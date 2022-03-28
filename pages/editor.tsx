@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { WgpuShim, shader } from "./wgpushim";
 
 const Index = () => {
-    WgpuShim();
+    WgpuShim()
     const [code, setCode] = useState<string>(shader)
 
     const onInitializePane: MonacoOnInitializePane = (
@@ -12,13 +12,14 @@ const Index = () => {
         editorRef,
         model
     ) => {
-        editorRef.current.setScrollTop(1)
-        editorRef.current.setPosition({
+        //editorRef.current.setScrollTop(1)
+        /*editorRef.current.setPosition({
             lineNumber: 2,
             column: 0,
-        })
+        })*/
         editorRef.current.focus()
         monacoEditorRef.current.setModelMarkers(model[0], 'owner', null)
+
     }
 
     return <Monaco
