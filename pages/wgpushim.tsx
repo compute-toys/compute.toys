@@ -99,9 +99,11 @@ fn main_image(@builtin(global_invocation_id) global_id: uint3) {
 }
 `
 
-export const WgpuShim = () => {
+export const WgpuShim = (callback) => {
     import("wgputoy").then(wgputoy => {
-        wgputoy.main(shader, ["main_hist", "main_image"]);
+        wgputoy.set_shader(shader)
+        wgputoy.main(["main_hist", "main_image"])
+        callback(wgputoy)
     });
 }
 

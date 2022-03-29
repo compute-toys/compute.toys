@@ -1,11 +1,20 @@
 
 import Monaco, { MonacoOnInitializePane } from './components/monaco'
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
 import { WgpuShim, shader } from "./wgpushim";
 
+var wgpuContext;
+
+WgpuShim((wgputoy) => {
+    wgpuContext = wgputoy
+})
+
 const Index = () => {
-    WgpuShim()
     const [code, setCode] = useState<string>(shader)
+
+    useEffect(() => {
+        wgpuContext?.set_shader(code)
+    }, [code])
 
     const onInitializePane: MonacoOnInitializePane = (
         monacoEditorRef,
