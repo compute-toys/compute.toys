@@ -1,4 +1,6 @@
-export const shader = `
+import React from "react";
+
+export const default_shader = `
 // 2022 David A Roberts <https://davidar.io/>
 
 type int = i32;
@@ -99,11 +101,46 @@ fn main_image(@builtin(global_invocation_id) global_id: uint3) {
 }
 `
 
-export const WgpuShim = (callback) => {
-    import("wgputoy").then(wgputoy => {
-        wgputoy.set_shader(shader)
-        wgputoy.main(["main_hist", "main_image"])
-        callback(wgputoy)
-    });
+interface WgpuContext {
+    main(bind_id: string, entry_points: string[]): void;
+    get_shader(): string;
+    greet(name: string): void;
+    set_shader(new_shader: string): void
 }
 
+interface WgpuToyProps {
+    code: string,
+    bind_id: string
+}
+
+interface WgpuToyState {
+    wgputoyContext: WgpuContext
+}
+
+export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState> {
+    constructor(props) {
+        super(props);
+    }
+
+    componentDidMount() {
+        import('wgputoy').then(wgputoy => {
+            wgputoy.set_shader(default_shader);
+            wgputoy.main(this.props.bind_id, ["main_hist", "main_image"]);
+            this.setState({wgputoyContext: wgputoy});
+        });
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.code !== prevProps.code) {
+            this.setShader(this.props.code);
+        }
+    }
+
+    setShader(_shader: string) {
+        this.state.wgputoyContext.set_shader(_shader);
+    }
+
+    render() {
+        return <div id={this.props.bind_id}/>;
+    }
+}

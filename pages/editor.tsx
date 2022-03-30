@@ -1,44 +1,28 @@
 
 import Monaco, { MonacoOnInitializePane } from './components/monaco'
 import {useEffect, useState} from 'react'
-import { WgpuShim, shader } from "./wgpushim";
-
-var wgpuContext;
-
-WgpuShim((wgputoy) => {
-    wgpuContext = wgputoy
-})
+import WgpuToy, { default_shader } from "./components/wgputoy";
 
 const Index = () => {
-    const [code, setCode] = useState<string>(shader)
-
-    useEffect(() => {
-        wgpuContext?.set_shader(code)
-    }, [code])
+    const [code, setCode] = useState<string>(default_shader)
 
     const onInitializePane: MonacoOnInitializePane = (
         monacoEditorRef,
         editorRef,
         model
     ) => {
-        //editorRef.current.setScrollTop(1)
-        /*editorRef.current.setPosition({
-            lineNumber: 2,
-            column: 0,
-        })*/
         editorRef.current.focus()
         monacoEditorRef.current.setModelMarkers(model[0], 'owner', null)
-
     }
 
-    return <Monaco
+    return <div><Monaco
         code={code}
         setCode={setCode}
         editorOptions={{
             stopRenderingLineAfter: 1000,
         }}
         onInitializePane={onInitializePane}
-    />
+    /><WgpuToy code={code} bind_id={"editor-canvas"}/></div>
 }
 
 export default Index;
