@@ -121,9 +121,9 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
 
     componentDidMount() {
         init_wgpu(this.props.bind_id).then(ctx => {
-            let wgputoy = new WgpuToyRenderer(ctx);
-            this.setState({wgputoy});
-            wgputoy.set_shader(default_shader, default_entry_points);
+            this.setState({wgputoy: new WgpuToyRenderer(ctx)});
+            this.state.wgputoy.set_shader(default_shader, default_entry_points);
+            this.state.wgputoy.resize(1280, 720);
             this.play();
         });
     }
