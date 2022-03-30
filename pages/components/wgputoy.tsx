@@ -23,7 +23,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         init_wgpu(this.props.bindID).then(ctx => {
             this.setState({wgputoy: new WgpuToyRenderer(ctx)});
             this.state.wgputoy.set_shader(default_shader, default_entry_points);
-            this.state.wgputoy.resize(512, 256);
+            this.updateDimensions();
             this.play();
         });
     }
@@ -32,12 +32,13 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         if (this.props.code !== prevProps.code) {
             this.setShader(this.props.code);
         }
-        const parentWidth = this.props.parentRef.current.clientWidth;
-        this.updateDimensions(parentWidth);
+
+        this.updateDimensions();
     }
 
-    updateDimensions(parentWidth: number) {
-        const baseIncrement = Math.max(Math.floor(parentWidth / 32),1);
+    updateDimensions() {
+        const parentWidth = this.props.parentRef.current.clientWidth;
+        const baseIncrement = Math.max(Math.floor(parentWidth / 32)-1,1);
 
         const newWidth = baseIncrement * 32;
         const newHeight = baseIncrement * 18;

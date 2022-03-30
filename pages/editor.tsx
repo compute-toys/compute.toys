@@ -12,6 +12,14 @@ import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 
+const Item = styled(Paper)(({ theme }) => ({
+    backgroundColor: '#1e1e1e',
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+}));
+
 const Index = () => {
     const [code, setCode] = useState<string>(default_shader)
     const canvasGridRef = useRef();
@@ -27,22 +35,32 @@ const Index = () => {
         monacoEditorRef.current.setModelMarkers(model[0], 'owner', null)
     }
 
+    const frameStyle = {
+        justifyContent: 'center',
+        border: 1,
+        borderColor: 'grey.500'
+    }
+
     return (
         <Box sx={{ flexGrow: 1 }}>
             <Grid container spacing={2}>
                 <Grid item ref={canvasGridRef} xs={4} md={5} lg={6} xl={7}>
-                    <WgpuToy parentRef={canvasGridRef} code={code} bindID={"editor-canvas"}/>
+                    <Item><Box sx={frameStyle}>
+                        <WgpuToy parentRef={canvasGridRef} code={code} bindID={"editor-canvas"}/>
+                    </Box></Item>
                 </Grid>
                 <Grid item ref={monacoGridRef} xs={8} md={7} lg={6} xl={5}>
-                <Monaco
-                    code={code}
-                    setCode={setCode}
-                    parentRef={monacoGridRef}
-                    editorOptions={{
-                        stopRenderingLineAfter: 1000
-                    }}
-                    onInitializePane={onInitializePane}
-                />
+                <Item>
+                    <Monaco
+                        code={code}
+                        setCode={setCode}
+                        parentRef={monacoGridRef}
+                        editorOptions={{
+                            stopRenderingLineAfter: 1000
+                        }}
+                        onInitializePane={onInitializePane}
+                    />
+                </Item>
                 </Grid>
             </Grid>
         </Box>
