@@ -37,10 +37,10 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     }
 
     updateDimensions(parentWidth: number) {
-        const baseIncrement = Math.floor(parentWidth / 16.);
+        const baseIncrement = Math.max(Math.floor(parentWidth / 32),1);
 
-        const newWidth = baseIncrement * 16.;
-        const newHeight = baseIncrement * 9.;
+        const newWidth = baseIncrement * 32;
+        const newHeight = baseIncrement * 18;
 
         if (newWidth !== this.state.width) {
             this.setState({width: newWidth});

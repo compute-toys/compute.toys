@@ -30,15 +30,16 @@ const Index = () => {
     return (
         <Box sx={{ flexGrow: 1 }}>
             <Grid container spacing={2}>
-                <Grid item ref={canvasGridRef} xs={4}>
+                <Grid item ref={canvasGridRef} xs={4} md={5} lg={6} xl={7}>
                     <WgpuToy parentRef={canvasGridRef} code={code} bindID={"editor-canvas"}/>
                 </Grid>
-                <Grid item ref={monacoGridRef} xs={8}>
+                <Grid item ref={monacoGridRef} xs={8} md={7} lg={6} xl={5}>
                 <Monaco
                     code={code}
                     setCode={setCode}
+                    parentRef={monacoGridRef}
                     editorOptions={{
-                        stopRenderingLineAfter: 1000,
+                        stopRenderingLineAfter: 1000
                     }}
                     onInitializePane={onInitializePane}
                 />

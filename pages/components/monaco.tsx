@@ -37,6 +37,7 @@ export type ScriptEditorProps = {
     // usage: const [code, setCode] = useState<string>('default value')
     code: string
     setCode: Dispatch<SetStateAction<string>>
+    parentRef: MutableRefObject<any>
 
     // see: https://microsoft.github.io/monaco-editor/api/modules/monaco.editor.html
     editorOptions: MonacoEditorOptions
@@ -49,7 +50,7 @@ export type ScriptEditorProps = {
 //
 
 const Monaco = (props: ScriptEditorProps): JSX.Element => {
-    const { code, setCode, editorOptions, onInitializePane } = props
+    const { code, setCode, parentRef, editorOptions, onInitializePane } = props
 
     const monacoEditorRef = useRef<any | null>(null)
     const editorRef = useRef<any | null>(null)
@@ -68,7 +69,7 @@ const Monaco = (props: ScriptEditorProps): JSX.Element => {
     })
 
     return <Editor
-        height="42.9em" // preference
+        height="40em" // preference
         language="go"   // preference
         onChange={(value, _event) => {
             setCode(value)
@@ -80,7 +81,7 @@ const Monaco = (props: ScriptEditorProps): JSX.Element => {
         options={editorOptions}
         theme="vs-dark" // preference
         value={code}
-        width="60em"    // preference
+        width={undefined} // fit to bounding box
     />
 }
 
