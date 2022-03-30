@@ -1,4 +1,5 @@
 import React from "react";
+import { WgpuToyRenderer, init_wgpu } from "wgputoy";
 
 export const default_shader = `
 // 2022 David A Roberts <https://davidar.io/>
@@ -101,12 +102,7 @@ fn main_image(@builtin(global_invocation_id) global_id: uint3) {
 }
 `
 
-interface WgpuContext {
-    main(bind_id: string, entry_points: string[]): void;
-    get_shader(): string;
-    greet(name: string): void;
-    set_shader(new_shader: string): void
-}
+const default_entry_points = ["main_hist", "main_image"];
 
 interface WgpuToyProps {
     code: string,
@@ -114,7 +110,8 @@ interface WgpuToyProps {
 }
 
 interface WgpuToyState {
-    wgputoyContext: WgpuContext
+    wgputoy: WgpuToyRenderer,
+    requestAnimationFrameID: number,
 }
 
 export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState> {
@@ -123,10 +120,11 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     }
 
     componentDidMount() {
-        import('wgputoy').then(wgputoy => {
-            wgputoy.set_shader(default_shader);
-            wgputoy.main(this.props.bind_id, ["main_hist", "main_image"]);
-            this.setState({wgputoyContext: wgputoy});
+        init_wgpu(this.props.bind_id).then(ctx => {
+            let wgputoy = new WgpuToyRenderer(ctx);
+            this.setState({wgputoy});
+            wgputoy.set_shader(default_shader, default_entry_points);
+            this.play();
         });
     }
 
@@ -136,11 +134,20 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         }
     }
 
-    setShader(_shader: string) {
-        this.state.wgputoyContext.set_shader(_shader);
+    setShader(_shader: string, _entry_points = default_entry_points) {
+        this.state.wgputoy.set_shader(_shader, _entry_points);
     }
 
     render() {
         return <div id={this.props.bind_id}/>;
+    }
+
+    play() {
+        this.state.wgputoy.render();
+        this.setState({requestAnimationFrameID: requestAnimationFrame(() => this.play())});
+    }
+
+    pause() {
+        cancelAnimationFrame(this.state.requestAnimationFrameID);
     }
 }
