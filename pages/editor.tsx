@@ -1,11 +1,11 @@
 // MUI sizing from refs:
 // https://github.com/mui/material-ui/issues/15662
 
-import Monaco, { MonacoOnInitializePane } from './components/monaco';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import Monaco, { MonacoOnInitializePane } from '../components/monaco';
+import {useRef, useState} from 'react';
 
-import WgpuToy from "./components/wgputoy";
-import { default_shader } from "./components/wgpu-defaults";
+import WgpuToy from "../components/wgputoy";
+import { default_shader } from "../components/wgpu-defaults";
 
 import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
@@ -42,7 +42,14 @@ const Index = () => {
     const frameStyle = {
         justifyContent: 'center',
         border: 1,
-        borderColor: 'grey.500'
+        borderColor: 'grey.800',
+        display: 'inline-block',
+        borderRadius: '4px'
+    }
+
+    const canvasStyle = {
+        display: 'inline-block',
+        borderRadius: '4px'
     }
 
     return (
@@ -50,7 +57,7 @@ const Index = () => {
             <Grid container spacing={2}>
                 <Grid item ref={renderNodeRef} xs={4} md={5} lg={6} xl={7}>
                     <Item><Box sx={frameStyle}>
-                        <WgpuToy parentWidth={renderNodeWidth} code={code} bindID={"editor-canvas"}/>
+                        <WgpuToy parentWidth={renderNodeWidth} code={code} bindID={"editor-canvas"} style={canvasStyle}/>
                     </Box></Item>
                 </Grid>
                 <Grid item ref={monacoGridRef} xs={8} md={7} lg={6} xl={5}>
