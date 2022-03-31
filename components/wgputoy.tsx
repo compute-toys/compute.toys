@@ -1,12 +1,14 @@
-import React, {CSSProperties, lazy, MutableRefObject} from "react";
+import React, {CSSProperties, Dispatch, lazy, MutableRefObject, SetStateAction} from "react";
 import { WgpuToyRenderer, init_wgpu } from "wgputoy";
 import { default_shader } from "./wgpu-defaults"
 
 interface WgpuToyProps {
     code: string,
-    bindID: string
-    parentWidth: number
-    style: CSSProperties
+    bindID: string,
+    parentWidth: number,
+    style: CSSProperties,
+    play: boolean,
+    setPlay: Dispatch<SetStateAction<boolean>>
 }
 
 interface WgpuToyState {
@@ -25,6 +27,8 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
             this.setState({wgputoy: new WgpuToyRenderer(ctx)});
             this.state.wgputoy.set_shader(default_shader);
             this.updateDimensions();
+
+            // this is the only place we want to set play manually, otherwise it's UI-driven
             this.play();
         });
     }
@@ -36,6 +40,10 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
 
         if (this.props.parentWidth !== prevProps.parentWidth) {
             this.updateDimensions();
+        }
+
+        if (this.props.play !== prevProps.play) {
+            this.togglePlay();
         }
 
     }
@@ -55,6 +63,14 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
 
     setShader(_shader: string) {
         this.state.wgputoy.set_shader(_shader);
+    }
+
+    togglePlay() {
+        if (this.props.play) {
+            this.play();
+        } else {
+            this.pause();
+        }
     }
 
     play() {

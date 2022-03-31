@@ -13,6 +13,11 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 
 import useSize from "@react-hook/size";
+import { Fab } from "@mui/material";
+
+import PlayPauseButton from "../components/playpausebutton"
+import { ThemeProvider } from "@mui/material/styles";
+import { theme } from "../theme/theme";
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: '#1e1e1e',
@@ -24,7 +29,10 @@ const Item = styled(Paper)(({ theme }) => ({
 
 const Index = () => {
     const [code, setCode] = useState<string>(default_shader)
-    const monacoGridRef = useRef();
+    const [play, setPlay] = useState<boolean>(true)
+
+    const monacoNodeRef = useRef(null);
+    const [monacoNodeWidth, monacoNodeHeight] = useSize(monacoNodeRef);
 
     const renderNodeRef = useRef(null);
     const [renderNodeWidth, renderNodeHeight] = useSize(renderNodeRef);
@@ -53,19 +61,24 @@ const Index = () => {
     }
 
     return (
+        <ThemeProvider theme={theme}>
         <Box sx={{ flexGrow: 1 }}>
             <Grid container spacing={2}>
                 <Grid item ref={renderNodeRef} xs={4} md={5} lg={6} xl={7}>
-                    <Item><Box sx={frameStyle}>
-                        <WgpuToy parentWidth={renderNodeWidth} code={code} bindID={"editor-canvas"} style={canvasStyle}/>
-                    </Box></Item>
+                    <Item>
+                        <Box sx={frameStyle}>
+                            <WgpuToy parentWidth={renderNodeWidth} code={code} play={play} setPlay={setPlay} bindID={"editor-canvas"} style={canvasStyle}/>
+                        </Box>
+                        <PlayPauseButton play={play} setPlay={setPlay} />
+                    </Item>
+
                 </Grid>
-                <Grid item ref={monacoGridRef} xs={8} md={7} lg={6} xl={5}>
+                <Grid item ref={monacoNodeRef} xs={8} md={7} lg={6} xl={5}>
                 <Item>
                     <Monaco
                         code={code}
                         setCode={setCode}
-                        parentRef={monacoGridRef}
+                        parentWidth={monacoNodeWidth}
                         editorOptions={{
                             stopRenderingLineAfter: 1000
                         }}
@@ -75,6 +88,7 @@ const Index = () => {
                 </Grid>
             </Grid>
         </Box>
+        </ThemeProvider>
     );
 }
 
