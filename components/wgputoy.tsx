@@ -1,4 +1,4 @@
-import React, {MutableRefObject} from "react";
+import React, {CSSProperties, lazy, MutableRefObject} from "react";
 import { WgpuToyRenderer, init_wgpu } from "wgputoy";
 import { default_shader, default_entry_points } from "./wgpu-defaults"
 
@@ -6,6 +6,7 @@ interface WgpuToyProps {
     code: string,
     bindID: string
     parentWidth: number
+    style: CSSProperties
 }
 
 interface WgpuToyState {
@@ -56,10 +57,6 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         this.state.wgputoy.set_shader(_shader, _entry_points);
     }
 
-    render() {
-        return <div id={this.props.bindID}/>;
-    }
-
     play() {
         this.state.wgputoy.render();
         this.setState({requestAnimationFrameID: requestAnimationFrame(() => this.play())});
@@ -67,5 +64,9 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
 
     pause() {
         cancelAnimationFrame(this.state.requestAnimationFrameID);
+    }
+
+    render() {
+        return <canvas id={this.props.bindID} style={this.props.style}/>;
     }
 }
