@@ -1,6 +1,6 @@
 import React, {CSSProperties, lazy, MutableRefObject} from "react";
 import { WgpuToyRenderer, init_wgpu } from "wgputoy";
-import { default_shader, default_entry_points } from "./wgpu-defaults"
+import { default_shader } from "./wgpu-defaults"
 
 interface WgpuToyProps {
     code: string,
@@ -23,7 +23,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     componentDidMount() {
         init_wgpu(this.props.bindID).then(ctx => {
             this.setState({wgputoy: new WgpuToyRenderer(ctx)});
-            this.state.wgputoy.set_shader(default_shader, default_entry_points);
+            this.state.wgputoy.set_shader(default_shader);
             this.updateDimensions();
             this.play();
         });
@@ -53,8 +53,8 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         }
     }
 
-    setShader(_shader: string, _entry_points = default_entry_points) {
-        this.state.wgputoy.set_shader(_shader, _entry_points);
+    setShader(_shader: string) {
+        this.state.wgputoy.set_shader(_shader);
     }
 
     play() {

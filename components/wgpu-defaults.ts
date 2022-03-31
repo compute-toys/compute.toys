@@ -1,5 +1,3 @@
-export const default_entry_points = ["main_hist", "main_image"];
-
 export const default_shader = `
 // 2022 David A Roberts <https://davidar.io/>
 
