@@ -17,15 +17,8 @@ type float2 = vec2<f32>;
 type float3 = vec3<f32>;
 type float4 = vec4<f32>;
 
-struct Params {
-    width: uint;
-    height: uint;
-    frame: uint;
-};
-
-struct StorageBuffer {
-    data: array<atomic<i32>>;
-};
+struct Params { width: uint, height: uint, frame: uint };
+struct StorageBuffer { data: array<atomic<i32>> };
 
 @group(0) @binding(0) var<uniform> params: Params;
 @group(0) @binding(1) var col: texture_storage_2d<rgba16float,write>;
