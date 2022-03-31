@@ -9,11 +9,6 @@ fn pcg(seed: ptr<function, uint>) -> float {
 	return float((word >> 22u) ^ word) / float(0xffffffffu);
 }
 
-fn smoothstep(edge0: float3, edge1: float3, x: float3) -> float3 {
-    let t = clamp((x - edge0) / (edge1 - edge0), float3(0.0), float3(1.0));
-    return t * t * (3.0 - 2.0 * t);
-}
-
 @stage(compute) @workgroup_size(16, 16)
 fn main_hist(@builtin(global_invocation_id) global_id: uint3) {
     let resolution = float2(float(params.width), float(params.height));
