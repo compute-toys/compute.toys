@@ -5,7 +5,7 @@ import { default_shader, default_entry_points } from "./wgpu-defaults"
 interface WgpuToyProps {
     code: string,
     bindID: string
-    parentRef: MutableRefObject<any>
+    parentWidth: number
 }
 
 interface WgpuToyState {
@@ -33,17 +33,20 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
             this.setShader(this.props.code);
         }
 
-        this.updateDimensions();
+        if (this.props.parentWidth !== prevProps.parentWidth) {
+            this.updateDimensions();
+        }
+
     }
 
     updateDimensions() {
-        const parentWidth = this.props.parentRef.current.clientWidth;
+        const parentWidth = this.props.parentWidth;
         const baseIncrement = Math.max(Math.floor(parentWidth / 32)-1,1);
 
         const newWidth = baseIncrement * 32;
         const newHeight = baseIncrement * 18;
 
-        if (newWidth !== this.state.width) {
+        if (this.state && newWidth !== this.state.width) {
             this.setState({width: newWidth});
             this.state.wgputoy.resize(newWidth, newHeight);
         }

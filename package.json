@@ -10,6 +10,8 @@
     "@emotion/styled": "^11.8.1",
     "@monaco-editor/react": "^4.4.1",
     "@mui/material": "^5.5.3",
+    "@react-hook/resize-observer": "^1.2.5",
+    "@react-hook/size": "^2.1.2",
     "next": "latest",
     "react": "17.0.2",
     "react-dom": "17.0.2",
