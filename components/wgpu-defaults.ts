@@ -49,6 +49,7 @@ fn main_hist(@builtin(global_invocation_id) global_id: uint3) {
 
 @stage(compute) @workgroup_size(16, 16)
 fn main_image(@builtin(global_invocation_id) global_id: uint3) {
+    if (global_id.x >= params.width || global_id.y >= params.height) { return; }
     let id = global_id.x + global_id.y * params.width;
     let x = float(atomicLoad(&buf.data[id*4u+0u]));
     let y = float(atomicLoad(&buf.data[id*4u+1u]));
