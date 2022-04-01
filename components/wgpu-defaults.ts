@@ -11,12 +11,12 @@ fn pcg(seed: ptr<function, uint>) -> float {
 
 @stage(compute) @workgroup_size(16, 16)
 fn main_hist(@builtin(global_invocation_id) global_id: uint3) {
-    let resolution = float2(float(params.width), float(params.height));
-    var seed = global_id.x + global_id.y * params.width + params.frame * params.width * params.height;
+    let resolution = float2(screen.size);
+    var seed = global_id.x + global_id.y * screen.size.x + time.frame * screen.size.x * screen.size.y;
     for (var iter = 0; iter < 8; iter = iter + 1) {
     let aspect = resolution.xy / resolution.y;
-    let uv  = float2(float(global_id.x) + pcg(&seed), float(global_id.y) + pcg(&seed)) / resolution.xy;
-    let uv0 = float2(float(global_id.x) + pcg(&seed), float(global_id.y) + pcg(&seed)) / resolution.xy;
+    let uv  = float2(float(global_id.x) + pcg(&seed), float(global_id.y) + pcg(&seed)) / resolution;
+    let uv0 = float2(float(global_id.x) + pcg(&seed), float(global_id.y) + pcg(&seed)) / resolution;
     let c  = (uv  * 2. - 1.) * aspect * 1.5;
     let z0 = (uv0 * 2. - 1.) * aspect * 1.5;
     var z = z0;
@@ -29,11 +29,11 @@ fn main_hist(@builtin(global_invocation_id) global_id: uint3) {
     for (var i = 0; i < 2500; i = i + 1) {
         z = float2(z.x * z.x - z.y * z.y, 2. * z.x * z.y) + c;
         if (dot(z,z) > 4.) { break; }
-        let t = float(params.frame) / 60.;
+        let t = float(time.frame) / 60.;
         let p = (cos(.3*t) * z + sin(.3*t) * c) / 1.5 / aspect * .5 + .5;
         if (p.x < 0. || p.x > 1. || p.y < 0. || p.y > 1.) { continue; }
-        let id1 = uint(resolution.x * p.x) + uint(resolution.y * p.y) * params.width;
-        let id2 = uint(resolution.x * p.x) + uint(resolution.y * (1. - p.y)) * params.width;
+        let id1 = uint(resolution.x * p.x) + uint(resolution.y * p.y) * screen.size.x;
+        let id2 = uint(resolution.x * p.x) + uint(resolution.y * (1. - p.y)) * screen.size.x;
         if (n < 25) {
             atomicAdd(&buf.data[id1*4u+2u], 1);
             atomicAdd(&buf.data[id2*4u+2u], 1);
@@ -50,8 +50,8 @@ fn main_hist(@builtin(global_invocation_id) global_id: uint3) {
 
 @stage(compute) @workgroup_size(16, 16)
 fn main_image(@builtin(global_invocation_id) global_id: uint3) {
-    if (global_id.x >= params.width || global_id.y >= params.height) { return; }
-    let id = global_id.x + global_id.y * params.width;
+    if (global_id.x >= screen.size.x || global_id.y >= screen.size.y) { return; }
+    let id = global_id.x + global_id.y * screen.size.x;
     let x = float(atomicLoad(&buf.data[id*4u+0u]));
     let y = float(atomicLoad(&buf.data[id*4u+1u]));
     let z = float(atomicLoad(&buf.data[id*4u+2u]));
