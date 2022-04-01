@@ -11,15 +11,44 @@ interface WgpuToyProps {
     setPlay: Dispatch<SetStateAction<boolean>>
 }
 
+interface MousePosition {
+    x: number,
+    y: number
+}
+
 interface WgpuToyState {
     wgputoy: WgpuToyRenderer,
     requestAnimationFrameID: number,
-    width: number
+    width: number,
+    mouse: MousePosition,
+    click: boolean
 }
 
 export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState> {
     constructor(props) {
         super(props);
+        this.state = {
+            wgputoy: null,
+            requestAnimationFrameID: 0,
+            width: 0,
+            mouse: {x: 0, y: 0},
+            click: false
+        }
+        this.handleMouseDown = this.handleMouseDown.bind(this);
+        this.handleMouseUp = this.handleMouseUp.bind(this);
+        this.handleMouseMove = this.handleMouseMove.bind(this);
+    }
+
+    handleMouseMove(e) {
+        this.setState({ mouse: {x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY }});
+    }
+
+    handleMouseUp(e) {
+        this.setState({click: false});
+    }
+
+    handleMouseDown(e) {
+        this.setState({click: true});
     }
 
     componentDidMount() {
@@ -33,7 +62,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         });
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate(prevProps, prevState) {
         if (this.props.code !== prevProps.code) {
             this.setShader(this.props.code);
         }
@@ -46,6 +75,15 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
             this.togglePlay();
         }
 
+        if (this.state.mouse !== prevState.mouse || this.state.click !== prevState.click) {
+            this.updateMouse();
+        }
+
+    }
+
+    updateMouse() {
+        this.state.wgputoy.set_mouse_click(this.state.click);
+        this.state.wgputoy.set_mouse_pos(this.state.mouse.x, this.state.mouse.y)
     }
 
     updateDimensions() {
@@ -55,7 +93,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         const newWidth = baseIncrement * 32;
         const newHeight = baseIncrement * 18;
 
-        if (this.state && newWidth !== this.state.width) {
+        if (this.state.wgputoy && this.state && newWidth !== this.state.width) {
             this.setState({width: newWidth});
             this.state.wgputoy.resize(newWidth, newHeight);
         }
@@ -83,6 +121,15 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     }
 
     render() {
-        return <canvas id={this.props.bindID} style={this.props.style}/>;
+        return (
+            <canvas
+                onMouseMove={this.handleMouseMove}
+                onMouseDown={this.handleMouseDown}
+                onMouseUp={this.handleMouseUp}
+                onMouseLeave={this.handleMouseUp}
+                id={this.props.bindID}
+                style={this.props.style}
+            />
+        );
     }
 }
