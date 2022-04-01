@@ -31,6 +31,7 @@ fn main_hist(@builtin(global_invocation_id) global_id: uint3) {
         if (dot(z,z) > 4.) { break; }
         let t = float(params.frame) / 60.;
         let p = (cos(.3*t) * z + sin(.3*t) * c) / 1.5 / aspect * .5 + .5;
+        if (p.x < 0. || p.x > 1. || p.y < 0. || p.y > 1.) { continue; }
         let id1 = uint(resolution.x * p.x) + uint(resolution.y * p.y) * params.width;
         let id2 = uint(resolution.x * p.x) + uint(resolution.y * (1. - p.y)) * params.width;
         if (n < 25) {
