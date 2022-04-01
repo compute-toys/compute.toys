@@ -12,6 +12,9 @@ export const theme = createTheme({
             light: '#43aa8b',
             dark: '#254441',
         },
+        background: {
+            default: '#101010'
+        },
         neutral: {
             main: '#64748B',
             contrastText: '#F7CE5B',

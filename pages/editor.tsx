@@ -13,18 +13,25 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 
 import useSize from "@react-hook/size";
-import { Fab } from "@mui/material";
+import {CssBaseline, Fab} from "@mui/material";
 
 import PlayPauseButton from "../components/playpausebutton"
 import { ThemeProvider } from "@mui/material/styles";
 import { theme } from "../theme/theme";
 
 const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: '#1e1e1e',
+    backgroundColor: theme.palette.primary.darker,
     ...theme.typography.body2,
     padding: theme.spacing(1),
     textAlign: 'center',
     color: theme.palette.text.secondary,
+}));
+
+const Frame = styled(Paper)(({ theme }) => ({
+    backgroundColor: theme.palette.primary.darker,
+    justifyContent: 'center',
+    display: 'inline-flex',
+    borderRadius: '4px'
 }));
 
 const Index = () => {
@@ -47,47 +54,46 @@ const Index = () => {
         monacoEditorRef.current.setModelMarkers(model[0], 'owner', null)
     }
 
-    const frameStyle = {
-        justifyContent: 'center',
-        border: 1,
-        borderColor: 'grey.800',
-        display: 'inline-block',
-        borderRadius: '4px'
-    }
-
     const canvasStyle = {
         display: 'inline-block',
         borderRadius: '4px'
-    }
+    };
 
     return (
         <ThemeProvider theme={theme}>
-        <Box sx={{ flexGrow: 1 }}>
-            <Grid container spacing={2}>
-                <Grid item ref={renderNodeRef} xs={4} md={5} lg={6} xl={7}>
+            <CssBaseline/>
+            <Box sx={{ flexGrow: 1 }}>
+                <Grid container spacing={2}>
+                    <Grid item ref={renderNodeRef} xs={3} md={4} lg={5} xl={6}>
+                        <Item>
+                            <Frame elevation={12}>
+                                <WgpuToy
+                                    parentWidth={renderNodeWidth}
+                                    code={code}
+                                    play={play}
+                                    setPlay={setPlay}
+                                    bindID={"editor-canvas"}
+                                    style={canvasStyle}
+                                />
+                            </Frame>
+                            <PlayPauseButton play={play} setPlay={setPlay} />
+                        </Item>
+                    </Grid>
+                    <Grid item ref={monacoNodeRef} xs={9} md={8} lg={7} xl={6}>
                     <Item>
-                        <Box sx={frameStyle}>
-                            <WgpuToy parentWidth={renderNodeWidth} code={code} play={play} setPlay={setPlay} bindID={"editor-canvas"} style={canvasStyle}/>
-                        </Box>
-                        <PlayPauseButton play={play} setPlay={setPlay} />
+                        <Monaco
+                            code={code}
+                            setCode={setCode}
+                            parentWidth={monacoNodeWidth}
+                            editorOptions={{
+                                stopRenderingLineAfter: 1000
+                            }}
+                            onInitializePane={onInitializePane}
+                        />
                     </Item>
-
+                    </Grid>
                 </Grid>
-                <Grid item ref={monacoNodeRef} xs={8} md={7} lg={6} xl={5}>
-                <Item>
-                    <Monaco
-                        code={code}
-                        setCode={setCode}
-                        parentWidth={monacoNodeWidth}
-                        editorOptions={{
-                            stopRenderingLineAfter: 1000
-                        }}
-                        onInitializePane={onInitializePane}
-                    />
-                </Item>
-                </Grid>
-            </Grid>
-        </Box>
+            </Box>
         </ThemeProvider>
     );
 }
