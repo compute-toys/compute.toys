@@ -2,22 +2,25 @@
 // https://github.com/mui/material-ui/issues/15662
 
 import Monaco, { MonacoOnInitializePane } from '../components/monaco';
-import {useRef, useState} from 'react';
-
 import WgpuToy from "../components/wgputoy";
+
+import { useRef, useState } from 'react';
+
 import { default_shader } from "../components/wgpu-defaults";
 
-import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
 
 import useSize from "@react-hook/size";
-import {CssBaseline, Fab} from "@mui/material";
 
 import PlayPauseButton from "../components/playpausebutton"
-import { ThemeProvider } from "@mui/material/styles";
+import ResetButton from "../components/resetbutton";
+
+import { ThemeProvider, styled } from "@mui/material/styles";
 import { theme } from "../theme/theme";
+import { CssBaseline } from "@mui/material";
+
 
 const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.primary.darker,
@@ -35,8 +38,9 @@ const Frame = styled(Paper)(({ theme }) => ({
 }));
 
 const Index = () => {
-    const [code, setCode] = useState<string>(default_shader)
-    const [play, setPlay] = useState<boolean>(true)
+    const [code, setCode] = useState<string>(default_shader);
+    const [play, setPlay] = useState<boolean>(true);
+    const [reset, setReset] = useState<boolean>(false);
 
     const monacoNodeRef = useRef(null);
     const [monacoNodeWidth, monacoNodeHeight] = useSize(monacoNodeRef);
@@ -44,20 +48,14 @@ const Index = () => {
     const renderNodeRef = useRef(null);
     const [renderNodeWidth, renderNodeHeight] = useSize(renderNodeRef);
 
-
     const onInitializePane: MonacoOnInitializePane = (
         monacoEditorRef,
         editorRef,
         model
     ) => {
-        editorRef.current.focus()
-        monacoEditorRef.current.setModelMarkers(model[0], 'owner', null)
+        editorRef.current.focus();
+        monacoEditorRef.current.setModelMarkers(model[0], 'owner', null);
     }
-
-    const canvasStyle = {
-        display: 'inline-block',
-        borderRadius: '4px'
-    };
 
     return (
         <ThemeProvider theme={theme}>
@@ -72,11 +70,17 @@ const Index = () => {
                                     code={code}
                                     play={play}
                                     setPlay={setPlay}
+                                    reset={reset}
+                                    setReset={setReset}
                                     bindID={"editor-canvas"}
-                                    style={canvasStyle}
+                                    style={{
+                                        display: 'inline-block',
+                                        borderRadius: '4px'
+                                    }}
                                 />
                             </Frame>
                             <PlayPauseButton play={play} setPlay={setPlay} />
+                            <ResetButton reset={reset} setReset={setReset} />
                         </Item>
                     </Grid>
                     <Grid item ref={monacoNodeRef} xs={9} md={8} lg={7} xl={6}>

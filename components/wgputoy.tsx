@@ -9,9 +9,16 @@ interface WgpuToyProps {
     style: CSSProperties,
     play: boolean,
     setPlay: Dispatch<SetStateAction<boolean>>
+    reset: boolean,
+    setReset: Dispatch<SetStateAction<boolean>>
 }
 
 interface MousePosition {
+    x: number,
+    y: number
+}
+
+interface Dimensions {
     x: number,
     y: number
 }
@@ -63,22 +70,40 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (this.props.code !== prevProps.code) {
-            this.setShader(this.props.code);
-        }
+        if (this.state.wgputoy) { //needed in race-y circumstances
+            if (this.props.code !== prevProps.code) {
+                this.setShader(this.props.code);
+            }
 
-        if (this.props.parentWidth !== prevProps.parentWidth) {
-            this.updateDimensions();
-        }
+            if (this.props.parentWidth !== prevProps.parentWidth) {
+                this.updateDimensions();
+            }
 
-        if (this.props.play !== prevProps.play) {
-            this.togglePlay();
-        }
+            if (this.props.play !== prevProps.play) {
+                this.togglePlay();
+            }
 
-        if (this.state.mouse !== prevState.mouse || this.state.click !== prevState.click) {
-            this.updateMouse();
-        }
+            if (this.props.reset && (this.props.reset !== prevProps.reset)) {
+                this.reset();
+            }
 
+            if (this.state.mouse !== prevState.mouse || this.state.click !== prevState.click) {
+                this.updateMouse();
+            }
+        }
+    }
+
+    getDimensions(parentWidth: number): Dimensions {
+        const baseIncrement = Math.max(Math.floor(parentWidth / 32)-1,1);
+        return {x: baseIncrement * 32, y: baseIncrement * 18};
+    }
+
+    // just an unconditional version of resize(),
+    // consider a dedicated approach for reset()
+    reset() {
+        const dimensions = this.getDimensions(this.props.parentWidth);
+        this.state.wgputoy.resize(dimensions.x, dimensions.y);
+        this.props.setReset(false);
     }
 
     updateMouse() {
@@ -87,15 +112,10 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     }
 
     updateDimensions() {
-        const parentWidth = this.props.parentWidth;
-        const baseIncrement = Math.max(Math.floor(parentWidth / 32)-1,1);
-
-        const newWidth = baseIncrement * 32;
-        const newHeight = baseIncrement * 18;
-
-        if (this.state.wgputoy && this.state && newWidth !== this.state.width) {
-            this.setState({width: newWidth});
-            this.state.wgputoy.resize(newWidth, newHeight);
+        const dimensions = this.getDimensions(this.props.parentWidth);
+        if (this.state.wgputoy && this.state && dimensions.x !== this.state.width) {
+            this.setState({width: dimensions.x});
+            this.state.wgputoy.resize(dimensions.x, dimensions.y);
         }
     }
 

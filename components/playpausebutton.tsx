@@ -1,8 +1,8 @@
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
-import {Button, Fab} from "@mui/material";
+import {Button} from "@mui/material";
 import {Dispatch, FunctionComponent, SetStateAction} from "react";
-import {Theme, useTheme} from "@mui/material/styles";
+import {useTheme} from "@mui/material/styles";
 
 export type PlayPauseProps = {
     play: boolean,
