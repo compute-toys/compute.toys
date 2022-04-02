@@ -11,6 +11,9 @@ interface WgpuToyProps {
     setPlay: Dispatch<SetStateAction<boolean>>
     reset: boolean,
     setReset: Dispatch<SetStateAction<boolean>>
+    hotReload: boolean
+    manualReload: boolean
+    setManualReload: Dispatch<SetStateAction<boolean>>
 }
 
 interface MousePosition {
@@ -71,8 +74,15 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
 
     componentDidUpdate(prevProps, prevState) {
         if (this.state.wgputoy) { //needed in race-y circumstances
-            if (this.props.code !== prevProps.code) {
+            // if code changed and we're hot reloading, or
+            // hot reloading was just enabled, or
+            // user decided to manually reload
+            if ((this.props.hotReload && this.props.code !== prevProps.code)
+                || (this.props.hotReload && !prevProps.hotReload)
+                || (this.props.manualReload && !prevProps.manualReload)
+            ) {
                 this.setShader(this.props.code);
+                this.props.setManualReload(false);
             }
 
             if (this.props.parentWidth !== prevProps.parentWidth) {

@@ -3,6 +3,7 @@ import { createTheme } from '@mui/material/styles';
 export const theme = createTheme({
     status: {
         danger: '#db504a',
+        disabled: '#646F6C'
     },
     palette: {
         primary: {
@@ -16,7 +17,7 @@ export const theme = createTheme({
             default: '#101010'
         },
         neutral: {
-            main: '#64748B',
+            main: '#AAD2E6',
             contrastText: '#F7CE5B',
         },
     },

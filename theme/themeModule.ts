@@ -5,6 +5,7 @@ declare module '@mui/material/styles' {
     interface Theme {
         status: {
             danger: React.CSSProperties['color'];
+            disabled: React.CSSProperties['color'];
         };
     }
 
@@ -24,6 +25,7 @@ declare module '@mui/material/styles' {
     interface ThemeOptions {
         status: {
             danger: React.CSSProperties['color'];
+            disabled: React.CSSProperties['color'];
         };
     }
 }

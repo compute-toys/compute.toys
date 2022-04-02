@@ -20,6 +20,8 @@ import ResetButton from "../components/resetbutton";
 import { ThemeProvider, styled } from "@mui/material/styles";
 import { theme } from "../theme/theme";
 import { CssBaseline } from "@mui/material";
+import HotReloadToggle from "../components/hotreloadtoggle";
+import ReloadButton from "../components/reloadbutton";
 
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -41,6 +43,8 @@ const Index = () => {
     const [code, setCode] = useState<string>(default_shader);
     const [play, setPlay] = useState<boolean>(true);
     const [reset, setReset] = useState<boolean>(false);
+    const [hotReload, setHotReload] = useState<boolean>(false);
+    const [manualReload, setManualReload] = useState<boolean>(false);
 
     const monacoNodeRef = useRef(null);
     const [monacoNodeWidth, monacoNodeHeight] = useSize(monacoNodeRef);
@@ -72,6 +76,9 @@ const Index = () => {
                                     setPlay={setPlay}
                                     reset={reset}
                                     setReset={setReset}
+                                    hotReload={hotReload}
+                                    manualReload={manualReload}
+                                    setManualReload={setManualReload}
                                     bindID={"editor-canvas"}
                                     style={{
                                         display: 'inline-block',
@@ -94,6 +101,10 @@ const Index = () => {
                             }}
                             onInitializePane={onInitializePane}
                         />
+                        <Box sx={{paddingTop: "4px"}}>
+                            <ReloadButton hotReload={hotReload} setManualReload={setManualReload}/>
+                            <HotReloadToggle hotReload={hotReload} setHotReload={setHotReload}/>
+                        </Box>
                     </Item>
                     </Grid>
                 </Grid>
