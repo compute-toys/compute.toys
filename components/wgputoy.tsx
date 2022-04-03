@@ -1,6 +1,7 @@
 import React, {CSSProperties, Dispatch, lazy, MutableRefObject, SetStateAction} from "react";
 import { WgpuToyRenderer, init_wgpu } from "wgputoy";
 import { default_shader } from "./wgpu-defaults"
+import {ParseError} from "./parseerror";
 
 interface WgpuToyProps {
     code: string,
@@ -14,6 +15,7 @@ interface WgpuToyProps {
     hotReload: boolean
     manualReload: boolean
     setManualReload: Dispatch<SetStateAction<boolean>>
+    setError: Dispatch<SetStateAction<ParseError>>
 }
 
 interface MousePosition {
@@ -61,10 +63,27 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         this.setState({click: true});
     }
 
+    handleError(summary, row, col) {
+        this.props.setError(error => ({
+            summary: summary,
+            position: {row: Number(row), col: Number(col)},
+            success: false
+        }));
+    }
+
+    resetError() {
+        this.props.setError(error => ({
+            summary: undefined,
+            position: {row: undefined, col: undefined},
+            success: true
+        }));
+    }
+
     componentDidMount() {
         init_wgpu(this.props.bindID).then(ctx => {
             this.setState({wgputoy: new WgpuToyRenderer(ctx)});
             this.state.wgputoy.set_shader(default_shader);
+            this.state.wgputoy.on_error(this.handleError.bind(this))
             this.updateDimensions();
 
             // this is the only place we want to set play manually, otherwise it's UI-driven
@@ -130,6 +149,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     }
 
     setShader(_shader: string) {
+        this.resetError();
         this.state.wgputoy.set_shader(_shader);
     }
 
