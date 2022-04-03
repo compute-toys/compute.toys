@@ -86,6 +86,10 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
             this.state.wgputoy.on_error(this.handleError.bind(this))
             this.updateDimensions();
 
+            // https://commons.wikimedia.org/wiki/File:Regent_Street_Clay_Gregory.jpg
+            fetch("/london.jpg").then(r => r.blob()).then(b => b.arrayBuffer()).then(data =>
+                this.state.wgputoy.load_channel(new Uint8Array(data)));
+
             // this is the only place we want to set play manually, otherwise it's UI-driven
             this.play();
         });
