@@ -7,11 +7,7 @@ import React, {CSSProperties, Dispatch, SetStateAction, useRef} from "react";
 import {ParseError} from "./parseerror";
 
 interface HijackedConsole extends Console {
-    _debug(...data: any[]): void;
     _error(...data: any[]): void;
-    _info(...data: any[]): void;
-    _log(...data: any[]): void;
-    _warn(...data: any[]): void;
     _hijacked: boolean;
 }
 
@@ -33,7 +29,6 @@ export default class ConsoleHijacker extends React.Component<ConsoleHijackerProp
                 position: {row: parseInt(captureErr[1]), col: parseInt(captureErr[2])},
                 success: false
             }));
-            (window.console as HijackedConsole)._log("Hijacking");
         } else {
             (window.console as HijackedConsole)._error(msg);
         }
