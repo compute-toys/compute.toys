@@ -32,17 +32,17 @@ fn main_hist(@builtin(global_invocation_id) global_id: uint3) {
         let t = float(time.frame) / 60.;
         let p = (cos(.3*t) * z + sin(.3*t) * c) / 1.5 / aspect * .5 + .5;
         if (p.x < 0. || p.x > 1. || p.y < 0. || p.y > 1.) { continue; }
-        let id1 = uint(resolution.x * p.x) + uint(resolution.y * p.y) * screen.size.x;
-        let id2 = uint(resolution.x * p.x) + uint(resolution.y * (1. - p.y)) * screen.size.x;
+        let id1 = int(resolution.x * p.x) + int(resolution.y * p.y) * int(screen.size.x);
+        let id2 = int(resolution.x * p.x) + int(resolution.y * (1. - p.y)) * int(screen.size.x);
         if (n < 25) {
-            atomicAdd(&buf.data[id1*4u+2u], 1);
-            atomicAdd(&buf.data[id2*4u+2u], 1);
+            atomicAdd(&storageBuffer[id1*4+2], 1);
+            atomicAdd(&storageBuffer[id2*4+2], 1);
         } else if (n < 250) {
-            atomicAdd(&buf.data[id1*4u+1u], 1);
-            atomicAdd(&buf.data[id2*4u+1u], 1);
+            atomicAdd(&storageBuffer[id1*4+1], 1);
+            atomicAdd(&storageBuffer[id2*4+1], 1);
         } else if (n < 2500) {
-            atomicAdd(&buf.data[id1*4u+0u], 1);
-            atomicAdd(&buf.data[id2*4u+0u], 1);
+            atomicAdd(&storageBuffer[id1*4+0], 1);
+            atomicAdd(&storageBuffer[id2*4+0], 1);
         }
     }
     }
@@ -51,15 +51,15 @@ fn main_hist(@builtin(global_invocation_id) global_id: uint3) {
 @stage(compute) @workgroup_size(16, 16)
 fn main_image(@builtin(global_invocation_id) global_id: uint3) {
     if (global_id.x >= screen.size.x || global_id.y >= screen.size.y) { return; }
-    let id = global_id.x + global_id.y * screen.size.x;
-    let x = float(atomicLoad(&buf.data[id*4u+0u]));
-    let y = float(atomicLoad(&buf.data[id*4u+1u]));
-    let z = float(atomicLoad(&buf.data[id*4u+2u]));
+    let id = int(global_id.x + global_id.y * screen.size.x);
+    let x = float(atomicLoad(&storageBuffer[id*4+0]));
+    let y = float(atomicLoad(&storageBuffer[id*4+1]));
+    let z = float(atomicLoad(&storageBuffer[id*4+2]));
     var r = float3(x + y + z, y + z, z) / 3e3;
     r = smoothstep(float3(0.), float3(1.), 2.5 * pow(r, float3(.9, .8, .7)));
-    textureStore(col, int2(global_id.xy), float4(r, 1.));
-    atomicStore(&buf.data[id*4u+0u], int(x * .7));
-    atomicStore(&buf.data[id*4u+1u], int(y * .7));
-    atomicStore(&buf.data[id*4u+2u], int(z * .7));
+    textureStore(screenImage, int2(global_id.xy), float4(r, 1.));
+    atomicStore(&storageBuffer[id*4+0], int(x * .7));
+    atomicStore(&storageBuffer[id*4+1], int(y * .7));
+    atomicStore(&storageBuffer[id*4+2], int(z * .7));
 }
 `
