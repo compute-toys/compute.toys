@@ -23,7 +23,6 @@ import {Frame, Item, theme } from "../theme/theme";
 import { CssBaseline } from "@mui/material";
 
 import {ParseError} from "../components/parseerror";
-import ConsoleHijacker from "../components/consolehijacker";
 
 
 const Index = () => {
@@ -43,7 +42,6 @@ const Index = () => {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline/>
-            <ConsoleHijacker setError={setParseError}/>
             <Box sx={{ flexGrow: 1 }}>
                 <Grid container spacing={2}>
                     <Grid item ref={renderNodeRef} xs={3} md={4} lg={5} xl={6}>
