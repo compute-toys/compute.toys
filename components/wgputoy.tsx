@@ -63,6 +63,14 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         this.setState({click: true});
     }
 
+    handleKeyDown(e) {
+        this.state.wgputoy.set_keydown(e.keyCode, true);
+    }
+
+    handleKeyUp(e) {
+        this.state.wgputoy.set_keydown(e.keyCode, false);
+    }
+
     handleError(summary, row, col) {
         this.props.setError(error => ({
             summary: summary,
@@ -93,6 +101,8 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
             // this is the only place we want to set play manually, otherwise it's UI-driven
             this.play();
         });
+        document.addEventListener('keydown', this.handleKeyDown.bind(this));
+        document.addEventListener('keyup', this.handleKeyUp.bind(this));
     }
 
     componentDidUpdate(prevProps, prevState) {
