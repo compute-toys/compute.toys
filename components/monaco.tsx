@@ -1,6 +1,7 @@
 import Editor from '@monaco-editor/react'
 import React, {useEffect, useRef} from "react";
-import ReactDOM from "react-dom";
+import {wgslLanguageDef, wgslConfiguration} from '../public/grammars/wgsl'
+import {defineMonacoTheme} from "./monacotheme";
 
 
 const Monaco = (props) => {
@@ -25,20 +26,31 @@ const Monaco = (props) => {
             }
 
         }
-    }, [props.parseError])
+    }, [props.parseError]);
+
+    const editorWillMount = monaco => {
+        if (!monaco.languages.getLanguages().some(({ id }) => id === 'wgsl')) {
+            monaco.languages.register({ id: 'wgsl' });
+            monaco.languages.setMonarchTokensProvider('wgsl', wgslLanguageDef());
+            monaco.languages.setLanguageConfiguration('wgsl', wgslConfiguration());
+            defineMonacoTheme(monaco, 'global');
+        }
+    }
 
     return <Editor
         height="40em" // preference
-        language="cpp"   // preference
+        language="wgsl"
         onChange={(value, _event) => {
             props.setCode(value)
         }}
+        beforeMount={editorWillMount}
         onMount={(editor, monaco) => {
-            monacoRef.current = monaco
-            editorRef.current = editor
+            monacoRef.current = monaco;
+            editorRef.current = editor;
+
         }}
         options={props.editorOptions}
-        theme="vs-dark" // preference
+        theme='global' // preference
         value={props.code}
         width={undefined} // fit to bounding box
     />
