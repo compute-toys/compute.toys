@@ -19,7 +19,7 @@ import HotReloadToggle from "../components/hotreloadtoggle";
 import ReloadButton from "../components/reloadbutton";
 
 import { ThemeProvider, styled } from "@mui/material/styles";
-import {Frame, Item, theme } from "../theme/theme";
+import { Frame, Item, theme } from "../theme/theme";
 import { CssBaseline } from "@mui/material";
 
 import {ParseError} from "../components/parseerror";

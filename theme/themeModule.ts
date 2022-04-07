@@ -2,27 +2,45 @@ import { Palette, PaletteOptions, PaletteColor, PaletteColorOptions, SimplePalet
 import React from "react";
 
 declare module '@mui/material/styles' {
-    interface Theme {
+    export interface Theme {
         status: {
             danger: React.CSSProperties['color'];
             disabled: React.CSSProperties['color'];
         };
     }
 
-    interface Palette {
+    export interface Palette {
         neutral: Palette['primary'];
-    }
-    interface PaletteOptions {
-        neutral: PaletteOptions['primary'];
+        dracula: DraculaPalette;
     }
 
-    interface PaletteColor {
+    export interface DraculaPalette {
+        background:  string;
+        currentLine: string;
+        selection:   string;
+        foreground:  string;
+        comment:     string;
+        cyan:        string;
+        green:       string;
+        orange:      string;
+        pink:        string;
+        purple:      string;
+        red:         string;
+        yellow:      string;
+    }
+
+    export interface PaletteOptions {
+        neutral: PaletteOptions['primary'];
+        dracula: DraculaPalette;
+    }
+
+    export interface PaletteColor {
         darker?: string;
     }
-    interface SimplePaletteColorOptions {
+    export interface SimplePaletteColorOptions {
         darker?: string;
     }
-    interface ThemeOptions {
+    export interface ThemeOptions {
         status: {
             danger: React.CSSProperties['color'];
             disabled: React.CSSProperties['color'];
@@ -30,4 +48,3 @@ declare module '@mui/material/styles' {
     }
 }
 
-export{}

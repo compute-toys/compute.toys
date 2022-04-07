@@ -1,5 +1,6 @@
 import {createTheme, styled} from '@mui/material/styles';
 import Paper from "@mui/material/Paper";
+import "./themeModule";
 
 export const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.primary.darker,
@@ -28,6 +29,20 @@ export const theme = createTheme({
             darker: '#1e1e1e',
             light: '#43aa8b',
             dark: '#254441',
+        },
+        dracula: {
+            background: '#282a36',
+            currentLine:'#44475a',
+            selection:  '#44475a',
+            foreground: '#f8f8f2',
+            comment:    '#6272a4',
+            cyan:       '#8be9fd',
+            green:      '#50fa7b',
+            orange:     '#ffb86c',
+            pink:       '#ff79c6',
+            purple:     '#bd93f9',
+            red:        '#ff5555',
+            yellow:     '#f1fa8c',
         },
         background: {
             default: '#101010'
