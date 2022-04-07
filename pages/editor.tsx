@@ -80,7 +80,7 @@ const Index = () => {
                             editorOptions={{
                                 stopRenderingLineAfter: 1000,
                                 fontFamily: "'Fira Code', monospace",
-                                fontLigatures: true,
+                                //fontLigatures: true,
                             }}
                             parseError={parseError}
                         />
