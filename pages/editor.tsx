@@ -22,6 +22,8 @@ import { ThemeProvider, styled } from "@mui/material/styles";
 import { Frame, Item, theme } from "../theme/theme";
 import { CssBaseline } from "@mui/material";
 
+import "firacode";
+
 import {ParseError} from "../components/parseerror";
 
 
@@ -76,7 +78,9 @@ const Index = () => {
                             setCode={setCode}
                             parentWidth={monacoNodeWidth}
                             editorOptions={{
-                                stopRenderingLineAfter: 1000
+                                stopRenderingLineAfter: 1000,
+                                fontFamily: "'Fira Code', monospace",
+                                fontLigatures: true,
                             }}
                             parseError={parseError}
                         />
