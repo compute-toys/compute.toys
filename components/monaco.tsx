@@ -48,6 +48,8 @@ const Monaco = (props) => {
             monacoRef.current = monaco;
             editorRef.current = editor;
 
+            // https://github.com/microsoft/monaco-editor/issues/392
+            document.fonts.ready.then(() => monaco.editor.remeasureFonts());
         }}
         options={props.editorOptions}
         theme='global' // preference
