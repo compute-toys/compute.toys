@@ -20,9 +20,10 @@ import ReloadButton from "../components/reloadbutton";
 
 import { ThemeProvider, styled } from "@mui/material/styles";
 import { Frame, Item, theme } from "../theme/theme";
-import { CssBaseline } from "@mui/material";
+import {CssBaseline, Typography} from "@mui/material";
 
 import {ParseError} from "../components/parseerror";
+import UniformSliders from "../components/uniformsliders";
 
 
 const Index = () => {
@@ -71,6 +72,7 @@ const Index = () => {
                     </Grid>
                     <Grid item ref={monacoNodeRef} xs={9} md={8} lg={7} xl={6}>
                     <Item>
+                        <UniformSliders/>
                         <Monaco
                             code={code}
                             setCode={setCode}

@@ -1,6 +1,7 @@
 import {createTheme, styled} from '@mui/material/styles';
 import Paper from "@mui/material/Paper";
 import "./themeModule";
+import createPalette from "@mui/material/styles/createPalette";
 
 export const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.primary.darker,
