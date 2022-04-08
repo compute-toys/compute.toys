@@ -7,33 +7,44 @@ import Box from "@mui/material/Box";
 import React from "react";
 import {styled} from "@mui/system";
 import {theme} from "../theme/theme";
+import { v4 as UUID } from 'uuid';
 
 export class UniformSliderData {
-    private value: number;
-    private uniform: string;
-    constructor(initialValue: number, uniform: string) {
-        this.value = initialValue;
-        this.uniform = uniform;
+    private readonly value: number;
+    private readonly uniform: string;
+    private readonly uuid: string;
+    constructor(initialValue: number, uniform: string);
+    constructor(value: number, uniform: string, from: UniformSliderData);
+    constructor(...args: any[]) {
+        if (args.length == 2) {
+            this.value = args[0];
+            this.uniform = args[1];
+            this.uuid = UUID();
+        } else if (args.length == 3) {
+            this.value = args[0];
+            this.uniform = args[1];
+            this.uuid = args[2].getUUID();
+        }
     }
     getValue() {
         return this.value;
     }
-    setValue(value: number) {
-        this.value = value;
-    }
     getUniform() {
         return this.uniform;
     }
-    setUniform(uniform: string) {
-        this.uniform = uniform;
+    getUUID() {
+        return this.uuid;
     }
 }
 
+interface UniformSliderProps {
+    slider: UniformSliderData
+    index: number
+    sliderArray: Array<UniformSliderData>
+    setSliderArray: Dispatch<SetStateAction<Array<UniformSliderData>>>
+}
 
-export const UniformSliders = (props) => {
-    const theme = useTheme();
-
-    const [sliderArray, setSliderArray] = useState<Array<UniformSliderData>>([]);
+const UniformSlider: FunctionComponent<UniformSliderProps> = (props, ref) => {
 
     const CssTextField = styled(TextField)({
         '& .MuiOutlinedInput-root': {
@@ -52,9 +63,8 @@ export const UniformSliders = (props) => {
         },
     });
 
-    const sliders = sliderArray.map((slider, index) =>
+    return (
         <Box
-            key={slider.getUniform()}
             sx={{
                 display: 'inline-grid', // grid/inline-grid yields incorrect vertical alignment
                 gridAutoColumns: '1fr',
@@ -65,6 +75,7 @@ export const UniformSliders = (props) => {
         >
             <CssTextField
                 id="outlined-name"
+                key={props.slider.getUUID()}
                 aria-label={"Uniform name input"}
                 sx={{
                     display: 'table-cell',
@@ -76,25 +87,25 @@ export const UniformSliders = (props) => {
                 }}
                 size="small"
                 label="Name"
-                value={slider.getUniform()}
+                value={props.slider.getUniform()}
                 onChange={ (event: React.ChangeEvent<HTMLInputElement>) => {
-                    setSliderArray( oldSliderArray => {
+                    props.setSliderArray( oldSliderArray => {
                             return oldSliderArray.map(val => {
-                                return (val.getUniform() == slider.getUniform()) ? new UniformSliderData(slider.getValue(), event.target.value) : val;
+                                return (val.getUUID() == props.slider.getUUID()) ? new UniformSliderData(props.slider.getValue(), event.target.value, val) : val;
                             })
                         }
                     )
                 }}
             />
             <Slider
-                aria-label={slider.getUniform() + " slider"}
+                aria-label={props.slider.getUniform() + " slider"}
                 sx={{ display: 'table-cell', gridRow: '1', gridColumn: 'span 7', verticalAlign: 'middle' }}
-                value={slider.getValue()}
+                value={props.slider.getValue()}
                 onChange={
                     (event: Event, newValue: number | number[]) => {
-                        setSliderArray( oldSliderArray => {
+                        props.setSliderArray( oldSliderArray => {
                                 return oldSliderArray.map(val => {
-                                    return (val.getUniform() == slider.getUniform()) ? new UniformSliderData(newValue as number, slider.getUniform()) : val;
+                                    return (val.getUUID() == props.slider.getUUID()) ? new UniformSliderData(newValue as number, props.slider.getUniform(), val) : val;
                                 })
                             }
 
@@ -103,23 +114,33 @@ export const UniformSliders = (props) => {
                 }
             />
             <Button
-                aria-label={"Delete " + slider.getUniform() + " slider"}
+                aria-label={"Delete " + props.slider.getUniform() + " slider"}
                 sx={{ display: 'table-cell', gridRow: '1', gridColumn: 'span 1', color: theme.status.danger, verticalAlign: 'middle' }}
                 onClick={() => {
-                    setSliderArray(
+                    props.setSliderArray(
                         oldSliderArray => oldSliderArray
-                            .filter((oldSlider) => { return oldSlider.getUniform() != slider.getUniform() })
+                            .filter((oldSlider) => { return oldSlider.getUniform() != props.slider.getUniform() })
                     );
                 }}>
                 <ClearIcon/>
             </Button>
         </Box>
     );
+}
+
+
+export const UniformSliders = (props) => {
+    const theme = useTheme();
+
+    const [sliderArray, setSliderArray] = useState<Array<UniformSliderData>>([]);
 
     return (
         <Box>
         <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
-            {sliders}
+            {sliderArray.map(
+                    (slider, index) =>
+                        <UniformSlider key={slider.getUUID()} slider={slider} index={index} sliderArray={sliderArray} setSliderArray={setSliderArray}/>
+            )}
         </Stack>
         <Button sx={{color: theme.palette.primary.dark}}
                 onClick={() => {
