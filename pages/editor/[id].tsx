@@ -1,8 +1,8 @@
 // MUI sizing from refs:
 // https://github.com/mui/material-ui/issues/15662
 
-import Monaco from '../components/monaco';
-import WgpuToy from "../components/wgputoy";
+import Monaco from '../../components/monaco';
+import WgpuToy from "../../components/wgputoy";
 
 import React, { useRef, useState } from 'react';
 
@@ -11,19 +11,22 @@ import Grid from '@mui/material/Grid';
 
 import useSize from "@react-hook/size";
 
-import PlayPauseButton from "../components/playpausebutton"
-import ResetButton from "../components/resetbutton";
-import HotReloadToggle from "../components/hotreloadtoggle";
-import ReloadButton from "../components/reloadbutton";
+import PlayPauseButton from "../../components/playpausebutton"
+import ResetButton from "../../components/resetbutton";
+import HotReloadToggle from "../../components/hotreloadtoggle";
+import ReloadButton from "../../components/reloadbutton";
 
 import { ThemeProvider, styled } from "@mui/material/styles";
-import { Frame, Item, theme } from "../theme/theme";
+import { Frame, Item, theme } from "../../theme/theme";
 import {CssBaseline, Typography} from "@mui/material";
 
 import "firacode";
 
-import {ParseError} from "../components/parseerror";
-import UniformSliders, {UniformSliderRef} from "../components/uniformsliders";
+import {ParseError} from "../../components/parseerror";
+import UniformSliders, {UniformSliderRef} from "../../components/uniformsliders";
+import { useRouter } from 'next/router';
+
+import { Octokit } from "@octokit/rest";
 
 
 const Index = () => {
@@ -41,6 +44,21 @@ const Index = () => {
     const [renderNodeWidth, renderNodeHeight] = useSize(renderNodeRef);
 
     const [sliderRefMap, setSliderRefMap] = useState<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
+
+    const router = useRouter();
+    React.useEffect(() => {
+        if (router.isReady && typeof router.query.id === 'string') {
+            const octokit = new Octokit();
+            octokit.rest.gists.get({
+                gist_id: router.query.id
+            }).then(r => {
+                const files = Object.keys(r.data.files);
+                const content = r.data.files[files[0]].content;
+                setCode(content);
+                setManualReload(true);
+            });
+        }
+    }, [router.isReady]);
 
 
     return (
@@ -83,7 +101,6 @@ const Index = () => {
                         <Monaco
                             code={code}
                             setCode={setCode}
-                            setManualReload={setManualReload}
                             parentWidth={monacoNodeWidth}
                             editorOptions={{
                                 stopRenderingLineAfter: 1000,
