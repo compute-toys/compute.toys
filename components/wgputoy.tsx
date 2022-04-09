@@ -1,6 +1,7 @@
-import React, {CSSProperties, Dispatch, lazy, MutableRefObject, SetStateAction} from "react";
+import React, {CSSProperties, Dispatch, MutableRefObject, SetStateAction} from "react";
 import { WgpuToyRenderer, init_wgpu } from "wgputoy";
 import {ParseError} from "./parseerror";
+import {UniformSliderRef} from "./uniformsliders";
 
 interface WgpuToyProps {
     code: string,
@@ -15,6 +16,7 @@ interface WgpuToyProps {
     manualReload: boolean
     setManualReload: Dispatch<SetStateAction<boolean>>
     setError: Dispatch<SetStateAction<ParseError>>
+    sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>
 }
 
 interface MousePosition {
@@ -105,6 +107,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
 
     componentDidUpdate(prevProps, prevState) {
         if (this.state.wgputoy) { //needed in race-y circumstances
+
             // if code changed and we're hot reloading, or
             // hot reloading was just enabled, or
             // user decided to manually reload
@@ -174,8 +177,22 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     }
 
     play() {
+        this.updateUniforms();
         this.state.wgputoy.render();
         this.setState({requestAnimationFrameID: requestAnimationFrame(() => this.play())});
+    }
+
+    updateUniforms() {
+        if (this.props.sliderRefMap) {
+            [...this.props.sliderRefMap.keys()].map(uuid => {
+                if (this.props.sliderRefMap.get(uuid)) {
+                    this.state.wgputoy.set_custom_float(
+                        this.props.sliderRefMap.get(uuid).current.getUniform(),
+                        this.props.sliderRefMap.get(uuid).current.getVal())
+                }
+            }, this)
+        }
+
     }
 
     pause() {

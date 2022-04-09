@@ -4,7 +4,7 @@
 import Monaco from '../components/monaco';
 import WgpuToy from "../components/wgputoy";
 
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -18,11 +18,12 @@ import ReloadButton from "../components/reloadbutton";
 
 import { ThemeProvider, styled } from "@mui/material/styles";
 import { Frame, Item, theme } from "../theme/theme";
-import { CssBaseline } from "@mui/material";
+import {CssBaseline, Typography} from "@mui/material";
 
 import "firacode";
 
 import {ParseError} from "../components/parseerror";
+import UniformSliders, {UniformSliderRef} from "../components/uniformsliders";
 
 
 const Index = () => {
@@ -38,6 +39,9 @@ const Index = () => {
 
     const renderNodeRef = useRef(null);
     const [renderNodeWidth, renderNodeHeight] = useSize(renderNodeRef);
+
+    const [sliderRefMap, setSliderRefMap] = useState<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
+
 
     return (
         <ThemeProvider theme={theme}>
@@ -58,6 +62,7 @@ const Index = () => {
                                     manualReload={manualReload}
                                     setManualReload={setManualReload}
                                     setError={setParseError}
+                                    sliderRefMap={sliderRefMap}
                                     bindID={"editor-canvas"}
                                     style={{
                                         display: 'inline-block',
@@ -71,6 +76,10 @@ const Index = () => {
                     </Grid>
                     <Grid item ref={monacoNodeRef} xs={9} md={8} lg={7} xl={6}>
                     <Item>
+                        <UniformSliders
+                            sliderRefMap={sliderRefMap}
+                            setSliderRefMap={setSliderRefMap}
+                        />
                         <Monaco
                             code={code}
                             setCode={setCode}
