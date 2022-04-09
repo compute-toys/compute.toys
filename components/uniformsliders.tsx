@@ -42,18 +42,31 @@ const CssTextField = styled(TextField)({
     },
 });
 
+const validate = (text: string) => {
+    let matched = text.match(/^[a-zA-Z][a-zA-Z0-9_]*$/);
+    return (matched && matched.length === 1);
+}
+
 const CustomTextField = React.forwardRef((props: any, inputRef: MutableRefObject<any>) => {
     /*
         Avoid re-rendering the containing (parent) component
         by storing in-progress edits in local state
      */
     const [temporaryFieldValue, setTemporaryFieldValue] = useState("Uniform");
+    const [err, setErr] = useState(false);
 
     React.useEffect(() => {
         setTemporaryFieldValue(props.sliderUniform);
     },[props.sliderUniform]);
 
+    const onEnterKey = (event) => {
+        if(event.keyCode == 13){ // enter
+            inputRef.current.blur();
+        }
+    };
+
     return (<CssTextField
+        error={err}
         id="outlined-name"
         aria-label={"Uniform name input"}
         sx={{
@@ -66,11 +79,17 @@ const CustomTextField = React.forwardRef((props: any, inputRef: MutableRefObject
         }}
         inputRef={inputRef}
         size="small"
-        label="Name"
+        label={err ? "Invalid" : "Name"}
         value={temporaryFieldValue}
+        onKeyDown={onEnterKey}
         onChange={(event: React.ChangeEvent<HTMLInputElement>) => {setTemporaryFieldValue(event.target.value)}}
         onBlur={ (event: React.FocusEvent<HTMLInputElement>) => {
-            props.setSliderUniform(event.target.value);
+            if (validate(event.target.value)) {
+                props.setSliderUniform(event.target.value);
+                setErr(false);
+            } else {
+                setErr(true);
+            }
         }}
     />);
 });
@@ -105,7 +124,8 @@ const UniformSlider = (props: UniformSliderProps) => {
                 gridAutoColumns: '1fr',
                 gap: 1,
                 width: '100%',
-                paddingLeft: '2.5em'
+                paddingLeft: '2.5em',
+                alignItems: 'center'
             }}
         >
             <CustomTextField
@@ -116,7 +136,7 @@ const UniformSlider = (props: UniformSliderProps) => {
             />
             <Slider
                 aria-label={sliderUniform + " slider"}
-                sx={{ display: 'table-cell', gridRow: '1', gridColumn: 'span 7', verticalAlign: 'middle' }}
+                sx={{ display: 'table-cell', gridRow: '1', gridColumn: 'span 7', color: theme.palette.dracula.comment, verticalAlign: 'middle', marginLeft: '1em' }}
                 value={sliderVal}
                 onChange={ (event: Event, newValue: number | number[]) => {
                     setSliderVal( newValue as number)
@@ -124,7 +144,12 @@ const UniformSlider = (props: UniformSliderProps) => {
             />
             <Button
                 aria-label={"Delete " + sliderUniform + " slider"}
-                sx={{ display: 'table-cell', gridRow: '1', gridColumn: 'span 1', color: theme.status.danger, verticalAlign: 'middle' }}
+                sx={{
+                    display: 'table-cell', gridRow: '1', gridColumn: 'span 1',
+                    color: theme.palette.primary.contrastText,
+                    verticalAlign: 'middle', lineHeight: '0',
+                    paddingLeft: '1em', marginLeft: '3em'
+                }}
                 onClick={() => {
                     props.deleteCallback(props.uuid);
                 }}>
