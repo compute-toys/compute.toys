@@ -458,7 +458,10 @@ export const wgslLanguageDef = () => {
         ],
         // Field Accessor
         [
-          /(\.)([xyzw]+|[rgba]+|(?:[a-zA-Z][a-zA-Z0-9_]+))/, 'field'
+          /(\.)(((?:[xyzw]{1,4}|[rgba]{1,4})(?![a-zA-Z0-9_]+)))/, 'field.vector'
+        ],
+        [
+          /(\.)(?:[a-zA-Z][a-zA-Z0-9_]+)/, 'field'
         ],
         {include: '@numbers'},
         // Whitespace + comments
