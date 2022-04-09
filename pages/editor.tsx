@@ -4,7 +4,7 @@
 import Monaco from '../components/monaco';
 import WgpuToy from "../components/wgputoy";
 
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import { default_shader } from "../components/wgpu-defaults";
 
@@ -23,7 +23,7 @@ import { Frame, Item, theme } from "../theme/theme";
 import {CssBaseline, Typography} from "@mui/material";
 
 import {ParseError} from "../components/parseerror";
-import UniformSliders from "../components/uniformsliders";
+import UniformSliders, {UniformSliderRef} from "../components/uniformsliders";
 
 
 const Index = () => {
@@ -39,6 +39,9 @@ const Index = () => {
 
     const renderNodeRef = useRef(null);
     const [renderNodeWidth, renderNodeHeight] = useSize(renderNodeRef);
+
+    const [sliderRefMap, setSliderRefMap] = useState<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
+
 
     return (
         <ThemeProvider theme={theme}>
@@ -72,7 +75,10 @@ const Index = () => {
                     </Grid>
                     <Grid item ref={monacoNodeRef} xs={9} md={8} lg={7} xl={6}>
                     <Item>
-                        <UniformSliders/>
+                        <UniformSliders
+                            sliderRefMap={sliderRefMap}
+                            setSliderRefMap={setSliderRefMap}
+                        />
                         <Monaco
                             code={code}
                             setCode={setCode}
