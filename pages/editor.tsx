@@ -62,6 +62,7 @@ const Index = () => {
                                     manualReload={manualReload}
                                     setManualReload={setManualReload}
                                     setError={setParseError}
+                                    sliderRefMap={sliderRefMap}
                                     bindID={"editor-canvas"}
                                     style={{
                                         display: 'inline-block',

@@ -96,7 +96,7 @@ const UniformSlider = (props: UniformSliderProps) => {
             }
         };
         props.setRefCallback(sliderRef);
-    }, []);
+    });
 
     return (
         <Box
@@ -137,11 +137,11 @@ const UniformSlider = (props: UniformSliderProps) => {
 export const UniformSliders = (props) => {
     const theme = useTheme();
 
-    const [sliderRefMap, setSliderRefMap] = useState<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
+    //const [sliderRefMap, setSliderRefMap] = useState<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
 
     const sliderRefCallback = (ref) => {
-        ref && setSliderRefMap(sliderRefMap.set(ref.current.getUUID(), ref)); // set returns 'this'
+        ref && props.setSliderRefMap(props.sliderRefMap.set(ref.current.getUUID(), ref)); // set returns 'this'
     };
 
     /*
@@ -151,19 +151,19 @@ export const UniformSliders = (props) => {
         whenever one slider changes
      */
     const deleteCallback = (uuid) => {
-        setSliderRefMap( sliderArrayRefs => {sliderArrayRefs.delete(uuid); return sliderArrayRefs} );
+        props.setSliderRefMap( sliderArrayRefs => {sliderArrayRefs.delete(uuid); return sliderArrayRefs} );
         forceUpdate();
     };
 
     const addCallback = (uuid) => {
-        uuid && setSliderRefMap(sliderRefMap.set(uuid, null));
+        uuid && props.setSliderRefMap(props.sliderRefMap.set(uuid, null));
         forceUpdate();
     };
 
     return (
         <Box>
         <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
-            {[...sliderRefMap.keys()].map(uuid => (
+            {[...props.sliderRefMap.keys()].map(uuid => (
                 <UniformSlider key={uuid} uuid={uuid} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
             ))}
         </Stack>
