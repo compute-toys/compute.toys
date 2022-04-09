@@ -11,6 +11,7 @@
     "@monaco-editor/react": "^4.4.1",
     "@mui/icons-material": "^5.5.1",
     "@mui/material": "^5.5.3",
+    "@octokit/rest": "^18.12.0",
     "@react-hook/resize-observer": "^1.2.5",
     "@react-hook/size": "^2.1.2",
     "firacode": "^6.2.0",

@@ -3,6 +3,8 @@ import React, {useEffect, useRef} from "react";
 import {wgslLanguageDef, wgslConfiguration} from '../public/grammars/wgsl'
 import {defineMonacoTheme} from "./monacotheme";
 
+import { Octokit } from "@octokit/rest";
+
 
 const Monaco = (props) => {
     const monacoRef = useRef<any | null>(null);
@@ -50,6 +52,16 @@ const Monaco = (props) => {
 
             // https://github.com/microsoft/monaco-editor/issues/392
             document.fonts.ready.then(() => monaco.editor.remeasureFonts());
+
+            const octokit = new Octokit();
+            octokit.rest.gists.get({
+                gist_id: '435e9bb5c60ef892df53ce2233bae197'
+            }).then(r => {
+                const files = Object.keys(r.data.files);
+                const content = r.data.files[files[0]].content;
+                props.setCode(content);
+                props.setManualReload(true);
+            });
         }}
         options={props.editorOptions}
         theme='global' // preference

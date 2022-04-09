@@ -1,6 +1,5 @@
 import React, {CSSProperties, Dispatch, lazy, MutableRefObject, SetStateAction} from "react";
 import { WgpuToyRenderer, init_wgpu } from "wgputoy";
-import { default_shader } from "./wgpu-defaults"
 import {ParseError} from "./parseerror";
 
 interface WgpuToyProps {
@@ -90,7 +89,6 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     componentDidMount() {
         init_wgpu(this.props.bindID).then(ctx => {
             this.setState({wgputoy: new WgpuToyRenderer(ctx)});
-            this.state.wgputoy.set_shader(default_shader);
             this.state.wgputoy.on_error(this.handleError.bind(this))
             this.updateDimensions();
 

@@ -6,8 +6,6 @@ import WgpuToy from "../components/wgputoy";
 
 import { useRef, useState } from 'react';
 
-import { default_shader } from "../components/wgpu-defaults";
-
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 
@@ -28,7 +26,7 @@ import {ParseError} from "../components/parseerror";
 
 
 const Index = () => {
-    const [code, setCode] = useState<string>(default_shader);
+    const [code, setCode] = useState<string>("// Loading...");
     const [play, setPlay] = useState<boolean>(true);
     const [reset, setReset] = useState<boolean>(false);
     const [hotReload, setHotReload] = useState<boolean>(false);
@@ -76,6 +74,7 @@ const Index = () => {
                         <Monaco
                             code={code}
                             setCode={setCode}
+                            setManualReload={setManualReload}
                             parentWidth={monacoNodeWidth}
                             editorOptions={{
                                 stopRenderingLineAfter: 1000,
