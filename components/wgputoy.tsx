@@ -99,7 +99,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
                 this.state.wgputoy.load_channel(new Uint8Array(data)));
 
             // this is the only place we want to set play manually, otherwise it's UI-driven
-            this.play();
+            this.play(0);
         });
         document.addEventListener('keydown', this.handleKeyDown.bind(this));
         document.addEventListener('keyup', this.handleKeyUp.bind(this));
@@ -170,16 +170,17 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
 
     togglePlay() {
         if (this.props.play) {
-            this.play();
+            this.play(0);
         } else {
             this.pause();
         }
     }
 
-    play() {
+    play(time: DOMHighResTimeStamp) {
         this.updateUniforms();
+        this.state.wgputoy.set_time_elapsed(time * 1e-3);
         this.state.wgputoy.render();
-        this.setState({requestAnimationFrameID: requestAnimationFrame(() => this.play())});
+        this.setState({requestAnimationFrameID: requestAnimationFrame(this.play.bind(this))});
     }
 
     updateUniforms() {
