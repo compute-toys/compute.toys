@@ -10,8 +10,10 @@ export default function Home() {
 
       <main>
         <ul>
+          <li><a href="/editor/new">New</a></li>
           <li><a href="/editor/435e9bb5c60ef892df53ce2233bae197">Buddhabrot</a></li>
           <li><a href="/editor/53a3829482e4bce3f8329f19f1641f4c">Caustics</a></li>
+          <li><a href="/editor/5f9677a0ccfbd63d7a8657ad9af3a856">Hash without sine</a></li>
         </ul>
       </main>
 

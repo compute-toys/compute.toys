@@ -28,9 +28,31 @@ import { useRouter } from 'next/router';
 
 import { Octokit } from "@octokit/rest";
 
+const DEFAULT_SHADER = `
+@stage(compute) @workgroup_size(16, 16)
+fn main_image(@builtin(global_invocation_id) id: uint3) {
+    // Viewport resolution (in pixels)
+    let screen_size = uint2(textureDimensions(screen));
+
+    // Prevent overdraw for workgroups on the edge of the viewport
+    if (id.x >= screen_size.x || id.y >= screen_size.y) { return; }
+
+    // Pixel coordinates (centre of pixel)
+    let fragCoord = float2(id.xy) + .5;
+
+    // Normalised pixel coordinates (from 0 to 1)
+    let uv = fragCoord / float2(screen_size);
+
+    // Time varying pixel colour
+    let col = .5 + .5 * cos(time.elapsed + uv.xyx + float3(0.,2.,4.));
+
+    // Output to screen
+    textureStore(screen, int2(id.xy), float4(col, 1.));
+}
+`;
 
 const Index = () => {
-    const [code, setCode] = useState<string>("// Loading...");
+    const [code, setCode] = useState<string>(DEFAULT_SHADER);
     const [play, setPlay] = useState<boolean>(true);
     const [reset, setReset] = useState<boolean>(false);
     const [hotReload, setHotReload] = useState<boolean>(false);
@@ -47,7 +69,7 @@ const Index = () => {
 
     const router = useRouter();
     React.useEffect(() => {
-        if (router.isReady && typeof router.query.id === 'string') {
+        if (router.isReady && typeof router.query.id === 'string' && router.query.id !== 'new') {
             const octokit = new Octokit();
             octokit.rest.gists.get({
                 gist_id: router.query.id
