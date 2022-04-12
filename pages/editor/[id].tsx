@@ -72,16 +72,21 @@ const Index = () => {
 
     const router = useRouter();
     React.useEffect(() => {
-        if (router.isReady && typeof router.query.id === 'string' && router.query.id !== 'new') {
-            const octokit = new Octokit();
-            octokit.rest.gists.get({
-                gist_id: router.query.id
-            }).then(r => {
-                const files = Object.keys(r.data.files);
-                const content = r.data.files[files[0]].content;
-                setCode(content);
+        if (router.isReady && typeof router.query.id === 'string') {
+            if (router.query.id === 'new') {
                 setManualReload(true);
-            });
+            } else {
+                const octokit = new Octokit();
+                octokit.rest.gists.get({
+                    gist_id: router.query.id
+                }).then(r => {
+                    const files = Object.keys(r.data.files);
+                    const content = r.data.files[files[0]].content;
+                    setCode(content);
+                    setManualReload(true);
+                });
+            }
+
         }
     }, [router.isReady]);
 

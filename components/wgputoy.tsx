@@ -113,7 +113,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
             // user decided to manually reload
             if ((this.props.hotReload && this.props.code !== prevProps.code)
                 || (this.props.hotReload && !prevProps.hotReload)
-                || (this.props.manualReload && !prevProps.manualReload)
+                || (this.props.manualReload)
             ) {
                 this.setShader(this.props.code);
                 this.props.setManualReload(false);
