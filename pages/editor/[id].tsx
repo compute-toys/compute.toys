@@ -27,6 +27,7 @@ import UniformSliders, {UniformSliderRef} from "../../components/uniformsliders"
 import { useRouter } from 'next/router';
 
 import { Octokit } from "@octokit/rest";
+import TexturePicker, {LoadedTextures} from "../../components/texturepicker";
 
 const DEFAULT_SHADER = `
 @stage(compute) @workgroup_size(16, 16)
@@ -70,6 +71,8 @@ const Index = () => {
 
     const [sliderRefMap, setSliderRefMap] = useState<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
 
+    const [loadedTextures, setLoadedTextures] = useState(["/textures/blank.png", "/textures/blank.png"]);
+
     const router = useRouter();
     React.useEffect(() => {
         if (router.isReady && typeof router.query.id === 'string') {
@@ -111,6 +114,7 @@ const Index = () => {
                                     setManualReload={setManualReload}
                                     setError={setParseError}
                                     sliderRefMap={sliderRefMap}
+                                    loadedTextures={loadedTextures}
                                     bindID={"editor-canvas"}
                                     style={{
                                         display: 'inline-block',
@@ -144,6 +148,7 @@ const Index = () => {
                             <HotReloadToggle hotReload={hotReload} setHotReload={setHotReload}/>
                         </Box>
                     </Item>
+                        <TexturePicker loadedTextures={loadedTextures} setLoadedTextures={setLoadedTextures}/>
                     </Grid>
                 </Grid>
             </Box>

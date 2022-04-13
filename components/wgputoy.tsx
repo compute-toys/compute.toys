@@ -2,6 +2,7 @@ import React, {CSSProperties, Dispatch, MutableRefObject, SetStateAction} from "
 import { WgpuToyRenderer, init_wgpu } from "wgputoy";
 import {ParseError} from "./parseerror";
 import {UniformSliderRef} from "./uniformsliders";
+import {LoadedTextures} from "./texturepicker";
 
 interface WgpuToyProps {
     code: string,
@@ -16,6 +17,7 @@ interface WgpuToyProps {
     manualReload: boolean
     setManualReload: Dispatch<SetStateAction<boolean>>
     setError: Dispatch<SetStateAction<ParseError>>
+    loadedTextures: LoadedTextures,
     sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>
 }
 
@@ -95,8 +97,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
             this.updateDimensions();
 
             // https://commons.wikimedia.org/wiki/File:Regent_Street_Clay_Gregory.jpg
-            fetch("/london.jpg").then(r => r.blob()).then(b => b.arrayBuffer()).then(data =>
-                this.state.wgputoy.load_channel(new Uint8Array(data)));
+            //this.loadTexture("/fake.jpg");
 
             // this is the only place we want to set play manually, otherwise it's UI-driven
             this.play(0);
@@ -117,6 +118,12 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
             ) {
                 this.setShader(this.props.code);
                 this.props.setManualReload(false);
+            }
+
+            // Nasty, but apparently faster than any other method
+            //if (JSON.stringify(this.props.loadedTextures) !== JSON.stringify(prevProps.loadedTextures)) {
+            if (this.props.loadedTextures[0] !== prevProps.loadedTextures[0]) {
+                this.loadTexture(this.props.loadedTextures[0]);
             }
 
             if (this.props.parentWidth !== prevProps.parentWidth) {
@@ -193,7 +200,18 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
                 }
             }, this)
         }
+    }
 
+    loadTexture(uri: string) {
+        fetch(uri).then(
+            response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load image');
+                }
+                return response.blob();
+            }).then(b => b.arrayBuffer()).then(
+                data => this.state.wgputoy.load_channel(new Uint8Array(data))
+            ).catch(error => console.error(error));
     }
 
     pause() {
