@@ -14,19 +14,10 @@ export default function Home() {
           <li><a href="/editor/435e9bb5c60ef892df53ce2233bae197">Buddhabrot</a></li>
           <li><a href="/editor/53a3829482e4bce3f8329f19f1641f4c">Caustics</a></li>
           <li><a href="/editor/5f9677a0ccfbd63d7a8657ad9af3a856">Hash without sine</a></li>
+          <li><a href="/editor/ab237d17e5cdc3759e25c6b4dc1a73aa">Texture colorspace projection</a></li>
         </ul>
       </main>
 
-      <footer>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel" className="logo" />
-        </a>
-      </footer>
 
       <style jsx>{`
         .container {
