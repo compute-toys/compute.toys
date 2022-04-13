@@ -2,9 +2,13 @@ import * as React from 'react';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
-import { Item } from '../theme/theme';
+import {Item, theme} from '../theme/theme';
 import Draggable from 'react-draggable';
 import {Fragment, useRef, useState} from "react";
+import CancelIcon from '@mui/icons-material/Cancel';
+import PauseCircleIcon from "@mui/icons-material/PauseCircle";
+import {Button} from "@mui/material";
+import {DisabledByDefaultSharp} from "@mui/icons-material";
 
 export interface LoadedTextures {
     [key: number]: string
@@ -25,6 +29,13 @@ const DraggablePicker = (props) => {
                 left: '12%',
                 top: '12%'}}
             >
+                <div style={{display: 'flex', justifyContent: 'end',
+                    backgroundImage: 'repeating-linear-gradient(-45deg, rgba(255,255,255, 0.25), rgba(255,255,255, 0.25) 2px, transparent 1px, transparent 6px)',
+                    backgroundSize: '4px 4px'
+                }}>
+                    {/* Annoying viewbox tweak to align with drag bar*/}
+                    <DisabledByDefaultSharp viewBox="1.5 1.5 19.5 19.5" onClick={() => props.setPickerHidden(true)} color={'primary'}/>
+                </div>
                 <ImageList sx={{ width: size*6, height: size*4, overflow: 'hidden' }}
                            cols={6} rowHeight={size}
                 >
@@ -39,6 +50,7 @@ const DraggablePicker = (props) => {
                                     })
                             }}>
                             <img
+                                style={{borderRadius: '4px'}}
                                 src={`${item.img}?w=${size}&h=${size}&fit=crop&auto=format`}
                                 srcSet={`${item.img}?w=${size}&h=${size}&fit=crop&auto=format&dpr=2 2x`}
                                 loading="lazy"
@@ -59,8 +71,10 @@ export default function TexturePicker(props) {
 
     return (
         <Fragment>
-            <Item sx={{display: "inline-block"}}>
-                <ImageList sx={{width: size * 2, height: size}} cols={2} rowHeight={size}>
+            <Item sx={{display: "inline-block", marginTop: "18px"}}>
+                <ImageList sx={{width: size * 2, height: size, marginTop: "0px", marginBottom: "0px"}}
+                           cols={2} rowHeight={size}
+                >
                     { props.loadedTextures.map((img, index) => (
                         <ImageListItem
                             key={img + index}
@@ -83,7 +97,7 @@ export default function TexturePicker(props) {
                     ))}
                 </ImageList>
             </Item>
-            <DraggablePicker hidden={pickerHidden} channel={pickerChannel} setLoadedTextures={props.setLoadedTextures}/>
+            <DraggablePicker hidden={pickerHidden} setPickerHidden={setPickerHidden} channel={pickerChannel} setLoadedTextures={props.setLoadedTextures}/>
         </Fragment>
     );
 }

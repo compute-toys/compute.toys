@@ -137,6 +137,11 @@ const UniformSlider = (props: UniformSliderProps) => {
             <Slider
                 aria-label={sliderUniform + " slider"}
                 sx={{ display: 'table-cell', gridRow: '1', gridColumn: 'span 7', color: theme.palette.dracula.comment, verticalAlign: 'middle', marginLeft: '1em' }}
+                defaultValue={0.0}
+                step={0.001}
+                min={0.0}
+                max={1.0}
+                valueLabelDisplay="auto"
                 value={sliderVal}
                 onChange={ (event: Event, newValue: number | number[]) => {
                     setSliderVal( newValue as number)
