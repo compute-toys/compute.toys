@@ -96,9 +96,6 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
             this.state.wgputoy.on_error(this.handleError.bind(this))
             this.updateDimensions();
 
-            // https://commons.wikimedia.org/wiki/File:Regent_Street_Clay_Gregory.jpg
-            //this.loadTexture("/fake.jpg");
-
             // this is the only place we want to set play manually, otherwise it's UI-driven
             this.play(0);
         });
@@ -210,7 +207,13 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
                 }
                 return response.blob();
             }).then(b => b.arrayBuffer()).then(
-                data => this.state.wgputoy.load_channel(new Uint8Array(data))
+                data => {
+                    if (uri.match(/\.rgbe\.png/i)) {
+                        this.state.wgputoy.load_channel_rgbe(new Uint8Array(data))
+                    } else {
+                        this.state.wgputoy.load_channel(new Uint8Array(data))
+                    }
+                }
             ).catch(error => console.error(error));
     }
 

@@ -104,7 +104,7 @@ export default function TexturePicker(props) {
 
 const defaultTextures = [
     {img: '/textures/blank.png'},
-    {img: '/textures/london.jpg'},
+    {img: '/textures/london.jpg'}, // https://commons.wikimedia.org/wiki/File:Regent_Street_Clay_Gregory.jpg
     {img: '/textures/tex0.jpg'},
     {img: '/textures/tex1.jpg'},
     {img: '/textures/tex2.jpg'},
@@ -125,5 +125,6 @@ const defaultTextures = [
     {img: '/textures/noise1.png'},
     {img: '/textures/noise2.png'},
     {img: '/textures/noise3.png'},
-    {img: '/textures/noise4.png'}
+    {img: '/textures/noise4.png'},
+    {img: '/textures/spruit_sunrise_2k.rgbe.png'}, // https://polyhaven.com/a/spruit_sunrise
 ];
