@@ -120,7 +120,10 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
             // Nasty, but apparently faster than any other method
             //if (JSON.stringify(this.props.loadedTextures) !== JSON.stringify(prevProps.loadedTextures)) {
             if (this.props.loadedTextures[0] !== prevProps.loadedTextures[0]) {
-                this.loadTexture(this.props.loadedTextures[0]);
+                this.loadTexture(0, this.props.loadedTextures[0]);
+            }
+            if (this.props.loadedTextures[1] !== prevProps.loadedTextures[1]) {
+                this.loadTexture(1, this.props.loadedTextures[1]);
             }
 
             if (this.props.parentWidth !== prevProps.parentWidth) {
@@ -199,7 +202,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         }
     }
 
-    loadTexture(uri: string) {
+    loadTexture(index: number, uri: string) {
         fetch(uri).then(
             response => {
                 if (!response.ok) {
@@ -209,9 +212,9 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
             }).then(b => b.arrayBuffer()).then(
                 data => {
                     if (uri.match(/\.rgbe\.png/i)) {
-                        this.state.wgputoy.load_channel_rgbe(new Uint8Array(data))
+                        this.state.wgputoy.load_channel_rgbe(index, new Uint8Array(data))
                     } else {
-                        this.state.wgputoy.load_channel(new Uint8Array(data))
+                        this.state.wgputoy.load_channel(index, new Uint8Array(data))
                     }
                 }
             ).catch(error => console.error(error));

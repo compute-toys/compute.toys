@@ -119,7 +119,7 @@ const defaultTextures = [
     {img: '/textures/tex11.jpg'},
     {img: '/textures/anim0.png'},
     {img: '/textures/bayer0.png'},
-    {img: '/textures/font0.png'},
+    {img: '/textures/font0.png'}, // https://github.com/otaviogood/shader_fontgen
     {img: '/textures/height0.png'},
     {img: '/textures/noise0.png'},
     {img: '/textures/noise1.png'},
