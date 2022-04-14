@@ -94,6 +94,8 @@ const CustomTextField = React.forwardRef((props: any, inputRef: MutableRefObject
     />);
 });
 
+CustomTextField.displayName = "CustomTextField";
+
 const UniformSlider = (props: UniformSliderProps) => {
 
     const [sliderVal, setSliderVal] = useState(0);

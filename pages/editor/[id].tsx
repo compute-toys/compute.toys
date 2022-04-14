@@ -89,9 +89,8 @@ const Index = () => {
                     setManualReload(true);
                 });
             }
-
         }
-    }, [router.isReady]);
+    }, [router.isReady, router.query.id]);
 
 
     return (

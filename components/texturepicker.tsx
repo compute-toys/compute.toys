@@ -5,10 +5,8 @@ import ImageListItemBar from '@mui/material/ImageListItemBar';
 import {Item, theme} from '../theme/theme';
 import Draggable from 'react-draggable';
 import {Fragment, useRef, useState} from "react";
-import CancelIcon from '@mui/icons-material/Cancel';
-import PauseCircleIcon from "@mui/icons-material/PauseCircle";
-import {Button} from "@mui/material";
 import {DisabledByDefaultSharp} from "@mui/icons-material";
+import Image from 'next/image';
 
 export interface LoadedTextures {
     [key: number]: string
@@ -49,10 +47,12 @@ const DraggablePicker = (props) => {
                                         return newArr; //returning a modified prevLoadedTextures will cause downstream effect checks to fail!
                                     })
                             }}>
-                            <img
+                            <Image
                                 style={{borderRadius: '4px'}}
-                                src={`${item.img}?w=${size}&h=${size}&fit=crop&auto=format`}
-                                srcSet={`${item.img}?w=${size}&h=${size}&fit=crop&auto=format&dpr=2 2x`}
+                                src={item.img}
+                                alt={item.img}
+                                width={size}
+                                height={size}
                                 loading="lazy"
                             />
                         </ImageListItem>
@@ -83,11 +83,12 @@ export default function TexturePicker(props) {
                                 setPickerHidden(!pickerHidden)
                             }}
                         >
-                            <img
+                            <Image
                                 style={{borderRadius: '4px'}}
-                                src={`${img}?w=${size}&h=${size}&fit=crop&auto=format`}
-                                srcSet={`${img}?w=${size}&h=${size}&fit=crop&auto=format&dpr=2 2x`}
-                                alt={img}
+                                src={img}
+                                alt={"Channel " + index + " texture"}
+                                width={size}
+                                height={size}
                                 loading="lazy"
                             />
                             <ImageListItemBar

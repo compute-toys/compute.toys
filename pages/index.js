@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link'
 
 export default function Home() {
   return (
@@ -10,11 +11,11 @@ export default function Home() {
 
       <main>
         <ul>
-          <li><a href="/editor/new">New</a></li>
-          <li><a href="/editor/435e9bb5c60ef892df53ce2233bae197">Buddhabrot</a></li>
-          <li><a href="/editor/53a3829482e4bce3f8329f19f1641f4c">Caustics</a></li>
-          <li><a href="/editor/5f9677a0ccfbd63d7a8657ad9af3a856">Hash without sine</a></li>
-          <li><a href="/editor/ab237d17e5cdc3759e25c6b4dc1a73aa">Texture colorspace projection</a></li>
+          <li><Link href="/editor/new">New</Link></li>
+          <li><Link href="/editor/435e9bb5c60ef892df53ce2233bae197">Buddhabrot</Link></li>
+          <li><Link href="/editor/53a3829482e4bce3f8329f19f1641f4c">Caustics</Link></li>
+          <li><Link href="/editor/5f9677a0ccfbd63d7a8657ad9af3a856">Hash without sine</Link></li>
+          <li><Link href="/editor/ab237d17e5cdc3759e25c6b4dc1a73aa">Texture colorspace projection</Link></li>
         </ul>
       </main>
 
