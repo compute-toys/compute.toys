@@ -3,6 +3,8 @@ import { WgpuToyRenderer, init_wgpu } from "wgputoy";
 import {ParseError} from "./parseerror";
 import {UniformSliderRef} from "./uniformsliders";
 import {LoadedTextures} from "./texturepicker";
+import { Fragment } from "react";
+import {Skeleton} from "@mui/material";
 
 interface WgpuToyProps {
     code: string,
@@ -226,14 +228,20 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
 
     render() {
         return (
-            <canvas
-                onMouseMove={this.handleMouseMove}
-                onMouseDown={this.handleMouseDown}
-                onMouseUp={this.handleMouseUp}
-                onMouseLeave={this.handleMouseUp}
-                id={this.props.bindID}
-                style={this.props.style}
-            />
+            <Fragment>
+                <canvas
+                    onMouseMove={this.handleMouseMove}
+                    onMouseDown={this.handleMouseDown}
+                    onMouseUp={this.handleMouseUp}
+                    onMouseLeave={this.handleMouseUp}
+                    id={this.props.bindID}
+                    style={this.state.wgputoy ? this.props.style : {position: "fixed", display: "hidden"}}
+                />
+                {this.state.wgputoy ?
+                    null : <Skeleton variant="rectangular"
+                                 width={this.getDimensions(this.props.parentWidth).x}
+                                 height={this.getDimensions(this.props.parentWidth).y}/>}
+            </Fragment>
         );
     }
 }
