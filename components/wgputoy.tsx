@@ -84,6 +84,10 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         }));
     }
 
+    handleSuccess(entryPoints) {
+        console.log(entryPoints);
+    }
+
     resetError() {
         this.props.setError(error => ({
             summary: undefined,
@@ -95,7 +99,8 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     componentDidMount() {
         init_wgpu(this.props.bindID).then(ctx => {
             this.setState({wgputoy: new WgpuToyRenderer(ctx)});
-            this.state.wgputoy.on_error(this.handleError.bind(this))
+            this.state.wgputoy.on_error(this.handleError.bind(this));
+            this.state.wgputoy.on_success(this.handleSuccess.bind(this));
             this.updateDimensions();
 
             // this is the only place we want to set play manually, otherwise it's UI-driven
@@ -119,8 +124,6 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
                 this.props.setManualReload(false);
             }
 
-            // Nasty, but apparently faster than any other method
-            //if (JSON.stringify(this.props.loadedTextures) !== JSON.stringify(prevProps.loadedTextures)) {
             if (this.props.loadedTextures[0] !== prevProps.loadedTextures[0]) {
                 this.loadTexture(0, this.props.loadedTextures[0]);
             }
