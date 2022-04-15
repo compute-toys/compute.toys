@@ -6,7 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import Box from "@mui/material/Box";
 import React from "react";
 import {styled} from "@mui/system";
-import {theme} from "../theme/theme";
+import {getRainbowColor, theme} from "../theme/theme";
 import { v4 as UUID } from 'uuid';
 
 
@@ -20,6 +20,7 @@ interface UniformSliderProps {
     setRefCallback: (r: React.MutableRefObject<UniformSliderRef>) => void
     deleteCallback: (uuid: string) => void
     uuid: string
+    index: number
 }
 
 
@@ -72,10 +73,10 @@ const CustomTextField = React.forwardRef((props: any, inputRef: MutableRefObject
         sx={{
             display: 'table-cell',
             gridRow: '1',
-            gridColumn: 'span 2',
+            gridColumn: 'span 3',
             verticalAlign: 'middle',
-            input: {color: theme.palette.dracula.selection},
-            label: {color: theme.palette.dracula.selection}
+            input: {color: getRainbowColor(props.index)},
+            label: {color: getRainbowColor(props.index)}
         }}
         inputRef={inputRef}
         size="small"
@@ -126,11 +127,13 @@ const UniformSlider = (props: UniformSliderProps) => {
                 gridAutoColumns: '1fr',
                 gap: 1,
                 width: '100%',
-                paddingLeft: '2.5em',
-                alignItems: 'center'
+                paddingLeft: '0em',
+                alignItems: 'center',
+                color: getRainbowColor(props.index)
             }}
         >
             <CustomTextField
+                index={props.index}
                 ref={inputRef}
                 uuid={props.uuid}
                 sliderUniform={sliderUniform}
@@ -138,7 +141,14 @@ const UniformSlider = (props: UniformSliderProps) => {
             />
             <Slider
                 aria-label={sliderUniform + " slider"}
-                sx={{ display: 'table-cell', gridRow: '1', gridColumn: 'span 7', color: theme.palette.dracula.comment, verticalAlign: 'middle', marginLeft: '1em' }}
+                sx={{
+                    display: 'table-cell',
+                    gridRow: '1',
+                    gridColumn: 'span 7',
+                    verticalAlign: 'middle',
+                    marginLeft: '1em',
+                    color: getRainbowColor(props.index)
+                }}
                 defaultValue={0.0}
                 step={0.001}
                 min={0.0}
@@ -153,9 +163,10 @@ const UniformSlider = (props: UniformSliderProps) => {
                 aria-label={"Delete " + sliderUniform + " slider"}
                 sx={{
                     display: 'table-cell', gridRow: '1', gridColumn: 'span 1',
-                    color: theme.palette.primary.contrastText,
+                    color: theme.palette.dracula.foreground,
                     verticalAlign: 'middle', lineHeight: '0',
-                    paddingLeft: '1em', marginLeft: '3em'
+                    padding: '0px', marginLeft: '2em', marginRight: '8px',
+                    minWidth: '32px'
                 }}
                 onClick={() => {
                     props.deleteCallback(props.uuid);
@@ -169,7 +180,7 @@ const UniformSlider = (props: UniformSliderProps) => {
 export const UniformSliders = (props) => {
     const theme = useTheme();
 
-    //const [sliderRefMap, setSliderRefMap] = useState<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
+    // recommended pattern for forcing an update with a simple counter
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
 
     const sliderRefCallback = (ref) => {
@@ -194,17 +205,17 @@ export const UniformSliders = (props) => {
 
     return (
         <Box>
-        <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
-            {[...props.sliderRefMap.keys()].map(uuid => (
-                <UniformSlider key={uuid} uuid={uuid} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
-            ))}
-        </Stack>
-        <Button sx={{color: theme.palette.primary.dark}}
-                onClick={() => {
-                    addCallback(UUID());
-                }}>
-            <AddIcon/>
-        </Button>
+            <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
+                {[...props.sliderRefMap.keys()].map((uuid, index) => (
+                    <UniformSlider key={uuid} uuid={uuid} index={index} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
+                ))}
+            </Stack>
+            <Button sx={{color: theme.palette.primary.light, padding: "0px"}}
+                    onClick={() => {
+                        addCallback(UUID());
+                    }}>
+                <AddIcon/>
+            </Button>
         </Box>
     );
 }

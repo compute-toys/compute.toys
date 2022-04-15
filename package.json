@@ -10,6 +10,7 @@
     "@emotion/styled": "^11.8.1",
     "@monaco-editor/react": "^4.4.1",
     "@mui/icons-material": "^5.5.1",
+    "@mui/lab": "^5.0.0-alpha.77",
     "@mui/material": "^5.5.3",
     "@octokit/rest": "^18.12.0",
     "@react-hook/resize-observer": "^1.2.5",

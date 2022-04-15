@@ -2,6 +2,7 @@ import {createTheme, styled} from '@mui/material/styles';
 import Paper from "@mui/material/Paper";
 import "./themeModule";
 import createPalette from "@mui/material/styles/createPalette";
+import "firacode";
 
 export const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.primary.darker,
@@ -19,6 +20,15 @@ export const Frame = styled(Paper)(({ theme }) => ({
 }));
 
 export const theme = createTheme({
+    typography: {
+        fontFamily: ['Fira Code', 'monospace'].join(','),
+        fontSize: 12
+    },
+    components: {
+        MuiCssBaseline: {
+
+        },
+    },
     status: {
         danger: '#db504a',
         disabled: '#646F6C'
@@ -54,3 +64,17 @@ export const theme = createTheme({
         },
     },
 });
+
+export const rainbow = [
+    theme.palette.dracula.cyan,
+    theme.palette.dracula.green,
+    theme.palette.dracula.orange,
+    theme.palette.dracula.pink,
+    theme.palette.dracula.purple,
+    theme.palette.dracula.red,
+    theme.palette.dracula.yellow,
+]
+
+export const getRainbowColor = (index: number) => {
+    return rainbow[index % rainbow.length];
+}

@@ -21,6 +21,7 @@ interface WgpuToyProps {
     setError: Dispatch<SetStateAction<ParseError>>
     loadedTextures: LoadedTextures,
     sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>
+    setEntryPoints: Dispatch<SetStateAction<Array<String>>>
 }
 
 interface MousePosition {
@@ -85,7 +86,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     }
 
     handleSuccess(entryPoints) {
-        console.log(entryPoints);
+        this.props.setEntryPoints(entryPoints);
     }
 
     resetError() {
@@ -108,6 +109,10 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
         });
         document.addEventListener('keydown', this.handleKeyDown.bind(this));
         document.addEventListener('keyup', this.handleKeyUp.bind(this));
+    }
+
+    componentWillUnmount() {
+        this.pause();
     }
 
     componentDidUpdate(prevProps, prevState) {

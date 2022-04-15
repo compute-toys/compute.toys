@@ -1,7 +1,7 @@
 import Editor from '@monaco-editor/react'
 import React, {useEffect, useRef} from "react";
 import {wgslLanguageDef, wgslConfiguration} from '../public/grammars/wgsl'
-import {defineMonacoTheme} from "./monacotheme";
+import {defineMonacoTheme} from "../theme/monacotheme";
 
 
 const Monaco = (props) => {

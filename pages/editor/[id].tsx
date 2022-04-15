@@ -8,6 +8,7 @@ import React, { useRef, useState } from 'react';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import useSize from "@react-hook/size";
 
@@ -18,7 +19,7 @@ import ReloadButton from "../../components/reloadbutton";
 
 import { ThemeProvider, styled } from "@mui/material/styles";
 import { Frame, Item, theme } from "../../theme/theme";
-import {CssBaseline, Typography} from "@mui/material";
+import {Accordion, AccordionDetails, AccordionSummary, CssBaseline, Typography} from "@mui/material";
 
 import "firacode";
 
@@ -28,6 +29,7 @@ import { useRouter } from 'next/router';
 
 import { Octokit } from "@octokit/rest";
 import TexturePicker, {LoadedTextures} from "../../components/texturepicker";
+import EntryPointDisplay from "../../components/entrypointdisplay";
 
 const DEFAULT_SHADER = `
 @stage(compute) @workgroup_size(16, 16)
@@ -62,6 +64,8 @@ const Index = () => {
     const [hotReload, setHotReload] = useState<boolean>(false);
     const [manualReload, setManualReload] = useState<boolean>(false);
     const [parseError, setParseError] = useState<ParseError>(null);
+    const [loadedTextures, setLoadedTextures] = useState(["/textures/blank.png", "/textures/blank.png"]);
+    const [entryPoints, setEntryPoints] = useState([]);
 
     const monacoNodeRef = useRef(null);
     const [monacoNodeWidth, monacoNodeHeight] = useSize(monacoNodeRef);
@@ -70,8 +74,6 @@ const Index = () => {
     const [renderNodeWidth, renderNodeHeight] = useSize(renderNodeRef);
 
     const [sliderRefMap, setSliderRefMap] = useState<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
-
-    const [loadedTextures, setLoadedTextures] = useState(["/textures/blank.png", "/textures/blank.png"]);
 
     const router = useRouter();
     React.useEffect(() => {
@@ -94,64 +96,75 @@ const Index = () => {
 
 
     return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline/>
-            <Box sx={{ flexGrow: 1 }}>
-                <Grid container spacing={2}>
-                    <Grid item ref={renderNodeRef} xs={3} md={4} lg={5} xl={6}>
-                        <Item>
-                            <Frame elevation={12}>
-                                <WgpuToy
-                                    parentWidth={renderNodeWidth}
-                                    code={code}
-                                    play={play}
-                                    setPlay={setPlay}
-                                    reset={reset}
-                                    setReset={setReset}
-                                    hotReload={hotReload}
-                                    manualReload={manualReload}
-                                    setManualReload={setManualReload}
-                                    setError={setParseError}
-                                    sliderRefMap={sliderRefMap}
-                                    loadedTextures={loadedTextures}
-                                    bindID={"editor-canvas"}
-                                    style={{
-                                        display: 'inline-block',
-                                        borderRadius: '4px'
-                                    }}
-                                />
-                            </Frame>
-                            <PlayPauseButton play={play} setPlay={setPlay} />
-                            <ResetButton reset={reset} setReset={setReset} />
-                        </Item>
-                    </Grid>
-                    <Grid item ref={monacoNodeRef} xs={9} md={8} lg={7} xl={6}>
+        <Box sx={{ flexGrow: 1 }}>
+            <Grid container spacing={2}>
+                <Grid item ref={renderNodeRef} xs={3} md={4} lg={5} xl={6}>
                     <Item>
-                        <UniformSliders
-                            sliderRefMap={sliderRefMap}
-                            setSliderRefMap={setSliderRefMap}
-                        />
-                        <Monaco
-                            code={code}
-                            setCode={setCode}
-                            parentWidth={monacoNodeWidth}
-                            editorOptions={{
-                                stopRenderingLineAfter: 1000,
-                                fontFamily: "'Fira Code', monospace",
-                                //fontLigatures: true,
-                            }}
-                            parseError={parseError}
-                        />
-                        <Box sx={{paddingTop: "4px"}}>
-                            <ReloadButton hotReload={hotReload} setManualReload={setManualReload}/>
-                            <HotReloadToggle hotReload={hotReload} setHotReload={setHotReload}/>
-                        </Box>
+                        <Frame elevation={12}>
+                            <WgpuToy
+                                parentWidth={renderNodeWidth}
+                                code={code}
+                                play={play}
+                                setPlay={setPlay}
+                                reset={reset}
+                                setReset={setReset}
+                                hotReload={hotReload}
+                                manualReload={manualReload}
+                                setManualReload={setManualReload}
+                                setError={setParseError}
+                                sliderRefMap={sliderRefMap}
+                                loadedTextures={loadedTextures}
+                                setEntryPoints={setEntryPoints}
+                                bindID={"editor-canvas"}
+                                style={{
+                                    display: 'inline-block',
+                                    borderRadius: '4px'
+                                }}
+                            />
+                        </Frame>
+                        <PlayPauseButton play={play} setPlay={setPlay} />
+                        <ResetButton reset={reset} setReset={setReset} />
+                        <Accordion sx={{color: theme.palette.dracula.foreground, backgroundColor: theme.palette.primary.darker}}>
+                            <AccordionSummary
+                                sx={{fontSize: 14}}
+                                expandIcon={<ExpandMoreIcon sx={{color: theme.palette.dracula.foreground}}/>}
+                                aria-controls="uniform-accordion"
+                                id="uniform-accordion"
+                            >Uniforms</AccordionSummary>
+                            <AccordionDetails sx={{padding: "0px 2px 8px"}}>
+                                <UniformSliders
+                                    sliderRefMap={sliderRefMap}
+                                    setSliderRefMap={setSliderRefMap}
+                                />
+                            </AccordionDetails>
+                        </Accordion>
                     </Item>
-                        <TexturePicker loadedTextures={loadedTextures} setLoadedTextures={setLoadedTextures}/>
+                </Grid>
+                <Grid item ref={monacoNodeRef} xs={9} md={8} lg={7} xl={6}>
+                <Item>
+                    <Monaco
+                        code={code}
+                        setCode={setCode}
+                        parentWidth={monacoNodeWidth}
+                        editorOptions={{
+                            stopRenderingLineAfter: 1000,
+                            fontFamily: "'Fira Code', monospace",
+                            //fontLigatures: true,
+                        }}
+                        parseError={parseError}
+                    />
+                    <Box sx={{paddingTop: "4px"}}>
+                        <ReloadButton hotReload={hotReload} setManualReload={setManualReload}/>
+                        <HotReloadToggle hotReload={hotReload} setHotReload={setHotReload}/>
+                    </Box>
+                </Item>
+                    <Grid container spacing={2}>
+                        <Grid item><TexturePicker loadedTextures={loadedTextures} setLoadedTextures={setLoadedTextures}/></Grid>
+                        <Grid item><EntryPointDisplay entryPoints={entryPoints}/></Grid>
                     </Grid>
                 </Grid>
-            </Box>
-        </ThemeProvider>
+            </Grid>
+        </Box>
     );
 }
 

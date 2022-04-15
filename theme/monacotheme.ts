@@ -1,5 +1,5 @@
-import { theme } from "../theme/theme";
-import "../theme/themeModule";
+import { theme } from "./theme";
+import "./themeModule";
 
 export const defineMonacoTheme = (monaco, name: string) => {
 
