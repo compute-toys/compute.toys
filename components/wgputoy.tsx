@@ -212,15 +212,15 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
 
     updateUniforms() {
         if (this.props.sliderRefMap) {
-            let names = [];
-            let values = [];
+            let names: string[] = [];
+            let values: number[] = [];
             [...this.props.sliderRefMap.keys()].map(uuid => {
                 if (this.props.sliderRefMap.get(uuid)) {
                     names.push(this.props.sliderRefMap.get(uuid).current.getUniform());
                     values.push(this.props.sliderRefMap.get(uuid).current.getVal());
                 }
             }, this);
-            if (names.length > 0) this.state.wgputoy.set_custom_floats(names, values);
+            if (names.length > 0) this.state.wgputoy.set_custom_floats(names, Float32Array.from(values));
         }
     }
 
