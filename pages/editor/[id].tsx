@@ -85,8 +85,14 @@ const Index = () => {
                 octokit.rest.gists.get({
                     gist_id: router.query.id
                 }).then(r => {
+                    console.log(r.data);
+                    const title = r.data.description;
                     const files = Object.keys(r.data.files);
-                    const content = r.data.files[files[0]].content;
+                    const wgsl = files.filter(f => f.endsWith('wgsl'))[0];
+                    const license = r.data.files.LICENSE;
+                    let content = r.data.files[wgsl].content;
+                    if (title) document.title = title;
+                    if (license) content = '/*** BEGIN LICENSE ***\n' + license.content + '\n*** END LICENSE ***/\n\n\n' + content;
                     setCode(content);
                     setManualReload(true);
                 });

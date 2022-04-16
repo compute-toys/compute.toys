@@ -16,6 +16,7 @@ export default function Home() {
           <li><Link href="/editor/53a3829482e4bce3f8329f19f1641f4c">Caustics</Link></li>
           <li><Link href="/editor/5f9677a0ccfbd63d7a8657ad9af3a856">Hash without sine</Link></li>
           <li><Link href="/editor/ab237d17e5cdc3759e25c6b4dc1a73aa">Texture colorspace projection</Link></li>
+          <li><Link href="/editor/ebd53bc4d99f8edd63b623ef0439d10c">Simplex Noise</Link></li>
         </ul>
       </main>
 
