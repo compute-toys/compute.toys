@@ -21,11 +21,17 @@ const DraggablePicker = (props) => {
 
     return (
         <Draggable nodeRef={nodeRef} bounds="body" positionOffset={{x:'0',y:'0'}}>
-            <Item ref={nodeRef} sx={props.hidden ? {display: 'none'} : {
-                display: 'inline-block',
-                position: 'fixed',
-                left: '12%',
-                top: '12%'}}
+            <Item ref={nodeRef} elevation={12}
+                  sx={
+                      props.hidden ? {display: 'none'} :
+                      {
+                          zIndex: '2',
+                          display: 'inline-block',
+                          position: 'fixed',
+                          left: '12%',
+                          top: '12%'
+                      }
+                  }
             >
                 <div style={{display: 'flex', justifyContent: 'end',
                     backgroundImage: 'repeating-linear-gradient(-45deg, rgba(255,255,255, 0.25), rgba(255,255,255, 0.25) 2px, transparent 1px, transparent 6px)',

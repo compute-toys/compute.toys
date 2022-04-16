@@ -100,22 +100,31 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
     componentDidMount() {
         init_wgpu(this.props.bindID).then(ctx => {
             this.setState({wgputoy: new WgpuToyRenderer(ctx)});
-            this.state.wgputoy.on_error(this.handleError.bind(this));
-            this.state.wgputoy.on_success(this.handleSuccess.bind(this));
-            this.updateDimensions();
-
-            // this is the only place we want to set play manually, otherwise it's UI-driven
-            this.play(0);
         });
-        document.addEventListener('keydown', this.handleKeyDown.bind(this));
-        document.addEventListener('keyup', this.handleKeyUp.bind(this));
     }
 
     componentWillUnmount() {
         this.pause();
     }
 
+    init() {
+        this.state.wgputoy.on_error(this.handleError.bind(this));
+        this.state.wgputoy.on_success(this.handleSuccess.bind(this));
+        document.addEventListener('keydown', this.handleKeyDown.bind(this));
+        document.addEventListener('keyup', this.handleKeyUp.bind(this));
+
+        this.updateDimensions();
+
+        // this is the only place we want to set play manually, otherwise it's UI-driven
+        this.play(0);
+    }
+
     componentDidUpdate(prevProps, prevState) {
+        // the context *just* initialized
+        if (this.state.wgputoy !== prevState.wgputoy) {
+            this.init();
+        }
+        // the context is initialized
         if (this.state.wgputoy) { //needed in race-y circumstances
 
             // if code changed and we're hot reloading, or
@@ -125,6 +134,7 @@ export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState>
                 || (this.props.hotReload && !prevProps.hotReload)
                 || (this.props.manualReload)
             ) {
+                console.log("setting shader");
                 this.setShader(this.props.code);
                 this.props.setManualReload(false);
             }

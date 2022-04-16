@@ -6,6 +6,7 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import {getRainbowColor, Item} from '../theme/theme';
+import {Skeleton} from "@mui/material";
 
 export default function EntryPointDisplay(props) {
     return (
@@ -20,6 +21,9 @@ export default function EntryPointDisplay(props) {
                         <TimelineContent color={getRainbowColor(index)}>{entryPoint}</TimelineContent>
                     </TimelineItem>
                 ))}
+                {props.entryPoints.length === 0 ? <Skeleton variant="rectangular"
+                                                            width={128}
+                                                            height={100}/> : null}
             </Timeline>
         </Item>
     );
