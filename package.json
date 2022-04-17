@@ -2,7 +2,6 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild" : "npm link ../pkg",
     "build": "next build",
     "start": "next start"
   },
@@ -24,9 +23,7 @@
     "react-draggable": "^4.4.4",
     "sharp": "^0.30.3",
     "uuid": "^8.3.2",
-    "wgputoy": "file:../pkg",
-    "@types/node": "^17.0.23",
-    "typescript": "^4.6.3"
+    "wgputoy": "file:../pkg"
   },
   "devDependencies": {
     "@types/node": "^17.0.23",
