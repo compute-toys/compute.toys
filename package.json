@@ -2,6 +2,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild" : "npm link ../pkg",
     "build": "next build",
     "start": "next start"
   },
