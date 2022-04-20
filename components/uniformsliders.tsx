@@ -8,6 +8,8 @@ import React from "react";
 import {styled} from "@mui/system";
 import {getRainbowColor, theme} from "../theme/theme";
 import { v4 as UUID } from 'uuid';
+import {sliderRefMapAtom} from "../lib/atoms";
+import {useAtom} from "jotai";
 
 
 export interface UniformSliderRef {
@@ -100,7 +102,7 @@ CustomTextField.displayName = "CustomTextField";
 const UniformSlider = (props: UniformSliderProps) => {
 
     const [sliderVal, setSliderVal] = useState(0);
-    const [sliderUniform, setSliderUniform] = useState("Uniform");
+    const [sliderUniform, setSliderUniform] = useState("uniform_" + props.index);
 
     const sliderRef = useRef<UniformSliderRef>();
     const inputRef = useRef<HTMLInputElement>();
@@ -177,14 +179,15 @@ const UniformSlider = (props: UniformSliderProps) => {
     );
 };
 
-export const UniformSliders = (props) => {
+export const UniformSliders = () => {
     const theme = useTheme();
 
     // recommended pattern for forcing an update with a simple counter
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
+    const [sliderRefMap, setSliderRefMap] = useAtom(sliderRefMapAtom);
 
     const sliderRefCallback = (ref) => {
-        ref && props.setSliderRefMap(props.sliderRefMap.set(ref.current.getUUID(), ref)); // set returns 'this'
+        ref && setSliderRefMap(sliderRefMap.set(ref.current.getUUID(), ref)); // set returns 'this'
     };
 
     /*
@@ -194,19 +197,19 @@ export const UniformSliders = (props) => {
         whenever one slider changes
      */
     const deleteCallback = (uuid) => {
-        props.setSliderRefMap( sliderArrayRefs => {sliderArrayRefs.delete(uuid); return sliderArrayRefs} );
+        setSliderRefMap( sliderArrayRefs => {sliderArrayRefs.delete(uuid); return sliderArrayRefs} );
         forceUpdate();
     };
 
     const addCallback = (uuid) => {
-        uuid && props.setSliderRefMap(props.sliderRefMap.set(uuid, null));
+        uuid && setSliderRefMap(sliderRefMap.set(uuid, null));
         forceUpdate();
     };
 
     return (
         <Box>
             <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
-                {[...props.sliderRefMap.keys()].map((uuid, index) => (
+                {[...sliderRefMap.keys()].map((uuid, index) => (
                     <UniformSlider key={uuid} uuid={uuid} index={index} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
                 ))}
             </Stack>

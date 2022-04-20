@@ -1,267 +1,46 @@
-import React, {CSSProperties, Dispatch, MutableRefObject, SetStateAction} from "react";
-import { WgpuToyRenderer, init_wgpu } from "wgputoy";
-import {ParseError} from "./parseerror";
-import {UniformSliderRef} from "./uniformsliders";
-import {LoadedTextures} from "./texturepicker";
-import { Fragment } from "react";
+import React, {
+    Fragment,
+    useCallback, useState,
+} from "react";
+
+import {useUpdateAtom} from "jotai/utils";
+import {canvasElAtom, canvasParentElAtom, wgputoyAtom} from "../lib/wgputoyatoms";
+import dynamic from "next/dynamic";
+import {useAtomValue} from "jotai";
 import {Skeleton} from "@mui/material";
+import {getDimensions} from "../lib/canvasdimensions";
 
-interface WgpuToyProps {
-    code: string,
-    bindID: string,
-    parentWidth: number,
-    style: CSSProperties,
-    play: boolean,
-    setPlay: Dispatch<SetStateAction<boolean>>
-    reset: boolean,
-    setReset: Dispatch<SetStateAction<boolean>>
-    hotReload: boolean
-    manualReload: boolean
-    setManualReload: Dispatch<SetStateAction<boolean>>
-    setError: Dispatch<SetStateAction<ParseError>>
-    loadedTextures: LoadedTextures,
-    sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>
-    setEntryPoints: Dispatch<SetStateAction<Array<String>>>
-}
+export const WgpuToyWrapper = (props) => {
+    const setCanvasEl = useUpdateAtom(canvasElAtom);
+    const [loaded, setLoaded] = useState(false);
+    const canvasParentEl = useAtomValue(canvasParentElAtom);
 
-interface MousePosition {
-    x: number,
-    y: number
-}
-
-interface Dimensions {
-    x: number,
-    y: number
-}
-
-interface WgpuToyState {
-    wgputoy: WgpuToyRenderer,
-    requestAnimationFrameID: number,
-    width: number,
-    mouse: MousePosition,
-    click: boolean
-}
-
-export default class WgpuToy extends React.Component<WgpuToyProps, WgpuToyState> {
-    constructor(props) {
-        super(props);
-        this.state = {
-            wgputoy: null,
-            requestAnimationFrameID: 0,
-            width: 0,
-            mouse: {x: 0, y: 0},
-            click: false
+    const canvasRef = useCallback(canvas => {
+        if (canvas) {
+            setCanvasEl(canvas);
         }
-        this.handleMouseDown = this.handleMouseDown.bind(this);
-        this.handleMouseUp = this.handleMouseUp.bind(this);
-        this.handleMouseMove = this.handleMouseMove.bind(this);
-    }
+    }, []);
 
-    handleMouseMove(e) {
-        this.setState({ mouse: {x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY }});
-    }
+    const onLoad = useCallback(() => {
+            setLoaded(true);
+    }, []);
 
-    handleMouseUp(e) {
-        this.setState({click: false});
-    }
+    // Nominally want to use lazy/Suspense here, but it's broken
+    const Controller = dynamic(() => import('./wgputoycontroller'), {ssr: false});
 
-    handleMouseDown(e) {
-        this.setState({click: true});
-    }
+    const dim = getDimensions(canvasParentEl ? canvasParentEl.offsetWidth : 256);
 
-    handleKeyDown(e) {
-        this.state.wgputoy.set_keydown(e.keyCode, true);
-    }
-
-    handleKeyUp(e) {
-        this.state.wgputoy.set_keydown(e.keyCode, false);
-    }
-
-    handleError(summary, row, col) {
-        this.props.setError(error => ({
-            summary: summary,
-            position: {row: Number(row), col: Number(col)},
-            success: false
-        }));
-    }
-
-    handleSuccess(entryPoints) {
-        this.props.setEntryPoints(entryPoints);
-    }
-
-    resetError() {
-        this.props.setError(error => ({
-            summary: undefined,
-            position: {row: undefined, col: undefined},
-            success: true
-        }));
-    }
-
-    componentDidMount() {
-        init_wgpu(this.props.bindID).then(ctx => {
-            this.setState({wgputoy: new WgpuToyRenderer(ctx)});
-        });
-    }
-
-    componentWillUnmount() {
-        this.pause();
-    }
-
-    init() {
-        this.state.wgputoy.on_error(this.handleError.bind(this));
-        this.state.wgputoy.on_success(this.handleSuccess.bind(this));
-        document.addEventListener('keydown', this.handleKeyDown.bind(this));
-        document.addEventListener('keyup', this.handleKeyUp.bind(this));
-
-        this.updateDimensions();
-
-        // this is the only place we want to set play manually, otherwise it's UI-driven
-        this.play(0);
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        // the context *just* initialized
-        if (this.state.wgputoy !== prevState.wgputoy) {
-            this.init();
-        }
-        // the context is initialized
-        if (this.state.wgputoy) { //needed in race-y circumstances
-
-            // if code changed and we're hot reloading, or
-            // hot reloading was just enabled, or
-            // user decided to manually reload
-            if ((this.props.hotReload && this.props.code !== prevProps.code)
-                || (this.props.hotReload && !prevProps.hotReload)
-                || (this.props.manualReload)
-            ) {
-                console.log("setting shader");
-                this.setShader(this.props.code);
-                this.props.setManualReload(false);
-            }
-
-            if (this.props.loadedTextures[0] !== prevProps.loadedTextures[0]) {
-                this.loadTexture(0, this.props.loadedTextures[0]);
-            }
-            if (this.props.loadedTextures[1] !== prevProps.loadedTextures[1]) {
-                this.loadTexture(1, this.props.loadedTextures[1]);
-            }
-
-            if (this.props.parentWidth !== prevProps.parentWidth) {
-                this.updateDimensions();
-            }
-
-            if (this.props.play !== prevProps.play) {
-                this.togglePlay();
-            }
-
-            if (this.props.reset && (this.props.reset !== prevProps.reset)) {
-                this.reset();
-            }
-
-            if (this.state.mouse !== prevState.mouse || this.state.click !== prevState.click) {
-                this.updateMouse();
-            }
-        }
-    }
-
-    getDimensions(parentWidth: number): Dimensions {
-        const baseIncrement = Math.max(Math.floor(parentWidth / 32)-1,1);
-        return {x: baseIncrement * 32, y: baseIncrement * 18};
-    }
-
-    // just an unconditional version of resize(),
-    // consider a dedicated approach for reset()
-    reset() {
-        const dimensions = this.getDimensions(this.props.parentWidth);
-        this.state.wgputoy.resize(dimensions.x, dimensions.y);
-        this.props.setReset(false);
-    }
-
-    updateMouse() {
-        this.state.wgputoy.set_mouse_click(this.state.click);
-        this.state.wgputoy.set_mouse_pos(this.state.mouse.x, this.state.mouse.y)
-    }
-
-    updateDimensions() {
-        const dimensions = this.getDimensions(this.props.parentWidth);
-        if (this.state.wgputoy && this.state && dimensions.x !== this.state.width) {
-            this.setState({width: dimensions.x});
-            this.state.wgputoy.resize(dimensions.x, dimensions.y);
-        }
-    }
-
-    setShader(_shader: string) {
-        this.resetError();
-        this.state.wgputoy.set_shader(_shader);
-    }
-
-    togglePlay() {
-        if (this.props.play) {
-            this.play(0);
-        } else {
-            this.pause();
-        }
-    }
-
-    play(time: DOMHighResTimeStamp) {
-        this.updateUniforms();
-        this.state.wgputoy.set_time_elapsed(time * 1e-3);
-        this.state.wgputoy.render();
-        this.setState({requestAnimationFrameID: requestAnimationFrame(this.play.bind(this))});
-    }
-
-    updateUniforms() {
-        if (this.props.sliderRefMap) {
-            let names: string[] = [];
-            let values: number[] = [];
-            [...this.props.sliderRefMap.keys()].map(uuid => {
-                if (this.props.sliderRefMap.get(uuid)) {
-                    names.push(this.props.sliderRefMap.get(uuid).current.getUniform());
-                    values.push(this.props.sliderRefMap.get(uuid).current.getVal());
-                }
-            }, this);
-            if (names.length > 0) this.state.wgputoy.set_custom_floats(names, Float32Array.from(values));
-        }
-    }
-
-    loadTexture(index: number, uri: string) {
-        fetch(uri).then(
-            response => {
-                if (!response.ok) {
-                    throw new Error('Failed to load image');
-                }
-                return response.blob();
-            }).then(b => b.arrayBuffer()).then(
-                data => {
-                    if (uri.match(/\.rgbe\.png/i)) {
-                        this.state.wgputoy.load_channel_rgbe(index, new Uint8Array(data))
-                    } else {
-                        this.state.wgputoy.load_channel(index, new Uint8Array(data))
-                    }
-                }
-            ).catch(error => console.error(error));
-    }
-
-    pause() {
-        cancelAnimationFrame(this.state.requestAnimationFrameID);
-    }
-
-    render() {
-        return (
-            <Fragment>
-                <canvas
-                    onMouseMove={this.handleMouseMove}
-                    onMouseDown={this.handleMouseDown}
-                    onMouseUp={this.handleMouseUp}
-                    onMouseLeave={this.handleMouseUp}
-                    id={this.props.bindID}
-                    style={this.state.wgputoy ? this.props.style : {position: "fixed", display: "hidden"}}
-                />
-                {this.state.wgputoy ?
-                    null : <Skeleton variant="rectangular"
-                                 width={this.getDimensions(this.props.parentWidth).x}
-                                 height={this.getDimensions(this.props.parentWidth).y}/>}
-            </Fragment>
-        );
-    }
-}
+    return (
+        <Fragment>
+            <canvas
+                ref={canvasRef}
+                id={props.bindID}
+                style={loaded ? props.style : {position: "fixed", display: "hidden"}}
+            />
+            {loaded ? null : <Skeleton variant="rectangular"
+                                 width={dim.x}
+                                 height={dim.y}/>}
+            <Controller onLoad={onLoad}/>
+        </Fragment>
+    );
+};

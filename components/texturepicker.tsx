@@ -7,12 +7,17 @@ import Draggable from 'react-draggable';
 import {Fragment, useRef, useState} from "react";
 import {DisabledByDefaultSharp} from "@mui/icons-material";
 import Image from 'next/image';
+import {useAtom, useAtomValue} from "jotai";
+import {loadedTexturesAtom} from "../lib/atoms";
+import {useUpdateAtom} from "jotai/utils";
 
 export interface LoadedTextures {
     [key: number]: string
 }
 
 const DraggablePicker = (props) => {
+    const setLoadedTextures = useUpdateAtom(loadedTexturesAtom);
+
     let size = 128;
 
     // Draggable needs this so React doesn't complain
@@ -46,7 +51,7 @@ const DraggablePicker = (props) => {
                     { defaultTextures.map((item, index) => (
                         <ImageListItem key={item.img + props.channel}
                             onClick={() => {
-                                props.setLoadedTextures(
+                                setLoadedTextures(
                                     prevLoadedTextures => {
                                         const newArr = [...prevLoadedTextures]; //shallow copy is fine for now
                                         newArr[props.channel] = item.img;
@@ -69,9 +74,11 @@ const DraggablePicker = (props) => {
     );
 }
 
-export default function TexturePicker(props) {
+export default function TexturePicker() {
     const [pickerHidden, setPickerHidden] = useState(true);
     const [pickerChannel, setPickerChannel] = useState(0);
+
+    const loadedTextures = useAtomValue(loadedTexturesAtom);
 
     let size = 128;
 
@@ -81,7 +88,7 @@ export default function TexturePicker(props) {
                 <ImageList sx={{width: size * 2, height: size, marginTop: "0px", marginBottom: "0px"}}
                            cols={2} rowHeight={size}
                 >
-                    { props.loadedTextures.map((img, index) => (
+                    { loadedTextures.map((img, index) => (
                         <ImageListItem
                             key={img + index}
                             onClick={() => {
@@ -104,7 +111,7 @@ export default function TexturePicker(props) {
                     ))}
                 </ImageList>
             </Item>
-            <DraggablePicker hidden={pickerHidden} setPickerHidden={setPickerHidden} channel={pickerChannel} setLoadedTextures={props.setLoadedTextures}/>
+            <DraggablePicker hidden={pickerHidden} setPickerHidden={setPickerHidden} channel={pickerChannel}/>
         </Fragment>
     );
 }

@@ -1,37 +1,31 @@
-import {Button, ToggleButton} from "@mui/material";
-import {Dispatch, FunctionComponent, SetStateAction} from "react";
+import {Button} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
 import {AcUnit, LocalFireDepartment} from "@mui/icons-material";
+import {useAtom, useAtomValue} from "jotai";
+import {hotReloadAtom} from "../lib/atoms";
 
-export type HotReloadProps = {
-    hotReload: boolean,
-    setHotReload: Dispatch<SetStateAction<boolean>>,
-}
-
-const HotColdIcon: FunctionComponent<HotReloadProps> = (props) => {
-    if (props.hotReload) {
+const HotColdIcon = () => {
+    const hotReload = useAtomValue(hotReloadAtom);
+    if (hotReload) {
         return <LocalFireDepartment/>; // flame
     } else {
         return <AcUnit/>; // snowflake
     }
 }
 
-export const HotReloadToggle: FunctionComponent<HotReloadProps> = (props) => {
+export const HotReloadToggle = () => {
+    const [hotReload, setHotReload] = useAtom(hotReloadAtom);
+
     const theme = useTheme();
-    let style;
-    if (props.hotReload) {
-        style = {color: theme.status.danger};
-    } else {
-        style = {color: theme.palette.neutral.main};
-    }
+
     return (
         <Button
             onClick={() => {
-                props.setHotReload(!props.hotReload);
+                setHotReload(!hotReload);
             }}
-            sx={style}
+            sx={hotReload ? {color: theme.status.danger} : {color: theme.palette.neutral.main}}
         >
-            <HotColdIcon {...props}/>
+            <HotColdIcon/>
         </Button>
     );
 }

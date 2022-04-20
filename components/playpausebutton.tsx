@@ -1,21 +1,19 @@
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import {Button} from "@mui/material";
-import {Dispatch, FunctionComponent, SetStateAction} from "react";
 import {useTheme} from "@mui/material/styles";
+import {useAtom, useAtomValue} from "jotai";
+import {playAtom} from "../lib/atoms";
 
-export type PlayPauseProps = {
-    play: boolean,
-    setPlay: Dispatch<SetStateAction<boolean>>,
+const PlayPauseIcon = () => {
+    const play = useAtomValue(playAtom);
+    return play ? <PauseCircleIcon /> : <PlayCircleOutlineIcon />;
 }
 
-export const PlayPauseButton: FunctionComponent<PlayPauseProps> = (props) => {
+export const PlayPauseButton = () => {
+    const [play, setPlay] = useAtom(playAtom);
     const theme = useTheme();
-    if (props.play) {
-        return <Button onClick={() => props.setPlay(false)} sx={{color: theme.palette.primary.contrastText}}><PauseCircleIcon /></Button>;
-    } else {
-        return <Button onClick={() => props.setPlay(true)} sx={{color: theme.palette.primary.light}}><PlayCircleOutlineIcon /></Button>;
-    }
+    return <Button onClick={() => setPlay(!play)} sx={play ? {color: theme.palette.primary.contrastText} : {color: theme.palette.primary.light}}><PlayPauseIcon /></Button>;
 }
 
 export default PlayPauseButton;

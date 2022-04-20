@@ -1,37 +1,33 @@
 import {Button} from "@mui/material";
-import {Dispatch, FunctionComponent, SetStateAction} from "react";
 import {useTheme} from "@mui/material/styles";
 import {PlayArrowRounded, PlayDisabledRounded} from "@mui/icons-material";
+import {useAtom, useAtomValue} from "jotai";
+import {hotReloadAtom, manualReloadAtom} from "../lib/atoms";
+import {useUpdateAtom} from "jotai/utils";
 
-export type ReloadProps = {
-    hotReload: boolean,
-    setManualReload: Dispatch<SetStateAction<boolean>>
-}
-
-const PlayIcon: FunctionComponent<ReloadProps> = (props) => {
-    if (props.hotReload) {
+const PlayIcon = () => {
+    const hotReload = useAtomValue(hotReloadAtom);
+    if (hotReload) {
         return <PlayDisabledRounded/>;
     } else {
         return <PlayArrowRounded/>;
     }
 }
 
-export const ReloadButton: FunctionComponent<ReloadProps> = (props) => {
+export const ReloadButton = () => {
+    const hotReload = useAtomValue(hotReloadAtom);
+    const setManualReload = useUpdateAtom(manualReloadAtom);
+
     const theme = useTheme();
-    let style;
-    if (props.hotReload) {
-        style = {color: theme.status.disabled};
-    } else {
-        style = {color: theme.palette.primary.light};
-    }
+
     return (
         <Button
             onClick={() => {
-                props.setManualReload(true);
+                setManualReload(true);
             }}
-            sx={style}
+            sx={hotReload ? {color: theme.status.disabled} : {color: theme.palette.primary.light}}
         >
-            <PlayIcon {...props}/>
+            <PlayIcon/>
         </Button>
     );
 }
