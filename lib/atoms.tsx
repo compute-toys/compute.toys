@@ -39,6 +39,9 @@ export const parseErrorAtom = atom<ParseError>({
     position: {row: 0, col: 0},
     success: true
 });
-export const loadedTexturesAtom = atom(["/textures/blank.png", "/textures/blank.png"]);
+export const loadedTexturesAtom = atom<{
+    img: string;
+    thumb?: string;
+}[]>([{img: '/textures/blank.png'}, {img: '/textures/blank.png'}]);
 export const entryPointsAtom = atom([]);
 export const sliderRefMapAtom = atom<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
