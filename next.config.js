@@ -9,11 +9,10 @@ const nextConfig = {
             asyncWebAssembly: true,
             layers: true
         };
-        if (isServer) {
+        if (isServer && !dev) {
             config.output.webassemblyModuleFilename = "chunks/[id].wasm";
             config.plugins.push(new WasmChunksFixPlugin());
         }
-
         return config;
     }
 };
