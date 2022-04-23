@@ -2,7 +2,6 @@ import React, {
     useCallback,
     useEffect
 } from "react";
-import {WgpuToyRenderer} from "wgputoy";
 
 import {atom, useAtom, useAtomValue} from "jotai";
 import {

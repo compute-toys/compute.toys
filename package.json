@@ -2,6 +2,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "cp -R ../pkg/. ./lib/wgputoy/",
     "build": "next build",
     "start": "next start"
   },
@@ -24,8 +25,7 @@
     "react-dom": "^18.0.0",
     "react-draggable": "^4.4.4",
     "sharp": "^0.30.3",
-    "uuid": "^8.3.2",
-    "wgputoy": "file:../pkg"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "^17.0.24",
