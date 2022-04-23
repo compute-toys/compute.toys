@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "predev": "cp -R ../pkg/. ./lib/wgputoy/",
     "dev": "next dev",
     "prebuild": "cp -R ../pkg/. ./lib/wgputoy/",
     "build": "next build",
