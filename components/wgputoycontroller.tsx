@@ -2,7 +2,6 @@ import React, {
     useCallback,
     useEffect
 } from "react";
-import {WgpuToyRenderer} from "wgputoy";
 
 import {atom, useAtom, useAtomValue} from "jotai";
 import {
@@ -125,8 +124,8 @@ const WgpuToyController = (props) => {
                     return response.blob();
                 }).then(b => b.arrayBuffer()).then(
                 data => {
-                    if (uri.match(/\.rgbe\.png/i)) {
-                        wgputoy.load_channel_rgbe(index, new Uint8Array(data))
+                    if (uri.match(/\.hdr/i)) {
+                        wgputoy.load_channel_hdr(index, new Uint8Array(data))
                     } else {
                         wgputoy.load_channel(index, new Uint8Array(data))
                     }
@@ -222,11 +221,11 @@ const WgpuToyController = (props) => {
     }, [reset]);
 
     useEffect(() => {
-        loadTexture(0, loadedTextures[0]);
+        loadTexture(0, loadedTextures[0].img);
     }, [loadedTextures[0]]);
 
     useEffect(() => {
-        loadTexture(1, loadedTextures[1]);
+        loadTexture(1, loadedTextures[1].img);
     }, [loadedTextures[1]]);
 
     return null;

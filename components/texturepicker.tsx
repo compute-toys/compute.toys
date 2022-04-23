@@ -54,13 +54,13 @@ const DraggablePicker = (props) => {
                                 setLoadedTextures(
                                     prevLoadedTextures => {
                                         const newArr = [...prevLoadedTextures]; //shallow copy is fine for now
-                                        newArr[props.channel] = item.img;
+                                        newArr[props.channel] = item;
                                         return newArr; //returning a modified prevLoadedTextures will cause downstream effect checks to fail!
                                     })
                             }}>
                             <Image
                                 style={{borderRadius: '4px'}}
-                                src={item.img}
+                                src={item.thumb || item.img}
                                 alt={item.img}
                                 width={size}
                                 height={size}
@@ -88,9 +88,9 @@ export default function TexturePicker() {
                 <ImageList sx={{width: size * 2, height: size, marginTop: "0px", marginBottom: "0px"}}
                            cols={2} rowHeight={size}
                 >
-                    { loadedTextures.map((img, index) => (
+                    { loadedTextures.map((item, index) => (
                         <ImageListItem
-                            key={img + index}
+                            key={item.img + index}
                             onClick={() => {
                                 setPickerChannel(index);
                                 setPickerHidden(!pickerHidden)
@@ -98,7 +98,7 @@ export default function TexturePicker() {
                         >
                             <Image
                                 style={{borderRadius: '4px'}}
-                                src={img}
+                                src={item.thumb || item.img}
                                 alt={"Channel " + index + " texture"}
                                 width={size}
                                 height={size}
@@ -140,5 +140,5 @@ const defaultTextures = [
     {img: '/textures/noise2.png'},
     {img: '/textures/noise3.png'},
     {img: '/textures/noise4.png'},
-    {img: '/textures/spruit_sunrise_2k.rgbe.png'}, // https://polyhaven.com/a/spruit_sunrise
+    {img: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/spruit_sunrise_2k.hdr', thumb: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/spruit_sunrise.jpg'}, // https://polyhaven.com/a/spruit_sunrise
 ];

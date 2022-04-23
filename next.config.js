@@ -4,6 +4,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
+    images: {
+        domains: ['dl.polyhaven.org'],
+    },
     webpack(config, { isServer, dev }) {
         config.experiments = {
             asyncWebAssembly: true,
