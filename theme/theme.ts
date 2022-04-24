@@ -3,21 +3,7 @@ import Paper from "@mui/material/Paper";
 import "./themeModule";
 import createPalette from "@mui/material/styles/createPalette";
 import "firacode";
-
-export const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.primary.darker,
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-}));
-
-export const Frame = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.primary.darker,
-    justifyContent: 'center',
-    display: 'inline-flex',
-    borderRadius: '4px'
-}));
+import {TextField} from "@mui/material";
 
 export const theme = createTheme({
     typography: {
@@ -55,12 +41,51 @@ export const theme = createTheme({
             red:        '#ff5555',
             yellow:     '#f1fa8c',
         },
+        text: {
+            primary: '#f8f8f2',
+            secondary: '#6272a4'
+        },
         background: {
-            default: '#101010'
+            default: '#101010',
+            paper: '#1e1e1e'
         },
         neutral: {
             main: '#AAD2E6',
             contrastText: '#F7CE5B',
+        },
+    },
+});
+
+// These MUST be declared outside component, or wrapped as a JSX.Element
+// Otherwise rerender is triggered every time.
+export const Item = styled(Paper)(({ theme }) => ({
+    backgroundColor: theme.palette.primary.darker,
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+}));
+
+export const Frame = styled(Paper)(({ theme }) => ({
+    backgroundColor: theme.palette.primary.darker,
+    justifyContent: 'center',
+    display: 'inline-flex',
+    borderRadius: '4px'
+}));
+
+export const CssTextField = styled(TextField)({
+    '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+            borderColor: theme.palette.dracula.currentLine,
+        },
+        '&:hover fieldset': {
+            borderColor: theme.palette.dracula.currentLine,
+        },
+        '&.Mui-focused fieldset': {
+            borderColor: theme.palette.dracula.foreground,
+        },
+        '&.Mui-focused input': {
+            color: theme.palette.dracula.foreground,
         },
     },
 });

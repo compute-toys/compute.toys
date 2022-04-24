@@ -1,7 +1,8 @@
-import {atom} from 'jotai';
+import {atom, useAtom} from 'jotai';
 import {ParseError} from "./parseerror";
 import React, {useState} from "react";
 import {UniformSliderRef} from "../components/uniformsliders";
+import {UniformActiveSettings} from "./serializeshader";
 
 export const DEFAULT_SHADER = `
 @stage(compute) @workgroup_size(16, 16)
@@ -29,7 +30,12 @@ fn main_image(@builtin(global_invocation_id) id: uint3) {
 }
 `;
 
+export type Visibility = 'private' | 'unlisted' | 'public';
+
 export const codeAtom = atom<string>(DEFAULT_SHADER);
+export const titleAtom = atom<string>("New Shader");
+export const descriptionAtom = atom<string>("");
+export const visibilityAtom = atom<Visibility>("private");
 export const playAtom = atom<boolean>(true);
 export const resetAtom = atom<boolean>(false);
 export const hotReloadAtom = atom<boolean>(false);
@@ -45,3 +51,6 @@ export const loadedTexturesAtom = atom<{
 }[]>([{img: '/textures/blank.png'}, {img: '/textures/blank.png'}]);
 export const entryPointsAtom = atom([]);
 export const sliderRefMapAtom = atom<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
+
+export const sliderSerDeArrayAtom = atom<Array<UniformActiveSettings>>([]);
+export const sliderSerDeNeedsUpdateAtom = atom<boolean>(false);

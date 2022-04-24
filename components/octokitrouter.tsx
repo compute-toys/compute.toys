@@ -1,12 +1,23 @@
 import {useRouter} from "next/router";
 import React from "react";
 import {Octokit} from "@octokit/rest";
-import {codeAtom, DEFAULT_SHADER, manualReloadAtom} from "../lib/atoms";
+import {
+    codeAtom,
+    DEFAULT_SHADER,
+    descriptionAtom,
+    manualReloadAtom,
+    titleAtom,
+    Visibility,
+    visibilityAtom
+} from "../lib/atoms";
 import {useUpdateAtom} from "jotai/utils";
 
 export const useOctokitRouter = () => {
     const setCode = useUpdateAtom(codeAtom);
     const setManualReload = useUpdateAtom(manualReloadAtom);
+    const setTitle = useUpdateAtom(titleAtom);
+    const setDescription = useUpdateAtom(descriptionAtom);
+    const setVisibility = useUpdateAtom(visibilityAtom);
 
     const router = useRouter();
     React.useEffect(() => {
@@ -14,6 +25,10 @@ export const useOctokitRouter = () => {
             if (router.query.id === 'new') {
                 setCode(DEFAULT_SHADER);
                 setManualReload(true);
+                setTitle("New Shader");
+                setDescription("");
+                setVisibility("private" as Visibility);
+                document.title = "New Shader";
             } else {
                 const octokit = new Octokit();
                 octokit.rest.gists.get({
@@ -29,6 +44,9 @@ export const useOctokitRouter = () => {
                     if (license) content = '/*** BEGIN LICENSE ***\n' + license.content + '\n*** END LICENSE ***/\n\n\n' + content;
                     setCode(content);
                     setManualReload(true);
+                    setTitle(title);
+                    setDescription("");
+                    setVisibility("private" as Visibility);
                 });
             }
         }

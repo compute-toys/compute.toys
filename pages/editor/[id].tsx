@@ -26,6 +26,8 @@ import EntryPointDisplay from "../../components/entrypointdisplay";
 import {useOctokitRouter} from "../../components/octokitrouter";
 import {canvasParentElAtom} from "../../lib/wgputoyatoms";
 import {useUpdateAtom} from "jotai/utils";
+import LoginModal from "../../components/loginmodal";
+import {MetadataEditor} from "../../components/metadataeditor";
 
 const Index = () => {
 
@@ -41,6 +43,7 @@ const Index = () => {
 
     return (
         <Box sx={{ flexGrow: 1 }}>
+            <LoginModal/>
             <Grid container spacing={2}>
                 <Grid item ref={renderParentNodeRef} xs={3} md={4} lg={5} xl={6}>
                     <Item>
@@ -67,6 +70,7 @@ const Index = () => {
                             </AccordionDetails>
                         </Accordion>
                     </Item>
+                    <MetadataEditor/>
                 </Grid>
                 <Grid item xs={9} md={8} lg={7} xl={6}>
                 <Item>
