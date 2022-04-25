@@ -8,7 +8,7 @@ import {UpdateProfile} from "../components/updateprofile";
 
 export default function App({ Component, pageProps }: AppProps) {
     return (
-        <AuthProvider supabase={supabase}>
+        <AuthProvider>
         <ThemeProvider theme={theme}>
             <CssBaseline/>
             <UpdateProfile/>

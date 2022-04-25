@@ -1,6 +1,8 @@
 // https://www.misha.wtf/blog/nextjs-supabase-auth
 import {ChangeEvent, createContext, useContext, useEffect, useState} from 'react';
 import {supabase} from "./supabaseclient";
+import {useAtom, useAtomValue} from "jotai";
+import {profileAtom, sessionAtom, userAtom, viewAtom} from "./loginatoms";
 
 export const EVENTS = {
     SIGNED_IN: 'SIGNED_IN',
@@ -9,42 +11,21 @@ export const EVENTS = {
     TOKEN_REFRESHED: 'TOKEN_REFRESHED'
 };
 
-export const VIEWS = {
-    LOGGED_IN: 'logged_in',
-    LOGGED_OUT: 'logged_out'
-};
 
 export const AuthContext = createContext(undefined);
 
-export const AuthProvider = ({ supabase, ...props }) => {
-    const [session, setSession] = useState(null);
-    const [user, setUser] = useState(null);
-    const [view, setView] = useState(VIEWS.LOGGED_OUT);
-    const [username, setUsername] = useState(null);
-    const [avatar, setAvatar] = useState(null);
+export const AuthProvider = ({ ...props }) => {
+    const [session, setSession] = useAtom(sessionAtom);
+    const user = useAtomValue(userAtom);
+    const view = useAtomValue(viewAtom);
+    const profile = useAtomValue(profileAtom);
 
-    const checkUsername = async () => {
-        if (view === VIEWS.LOGGED_OUT) {
-            setUsername(null);
-            setAvatar(null);
-            return;
-        }
-        try {
-            let { data, error, status } = await supabase
-                .from('profile')
-                .select(`username, avatar_url`)
-                .eq('id', user.id)
-                .single();
-            if ((error && status !== 406) || !data) {
-                setUsername(null);
-                setAvatar(null);
-            } else {
-                setUsername(data.username);
-                setAvatar(data.avatar_url);
-            }
-        } catch (error) {}
-    }
+    useEffect(() => {
+        // attempt to get the session
+        setSession(true);
+    })
 
+    /*
     useEffect(() => {
         const activeSession = supabase.auth.session();
         const user = activeSession?.user;
@@ -78,18 +59,17 @@ export const AuthProvider = ({ supabase, ...props }) => {
 
     useEffect(() => {
         checkUsername();
-    }, [view])
+    }, [view])*/
 
     return (
         <AuthContext.Provider
-            value={{
-                user: user,
-                view: view,
-                session: session,
-                logOut: () => supabase.auth.signOut(),
-                username: username,
-                avatar: avatar
-            }}
+            value={[
+                user,
+                view,
+                session,
+                () => setSession(false),
+                profile
+            ]}
             {...props}
         />
     );

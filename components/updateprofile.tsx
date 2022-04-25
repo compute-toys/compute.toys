@@ -1,18 +1,19 @@
 import {ChangeEvent, Fragment, useEffect, useState} from "react";
 import {supabase} from "../lib/supabaseclient";
-import {useAuth, VIEWS} from "../lib/authcontext";
+import {useAuth} from "../lib/authcontext";
 import {Button, Modal, Stack, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
 import Avatar from "./avatar";
 import UploadButton from "./uploadbutton";
 import {CssTextField, Item, theme} from "../theme/theme";
+import {VIEWS} from "../lib/loginatoms";
 
 export const UpdateProfile = () => {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [avatar, setAvatar] = useState(null);
     const [username, setUsername] = useState(null);
-    const {user, view, session, logOut, authUsername, authAvatar} = useAuth();
+    const [user, view, session, logOut, profile] = useAuth();
     const [openProfileModal, setOpenProfileModal] = useState(false);
 
     const [usernameEditor, setUsernameEditor] = useState(null);
@@ -124,21 +125,21 @@ export const UpdateProfile = () => {
     }
 
     useEffect(() => {
-        if (view === VIEWS.LOGGED_IN && authUsername === null) {
+        if (view === VIEWS.LOGGED_IN && !profile.username) {
             checkUsername().then((username) => {
                 if (username === null) {
                     setOpenProfileModal(true);
                 }
             });
         } else if (view === VIEWS.LOGGED_IN) {
-            if (authUsername !== null) {
-                setUsername(authUsername);
+            if (profile.username) {
+                setUsername(profile.username);
             }
-            if (authAvatar !== null) {
-                setAvatar(authAvatar);
+            if (profile.avatar) {
+                setAvatar(profile.avatar);
             }
         }
-    }, [view, authUsername])
+    }, [view, profile.username, profile.avatar])
 
     const style = {
         position: 'absolute' as 'absolute',
