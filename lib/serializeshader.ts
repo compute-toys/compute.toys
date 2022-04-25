@@ -1,4 +1,4 @@
-import {atom, useAtom, useAtomValue} from "jotai";
+import {useAtom} from "jotai";
 import {
     codeAtom,
     descriptionAtom,
@@ -26,7 +26,7 @@ export interface ShaderActiveSettings {
 }
 
 export type HOST_GET = (id: number) => Promise<void>;
-export type HOST_CREATE = () => Promise<number>;
+export type HOST_CREATE = () => Promise<number | null>;
 export type HOST_UPDATE = (id: number) => Promise<void>;
 
 export default function useShaderSerDe(): [HOST_GET, HOST_CREATE, HOST_UPDATE] {
@@ -39,59 +39,96 @@ export default function useShaderSerDe(): [HOST_GET, HOST_CREATE, HOST_UPDATE] {
     const [visibility, setVisibility] = useAtom(visibilityAtom);
 
     const get = async (id: number) => {
-        const res = await supabase
-            .from<definitions["shader"]>('shader')
-            .select('*')
-            .eq("id", id);
-        const shader = res.data[0];
-        setTitle(shader.name);
-        setDescription(shader.description);
-        setVisibility(shader.visibility);
+        try {
+            let {data, error, status} = await supabase
+                .from<definitions["shader"]>('shader')
+                .select('*')
+                .eq("id", id)
+                .single();
 
-        const body = JSON.parse(shader.body);
+            if (error && status !== 406) {
+                throw error;
+            }
 
-        const shaderActiveSettings: ShaderActiveSettings = {
-            code: JSON.parse(body.code),
-            uniforms: body.uniforms,
-            textures: body.textures
+            if (data) {
+                const shader = data;
+                setTitle(shader.name);
+                setDescription(shader.description);
+                setVisibility(shader.visibility);
+
+
+                const body = JSON.parse(shader.body);
+
+                const shaderActiveSettings: ShaderActiveSettings = {
+                    code: JSON.parse(body.code),
+                    uniforms: body.uniforms,
+                    textures: body.textures
+                }
+
+                setCode(shaderActiveSettings.code);
+                setLoadedTextures(shaderActiveSettings.textures);
+                setSliderSerDeArray(shaderActiveSettings.uniforms);
+                setSliderSerDeNeedsUpdateAtom(true);
+            }
+        } catch (error) {
+            alert(error.message);
         }
-
-        setCode(shaderActiveSettings.code);
-        setLoadedTextures(shaderActiveSettings.textures);
-        setSliderSerDeArray(shaderActiveSettings.uniforms);
-        setSliderSerDeNeedsUpdateAtom(true);
     };
 
     const create = async () => {
-        const res = await supabase
-            .from<definitions["shader"]>('shader')
-            .insert([{
-                name: title,
-                description: description,
-                visibility: visibility,
-                body: JSON.stringify({
-                    code: JSON.stringify(code),
-                    uniforms: sliderSerDeArray,
-                    textures: loadedTextures
-                })
-            }]);
-        return res.data["id"];
+        try {
+            let {data, error, status} = await supabase
+                .from<definitions["shader"]>('shader')
+                .insert([{
+                    name: title,
+                    description: description,
+                    visibility: visibility,
+                    body: JSON.stringify({
+                        code: JSON.stringify(code),
+                        uniforms: sliderSerDeArray,
+                        textures: loadedTextures
+                    })
+                }]).single();
+
+            if (error && status !== 406) {
+                throw error;
+            }
+            if (data) {
+                return data["id"];
+            } else {
+                return null;
+            }
+
+        } catch (error) {
+            alert(error.message);
+            return null;
+        }
     };
 
     const update = async (id: number) => {
-        await supabase
-            .from<definitions["shader"]>('shader')
-            .update({
-                name: title,
-                description: description,
-                visibility: visibility,
-                body: JSON.stringify({
-                    code: JSON.stringify(code),
-                    uniforms: sliderSerDeArray,
-                    textures: loadedTextures
+        try {
+            // TODO: let supabase know we don't need the record
+            let {data, error, status} = await supabase
+                .from<definitions["shader"]>('shader')
+                .update({
+                    name: title,
+                    description: description,
+                    visibility: visibility,
+                    body: JSON.stringify({
+                        code: JSON.stringify(code),
+                        uniforms: sliderSerDeArray,
+                        textures: loadedTextures
+                    })
                 })
-            })
-            .eq('id', id);
+                .eq('id', id)
+                .single();
+
+            if (error && status !== 406) {
+                throw error;
+            }
+        } catch (error) {
+            alert(error.message);
+        }
     };
 
     return [get, create, update];

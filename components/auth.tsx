@@ -1,12 +1,11 @@
-import React, {Fragment, useContext, useState} from 'react'
+import React, {ChangeEvent, Fragment, useContext, useState} from 'react'
 import { supabase } from '../lib/supabaseclient'
 import {CssTextField, Item, theme} from "../theme/theme";
 import {Button, Typography} from "@mui/material";
-import {useAuth} from "../lib/authcontext";
 
 export default function Auth() {
-    const [loading, setLoading] = useState(false)
-    const [email, setEmail] = useState('')
+    const [loading, setLoading] = useState(false);
+    const [email, setEmail] = useState('');
 
     const handleLogin = async (email) => {
         try {

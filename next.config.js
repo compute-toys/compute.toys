@@ -5,7 +5,7 @@
 const nextConfig = {
     reactStrictMode: true,
     images: {
-        domains: ['dl.polyhaven.org'],
+        domains: ['dl.polyhaven.org', process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME]
     },
     webpack(config, { isServer, dev }) {
         config.experiments = {

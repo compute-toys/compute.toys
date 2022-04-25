@@ -28,6 +28,7 @@ import {canvasParentElAtom} from "../../lib/wgputoyatoms";
 import {useUpdateAtom} from "jotai/utils";
 import LoginModal from "../../components/loginmodal";
 import {MetadataEditor} from "../../components/metadataeditor";
+import {UpdateProfile} from "../../components/updateprofile";
 
 const Index = () => {
 

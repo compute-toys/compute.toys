@@ -1,10 +1,7 @@
-import React, {useEffect, useRef, useState} from "react";
-import Box from "@mui/material/Box";
-import {CssTextField, getRainbowColor, Item, theme} from "../theme/theme";
-import {Button, FormControl, Grid, InputBase, InputLabel, MenuItem, Select, Slider} from "@mui/material";
-import ClearIcon from "@mui/icons-material/Clear";
-import {UniformSliderRef} from "./uniformsliders";
-import {atom, useAtom} from "jotai";
+import {ChangeEvent} from "react";
+import {CssTextField, Item, theme} from "../theme/theme";
+import {FormControl, Grid, InputBase, InputLabel, MenuItem, Select, Slider} from "@mui/material";
+import {useAtom} from "jotai";
 import {descriptionAtom, titleAtom, Visibility, visibilityAtom} from "../lib/atoms";
 import {styled} from "@mui/material/styles";
 
@@ -34,12 +31,12 @@ export const MetadataEditor = (props) => {
                         size="medium"
                         label={"Title"}
                         value={title}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {setTitle(event.target.value)}}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => {setTitle(event.target.value)}}
                         sx={{
                             input: {color: theme.palette.dracula.red},
                             label: {color: theme.palette.dracula.red}
                         }}
-                        inputProps={{style: {fontSize: "1.5em", height: "1.0em"}}}
+                        inputProps={{style: {fontSize: "1.25em", height: "1.0em"}}}
                     />
                 </Grid>
                 <Grid item xs={4}>
@@ -51,7 +48,7 @@ export const MetadataEditor = (props) => {
                             value={visibility}
                             label="Visibility"
                             input={<VisibilityInput/>}
-                            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {setVisibility(event.target.value as Visibility)}}
+                            onChange={(event: ChangeEvent<HTMLInputElement>) => {setVisibility(event.target.value as Visibility)}}
                         >
                             <MenuItem value={'private'}>private</MenuItem>
                             <MenuItem value={'unlisted'}>unlisted</MenuItem>
@@ -69,7 +66,7 @@ export const MetadataEditor = (props) => {
                         label={"Description"}
                         value={description}
                         rows={3}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {setDescription(event.target.value)}}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => {setDescription(event.target.value)}}
                         sx ={{
                             input: {color: theme.palette.dracula.purple},
                             label: {color: theme.palette.dracula.purple}
