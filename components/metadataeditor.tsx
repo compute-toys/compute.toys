@@ -1,9 +1,14 @@
 import {ChangeEvent} from "react";
 import {CssTextField, Item, theme} from "../theme/theme";
-import {FormControl, Grid, InputBase, InputLabel, MenuItem, Select, Slider} from "@mui/material";
-import {useAtom} from "jotai";
+import {Button, FormControl, Grid, InputBase, InputLabel, MenuItem, Select} from "@mui/material";
+import {useAtom, useAtomValue} from "jotai";
 import {descriptionAtom, titleAtom, Visibility, visibilityAtom} from "../lib/atoms";
 import {styled} from "@mui/material/styles";
+import {
+    shadowCanvasElAtom,
+    shadowCanvasToDataUrl
+} from "./shadowcanvas";
+import {canvasElAtom} from "../lib/wgputoyatoms";
 
 const VisibilityInput = styled(InputBase)(({ theme }) => ({
     '& .MuiInputBase-input': {
@@ -16,10 +21,12 @@ const VisibilityInput = styled(InputBase)(({ theme }) => ({
     },
 }));
 
-export const MetadataEditor = (props) => {
+export const MetadataEditor = () => {
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
     const [visibility, setVisibility] = useAtom(visibilityAtom);
+    const shadowCanvasEl = useAtomValue(shadowCanvasElAtom);
+    const canvasEl = useAtomValue(canvasElAtom);
     return (
         <Item sx={{textAlign: "left", marginTop: "20px"}}>
             <Grid container spacing={2} sx={{padding: "10px"}}>
@@ -73,6 +80,13 @@ export const MetadataEditor = (props) => {
                         }}
                     />
                 </Grid>
+            </Grid>
+            <Grid item xs={8}></Grid>
+            <Grid item xs={4}>
+                <Button onClick={async () => {
+                    const str = await shadowCanvasToDataUrl(canvasEl, shadowCanvasEl);
+                    console.log(str);
+                }}>Save</Button>
             </Grid>
         </Item>
     );
