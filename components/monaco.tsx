@@ -43,7 +43,7 @@ const Monaco = (props) => {
     }
 
     return <Editor
-        height="40em" // preference
+        height="80vh" // preference
         language="wgsl"
         onChange={(value, _event) => {
             setCode(value)
