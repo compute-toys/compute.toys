@@ -18,6 +18,7 @@
     "@react-hook/resize-observer": "^1.2.5",
     "@react-hook/size": "^2.1.2",
     "@supabase/supabase-js": "^1.35.2",
+    "base64-arraybuffer": "^1.0.2",
     "depcheck": "^1.4.3",
     "firacode": "^6.2.0",
     "graphql": "^16.3.0",

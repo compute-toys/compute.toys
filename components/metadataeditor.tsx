@@ -2,13 +2,15 @@ import {ChangeEvent} from "react";
 import {CssTextField, Item, theme} from "../theme/theme";
 import {Button, FormControl, Grid, InputBase, InputLabel, MenuItem, Select} from "@mui/material";
 import {useAtom, useAtomValue} from "jotai";
-import {descriptionAtom, titleAtom, Visibility, visibilityAtom} from "../lib/atoms";
+import {descriptionAtom, shaderDataUrlThumbAtom, titleAtom, Visibility, visibilityAtom} from "../lib/atoms";
 import {styled} from "@mui/material/styles";
 import {
     shadowCanvasElAtom,
     shadowCanvasToDataUrl
 } from "./shadowcanvas";
 import {canvasElAtom} from "../lib/wgputoyatoms";
+import {useUpdateAtom} from "jotai/utils";
+import useShaderSerDe from "../lib/serializeshader";
 
 const VisibilityInput = styled(InputBase)(({ theme }) => ({
     '& .MuiInputBase-input': {
@@ -25,8 +27,21 @@ export const MetadataEditor = () => {
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
     const [visibility, setVisibility] = useAtom(visibilityAtom);
+    const setShaderDataUrlThumb = useUpdateAtom(shaderDataUrlThumbAtom);
     const shadowCanvasEl = useAtomValue(shadowCanvasElAtom);
     const canvasEl = useAtomValue(canvasElAtom);
+    const [getFromHost, upsertToHost] = useShaderSerDe();
+
+    //not the best place for this logic
+    const upsertShader = async () => {
+        const dataUrl = await shadowCanvasToDataUrl(canvasEl, shadowCanvasEl);
+
+        // we have the dataUrl "in hand," if we use an atom here
+        // we'll have to wait to roundtrip it, so pass it instead.
+        setShaderDataUrlThumb(dataUrl);
+        await upsertToHost(dataUrl);
+    }
+
     return (
         <Item sx={{textAlign: "left", marginTop: "20px"}}>
             <Grid container spacing={2} sx={{padding: "10px"}}>
@@ -84,8 +99,7 @@ export const MetadataEditor = () => {
             <Grid item xs={8}></Grid>
             <Grid item xs={4}>
                 <Button onClick={async () => {
-                    const str = await shadowCanvasToDataUrl(canvasEl, shadowCanvasEl);
-                    console.log(str);
+                    upsertShader();
                 }}>Save</Button>
             </Grid>
         </Item>

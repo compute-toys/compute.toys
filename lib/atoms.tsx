@@ -32,6 +32,7 @@ fn main_image(@builtin(global_invocation_id) id: uint3) {
 
 export type Visibility = 'private' | 'unlisted' | 'public';
 
+export const shaderIDAtom = atom<number | false>(false);
 export const codeAtom = atom<string>(DEFAULT_SHADER);
 export const titleAtom = atom<string>("New Shader");
 export const descriptionAtom = atom<string>("");
@@ -54,3 +55,5 @@ export const sliderRefMapAtom = atom<Map<string,React.MutableRefObject<UniformSl
 
 export const sliderSerDeArrayAtom = atom<Array<UniformActiveSettings>>([]);
 export const sliderSerDeNeedsUpdateAtom = atom<boolean>(false);
+
+export const shaderDataUrlThumbAtom = atom<string>("");

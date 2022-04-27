@@ -66,12 +66,12 @@ export const UpdateProfile = () => {
             }
 
             const fileExt = file.name.split('.').pop()
-            const fileName = `${user.id}${Math.random()}.${fileExt}`
+            const fileName = `${user.id}/avatar.${fileExt}`
             const filePath = `${fileName}`
 
             let { error: uploadError } = await supabase.storage
                 .from('avatar')
-                .upload(filePath, file)
+                .upload(filePath, file, {upsert: true})
 
             if (uploadError) {
                 setErrorMessage('Error uploading image: ' + uploadError.message);

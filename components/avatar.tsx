@@ -15,20 +15,6 @@ export default function Avatar({ url, size, displayOnNull}: { url: string | null
         }
     }, [url])
 
-    /* Don't do this for small files in public storage
-    async function downloadImage(path: string) {
-        try {
-            const { data, error } = await supabase.storage.from('avatar').download(path)
-            if (error) {
-                throw error
-            }
-            const url = URL.createObjectURL(data)
-            setAvatarUrl(url)
-        } catch (error) {
-            console.log('Error downloading image: ', error.message)
-        }
-    }*/
-
     const displayNull = typeof displayOnNull !== 'undefined' && displayOnNull;
 
     return avatarUrl ? (

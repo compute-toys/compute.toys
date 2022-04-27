@@ -5,6 +5,8 @@ import {atom} from "jotai";
 import {getDimensions} from "../lib/canvasdimensions";
 
 export const MAX_SHADOW_CANVAS_WIDTH = 700;
+// range from 0.0 to 1.0
+export const JPEG_IMAGE_QUALITY = 0.5;
 
 export const safeShadowCanvasContext = (canvas: HTMLCanvasElement | false, shadowCanvas: HTMLCanvasElement | false,
                                         callback: (canvas: HTMLCanvasElement, shadowCanvas: HTMLCanvasElement) => Promise<void>) : Promise<void> => {
@@ -69,7 +71,7 @@ export const shadowCanvasToDataUrl = async (canvasEl: HTMLCanvasElement | false,
     return safeShadowCanvasToDataContext(shadowCanvasEl,
         async (shadowCanvas) => {
             await copyToShadowCanvas(canvasEl, shadowCanvasEl);
-            return new Promise<string>(r => {r(shadowCanvas.toDataURL("image/jpeg", 0.5))});
+            return new Promise<string>(r => {r(shadowCanvas.toDataURL("image/jpeg", JPEG_IMAGE_QUALITY))});
         });
 }
 

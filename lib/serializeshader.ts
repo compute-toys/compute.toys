@@ -1,13 +1,18 @@
-import {useAtom} from "jotai";
+import {useAtom, useAtomValue} from "jotai";
 import {
     codeAtom,
     descriptionAtom,
-    loadedTexturesAtom,
+    loadedTexturesAtom, shaderDataUrlThumbAtom, shaderIDAtom, sliderRefMapAtom,
     sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom,
     titleAtom, visibilityAtom
 } from "./atoms";
 import {supabase} from "./supabaseclient";
 import {definitions} from "../types/supabase";
+import {withRouter} from "next/router";
+import React, {ChangeEvent} from "react";
+import {decode} from "base64-arraybuffer";
+import {useAuth} from "./authcontext";
+import {UniformSliderRef} from "../components/uniformsliders";
 
 export interface UniformActiveSettings {
     name: string,
@@ -25,13 +30,43 @@ export interface ShaderActiveSettings {
     textures: Array<TextureActiveSettings>
 }
 
-export type HOST_GET = (id: number) => Promise<void>;
-export type HOST_CREATE = () => Promise<number | null>;
-export type HOST_UPDATE = (id: number) => Promise<void>;
+export interface UpsertResult {
+    id: number | null;
+    needsRedirect: boolean;
+    success: boolean;
+    message?: string;
+}
 
-export default function useShaderSerDe(): [HOST_GET, HOST_CREATE, HOST_UPDATE] {
+const upsertResult = (id: number | null, needsRedirect: boolean, success: boolean, message?: string) : UpsertResult => {
+    return {
+        id: id,
+        needsRedirect: needsRedirect,
+        success: success,
+        message: message ?? undefined
+    };
+}
+
+export type HOST_GET = (id: number) => Promise<void>;
+export type HOST_UPSERT = (dataUrl: string) => Promise<UpsertResult>;
+
+const getSliderActiveSettings = (sliderRefMap: Map<string,React.MutableRefObject<UniformSliderRef>>) => {
+    // convert our map of references into a plain array of objects
+    return [...sliderRefMap.keys()].map((uuid) => {
+        return {
+            name: sliderRefMap[uuid].current.getUniform(),
+            value: sliderRefMap[uuid].current.getVal()
+        } as UniformActiveSettings;
+    })
+}
+
+export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
+    const [user, view, session, logOut, profile] = useAuth();
+    // the router is responsible for setting shader ID
+    const shaderID = useAtomValue(shaderIDAtom);
+
     const [code, setCode] = useAtom(codeAtom);
     const [loadedTextures, setLoadedTextures] = useAtom(loadedTexturesAtom);
+    const sliderRefMap = useAtomValue(sliderRefMapAtom);
     const [sliderSerDeArray, setSliderSerDeArray] = useAtom(sliderSerDeArrayAtom);
     const [sliderSerDeNeedsUpdate, setSliderSerDeNeedsUpdateAtom] = useAtom(sliderSerDeNeedsUpdateAtom);
     const [title, setTitle] = useAtom(titleAtom);
@@ -56,7 +91,6 @@ export default function useShaderSerDe(): [HOST_GET, HOST_CREATE, HOST_UPDATE] {
                 setDescription(shader.description);
                 setVisibility(shader.visibility);
 
-
                 const body = JSON.parse(shader.body);
 
                 const shaderActiveSettings: ShaderActiveSettings = {
@@ -75,7 +109,36 @@ export default function useShaderSerDe(): [HOST_GET, HOST_CREATE, HOST_UPDATE] {
         }
     };
 
-    const create = async () => {
+    const uploadThumb = async (id: number, dataUrl: string) => {
+        const fileExt = "jpg";
+        const fileName = `${user!.id}/${id}.${fileExt}`;
+
+        // convert to a format that the API likes by stripping the header
+        // TODO: make this less brittle
+        const buf = Buffer.from(dataUrl.replace('data:image/jpeg;base64,', ''), 'base64');
+        let { error: uploadError } = await supabase.storage
+            .from('shaderthumb')
+            .upload(fileName, buf,
+                {contentType: 'image/jpeg', upsert: true});
+        /*let { error: uploadError } = await supabase.storage
+            .from('shaderthumb')
+            .upload(fileName, decode(dataUrl),
+                {contentType: 'image/jpeg', upsert: true})*/
+
+        if (uploadError) {
+            throw uploadError
+        }
+
+        let { error: updateError } = await supabase.from('shader').update({
+            thumb_url: fileName,
+        }).eq('id', id)
+
+        if (updateError) {
+            throw updateError
+        }
+    }
+
+    const create = async (dataUrl: string) => {
         try {
             let {data, error, status} = await supabase
                 .from<definitions["shader"]>('shader')
@@ -85,7 +148,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_CREATE, HOST_UPDATE] {
                     visibility: visibility,
                     body: JSON.stringify({
                         code: JSON.stringify(code),
-                        uniforms: sliderSerDeArray,
+                        uniforms: getSliderActiveSettings(sliderRefMap),
                         textures: loadedTextures
                     })
                 }]).single();
@@ -93,19 +156,21 @@ export default function useShaderSerDe(): [HOST_GET, HOST_CREATE, HOST_UPDATE] {
             if (error && status !== 406) {
                 throw error;
             }
+
             if (data) {
-                return data["id"];
+                await uploadThumb(data["id"], dataUrl);
+                return upsertResult(data["id"], true, true);
             } else {
-                return null;
+                return upsertResult(null, false, false, "No data returned on creation");
             }
 
         } catch (error) {
             alert(error.message);
-            return null;
+            return upsertResult(null, false, false, error.message);
         }
     };
 
-    const update = async (id: number) => {
+    const update = async (id: number, dataUrl: string) => {
         try {
             // TODO: let supabase know we don't need the record
             let {data, error, status} = await supabase
@@ -116,7 +181,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_CREATE, HOST_UPDATE] {
                     visibility: visibility,
                     body: JSON.stringify({
                         code: JSON.stringify(code),
-                        uniforms: sliderSerDeArray,
+                        uniforms: getSliderActiveSettings(sliderRefMap),
                         textures: loadedTextures
                     })
                 })
@@ -126,10 +191,22 @@ export default function useShaderSerDe(): [HOST_GET, HOST_CREATE, HOST_UPDATE] {
             if (error && status !== 406) {
                 throw error;
             }
+
+            await uploadThumb(id, dataUrl);
+            return upsertResult(id, false, true);
         } catch (error) {
             alert(error.message);
+            return upsertResult(id, false, false, error.message);
         }
     };
 
-    return [get, create, update];
-};
+    const upsert = async (dataUrl: string) => {
+        if (shaderID) {
+            return update(shaderID, dataUrl);
+        } else {
+            return create(dataUrl);
+        }
+    }
+
+    return [get, upsert];
+}
