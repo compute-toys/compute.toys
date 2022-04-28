@@ -1,35 +1,33 @@
 // MUI sizing from refs:
 // https://github.com/mui/material-ui/issues/15662
 
-import Monaco from '../../components/monaco';
-import {WgpuToyWrapper} from "../../components/wgputoy";
+import Monaco from 'components/monaco';
+import {WgpuToyWrapper} from "components/wgputoy";
 
-import React, {useCallback} from 'react';
+import {useCallback} from 'react';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import PlayPauseButton from "../../components/playpausebutton"
-import ResetButton from "../../components/resetbutton";
-import HotReloadToggle from "../../components/hotreloadtoggle";
-import ReloadButton from "../../components/reloadbutton";
+import PlayPauseButton from "components/playpausebutton"
+import ResetButton from "components/resetbutton";
+import HotReloadToggle from "components/hotreloadtoggle";
+import ReloadButton from "components/reloadbutton";
 
-import { Frame, Item, theme } from "../../theme/theme";
-import {Accordion, AccordionDetails, AccordionSummary, CssBaseline, Typography} from "@mui/material";
+import { Frame, Item, theme } from "theme/theme";
+import {Accordion, AccordionDetails, AccordionSummary} from "@mui/material";
 
 import "firacode";
 
-import UniformSliders, {UniformSliderRef} from "../../components/uniformsliders";
-import TexturePicker, {LoadedTextures} from "../../components/texturepicker";
-import EntryPointDisplay from "../../components/entrypointdisplay";
-import {useOctokitRouter} from "../../components/octokitrouter";
-import {canvasParentElAtom} from "../../lib/wgputoyatoms";
+import UniformSliders from "components/uniformsliders";
+import TexturePicker from "components/texturepicker";
+import EntryPointDisplay from "components/entrypointdisplay";
+import {canvasParentElAtom} from "lib/wgputoyatoms";
 import {useUpdateAtom} from "jotai/utils";
-import LoginModal from "../../components/loginmodal";
-import {MetadataEditor} from "../../components/metadataeditor";
-import {UpdateProfile} from "../../components/updateprofile";
-import {useDBRouter} from "../../lib/dbrouter";
+import LoginModal from "components/loginmodal";
+import {MetadataEditor} from "components/metadataeditor";
+import {useDBRouter} from "lib/dbrouter";
 
 const Index = () => {
 

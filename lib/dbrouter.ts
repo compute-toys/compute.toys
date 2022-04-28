@@ -1,9 +1,8 @@
 import {useRouter} from "next/router";
-import React from "react";
-import {Octokit} from "@octokit/rest";
-import {codeAtom, DEFAULT_SHADER, manualReloadAtom, shaderIDAtom} from "./atoms";
+import {codeAtom, DEFAULT_SHADER, manualReloadAtom, shaderIDAtom} from "lib/atoms";
 import {useUpdateAtom} from "jotai/utils";
-import useShaderSerDe from "./serializeshader";
+import useShaderSerDe from "lib/serializeshader";
+import {useEffect} from "react";
 
 function toNumber(str) {
     if (!Number.isNaN(Number(str))) {
@@ -21,7 +20,7 @@ export const useDBRouter = () => {
     const [get, upsert] = useShaderSerDe();
 
     const router = useRouter();
-    React.useEffect(() => {
+    useEffect(() => {
         if (router.isReady && typeof router.query.id === 'string') {
             const id = toNumber(router.query.id);
             if (id) {

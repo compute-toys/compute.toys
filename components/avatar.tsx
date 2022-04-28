@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import {supabase, SUPABASE_AVATAR_BUCKET_NAME, SUPABASE_AVATAR_STORAGE_BUCKET_URL_POSTFIX} from '../lib/supabaseclient'
+import {SUPABASE_AVATAR_BUCKET_NAME} from 'lib/supabaseclient'
 import Image from 'next/image';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import {getFullyQualifiedSupabaseBucketURL} from "../lib/urlutils";
+import {getFullyQualifiedSupabaseBucketURL} from "lib/urlutils";
 
 export default function Avatar({ url, size, displayOnNull}: { url: string | null; size: number; displayOnNull?: boolean }) {
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null)

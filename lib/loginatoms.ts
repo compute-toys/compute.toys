@@ -1,7 +1,7 @@
 // Using 'false' here to satisfy type checker for Jotai's function overloads
 import {atom} from "jotai";
 import {Session, User} from "@supabase/gotrue-js";
-import {supabase, SUPABASE_PROFILE_TABLE_NAME} from "./supabaseclient";
+import {supabase, SUPABASE_PROFILE_TABLE_NAME} from "lib/supabaseclient";
 
 const isSSR = typeof window === "undefined";
 
@@ -15,16 +15,21 @@ export interface ProfileData {
     avatar: string | false
 }
 
-export const sessionAtom = atom<Promise<Session | false>, boolean, void>(
+export const sessionAtom = atom<Promise<Session | false>, boolean | Session, void>(
     new Promise<false>((resolve, reject) => resolve(false)),
     async (get, set, log_in) => {
         let session;
-        if (log_in) {
-            session = supabase.auth.session() ?? false;
+        if (typeof log_in === "boolean") {
+            if (log_in) {
+                session = supabase.auth.session() ?? false;
+            } else {
+                await supabase.auth.signOut();
+                session = false;
+            }
         } else {
-            await supabase.auth.signOut();
-            session = false;
+            session = log_in
         }
+
         set(sessionAtom, session);
     }
 );

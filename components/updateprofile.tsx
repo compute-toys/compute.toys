@@ -1,12 +1,12 @@
-import {ChangeEvent, Fragment, useEffect, useState} from "react";
-import {supabase} from "../lib/supabaseclient";
-import {useAuth} from "../lib/authcontext";
+import {ChangeEvent, useEffect, useState} from "react";
+import {supabase} from "lib/supabaseclient";
+import {useAuth} from "lib/authcontext";
 import {Button, Modal, Stack, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
-import Avatar from "./avatar";
-import UploadButton from "./uploadbutton";
-import {CssTextField, Item, theme} from "../theme/theme";
-import {VIEWS} from "../lib/loginatoms";
+import Avatar from "components/avatar";
+import UploadButton from "components/uploadbutton";
+import {CssTextField, Item, theme} from "theme/theme";
+import {VIEWS} from "lib/loginatoms";
 
 export const UpdateProfile = () => {
     const [loading, setLoading] = useState(false);

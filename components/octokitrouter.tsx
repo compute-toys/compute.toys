@@ -1,5 +1,4 @@
 import {useRouter} from "next/router";
-import React from "react";
 import {Octokit} from "@octokit/rest";
 import {
     codeAtom,
@@ -9,8 +8,9 @@ import {
     titleAtom,
     Visibility,
     visibilityAtom
-} from "../lib/atoms";
+} from "lib/atoms";
 import {useUpdateAtom} from "jotai/utils";
+import {useEffect} from "react";
 
 export const useOctokitRouter = () => {
     const setCode = useUpdateAtom(codeAtom);
@@ -20,7 +20,7 @@ export const useOctokitRouter = () => {
     const setVisibility = useUpdateAtom(visibilityAtom);
 
     const router = useRouter();
-    React.useEffect(() => {
+    useEffect(() => {
         if (router.isReady && typeof router.query.id === 'string') {
             if (router.query.id === 'new') {
                 setCode(DEFAULT_SHADER);

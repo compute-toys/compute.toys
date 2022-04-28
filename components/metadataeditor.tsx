@@ -1,8 +1,8 @@
 import {ChangeEvent} from "react";
-import {CssTextField, Item, theme} from "../theme/theme";
+import {CssTextField, Item, theme} from "theme/theme";
 import {Button, FormControl, Grid, InputBase, InputLabel, MenuItem, Select} from "@mui/material";
 import {useAtom, useAtomValue} from "jotai";
-import {descriptionAtom, shaderDataUrlThumbAtom, titleAtom, Visibility, visibilityAtom} from "../lib/atoms";
+import {descriptionAtom, shaderDataUrlThumbAtom, titleAtom, Visibility, visibilityAtom} from "lib/atoms";
 import {styled} from "@mui/material/styles";
 import {
     shadowCanvasElAtom,

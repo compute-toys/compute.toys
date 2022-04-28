@@ -1,7 +1,6 @@
 import { ChangeEventHandler } from 'react'
 import {Button, Fab} from "@mui/material";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
-import { theme } from '../theme/theme';
 
 export type UploadButtonProps = {
     onUpload: ChangeEventHandler<HTMLInputElement>

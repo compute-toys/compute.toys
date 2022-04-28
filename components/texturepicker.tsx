@@ -1,14 +1,13 @@
-import * as React from 'react';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
-import {Item, theme} from '../theme/theme';
+import {Item} from 'theme/theme';
 import Draggable from 'react-draggable';
 import {Fragment, useRef, useState} from "react";
 import {DisabledByDefaultSharp} from "@mui/icons-material";
 import Image from 'next/image';
-import {useAtom, useAtomValue} from "jotai";
-import {loadedTexturesAtom} from "../lib/atoms";
+import {useAtomValue} from "jotai";
+import {loadedTexturesAtom} from "lib/atoms";
 import {useUpdateAtom} from "jotai/utils";
 
 export interface LoadedTextures {

@@ -1,8 +1,4 @@
-import React, {
-    useCallback,
-    useEffect
-} from "react";
-
+import {useCallback, useEffect} from "react";
 import {atom, useAtom, useAtomValue} from "jotai";
 import {
     codeAtom, entryPointsAtom,
@@ -12,19 +8,18 @@ import {
     parseErrorAtom,
     playAtom,
     resetAtom, sliderRefMapAtom
-} from "../lib/atoms";
+} from "lib/atoms";
 import {useUpdateAtom} from "jotai/utils";
 import {
     canvasElAtom,
     canvasParentElAtom,
-    canvasParentSizeAtom,
     safeContext,
     safeContextWithCanvas,
     wgputoyAtom
-} from "../lib/wgputoyatoms";
+} from "lib/wgputoyatoms";
 import {useTransientAtom} from "jotai-game";
 import useResizeObserver from "@react-hook/resize-observer";
-import {getDimensions} from "../lib/canvasdimensions";
+import {getDimensions} from "lib/canvasdimensions";
 
 const requestAnimationFrameIDAtom = atom(0);
 const widthAtom = atom(0);

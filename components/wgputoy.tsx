@@ -1,14 +1,10 @@
-import React, {
-    Fragment,
-    useCallback, useState,
-} from "react";
-
+import {Fragment, useCallback, useState} from "react";
 import {useUpdateAtom} from "jotai/utils";
-import {canvasElAtom, canvasParentElAtom, wgputoyAtom} from "../lib/wgputoyatoms";
+import {canvasElAtom, canvasParentElAtom, wgputoyAtom} from "lib/wgputoyatoms";
 import dynamic from "next/dynamic";
 import {useAtomValue} from "jotai";
 import {Skeleton} from "@mui/material";
-import {getDimensions} from "../lib/canvasdimensions";
+import {getDimensions} from "lib/canvasdimensions";
 
 export const WgpuToyWrapper = (props) => {
     const setCanvasEl = useUpdateAtom(canvasElAtom);

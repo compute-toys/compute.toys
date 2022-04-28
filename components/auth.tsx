@@ -1,6 +1,6 @@
-import React, {ChangeEvent, Fragment, useContext, useState} from 'react'
-import { supabase } from '../lib/supabaseclient'
-import {CssTextField, Item, theme} from "../theme/theme";
+import {ChangeEvent, Fragment, useState} from 'react'
+import { supabase } from 'lib/supabaseclient'
+import {CssTextField, Item, theme} from "theme/theme";
 import {Button, Typography} from "@mui/material";
 
 export default function Auth() {
@@ -35,7 +35,7 @@ export default function Auth() {
                     size="small"
                     label={"Email"}
                     value={email}
-                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {setEmail(event.target.value)}}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) => {setEmail(event.target.value)}}
                     sx ={{
                         input: {color: theme.palette.dracula.cyan},
                         label: {color: theme.palette.dracula.cyan}

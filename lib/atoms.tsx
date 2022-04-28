@@ -1,8 +1,8 @@
-import {atom, useAtom} from 'jotai';
-import {ParseError} from "./parseerror";
-import React, {useState} from "react";
-import {UniformSliderRef} from "../components/uniformsliders";
-import {UniformActiveSettings} from "./serializeshader";
+import {atom} from 'jotai';
+import {ParseError} from "lib/parseerror";
+import {MutableRefObject} from "react";
+import {UniformSliderRef} from "components/uniformsliders";
+import {UniformActiveSettings} from "lib/serializeshader";
 
 export const DEFAULT_SHADER = `
 @stage(compute) @workgroup_size(16, 16)
@@ -51,7 +51,7 @@ export const loadedTexturesAtom = atom<{
     thumb?: string;
 }[]>([{img: '/textures/blank.png'}, {img: '/textures/blank.png'}]);
 export const entryPointsAtom = atom([]);
-export const sliderRefMapAtom = atom<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
+export const sliderRefMapAtom = atom<Map<string,MutableRefObject<UniformSliderRef>>>(new Map<string,MutableRefObject<UniformSliderRef>>());
 
 export const sliderSerDeArrayAtom = atom<Array<UniformActiveSettings>>([]);
 export const sliderSerDeNeedsUpdateAtom = atom<boolean>(false);

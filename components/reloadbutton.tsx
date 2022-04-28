@@ -1,8 +1,8 @@
 import {Button} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
 import {PlayArrowRounded, PlayDisabledRounded} from "@mui/icons-material";
-import {useAtom, useAtomValue} from "jotai";
-import {hotReloadAtom, manualReloadAtom} from "../lib/atoms";
+import {useAtomValue} from "jotai";
+import {hotReloadAtom, manualReloadAtom} from "lib/atoms";
 import {useUpdateAtom} from "jotai/utils";
 
 const PlayIcon = () => {

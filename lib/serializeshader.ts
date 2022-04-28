@@ -2,17 +2,15 @@ import {useAtom, useAtomValue} from "jotai";
 import {
     codeAtom,
     descriptionAtom,
-    loadedTexturesAtom, shaderDataUrlThumbAtom, shaderIDAtom, sliderRefMapAtom,
+    loadedTexturesAtom, shaderIDAtom, sliderRefMapAtom,
     sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom,
     titleAtom, visibilityAtom
-} from "./atoms";
-import {supabase, SUPABASE_SHADER_TABLE_NAME, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "./supabaseclient";
-import {definitions} from "../types/supabase";
-import {withRouter} from "next/router";
-import React, {ChangeEvent} from "react";
-import {decode} from "base64-arraybuffer";
-import {useAuth} from "./authcontext";
-import {UniformSliderRef} from "../components/uniformsliders";
+} from "lib/atoms";
+import {supabase, SUPABASE_SHADER_TABLE_NAME, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/supabaseclient";
+import {definitions} from "types/supabase";
+import {MutableRefObject} from "react";
+import {useAuth} from "lib/authcontext";
+import {UniformSliderRef} from "components/uniformsliders";
 
 export interface UniformActiveSettings {
     name: string,
@@ -49,7 +47,7 @@ const upsertResult = (id: number | null, needsRedirect: boolean, success: boolea
 export type HOST_GET = (id: number) => Promise<void>;
 export type HOST_UPSERT = (dataUrl: string) => Promise<UpsertResult>;
 
-const getSliderActiveSettings = (sliderRefMap: Map<string,React.MutableRefObject<UniformSliderRef>>) => {
+const getSliderActiveSettings = (sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>) => {
     // convert our map of references into a plain array of objects
     return [...sliderRefMap.keys()].map((uuid) => {
         return {
@@ -120,10 +118,6 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
             .from(SUPABASE_SHADERTHUMB_BUCKET_NAME)
             .upload(fileName, buf,
                 {contentType: 'image/jpeg', upsert: true});
-        /*let { error: uploadError } = await supabase.storage
-            .from('shaderthumb')
-            .upload(fileName, decode(dataUrl),
-                {contentType: 'image/jpeg', upsert: true})*/
 
         if (uploadError) {
             throw uploadError

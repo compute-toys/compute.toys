@@ -4,11 +4,11 @@ import {Button, Slider, Stack, TextField} from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import Box from "@mui/material/Box";
-import {CssTextField, getRainbowColor, theme} from "../theme/theme";
+import {CssTextField, getRainbowColor, theme} from "theme/theme";
 import { v4 as UUID } from 'uuid';
-import {sliderRefMapAtom, sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom} from "../lib/atoms";
+import {sliderRefMapAtom, sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom} from "lib/atoms";
 import {useAtom, useAtomValue} from "jotai";
-import {UniformActiveSettings} from "../lib/serializeshader";
+import {UniformActiveSettings} from "lib/serializeshader";
 
 
 export interface UniformSliderRef {

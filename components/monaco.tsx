@@ -1,9 +1,9 @@
 import Editor from '@monaco-editor/react'
-import React, {useEffect, useRef} from "react";
-import {wgslLanguageDef, wgslConfiguration} from '../public/grammars/wgsl'
-import {defineMonacoTheme} from "../theme/monacotheme";
+import {useEffect, useRef} from "react";
+import {wgslLanguageDef, wgslConfiguration} from 'public/grammars/wgsl'
+import {defineMonacoTheme} from "theme/monacotheme";
 import {useAtom} from "jotai";
-import {codeAtom, parseErrorAtom} from "../lib/atoms";
+import {codeAtom, parseErrorAtom} from "lib/atoms";
 
 
 const Monaco = (props) => {

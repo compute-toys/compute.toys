@@ -1,10 +1,8 @@
 import {createTheme, styled} from '@mui/material/styles';
 import Paper from "@mui/material/Paper";
-import "./themeModule";
-import createPalette from "@mui/material/styles/createPalette";
+import "theme/themeModule";
 import "firacode";
 import {darkScrollbar, TextField} from "@mui/material";
-import {palette} from "@mui/system";
 
 export const theme = createTheme({
     typography: {

@@ -1,6 +1,6 @@
 import {atom} from "jotai";
-import {init_wgpu, WgpuContext, WgpuToyRenderer} from "./wgputoy";
-import {Size} from "./usesizeatom";
+import {init_wgpu, WgpuContext, WgpuToyRenderer} from "lib/wgputoy";
+import {Size} from "lib/usesizeatom";
 
 const isSSR = typeof window === "undefined";
 

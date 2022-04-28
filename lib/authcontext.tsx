@@ -1,8 +1,9 @@
 // https://www.misha.wtf/blog/nextjs-supabase-auth
-import {ChangeEvent, createContext, useContext, useEffect, useState} from 'react';
-import {supabase} from "./supabaseclient";
+import {createContext, useContext, useEffect} from 'react';
+import {supabase} from "lib/supabaseclient";
 import {useAtom, useAtomValue} from "jotai";
-import {profileAtom, sessionAtom, userAtom, viewAtom} from "./loginatoms";
+import {profileAtom, sessionAtom, userAtom, viewAtom} from "lib/loginatoms";
+import {AuthChangeEvent, Session} from "@supabase/gotrue-js";
 
 export const EVENTS = {
     SIGNED_IN: 'SIGNED_IN',
@@ -14,16 +15,34 @@ export const EVENTS = {
 
 export const AuthContext = createContext(undefined);
 
+async function updateSupabaseCookie(event: AuthChangeEvent, session: Session | null) {
+    await fetch('/api/auth', {
+        method: 'POST',
+        headers: new Headers({ 'Content-Type': 'application/json' }),
+        credentials: 'same-origin',
+        body: JSON.stringify({ event, session }),
+    });
+}
+
 export const AuthProvider = ({ ...props }) => {
     const [session, setSession] = useAtom(sessionAtom);
     const user = useAtomValue(userAtom);
     const view = useAtomValue(viewAtom);
     const profile = useAtomValue(profileAtom);
 
+
     useEffect(() => {
-        // attempt to get the session
         setSession(true);
-    })
+
+        const { data: authListener } = supabase.auth.onAuthStateChange((event, _session) => {
+            updateSupabaseCookie(event, _session);
+            setSession(_session);
+        });
+
+        return () => {
+            authListener?.unsubscribe();
+        };
+    });
 
     /*
     useEffect(() => {

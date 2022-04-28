@@ -1,15 +1,14 @@
-import * as React from 'react';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import {Fragment} from "react";
 import Image from 'next/image';
-import {supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "../../lib/supabaseclient";
-import {Item, theme} from '../../theme/theme';
-import {getFullyQualifiedSupabaseBucketURL} from "../../lib/urlutils";
-import {Button, ImageListItemBar, Stack, Typography} from "@mui/material";
-import Avatar from "../../components/avatar";
+import {supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/supabaseclient";
+import {Item, theme} from 'theme/theme';
+import {getFullyQualifiedSupabaseBucketURL} from "lib/urlutils";
+import {Button, ImageListItemBar, Stack} from "@mui/material";
+import Avatar from "components/avatar";
 import Box from "@mui/material/Box";
-import LoginModal from "../../components/loginmodal";
+import LoginModal from "components/loginmodal";
 import Link from 'next/link'
 
 export const SHADERS_PER_PAGE = 12;

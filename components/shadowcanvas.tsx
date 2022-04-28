@@ -1,8 +1,7 @@
 import {useUpdateAtom} from "jotai/utils";
-import {canvasElAtom} from "../lib/wgputoyatoms";
-import React, {Fragment, useCallback} from "react";
+import {useCallback} from "react";
 import {atom} from "jotai";
-import {getDimensions} from "../lib/canvasdimensions";
+import {getDimensions} from "lib/canvasdimensions";
 
 export const MAX_SHADOW_CANVAS_WIDTH = 700;
 // range from 0.0 to 1.0

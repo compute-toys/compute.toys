@@ -1,11 +1,11 @@
 import { Palette, PaletteOptions, PaletteColor, PaletteColorOptions, SimplePaletteColorOptions, ThemeOptions, Theme } from "@mui/material/styles";
-import React from "react";
+import {CSSProperties} from "react";
 
 declare module '@mui/material/styles' {
     export interface Theme {
         status: {
-            danger: React.CSSProperties['color'];
-            disabled: React.CSSProperties['color'];
+            danger: CSSProperties['color'];
+            disabled: CSSProperties['color'];
         };
     }
 
@@ -42,8 +42,8 @@ declare module '@mui/material/styles' {
     }
     export interface ThemeOptions {
         status: {
-            danger: React.CSSProperties['color'];
-            disabled: React.CSSProperties['color'];
+            danger: CSSProperties['color'];
+            disabled: CSSProperties['color'];
         };
     }
 }

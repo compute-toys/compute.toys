@@ -1,11 +1,10 @@
 import {useEffect, useReducer, useState} from "react";
 import {Button, Modal, Stack} from "@mui/material";
-import Box from "@mui/material/Box";
-import { Item } from "../theme/theme";
-import Auth from "./auth";
-import {useAuth} from "../lib/authcontext";
-import Avatar from "./avatar";
-import {VIEWS} from "../lib/loginatoms";
+import { Item } from "theme/theme";
+import Auth from "components/auth";
+import {useAuth} from "lib/authcontext";
+import Avatar from "components/avatar";
+import {VIEWS} from "lib/loginatoms";
 
 export default function LoginModal() {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
@@ -25,8 +24,6 @@ export default function LoginModal() {
     const logInOutButton = view === VIEWS.LOGGED_OUT ?
         <Button onClick={handleOpen}>Log In</Button> :
         <Button onClick={handleLogOut}>Log Out</Button>;
-
-    console.log(user, view, profile.username, profile.avatar);
 
     return (
         <div>
