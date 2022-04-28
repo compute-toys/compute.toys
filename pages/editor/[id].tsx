@@ -29,6 +29,7 @@ import {useUpdateAtom} from "jotai/utils";
 import LoginModal from "../../components/loginmodal";
 import {MetadataEditor} from "../../components/metadataeditor";
 import {UpdateProfile} from "../../components/updateprofile";
+import {useDBRouter} from "../../lib/dbrouter";
 
 const Index = () => {
 
@@ -40,7 +41,7 @@ const Index = () => {
         }
     }, []);
 
-    useOctokitRouter();
+    useDBRouter();
 
     return (
         <Box sx={{ flexGrow: 1 }}>

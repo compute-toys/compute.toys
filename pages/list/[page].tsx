@@ -85,7 +85,7 @@ const ShaderPicker = (props) => {
                             loading="lazy"
                         />
                         <ImageListItemBar
-                            title={shader.name}
+                            title={<Link href={`/editor/${shader.id}`}>{shader.name}</Link>}
                             subtitle={`by ${shader.profile.username}`}
                             style={{borderRadius: '4px'}}
                             actionIcon={
