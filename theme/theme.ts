@@ -3,17 +3,13 @@ import Paper from "@mui/material/Paper";
 import "./themeModule";
 import createPalette from "@mui/material/styles/createPalette";
 import "firacode";
-import {TextField} from "@mui/material";
+import {darkScrollbar, TextField} from "@mui/material";
+import {palette} from "@mui/system";
 
 export const theme = createTheme({
     typography: {
         fontFamily: ['Fira Code', 'monospace'].join(','),
         fontSize: 12
-    },
-    components: {
-        MuiCssBaseline: {
-
-        },
     },
     status: {
         danger: '#db504a',
@@ -52,6 +48,16 @@ export const theme = createTheme({
         neutral: {
             main: '#AAD2E6',
             contrastText: '#F7CE5B',
+        },
+    },
+    components: {
+        MuiCssBaseline: {
+            styleOverrides: {
+                body: darkScrollbar(),
+                a: {
+                    color: '#f8f8f2',
+                }
+            },
         },
     },
 });

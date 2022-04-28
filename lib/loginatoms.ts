@@ -1,7 +1,7 @@
 // Using 'false' here to satisfy type checker for Jotai's function overloads
 import {atom} from "jotai";
 import {Session, User} from "@supabase/gotrue-js";
-import {supabase} from "./supabaseclient";
+import {supabase, SUPABASE_PROFILE_TABLE_NAME} from "./supabaseclient";
 
 const isSSR = typeof window === "undefined";
 
@@ -48,7 +48,7 @@ export const viewAtom = atom<string>((get) => {
 export const profileAtom = atom<Promise<ProfileData>>(async (get) => {
     if (!isSSR && get(userAtom) !== false && get(viewAtom) !== VIEWS.LOGGED_OUT) {
         let { data, error, status } = await supabase
-            .from('profile')
+            .from(SUPABASE_PROFILE_TABLE_NAME)
             .select(`username, avatar_url`)
             .eq('id', get(userAtom)["id"])
             .single();

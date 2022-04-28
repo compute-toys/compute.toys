@@ -12,6 +12,105 @@ export interface paths {
       };
     };
   };
+  "/profile": {
+    get: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.profile.id"];
+          username?: parameters["rowFilter.profile.username"];
+          created_at?: parameters["rowFilter.profile.created_at"];
+          about?: parameters["rowFilter.profile.about"];
+          avatar_url?: parameters["rowFilter.profile.avatar_url"];
+          /** Filtering Columns */
+          select?: parameters["select"];
+          /** Ordering */
+          order?: parameters["order"];
+          /** Limiting and Pagination */
+          offset?: parameters["offset"];
+          /** Limiting and Pagination */
+          limit?: parameters["limit"];
+        };
+        header: {
+          /** Limiting and Pagination */
+          Range?: parameters["range"];
+          /** Limiting and Pagination */
+          "Range-Unit"?: parameters["rangeUnit"];
+          /** Preference */
+          Prefer?: parameters["preferCount"];
+        };
+      };
+      responses: {
+        /** OK */
+        200: {
+          schema: definitions["profile"][];
+        };
+        /** Partial Content */
+        206: unknown;
+      };
+    };
+    post: {
+      parameters: {
+        body: {
+          /** profile */
+          profile?: definitions["profile"];
+        };
+        query: {
+          /** Filtering Columns */
+          select?: parameters["select"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** Created */
+        201: unknown;
+      };
+    };
+    delete: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.profile.id"];
+          username?: parameters["rowFilter.profile.username"];
+          created_at?: parameters["rowFilter.profile.created_at"];
+          about?: parameters["rowFilter.profile.about"];
+          avatar_url?: parameters["rowFilter.profile.avatar_url"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+    patch: {
+      parameters: {
+        query: {
+          id?: parameters["rowFilter.profile.id"];
+          username?: parameters["rowFilter.profile.username"];
+          created_at?: parameters["rowFilter.profile.created_at"];
+          about?: parameters["rowFilter.profile.about"];
+          avatar_url?: parameters["rowFilter.profile.avatar_url"];
+        };
+        body: {
+          /** profile */
+          profile?: definitions["profile"];
+        };
+        header: {
+          /** Preference */
+          Prefer?: parameters["preferReturn"];
+        };
+      };
+      responses: {
+        /** No Content */
+        204: never;
+      };
+    };
+  };
   "/shader": {
     get: {
       parameters: {
@@ -24,6 +123,7 @@ export interface paths {
           body?: parameters["rowFilter.shader.body"];
           author?: parameters["rowFilter.shader.author"];
           visibility?: parameters["rowFilter.shader.visibility"];
+          thumb_url?: parameters["rowFilter.shader.thumb_url"];
           /** Filtering Columns */
           select?: parameters["select"];
           /** Ordering */
@@ -82,6 +182,7 @@ export interface paths {
           body?: parameters["rowFilter.shader.body"];
           author?: parameters["rowFilter.shader.author"];
           visibility?: parameters["rowFilter.shader.visibility"];
+          thumb_url?: parameters["rowFilter.shader.thumb_url"];
         };
         header: {
           /** Preference */
@@ -104,6 +205,7 @@ export interface paths {
           body?: parameters["rowFilter.shader.body"];
           author?: parameters["rowFilter.shader.author"];
           visibility?: parameters["rowFilter.shader.visibility"];
+          thumb_url?: parameters["rowFilter.shader.thumb_url"];
         };
         body: {
           /** shader */
@@ -123,6 +225,25 @@ export interface paths {
 }
 
 export interface definitions {
+  profile: {
+    /**
+     * Format: uuid
+     * @description Note:
+     * This is a Primary Key.<pk/>
+     */
+    id: string;
+    /** Format: character varying */
+    username?: string;
+    /**
+     * Format: timestamp with time zone
+     * @default now()
+     */
+    created_at?: string;
+    /** Format: character varying */
+    about?: string;
+    /** Format: character varying */
+    avatar_url?: string;
+  };
   shader: {
     /**
      * Format: bigint
@@ -151,6 +272,8 @@ export interface definitions {
      * @enum {string}
      */
     visibility: "private" | "unlisted" | "public";
+    /** Format: character varying */
+    thumb_url?: string;
   };
 }
 
@@ -187,6 +310,18 @@ export interface parameters {
   offset: string;
   /** @description Limiting and Pagination */
   limit: string;
+  /** @description profile */
+  "body.profile": definitions["profile"];
+  /** Format: uuid */
+  "rowFilter.profile.id": string;
+  /** Format: character varying */
+  "rowFilter.profile.username": string;
+  /** Format: timestamp with time zone */
+  "rowFilter.profile.created_at": string;
+  /** Format: character varying */
+  "rowFilter.profile.about": string;
+  /** Format: character varying */
+  "rowFilter.profile.avatar_url": string;
   /** @description shader */
   "body.shader": definitions["shader"];
   /** Format: bigint */
@@ -205,6 +340,8 @@ export interface parameters {
   "rowFilter.shader.author": string;
   /** Format: public.visibility */
   "rowFilter.shader.visibility": string;
+  /** Format: character varying */
+  "rowFilter.shader.thumb_url": string;
 }
 
 export interface operations {}

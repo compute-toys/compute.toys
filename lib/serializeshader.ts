@@ -6,7 +6,7 @@ import {
     sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom,
     titleAtom, visibilityAtom
 } from "./atoms";
-import {supabase} from "./supabaseclient";
+import {supabase, SUPABASE_SHADER_TABLE_NAME, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "./supabaseclient";
 import {definitions} from "../types/supabase";
 import {withRouter} from "next/router";
 import React, {ChangeEvent} from "react";
@@ -76,7 +76,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     const get = async (id: number) => {
         try {
             let {data, error, status} = await supabase
-                .from<definitions["shader"]>('shader')
+                .from<definitions["shader"]>(SUPABASE_SHADER_TABLE_NAME)
                 .select('*')
                 .eq("id", id)
                 .single();
@@ -117,7 +117,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
         // TODO: make this less brittle
         const buf = Buffer.from(dataUrl.replace('data:image/jpeg;base64,', ''), 'base64');
         let { error: uploadError } = await supabase.storage
-            .from('shaderthumb')
+            .from(SUPABASE_SHADERTHUMB_BUCKET_NAME)
             .upload(fileName, buf,
                 {contentType: 'image/jpeg', upsert: true});
         /*let { error: uploadError } = await supabase.storage
@@ -141,7 +141,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     const create = async (dataUrl: string) => {
         try {
             let {data, error, status} = await supabase
-                .from<definitions["shader"]>('shader')
+                .from<definitions["shader"]>(SUPABASE_SHADER_TABLE_NAME)
                 .insert([{
                     name: title,
                     description: description,
@@ -174,7 +174,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
         try {
             // TODO: let supabase know we don't need the record
             let {data, error, status} = await supabase
-                .from<definitions["shader"]>('shader')
+                .from<definitions["shader"]>(SUPABASE_SHADER_TABLE_NAME)
                 .update({
                     name: title,
                     description: description,
