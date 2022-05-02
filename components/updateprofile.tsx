@@ -1,19 +1,18 @@
 import {ChangeEvent, useEffect, useState} from "react";
 import {supabase} from "lib/supabaseclient";
-import {useAuth} from "lib/authcontext";
+import {useAuth, VIEWS} from "lib/authcontext";
 import {Button, Modal, Stack, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
 import Avatar from "components/avatar";
 import UploadButton from "components/uploadbutton";
 import {CssTextField, Item, theme} from "theme/theme";
-import {VIEWS} from "lib/loginatoms";
 
 export const UpdateProfile = () => {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [avatar, setAvatar] = useState(null);
     const [username, setUsername] = useState(null);
-    const [user, view, session, logOut, profile] = useAuth();
+    const {user, view, profile} = useAuth();
     const [openProfileModal, setOpenProfileModal] = useState(false);
 
     const [usernameEditor, setUsernameEditor] = useState(null);

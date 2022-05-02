@@ -1,5 +1,6 @@
 import {useAtom, useAtomValue} from "jotai";
 import {
+    authorProfileAtom,
     codeAtom,
     descriptionAtom,
     loadedTexturesAtom, shaderIDAtom, sliderRefMapAtom,
@@ -58,7 +59,7 @@ const getSliderActiveSettings = (sliderRefMap: Map<string,MutableRefObject<Unifo
 }
 
 export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
-    const [user, view, session, logOut, profile] = useAuth();
+    const {user} = useAuth();
     // the router is responsible for setting shader ID
     const shaderID = useAtomValue(shaderIDAtom);
 
@@ -70,12 +71,24 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
     const [visibility, setVisibility] = useAtom(visibilityAtom);
+    const [authorProfile, setAuthorProfile] = useAtom(authorProfileAtom);
 
     const get = async (id: number) => {
         try {
             let {data, error, status} = await supabase
                 .from<definitions["shader"]>(SUPABASE_SHADER_TABLE_NAME)
-                .select('*')
+                .select(`
+                    name,
+                    description,
+                    visibility,
+                    body,
+                    profile (
+                        username,
+                        avatar_url,
+                        id
+                    )
+                        
+                `)
                 .eq("id", id)
                 .single();
 
@@ -101,6 +114,9 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                 setLoadedTextures(shaderActiveSettings.textures);
                 setSliderSerDeArray(shaderActiveSettings.uniforms);
                 setSliderSerDeNeedsUpdateAtom(true);
+                // Typescript can't infer type of joined table
+                // @ts-ignore
+                setAuthorProfile(shader.profile)
             }
         } catch (error) {
             alert(error.message);

@@ -91,6 +91,10 @@ export const CssTextField = styled(TextField)({
         '&.Mui-focused input': {
             color: theme.palette.dracula.foreground,
         },
+        '& input:disabled': {
+            color: theme.status.disabled,
+            WebkitTextFillColor: theme.status.disabled
+        }
     },
 });
 

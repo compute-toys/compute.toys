@@ -1,9 +1,7 @@
 // https://www.misha.wtf/blog/nextjs-supabase-auth
-import {createContext, useContext, useEffect} from 'react';
-import {supabase} from "lib/supabaseclient";
-import {useAtom, useAtomValue} from "jotai";
-import {profileAtom, sessionAtom, userAtom, viewAtom} from "lib/loginatoms";
-import {AuthChangeEvent, Session} from "@supabase/gotrue-js";
+import {createContext, useContext, useEffect, useState} from 'react';
+import {supabase, SUPABASE_PROFILE_TABLE_NAME} from "lib/supabaseclient";
+import {AuthChangeEvent, Session, User} from "@supabase/gotrue-js";
 
 export const EVENTS = {
     SIGNED_IN: 'SIGNED_IN',
@@ -12,8 +10,35 @@ export const EVENTS = {
     TOKEN_REFRESHED: 'TOKEN_REFRESHED'
 };
 
+export interface ProfileData {
+    username: string | false,
+    avatar: string | false
+}
 
-export const AuthContext = createContext(undefined);
+// obviously redundant but typescript will treat reference to
+// VIEWS as a namespace here and fail to find it
+export type View = 'logged_in' | 'logged_out';
+export type AuthLogIn = (email: string, password: string) => Promise<{error: any}>;
+export type AuthLogOut = () => Promise<{error: any}>;
+export type AuthSignUp = (email: string, username: string, password: string) => Promise<{error: any}>;
+
+export const VIEWS = {
+    LOGGED_IN: 'logged_in' as View,
+    LOGGED_OUT: 'logged_out' as View
+};
+
+// TODO: better error types
+export interface AuthContextInterface {
+    user: User | null,
+    view: View,
+    session: Session | null,
+    profile: ProfileData,
+    logIn: AuthLogIn,
+    logOut: AuthLogOut,
+    signUp: AuthSignUp
+}
+
+export const AuthContext = createContext<AuthContextInterface>(undefined);
 
 async function updateSupabaseCookie(event: AuthChangeEvent, session: Session | null) {
     await fetch('/api/auth', {
@@ -24,18 +49,150 @@ async function updateSupabaseCookie(event: AuthChangeEvent, session: Session | n
     });
 }
 
+async function logInApi(username: string, password: string) {
+    return await fetch('/api/login', {
+        method: 'POST',
+        headers: new Headers({ 'Content-Type': 'application/json' }),
+        credentials: 'same-origin',
+        body: JSON.stringify({ username, password }),
+    });
+}
+
+async function signUpApi(email: string, username: string, password: string) {
+    return await fetch('/api/signup', {
+        method: 'POST',
+        headers: new Headers({ 'Content-Type': 'application/json' }),
+        credentials: 'same-origin',
+        body: JSON.stringify({ email, username, password }),
+    });
+}
+
+//https://github.com/supabase/supabase/blob/master/examples/nextjs-ts-user-management/components/Account.tsx
+const uploadAvatar = async (file: File, user: User): Promise<{avatar, error}> => {
+    let error = undefined;
+    try {
+        if (file.size > (50 * 1024)) {
+            error = {message: 'Please select an image that is less than 50KB'};
+            return {avatar: undefined, error: error};
+        }
+
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${user.id}/avatar.${fileExt}`
+        const filePath = `${fileName}`
+
+        let { error: uploadError } = await supabase.storage
+            .from('avatar')
+            .upload(filePath, file, {upsert: true})
+
+        if (uploadError) {
+            error = {message: 'Error uploading image: ' + uploadError.message};
+            return {avatar: undefined, error: error};
+        }
+
+        let { error: updateError } = await supabase.from('profile').upsert({
+            id: user!.id,
+            avatar_url: filePath,
+        })
+
+        if (updateError) {
+            error = {message: 'Error updating profile image after upload: ' + updateError.message};
+            return {avatar: undefined, error: error};
+        }
+
+        return {avatar: filePath, error: error};
+    } catch (error) {
+        return {avatar: undefined, error: error};
+    }
+}
+
+const getProfileApi = async (user: User, view: string) => {
+    if (user && view && view !== VIEWS.LOGGED_OUT) {
+        return supabase
+            .from(SUPABASE_PROFILE_TABLE_NAME)
+            .select(`username, avatar_url`)
+            .eq('id', user.id)
+            .single()
+            .then( ({data, error, status}) => {
+                if ((error && status !== 406) || !data) {
+                    return {username: false, avatar: false};
+                } else {
+                    return {username: data.username, avatar: data.avatar_url};
+                }
+            });
+    } else {
+        return Promise.resolve({username: false, avatar: false});
+    }
+}
+
 export const AuthProvider = ({ ...props }) => {
-    const [session, setSession] = useAtom(sessionAtom);
-    const user = useAtomValue(userAtom);
-    const view = useAtomValue(viewAtom);
-    const profile = useAtomValue(profileAtom);
+    const [session, setSession] = useState(null);
+    const [user, setUser] = useState(null);
+    const [view, setView] = useState<View>(VIEWS.LOGGED_OUT);
+    const [profile, setProfile] = useState<ProfileData>({username: false, avatar: false});
+
+    const logIn = async (email: string, password: string) => {
+        return await supabase.auth.signIn({email, password})
+            .then(({session, user, error}) => {
+                if (error) {
+                    throw new Error(error.message)
+                } else {
+                    return session;
+                }
+            })
+            .then(_session => {setSession(_session); return {error: undefined}})
+            .catch((error) => {
+                return {error: error};
+            });
+    }
+
+    const signUp = async (email: string, username: string, password: string) : Promise<{ error }> => {
+        return await signUpApi(email, username, password)
+            .then((res) => {
+                if (!res.ok) {
+                    return res.json().then(res => {throw new Error(res.error)});
+                } else {
+                    return res.json();
+                }
+            })
+            .then(data => {
+                return { error: undefined};
+            })
+            .catch((err) => {
+                return {error: {message: err.message}}
+            });
+    }
+
+    const logOut = () => supabase.auth.signOut();
+
+    useEffect(() => {
+        if (session) {
+            setUser((session as Session).user ?? null);
+        } else {
+            setUser(null);
+        }
+    }, [session]);
+
+    useEffect(() => {
+        if (user) {
+            setView(VIEWS.LOGGED_IN);
+        } else {
+            setView(VIEWS.LOGGED_OUT);
+        }
+    }, [user]);
 
 
     useEffect(() => {
-        setSession(true);
+        getProfileApi(user, view).then((res : ProfileData) => {
+            setProfile(res);
+        })
+    }, [user, view]);
+
+    useEffect(() => {
+        setSession(supabase.auth.session());
 
         const { data: authListener } = supabase.auth.onAuthStateChange((event, _session) => {
-            updateSupabaseCookie(event, _session);
+            //updateSupabaseCookie(event, _session);
+            //setSession(_session);
             setSession(_session);
         });
 
@@ -44,51 +201,17 @@ export const AuthProvider = ({ ...props }) => {
         };
     });
 
-    /*
-    useEffect(() => {
-        const activeSession = supabase.auth.session();
-        const user = activeSession?.user;
-        setSession(activeSession);
-        setUser(user ?? null);
-        setView( user ? VIEWS.LOGGED_IN : VIEWS.LOGGED_OUT);
-
-        const { data: authListener } = supabase.auth.onAuthStateChange(
-            (event, currentSession) => {
-                setSession(currentSession);
-                setUser(user ?? null);
-
-                switch (event) {
-                    case EVENTS.SIGNED_OUT:
-                    case EVENTS.USER_UPDATED:
-                        setView(VIEWS.LOGGED_OUT);
-                        break;
-                    case EVENTS.SIGNED_IN:
-                    case EVENTS.TOKEN_REFRESHED:
-                        setView(VIEWS.LOGGED_IN);
-                        break;
-                    default:
-                }
-            }
-        );
-
-        return () => {
-            authListener?.unsubscribe();
-        };
-    }, []);
-
-    useEffect(() => {
-        checkUsername();
-    }, [view])*/
-
     return (
         <AuthContext.Provider
-            value={[
-                user,
-                view,
-                session,
-                () => setSession(false),
-                profile
-            ]}
+            value={{
+                user: user,
+                view: view,
+                session: session,
+                profile: profile,
+                logIn: logIn,
+                logOut: logOut,
+                signUp: signUp
+            }}
             {...props}
         />
     );

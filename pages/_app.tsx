@@ -11,7 +11,6 @@ export default function App({ Component, pageProps }: AppProps) {
         <ThemeProvider theme={theme}>
             <ShadowCanvas/>
             <CssBaseline/>
-            <UpdateProfile/>
             <Component {...pageProps} />
         </ThemeProvider>
         </AuthProvider>

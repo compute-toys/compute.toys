@@ -4,12 +4,16 @@ import Image from 'next/image';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import {getFullyQualifiedSupabaseBucketURL} from "lib/urlutils";
 
-export default function Avatar({ url, size, displayOnNull}: { url: string | null; size: number; displayOnNull?: boolean }) {
+export default function Avatar({ url, size, displayOnNull, verbatim}: { url: string | null | false; size: number; displayOnNull?: boolean; verbatim?: boolean }) {
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
 
     useEffect(() => {
         if (url) {
-            setAvatarUrl(getFullyQualifiedSupabaseBucketURL(SUPABASE_AVATAR_BUCKET_NAME, url));
+            if (!verbatim) {
+                setAvatarUrl(getFullyQualifiedSupabaseBucketURL(SUPABASE_AVATAR_BUCKET_NAME, url));
+            } else {
+                setAvatarUrl(url);
+            }
         } else {
             setAvatarUrl(null);
         }

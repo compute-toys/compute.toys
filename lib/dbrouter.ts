@@ -1,5 +1,5 @@
 import {useRouter} from "next/router";
-import {codeAtom, DEFAULT_SHADER, manualReloadAtom, shaderIDAtom} from "lib/atoms";
+import {authorProfileAtom, codeAtom, DEFAULT_SHADER, manualReloadAtom, shaderIDAtom} from "lib/atoms";
 import {useUpdateAtom} from "jotai/utils";
 import useShaderSerDe from "lib/serializeshader";
 import {useEffect} from "react";
@@ -16,6 +16,7 @@ export const useDBRouter = () => {
     const setCode = useUpdateAtom(codeAtom);
     const setManualReload = useUpdateAtom(manualReloadAtom);
     const setShaderID = useUpdateAtom(shaderIDAtom);
+    const setAuthorProfile = useUpdateAtom(authorProfileAtom);
 
     const [get, upsert] = useShaderSerDe();
 
@@ -31,6 +32,7 @@ export const useDBRouter = () => {
             } else if (router.query.id === 'new') {
                 setShaderID(false);
                 setCode(DEFAULT_SHADER);
+                setAuthorProfile(false)
                 setManualReload(true);
             } else {
                 setShaderID(false);
