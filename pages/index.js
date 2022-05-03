@@ -1,13 +1,22 @@
 import Head from 'next/head'
 import Link from 'next/link'
 
+import 'firacode'
+import '@fontsource/lobster'
+
 export default function Home() {
   return (
     <div className="container">
       <Head>
-        <title>wgputoy</title>
+        <title>compute.toys</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      <main>
+        <h1 className="title">
+          <span style={{ color: 'white', fontFamily: 'Fira Code', fontSize: '3rem', fontWeight: 'normal' }}><span style={{ color: 'gray' }}>@</span>compute<span style={{ fontFamily: 'Lobster', fontSize: '110%' }}><span style={{ color: 'gray' }}>.</span>toys</span></span>
+        </h1>
+      </main>
 
       <main>
         <ul>
