@@ -5,6 +5,12 @@ const nextConfig = {
     images: {
         domains: ['dl.polyhaven.org'],
     },
+    async rewrites() {
+        return [
+            { source: '/new',       destination: '/editor/new' },
+            { source: '/view/:id',  destination: '/editor/:id' },
+        ]
+    },
     webpack(config, { isServer }) {
         if (isServer) {
             config.output.webassemblyModuleFilename = './../static/wasm/[modulehash].wasm';
