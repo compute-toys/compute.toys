@@ -116,29 +116,43 @@ export default function TexturePicker() {
     );
 }
 
+function polyhaven_texture(name, map = 'diff') {
+    return {
+        img: `https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/${name}/${name}_${map}_1k.jpg`,
+        //url: `https://polyhaven.com/a/${name}`,
+    };
+}
+
+function polyhaven_hdri(name) {
+    return {
+        img: `https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/${name}_2k.hdr`,
+        thumb: `https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/${name}.jpg`,
+        //url: `https://polyhaven.com/a/${name}`,
+    };
+}
+
 const defaultTextures = [
+    polyhaven_texture('stone_brick_wall_001'),
+    polyhaven_texture('wood_table_001'),
+    polyhaven_texture('rusty_metal_02'),
+    polyhaven_texture('rock_pitted_mossy'),
+    polyhaven_texture('aerial_rocks_02'),
+    polyhaven_texture('book_pattern', 'col2'),
+    polyhaven_hdri('autumn_crossing'),
+    polyhaven_hdri('dikhololo_night'),
+    polyhaven_hdri('leadenhall_market'),
+    polyhaven_hdri('music_hall_01'),
+    polyhaven_hdri('spruit_sunrise'),
+    polyhaven_hdri('vatican_road'),
     {img: '/textures/blank.png'},
     {img: '/textures/london.jpg'}, // https://commons.wikimedia.org/wiki/File:Regent_Street_Clay_Gregory.jpg
-    {img: '/textures/tex0.jpg'},
-    {img: '/textures/tex1.jpg'},
-    {img: '/textures/tex2.jpg'},
-    {img: '/textures/tex3.jpg'},
-    {img: '/textures/tex4.jpg'},
-    {img: '/textures/tex5.jpg'},
-    {img: '/textures/tex6.jpg'},
-    {img: '/textures/tex7.jpg'},
-    {img: '/textures/tex8.jpg'},
-    {img: '/textures/tex9.jpg'},
-    {img: '/textures/tex10.jpg'},
-    {img: '/textures/tex11.jpg'},
     {img: '/textures/anim0.png'},
     {img: '/textures/bayer0.png'},
     {img: '/textures/font0.png'}, // https://github.com/otaviogood/shader_fontgen
-    {img: '/textures/height0.png'},
+    polyhaven_texture('rocks_ground_01', 'disp'),
     {img: '/textures/noise0.png'},
     {img: '/textures/noise1.png'},
     {img: '/textures/noise2.png'},
     {img: '/textures/noise3.png'},
     {img: '/textures/noise4.png'},
-    {img: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/spruit_sunrise_2k.hdr', thumb: 'https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/spruit_sunrise.jpg'}, // https://polyhaven.com/a/spruit_sunrise
 ];
