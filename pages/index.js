@@ -27,6 +27,8 @@ export default function Home() {
           <li><Link href="/view/ab237d17e5cdc3759e25c6b4dc1a73aa">Texture colorspace projection</Link></li>
           <li><Link href="/view/ebd53bc4d99f8edd63b623ef0439d10c">Simplex Noise</Link></li>
           <li><Link href="/view/0c70160b4145514241ac78098ac6d19f">Demofox Path Tracing</Link></li>
+          <li><Link href="/view/24429fb91484c0bace7c402f1ac1d1bd">Assert demo</Link></li>
+          <li><Link href="/view/67af8481dde3948b74e05769827cb5ae">Importance sampling demo</Link></li>
         </ul>
       </main>
 
