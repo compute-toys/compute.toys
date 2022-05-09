@@ -8,7 +8,7 @@ import {Fragment, useRef, useState} from "react";
 import {DisabledByDefaultSharp} from "@mui/icons-material";
 import Image from 'next/image';
 import {useAtom, useAtomValue} from "jotai";
-import {loadedTexturesAtom} from "../lib/atoms";
+import {loadedTexturesAtom, Texture} from "../lib/atoms";
 import {useUpdateAtom} from "jotai/utils";
 
 export interface LoadedTextures {
@@ -119,7 +119,7 @@ export default function TexturePicker() {
 function polyhaven_texture(name, map = 'diff') {
     return {
         img: `https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/${name}/${name}_${map}_1k.jpg`,
-        //url: `https://polyhaven.com/a/${name}`,
+        url: `https://polyhaven.com/a/${name}`,
     };
 }
 
@@ -127,11 +127,11 @@ function polyhaven_hdri(name) {
     return {
         img: `https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/${name}_2k.hdr`,
         thumb: `https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/${name}.jpg`,
-        //url: `https://polyhaven.com/a/${name}`,
+        url: `https://polyhaven.com/a/${name}`,
     };
 }
 
-const defaultTextures = [
+const defaultTextures: Texture[] = [
     polyhaven_texture('stone_brick_wall_001'),
     polyhaven_texture('wood_table_001'),
     polyhaven_texture('rusty_metal_02'),

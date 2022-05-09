@@ -29,6 +29,12 @@ fn main_image(@builtin(global_invocation_id) id: uint3) {
 }
 `;
 
+export interface Texture {
+    img: string,
+    thumb?: string,
+    url?: string,
+}
+
 export const codeAtom = atom<string>(DEFAULT_SHADER);
 export const playAtom = atom<boolean>(true);
 export const resetAtom = atom<boolean>(false);
@@ -39,9 +45,6 @@ export const parseErrorAtom = atom<ParseError>({
     position: {row: 0, col: 0},
     success: true
 });
-export const loadedTexturesAtom = atom<{
-    img: string;
-    thumb?: string;
-}[]>([{img: '/textures/blank.png'}, {img: '/textures/blank.png'}]);
+export const loadedTexturesAtom = atom<Texture[]>([{img: '/textures/blank.png'}, {img: '/textures/blank.png'}]);
 export const entryPointsAtom = atom([]);
 export const sliderRefMapAtom = atom<Map<string,React.MutableRefObject<UniformSliderRef>>>(new Map<string,React.MutableRefObject<UniformSliderRef>>());
