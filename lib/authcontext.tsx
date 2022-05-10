@@ -15,17 +15,22 @@ export interface ProfileData {
     avatar: string | false
 }
 
+
+
 // obviously redundant but typescript will treat reference to
 // VIEWS as a namespace here and fail to find it
 export type View = 'logged_in' | 'logged_out';
-export type AuthLogIn = (email: string, password: string) => Promise<{error: any}>;
-export type AuthLogOut = () => Promise<{error: any}>;
-export type AuthSignUp = (email: string, username: string, password: string) => Promise<{error: any}>;
 
 export const VIEWS = {
     LOGGED_IN: 'logged_in' as View,
     LOGGED_OUT: 'logged_out' as View
 };
+
+export type AuthLogIn = (email: string, password: string) => Promise<{error: any}>;
+export type AuthLogOut = () => Promise<{error: any}>;
+export type AuthSignUp = (email: string, username: string, password: string) => Promise<{error: any}>;
+export type AuthConfirm = (email: string, token: string) => Promise<{error: any}>;
+
 
 // TODO: better error types
 export interface AuthContextInterface {
@@ -35,7 +40,8 @@ export interface AuthContextInterface {
     profile: ProfileData,
     logIn: AuthLogIn,
     logOut: AuthLogOut,
-    signUp: AuthSignUp
+    signUp: AuthSignUp,
+    confirm: AuthConfirm
 }
 
 export const AuthContext = createContext<AuthContextInterface>(undefined);
@@ -64,6 +70,15 @@ async function signUpApi(email: string, username: string, password: string) {
         headers: new Headers({ 'Content-Type': 'application/json' }),
         credentials: 'same-origin',
         body: JSON.stringify({ email, username, password }),
+    });
+}
+
+async function confirmApi(email: string, token: string) {
+    return await fetch('/api/confirm', {
+        method: 'POST',
+        headers: new Headers({ 'Content-Type': 'application/json' }),
+        credentials: 'same-origin',
+        body: JSON.stringify({ email, token }),
     });
 }
 
@@ -139,7 +154,10 @@ export const AuthProvider = ({ ...props }) => {
                     return session;
                 }
             })
-            .then(_session => {setSession(_session); return {error: undefined}})
+            .then(_session => {
+                setSession(_session);
+                return {error: undefined}
+            })
             .catch((error) => {
                 return {error: error};
             });
@@ -156,6 +174,33 @@ export const AuthProvider = ({ ...props }) => {
             })
             .then(data => {
                 return { error: undefined};
+            })
+            .catch((err) => {
+                return {error: {message: err.message}}
+            });
+    }
+
+    const confirm = async (email: string, token: string) : Promise<{ error }> => {
+        return await confirmApi(email, token)
+            .then((res) => {
+                if (!res.ok) {
+                    return res.json().then(res => {throw new Error(res.error)});
+                } else {
+                    return res.json();
+                }
+            })
+            .then(async data => {
+                // seems really backwards since we already have the session,
+                // but this seems to be the only documented way to do this
+                const {user, session, error} = await supabase.auth.signIn({
+                    refreshToken: data.session.refresh_token,
+                });
+
+                if (error) {
+                    throw new Error(error.message);
+                } else {
+                    return {error: undefined};
+                }
             })
             .catch((err) => {
                 return {error: {message: err.message}}
@@ -210,7 +255,8 @@ export const AuthProvider = ({ ...props }) => {
                 profile: profile,
                 logIn: logIn,
                 logOut: logOut,
-                signUp: signUp
+                signUp: signUp,
+                confirm: confirm
             }}
             {...props}
         />

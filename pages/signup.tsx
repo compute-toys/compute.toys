@@ -3,19 +3,23 @@ import {useAuth, VIEWS} from "lib/authcontext";
 import {Button, Modal, Stack, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
 import {CssTextField, Item, theme} from "theme/theme";
+import { useRouter } from 'next/router';
 
 export const SignUp = () => {
-    const {signUp} = useAuth();
+    const {signUp, confirm} = useAuth();
+    const router = useRouter();
 
     const [usernameEditor, setUsernameEditor] = useState(null);
     const [emailEditor, setEmailEditor] = useState(null);
     const [password1Editor, setPassword1Editor] = useState(null);
     const [password2Editor, setPassword2Editor] = useState(null);
+    const [tokenEditor, setTokenEditor] = useState(null);
     const [passwordValid, setPasswordValid] = useState(false);
     const [usernameValid, setUsernameValid] = useState(false);
     const [emailValid, setEmailValid] = useState(false);
     const [allValid, setAllValid] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [confirmed, setConfirmed] = useState(false);
 
     const [errorMessage, setErrorMessage] = useState(null);
 
@@ -91,6 +95,17 @@ export const SignUp = () => {
             setSuccess(false);
         } else {
             setSuccess(true);
+        }
+    }
+
+    const submitConfirmation = async () => {
+        const {error} = await confirm(emailEditor, tokenEditor);
+        if (error) {
+            setErrorMessage(error.message)
+            setConfirmed(false);
+        } else {
+            router.back();
+            setConfirmed(true);
         }
     }
 
@@ -196,10 +211,32 @@ export const SignUp = () => {
                         : null
                     }
                     {success ?
+                        <Item sx={{color: theme.palette.dracula.cyan}}>
+                            <Stack>
+                                <Typography>
+                                    Enter your email confirmation code
+                                </Typography>
+                                <Stack direction="row" justifyContent={"center"} sx={{marginTop: "10px"}}>
+                                    <CssTextField
+                                        disabled={confirmed}
+                                        id="confirmation-login-input"
+                                        size={"small"}
+                                        value={tokenEditor || ""}
+                                        onChange={(e) => setTokenEditor(e.target.value)}
+                                    />
+                                </Stack>
+                                <Button onClick={() => submitConfirmation()} sx={{color: theme.palette.dracula.cyan}}>
+                                    Confirm
+                                </Button>
+                            </Stack>
+                        </Item>
+                        : null
+                    }
+                    {confirmed ?
                         <Item sx={{color: theme.palette.dracula.green}}>
                             <Stack>
                                 <Typography>
-                                    Check your email for a confirmation link!
+                                    Success!
                                 </Typography>
                             </Stack>
                         </Item>
