@@ -1,22 +1,34 @@
 import Head from 'next/head'
 import Link from 'next/link'
 
+import 'firacode'
+import '@fontsource/lobster'
+
 export default function Home() {
   return (
     <div className="container">
       <Head>
-        <title>wgputoy</title>
+        <title>compute.toys</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <main>
+        <h1 className="title">
+          <span style={{ color: 'white', fontFamily: 'Fira Code', fontSize: '3rem', fontWeight: 'normal' }}><span style={{ color: 'gray' }}>@</span>compute<span style={{ fontFamily: 'Lobster', fontSize: '110%' }}><span style={{ color: 'gray' }}>.</span>toys</span></span>
+        </h1>
+      </main>
+
+      <main>
         <ul>
-          <li><Link href="/editor/new">New</Link></li>
-          <li><Link href="/editor/435e9bb5c60ef892df53ce2233bae197">Buddhabrot</Link></li>
-          <li><Link href="/editor/53a3829482e4bce3f8329f19f1641f4c">Caustics</Link></li>
-          <li><Link href="/editor/5f9677a0ccfbd63d7a8657ad9af3a856">Hash without sine</Link></li>
-          <li><Link href="/editor/ab237d17e5cdc3759e25c6b4dc1a73aa">Texture colorspace projection</Link></li>
-          <li><Link href="/editor/ebd53bc4d99f8edd63b623ef0439d10c">Simplex Noise</Link></li>
+          <li><Link href="/new">New</Link></li>
+          <li><Link href="/view/435e9bb5c60ef892df53ce2233bae197">Buddhabrot</Link></li>
+          <li><Link href="/view/53a3829482e4bce3f8329f19f1641f4c">Caustics</Link></li>
+          <li><Link href="/view/5f9677a0ccfbd63d7a8657ad9af3a856">Hash without sine</Link></li>
+          <li><Link href="/view/ab237d17e5cdc3759e25c6b4dc1a73aa">Texture colorspace projection</Link></li>
+          <li><Link href="/view/ebd53bc4d99f8edd63b623ef0439d10c">Simplex Noise</Link></li>
+          <li><Link href="/view/0c70160b4145514241ac78098ac6d19f">Demofox Path Tracing</Link></li>
+          <li><Link href="/view/24429fb91484c0bace7c402f1ac1d1bd">Assert demo</Link></li>
+          <li><Link href="/view/67af8481dde3948b74e05769827cb5ae">Importance sampling demo</Link></li>
         </ul>
       </main>
 

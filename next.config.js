@@ -7,6 +7,12 @@ const nextConfig = {
     images: {
         domains: ['dl.polyhaven.org', process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME]
     },
+    async rewrites() {
+        return [
+            { source: '/new',       destination: '/editor/new' },
+            { source: '/view/:id',  destination: '/editor/:id' },
+        ]
+    },    
     webpack(config, { isServer, dev }) {
         config.experiments = {
             asyncWebAssembly: true,
@@ -16,6 +22,7 @@ const nextConfig = {
             config.output.webassemblyModuleFilename = "chunks/[id].wasm";
             config.plugins.push(new WasmChunksFixPlugin());
         }
+        config.optimization.moduleIds = 'named';
         return config;
     }
 };

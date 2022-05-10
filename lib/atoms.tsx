@@ -36,6 +36,12 @@ export interface AuthorProfile {
     id: string
 }
 
+export interface Texture {
+    img: string,
+    thumb?: string,
+    url?: string,
+}
+
 export type Visibility = 'private' | 'unlisted' | 'public';
 
 export const shaderIDAtom = atom<number | false>(false);
@@ -52,10 +58,7 @@ export const parseErrorAtom = atom<ParseError>({
     position: {row: 0, col: 0},
     success: true
 });
-export const loadedTexturesAtom = atom<{
-    img: string;
-    thumb?: string;
-}[]>([{img: '/textures/blank.png'}, {img: '/textures/blank.png'}]);
+export const loadedTexturesAtom = atom<Texture[]>([{img: '/textures/blank.png'}, {img: '/textures/blank.png'}]);
 export const entryPointsAtom = atom([]);
 export const sliderRefMapAtom = atom<Map<string,MutableRefObject<UniformSliderRef>>>(new Map<string,MutableRefObject<UniformSliderRef>>());
 
