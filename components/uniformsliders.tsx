@@ -10,6 +10,7 @@ import {sliderRefMapAtom, sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom} from
 import {useAtom, useAtomValue} from "jotai";
 import {UniformActiveSettings} from "lib/serializeshader";
 
+export const WGPU_CONTEXT_MAX_UNIFORMS = 16;
 
 export interface UniformSliderRef {
     getVal: () => number;
@@ -18,16 +19,21 @@ export interface UniformSliderRef {
 }
 
 interface UniformSliderProps {
-    setRefCallback: (r: React.MutableRefObject<UniformSliderRef>) => void
+    setRefCallback: (r: MutableRefObject<UniformSliderRef>) => void
     deleteCallback: (uuid: string) => void
     uuid: string
     index: number
     sliderSerDeArray: Array<UniformActiveSettings>
+    sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>
 }
 
-const validate = (text: string) => {
+const validate = (text: string, this_uuid: string, sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>) => {
     let matched = text.match(/^[a-zA-Z][a-zA-Z0-9_]*$/);
-    return (matched && matched.length === 1);
+    const nameValid = (matched && matched.length === 1);
+    const foundDuplicate = [...sliderRefMap.keys()].find((uuid, index) => {
+        return this_uuid !== uuid && sliderRefMap.get(uuid).current.getUniform() === text
+    });
+    return nameValid && !foundDuplicate;
 }
 
 const CustomTextField = forwardRef((props: any, inputRef: MutableRefObject<any>) => {
@@ -67,7 +73,7 @@ const CustomTextField = forwardRef((props: any, inputRef: MutableRefObject<any>)
         onKeyDown={onEnterKey}
         onChange={(event: ChangeEvent<HTMLInputElement>) => {setTemporaryFieldValue(event.target.value)}}
         onBlur={ (event: FocusEvent<HTMLInputElement>) => {
-            if (validate(event.target.value)) {
+            if (validate(event.target.value, props.uuid, props.sliderRefMap)) {
                 props.setSliderUniform(event.target.value);
                 setErr(false);
             } else {
@@ -81,9 +87,9 @@ CustomTextField.displayName = "CustomTextField";
 
 const UniformSlider = (props: UniformSliderProps) => {
 
-    const initFromHost = typeof props.sliderSerDeArray[props.index] !== 'undefined';
+    const initFromHost = props.sliderSerDeArray[props.index] !== undefined;
 
-    const [sliderVal, setSliderVal] = useState(initFromHost ? 0 : props.sliderSerDeArray[props.index].value);
+    const [sliderVal, setSliderVal] = useState(initFromHost ? props.sliderSerDeArray[props.index].value : 0);
     const [sliderUniform, setSliderUniform] = useState(initFromHost ? props.sliderSerDeArray[props.index].name : "uniform_" + props.index);
 
     const sliderRef = useRef<UniformSliderRef>();
@@ -123,6 +129,7 @@ const UniformSlider = (props: UniformSliderProps) => {
                 uuid={props.uuid}
                 sliderUniform={sliderUniform}
                 setSliderUniform={setSliderUniform}
+                sliderRefMap={props.sliderRefMap}
             />
             <Slider
                 aria-label={sliderUniform + " slider"}
@@ -165,8 +172,8 @@ const UniformSlider = (props: UniformSliderProps) => {
 export const UniformSliders = () => {
     const theme = useTheme();
 
-    // recommended pattern for forcing an update with a simple counter
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
+    // keeps a count of sliders and also force an update when the count changes
+    const [sliderCount, setSliderCount] = useState(0);
 
     const [sliderRefMap, setSliderRefMap] = useAtom(sliderRefMapAtom);
 
@@ -182,12 +189,12 @@ export const UniformSliders = () => {
      */
     const deleteCallback = (uuid) => {
         setSliderRefMap( sliderArrayRefs => {sliderArrayRefs.delete(uuid); return sliderArrayRefs} );
-        forceUpdate();
+        setSliderCount(sliderCount - 1);
     };
 
     const addCallback = (uuid) => {
         uuid && setSliderRefMap(sliderRefMap.set(uuid, null));
-        forceUpdate();
+        setSliderCount(sliderCount + 1);
     };
 
     const sliderSerDeArray = useAtomValue(sliderSerDeArrayAtom);
@@ -205,15 +212,18 @@ export const UniformSliders = () => {
         <Box>
             <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
                 {[...sliderRefMap.keys()].map((uuid, index) => (
-                    <UniformSlider key={uuid} uuid={uuid} index={index} sliderSerDeArray={sliderSerDeArray} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
+                    <UniformSlider key={uuid} uuid={uuid} index={index} sliderSerDeArray={sliderSerDeArray} sliderRefMap={sliderRefMap} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
                 ))}
             </Stack>
-            <Button sx={{color: theme.palette.primary.light, padding: "0px"}}
-                    onClick={() => {
-                        addCallback(UUID());
-                    }}>
-                <AddIcon/>
-            </Button>
+            {sliderCount < WGPU_CONTEXT_MAX_UNIFORMS ?
+                <Button sx={{color: theme.palette.primary.light, padding: "0px"}}
+                        onClick={() => {
+                            addCallback(UUID());
+                        }}>
+                    <AddIcon/>
+                </Button>
+            : null
+            }
         </Box>
     );
 }
