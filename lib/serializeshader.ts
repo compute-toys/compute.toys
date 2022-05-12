@@ -1,4 +1,4 @@
-import {useAtom, useAtomValue} from "jotai";
+import {atom, Getter, useAtom, useAtomValue} from "jotai";
 import {
     authorProfileAtom,
     codeAtom,
@@ -9,9 +9,10 @@ import {
 } from "lib/atoms";
 import {supabase, SUPABASE_SHADER_TABLE_NAME, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/supabaseclient";
 import {definitions} from "types/supabase";
-import {MutableRefObject} from "react";
+import {MutableRefObject, useMemo, useRef} from "react";
 import {useAuth} from "lib/authcontext";
 import {UniformSliderRef} from "components/uniformsliders";
+import {useUpdateAtom} from "jotai/utils";
 
 export interface UniformActiveSettings {
     name: string,
@@ -58,11 +59,30 @@ const getSliderActiveSettings = (sliderRefMap: Map<string,MutableRefObject<Unifo
     })
 }
 
-export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
-    const {user} = useAuth();
-    // the router is responsible for setting shader ID
-    const shaderID = useAtomValue(shaderIDAtom);
+// https://github.com/pmndrs/jotai/issues/1100
+export const useAtomGetter = () => {
+    const getter = useRef<Getter | null>(null);
+    const derived = useMemo(
+        () =>
+            atom((get) => {
+                getter.current = get;
+            }),
+        []
+    );
+    useAtomValue(derived);
+    return getter.current;
+};
 
+export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
+
+    const atomGetter = useAtomGetter();
+
+    const {user} = useAuth();
+
+
+    /*
+        // the router is responsible for setting shader ID
+    const shaderID = useAtomValue(shaderIDAtom);
     const [code, setCode] = useAtom(codeAtom);
     const [loadedTextures, setLoadedTextures] = useAtom(loadedTexturesAtom);
     const sliderRefMap = useAtomValue(sliderRefMapAtom);
@@ -71,7 +91,26 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
     const [visibility, setVisibility] = useAtom(visibilityAtom);
-    const [authorProfile, setAuthorProfile] = useAtom(authorProfileAtom);
+    const [authorProfile, setAuthorProfile] = useAtom(authorProfileAtom);*/
+
+    /*
+        We DO NOT want to use getters here, even though
+        it would be much more convenient to do so. If we did,
+        putting this function (useShaderSerde) anywhere in our
+        component tree would cause rerenders on all child
+        components in our tree whenever any of the values
+        we need to serialize change. Instead, we use a hack
+        to read the atoms imperatively when they are needed.
+     */
+
+    const setCode = useUpdateAtom(codeAtom);
+    const setLoadedTextures = useUpdateAtom(loadedTexturesAtom);
+    const setSliderSerDeArray = useUpdateAtom(sliderSerDeArrayAtom);
+    const setSliderSerDeNeedsUpdateAtom = useUpdateAtom(sliderSerDeNeedsUpdateAtom);
+    const setTitle = useUpdateAtom(titleAtom);
+    const setDescription = useUpdateAtom(descriptionAtom);
+    const setVisibility = useUpdateAtom(visibilityAtom);
+    const setAuthorProfile = useUpdateAtom(authorProfileAtom);
 
     const get = async (id: number) => {
         try {
@@ -153,13 +192,13 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
             let {data, error, status} = await supabase
                 .from<definitions["shader"]>(SUPABASE_SHADER_TABLE_NAME)
                 .insert([{
-                    name: title,
-                    description: description,
-                    visibility: visibility,
+                    name: atomGetter(titleAtom),
+                    description: atomGetter(descriptionAtom),
+                    visibility: atomGetter(visibilityAtom),
                     body: JSON.stringify({
-                        code: JSON.stringify(code),
-                        uniforms: getSliderActiveSettings(sliderRefMap),
-                        textures: loadedTextures
+                        code: JSON.stringify(atomGetter(codeAtom)),
+                        uniforms: getSliderActiveSettings(atomGetter(sliderRefMapAtom)),
+                        textures: atomGetter(loadedTexturesAtom)
                     })
                 }]).single();
 
@@ -186,13 +225,13 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
             let {data, error, status} = await supabase
                 .from<definitions["shader"]>(SUPABASE_SHADER_TABLE_NAME)
                 .update({
-                    name: title,
-                    description: description,
-                    visibility: visibility,
+                    name: atomGetter(titleAtom),
+                    description: atomGetter(descriptionAtom),
+                    visibility: atomGetter(visibilityAtom),
                     body: JSON.stringify({
-                        code: JSON.stringify(code),
-                        uniforms: getSliderActiveSettings(sliderRefMap),
-                        textures: loadedTextures
+                        code: JSON.stringify(atomGetter(codeAtom)),
+                        uniforms: getSliderActiveSettings(atomGetter(sliderRefMapAtom)),
+                        textures: atomGetter(loadedTexturesAtom)
                     })
                 })
                 .eq('id', id)
@@ -211,8 +250,8 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     };
 
     const upsert = async (dataUrl: string) => {
-        if (shaderID) {
-            return update(shaderID, dataUrl);
+        if (atomGetter(shaderIDAtom)) {
+            return update(atomGetter(shaderIDAtom) as number, dataUrl);
         } else {
             return create(dataUrl);
         }

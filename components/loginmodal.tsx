@@ -119,7 +119,7 @@ export default function LoginModal() {
         <div>
             <Stack direction="row" alignItems="center" justifyContent="right" spacing={1}>
                 <Avatar url={profile.avatar ?? null} size={24} displayOnNull={false}/>
-                <span>{profile.username ?? null}</span>
+                <span>{profile.username ? <Link href={`/profile/${profile.username}`}>{profile.username}</Link> : null}</span>
                 <span>{logInOutButton}</span>
             </Stack>
             <Modal

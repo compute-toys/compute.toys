@@ -236,9 +236,8 @@ export const AuthProvider = ({ ...props }) => {
         setSession(supabase.auth.session());
 
         const { data: authListener } = supabase.auth.onAuthStateChange((event, _session) => {
-            //updateSupabaseCookie(event, _session);
-            //setSession(_session);
             setSession(_session);
+            updateSupabaseCookie(event, _session);
         });
 
         return () => {

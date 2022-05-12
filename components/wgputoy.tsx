@@ -18,7 +18,8 @@ export const WgpuToyWrapper = (props) => {
     }, []);
 
     const onLoad = useCallback(() => {
-            setLoaded(true);
+        console.log("onLoad callback");
+        setLoaded(true);
     }, []);
 
     // Nominally want to use lazy/Suspense here, but it's broken
