@@ -60,6 +60,7 @@ const getSliderActiveSettings = (sliderRefMap: Map<string,MutableRefObject<Unifo
 }
 
 // https://github.com/pmndrs/jotai/issues/1100
+// TODO: jotai has experimental features for dealing with this case, use them when they're less experimental
 export const useAtomGetter = () => {
     const getter = useRef<Getter | null>(null);
     const derived = useMemo(
@@ -79,20 +80,6 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
 
     const {user} = useAuth();
 
-
-    /*
-        // the router is responsible for setting shader ID
-    const shaderID = useAtomValue(shaderIDAtom);
-    const [code, setCode] = useAtom(codeAtom);
-    const [loadedTextures, setLoadedTextures] = useAtom(loadedTexturesAtom);
-    const sliderRefMap = useAtomValue(sliderRefMapAtom);
-    const [sliderSerDeArray, setSliderSerDeArray] = useAtom(sliderSerDeArrayAtom);
-    const [sliderSerDeNeedsUpdate, setSliderSerDeNeedsUpdateAtom] = useAtom(sliderSerDeNeedsUpdateAtom);
-    const [title, setTitle] = useAtom(titleAtom);
-    const [description, setDescription] = useAtom(descriptionAtom);
-    const [visibility, setVisibility] = useAtom(visibilityAtom);
-    const [authorProfile, setAuthorProfile] = useAtom(authorProfileAtom);*/
-
     /*
         We DO NOT want to use getters here, even though
         it would be much more convenient to do so. If we did,
@@ -102,7 +89,6 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
         we need to serialize change. Instead, we use a hack
         to read the atoms imperatively when they are needed.
      */
-
     const setCode = useUpdateAtom(codeAtom);
     const setLoadedTextures = useUpdateAtom(loadedTexturesAtom);
     const setSliderSerDeArray = useUpdateAtom(sliderSerDeArrayAtom);
