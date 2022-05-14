@@ -20,6 +20,7 @@ export interface ProfileData {
 // obviously redundant but typescript will treat reference to
 // VIEWS as a namespace here and fail to find it
 export type View = 'logged_in' | 'logged_out';
+export type EmailOTPType = "signup" | "recovery";
 
 export const VIEWS = {
     LOGGED_IN: 'logged_in' as View,
@@ -29,7 +30,9 @@ export const VIEWS = {
 export type AuthLogIn = (email: string, password: string) => Promise<{error: any}>;
 export type AuthLogOut = () => Promise<{error: any}>;
 export type AuthSignUp = (email: string, username: string, password: string) => Promise<{error: any}>;
-export type AuthConfirm = (email: string, token: string) => Promise<{error: any}>;
+export type AuthConfirm = (email: string, token: string, type: EmailOTPType) => Promise<{error: any}>;
+export type AuthResetPassword = (email: string) => Promise<{error: any}>;
+export type AuthUpdatePassword = (password: string) => Promise<{error: any}>;
 
 
 // TODO: better error types
@@ -41,7 +44,9 @@ export interface AuthContextInterface {
     logIn: AuthLogIn,
     logOut: AuthLogOut,
     signUp: AuthSignUp,
-    confirm: AuthConfirm
+    confirm: AuthConfirm,
+    resetPassword: AuthResetPassword,
+    updatePassword: AuthUpdatePassword
 }
 
 export const AuthContext = createContext<AuthContextInterface>(undefined);
@@ -73,12 +78,12 @@ async function signUpApi(email: string, username: string, password: string) {
     });
 }
 
-async function confirmApi(email: string, token: string) {
+async function confirmApi(email: string, token: string, type: EmailOTPType) {
     return await fetch('/api/confirm', {
         method: 'POST',
         headers: new Headers({ 'Content-Type': 'application/json' }),
         credentials: 'same-origin',
-        body: JSON.stringify({ email, token }),
+        body: JSON.stringify({ email, token, type }),
     });
 }
 
@@ -140,7 +145,7 @@ const getProfileApi = async (user: User, view: string) => {
 }
 
 export const AuthProvider = ({ ...props }) => {
-    const [session, setSession] = useState(null);
+    const [session, setSession] = useState<Session | null>(null);
     const [user, setUser] = useState(null);
     const [view, setView] = useState<View>(VIEWS.LOGGED_OUT);
     const [profile, setProfile] = useState<ProfileData>({username: false, avatar: false});
@@ -180,8 +185,8 @@ export const AuthProvider = ({ ...props }) => {
             });
     }
 
-    const confirm = async (email: string, token: string) : Promise<{ error }> => {
-        return await confirmApi(email, token)
+    const confirm = async (email: string, token: string, type: EmailOTPType) : Promise<{ error }> => {
+        return await confirmApi(email, token, type)
             .then((res) => {
                 if (!res.ok) {
                     return res.json().then(res => {throw new Error(res.error)});
@@ -204,6 +209,30 @@ export const AuthProvider = ({ ...props }) => {
             })
             .catch((err) => {
                 return {error: {message: err.message}}
+            });
+    }
+
+    const resetPassword = async (email: string) : Promise<{ error }> => {
+        return await supabase.auth.api
+            .resetPasswordForEmail(email)
+        .then(({data, error}) => {
+            if (error) {
+                return {error: error.message};
+            } else {
+                return {error: undefined};
+            }
+        });
+    }
+
+    const updatePassword = async (password: string) : Promise<{ error }> => {
+        return await supabase.auth.api
+            .updateUser(session.access_token, { password : password })
+            .then(({data, error}) => {
+                if (error) {
+                    return {error: error.message};
+                } else {
+                    return {error: undefined};
+                }
             });
     }
 
@@ -255,7 +284,9 @@ export const AuthProvider = ({ ...props }) => {
                 logIn: logIn,
                 logOut: logOut,
                 signUp: signUp,
-                confirm: confirm
+                confirm: confirm,
+                resetPassword: resetPassword,
+                updatePassword: updatePassword
             }}
             {...props}
         />

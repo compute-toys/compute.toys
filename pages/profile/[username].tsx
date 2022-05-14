@@ -111,22 +111,31 @@ export default function Profile(props) {
     return (
         <Grid container spacing={2}>
             <Grid item  xs={4} >
-                <Item sx={{color: theme.palette.dracula.green}}>
+                <Item sx={{color: theme.palette.dracula.foreground}}>
                     <Stack direction="row">
-                        <Stack direction="row" justifyContent={"center"} spacing={20} sx={{marginTop: "10px"}}>
+                        <Stack direction="row">
                             <Avatar url={avatar} size={96} displayOnNull={true}/>
-                            <UploadButton onUpload={uploadAvatar} loading={uploading} color={theme.palette.dracula.green}/>
+                            <Box sx={{position: "relative"}}>
+                                <UploadButton onUpload={uploadAvatar} loading={uploading} sx={{
+                                    color: theme.palette.dracula.cyan,
+                                    position: "absolute",
+                                    bottom: 0,
+                                    right: 0,
+                                    minWidth: "20px"
+                                }} iconSx={{filter: "drop-shadow(0px 0px 3px rgb(0 0 0 / 0.8))"}} />
+                            </Box>
                         </Stack>
-                        <Stack>
-                            <Typography>
+                        <Stack sx={{justifyContent: "left", textAlign: "left", marginLeft: "1em"}}>
+                            <Typography variant="h6">
                                 {props.profile.username}
-                            </Typography>
-                            <Typography>
-                                About: {props.profile.about}
                             </Typography>
                             <Typography>
                                 Since: {toDateString(props.profile.created_at)}
                             </Typography>
+                            <Typography>
+                                About: {props.profile.about}
+                            </Typography>
+
                         </Stack>
                     </Stack>
                 </Item>
@@ -165,7 +174,7 @@ export async function getServerSideProps(context) {
     }
 
     // bad way of doing this, and is it really necessary?
-    if (user.id === id) {
+    if (user && user.id === id) {
         let { data: profileData, error: profileError, status: profileStatus } = await supabasePrivileged
             .from<definitions['profile']>('profile')
             .select(`*`)

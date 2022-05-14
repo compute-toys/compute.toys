@@ -99,7 +99,7 @@ export const SignUp = () => {
     }
 
     const submitConfirmation = async () => {
-        const {error} = await confirm(emailEditor, tokenEditor);
+        const {error} = await confirm(emailEditor, tokenEditor, "signup");
         if (error) {
             setErrorMessage(error.message)
             setConfirmed(false);

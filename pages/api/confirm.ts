@@ -2,13 +2,13 @@ import {NextApiRequest, NextApiResponse} from "next";
 import {supabase} from "lib/supabaseclient";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-    const {email, token} = req.body;
+    const {email, token, type} = req.body;
 
     const { user, session, error } = await supabase.auth.verifyOTP(
         {
             email: email,
             token: token,
-            type: "signup"
+            type: type
         }
     )
 

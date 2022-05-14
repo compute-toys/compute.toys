@@ -4,7 +4,8 @@ import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 
 export type UploadButtonProps = {
     onUpload: ChangeEventHandler<HTMLInputElement>
-    color: string
+    sx?: any
+    iconSx?: any
     loading: boolean
 }
 
@@ -14,7 +15,7 @@ export default function UploadButton(props: UploadButtonProps) {
             component="label"
             disabled={props.loading}
             aria-label="add-image"
-            sx={{ position: "fixed", overflow: "hidden", color: props.color }}
+            sx={props.sx}
         >
             <input
                 hidden
@@ -26,7 +27,7 @@ export default function UploadButton(props: UploadButtonProps) {
                     outline: "none"
                 }}
             />
-            <AddAPhotoIcon />
+            <AddAPhotoIcon sx={props.iconSx}/>
         </Button>
     )
 }
