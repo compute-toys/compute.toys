@@ -137,13 +137,13 @@ const WgpuToyController = (props) => {
 
         const handleKeyDown = (e) => {
             safeContext(wgputoy, (wgputoy) => {
-                wgputoy.set_keydown(e.keyCode, true);
+                if (typeof(e.keyCode) === 'number') wgputoy.set_keydown(e.keyCode, true);
             });
         }
 
         const handleKeyUp = (e) => {
             safeContext(wgputoy, (wgputoy) => {
-                wgputoy.set_keydown(e.keyCode, false);
+                if (typeof(e.keyCode) === 'number') wgputoy.set_keydown(e.keyCode, false);
             });
         }
 
