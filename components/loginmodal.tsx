@@ -194,28 +194,33 @@ export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
                         aria-label={"Email input"}
                         size="small"
                         label={"Email"}
+                        type={"email"}
                         value={email || ""}
+                        autoComplete={"username"}
                         onChange={(event: ChangeEvent<HTMLInputElement>) => {setEmail(event.target.value)}}
                         sx ={{
                             input: {color: theme.palette.dracula.cyan},
                             label: {color: theme.palette.dracula.cyan}
                         }}
                     />
-                    { (forgot && !awaitNewPassword) ? null : <CssTextField
-                        disabled={loading}
-                        id="password-login-input"
-                        size={"small"}
-                        aria-label={"Password input"}
-                        label={"Password"}
-                        value={password || ""}
-                        onChange={(e) => setPassword(e.target.value)}
-                        onKeyDown={onEnterKey}
-                        type={"password"}
-                        sx ={{
-                            input: {color: theme.palette.dracula.pink},
-                            label: {color: theme.palette.dracula.pink}
-                        }}
-                    /> }
+                    { (forgot && !awaitNewPassword) ? null :
+                        <CssTextField
+                            disabled={loading}
+                            id="password-login-input"
+                            size={"small"}
+                            aria-label={"Password input"}
+                            label={"Password"}
+                            value={password || ""}
+                            onChange={(e) => setPassword(e.target.value)}
+                            onKeyDown={onEnterKey}
+                            type={"password"}
+                            autoComplete={"current-password"}
+                            sx ={{
+                                input: {color: theme.palette.dracula.pink},
+                                label: {color: theme.palette.dracula.pink}
+                            }}
+                        />
+                    }
                     { getContextDialog() }
                     { forgot ? null : <a onClick={(e) => handleForgot()}>Forgot your password?</a>}
                     {error ?

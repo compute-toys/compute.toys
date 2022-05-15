@@ -1,3 +1,7 @@
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+    enabled: false
+})
+
 // cleanup pending these issues:
 // https://github.com/vercel/next.js/issues/32612
 // https://github.com/vercel/next.js/issues/34940
@@ -46,4 +50,4 @@ class WasmChunksFixPlugin {
     }
 }
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

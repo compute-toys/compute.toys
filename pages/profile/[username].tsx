@@ -2,18 +2,24 @@ import {ChangeEvent, Fragment, useEffect, useState} from "react";
 import {supabase} from "lib/supabaseclient";
 import {supabasePrivileged} from "lib/supabaseprivilegedclient";
 import {useAuth, VIEWS} from "lib/authcontext";
-import {Button, Modal, Stack, Typography} from "@mui/material";
+import {Button, Modal, Stack, Table, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
 import Avatar from "components/avatar";
 import UploadButton from "components/uploadbutton";
 import {CssTextField, Item, theme} from "theme/theme";
 import {definitions} from "../../types/supabase";
 import Grid from "@mui/material/Grid";
+import { toDateString } from "lib/dateutils";
+import {ShaderTable} from "../../components/shadertable";
+
+const PROFILE_AVATAR_WIDTH = 96;
 
 export default function Profile(props) {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [avatar, setAvatar] = useState(props.profile.avatar_url);
+    const [aboutEditor, setAboutEditor] = useState(props.profile.about);
+    const [unsavedChanges, setUnsavedChanges] = useState(false);
     const {user} = useAuth();
 
     const [errorMessage, setErrorMessage] = useState(null);
@@ -67,12 +73,13 @@ export default function Profile(props) {
         }
     }
 
-    async function updateProfile() {
+    async function saveChanges() {
         try {
             setLoading(true)
 
             const updates = {
                 id: user!.id,
+                about: aboutEditor,
             }
 
             let { error } = await supabase.from('profile').upsert(updates, {
@@ -85,6 +92,7 @@ export default function Profile(props) {
             }
 
             setErrorMessage(null);
+            setUnsavedChanges(false);
         } catch (error) {
         } finally {
             setLoading(false)
@@ -92,69 +100,106 @@ export default function Profile(props) {
     }
 
     const style = {
-        position: 'absolute' as 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        width: 400,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        marginTop: '16px',
+        width: "95%",
         bgcolor: 'background.paper',
-        border: '2px solid #000',
         boxShadow: 24,
         p: 4,
+        color: theme.palette.dracula.foreground
     };
 
-    const toDateString = (utcDate: string) => {
-        const date = new Date(utcDate);
-        return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
-    }
-
     return (
-        <Grid container spacing={2}>
-            <Grid item  xs={4} >
-                <Item sx={{color: theme.palette.dracula.foreground}}>
+                <Item sx={style}>
                     <Stack direction="row">
                         <Stack direction="row">
-                            <Avatar url={avatar} size={96} displayOnNull={true}/>
-                            <Box sx={{position: "relative"}}>
-                                <UploadButton onUpload={uploadAvatar} loading={uploading} sx={{
-                                    color: theme.palette.dracula.cyan,
-                                    position: "absolute",
-                                    bottom: 0,
-                                    right: 0,
-                                    minWidth: "20px"
-                                }} iconSx={{filter: "drop-shadow(0px 0px 3px rgb(0 0 0 / 0.8))"}} />
-                            </Box>
+                            <Box><Box sx={{position: "relative", width: `${PROFILE_AVATAR_WIDTH}px`}}>
+                                <Avatar url={avatar} size={PROFILE_AVATAR_WIDTH} displayOnNull={true}/>
+                                {props.editable ?
+                                        <UploadButton onUpload={uploadAvatar} loading={uploading} sx={{
+                                            color: theme.palette.dracula.cyan,
+                                            position: "absolute",
+                                            bottom: 0,
+                                            right: 0,
+                                            minWidth: "20px"
+                                        }} iconSx={{filter: "drop-shadow(0px 0px 3px rgb(0 0 0 / 0.8))"}} />
+                                    : null}
+                            </Box></Box>
                         </Stack>
-                        <Stack sx={{justifyContent: "left", textAlign: "left", marginLeft: "1em"}}>
+                        <Stack sx={{justifyContent: "left", textAlign: "left", marginLeft: "2em", width: "100%"}}>
                             <Typography variant="h6">
                                 {props.profile.username}
                             </Typography>
                             <Typography>
                                 Since: {toDateString(props.profile.created_at)}
                             </Typography>
-                            <Typography>
-                                About: {props.profile.about}
-                            </Typography>
+                            {props.editable ?
+                                <Fragment>
+                                    <CssTextField
+                                        multiline
+                                        fullWidth
+                                        id="profile-about"
+                                        aria-label={"About user"}
+                                        size="small"
+                                        label={"About"}
+                                        value={aboutEditor || ""}
+                                        rows={3}
+                                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                            setAboutEditor(event.target.value);
+                                            setUnsavedChanges(true);
+                                        }}
+                                        sx={{
+                                            marginTop: "1em",
+                                            input: {color: theme.palette.dracula.foreground},
+                                            label: {color: theme.palette.dracula.foreground}
+                                        }}
+                                    />
+                                    {unsavedChanges ?
+                                        <Button
+                                            onClick={(e) => {
+                                                saveChanges()
+                                            }}
+                                            sx={loading ? {color: theme.status.disabled} : {color: theme.palette.dracula.orange}}
+                                            disabled={loading}
+                                        >
+                                            <span>{loading ? 'Loading' : 'Save'}</span>
+                                        </Button>
+
+                                        : null
+                                    }
+                                </Fragment>
+
+                                :
+                                <Typography>
+                                    About: {props.profile.about}
+                                </Typography>
+                            }
+
 
                         </Stack>
                     </Stack>
+                    {errorMessage ?
+                        <Item sx={{color: theme.palette.dracula.red}}>
+                            <Stack>
+                                <Typography>
+                                    {errorMessage}
+                                </Typography>
+                            </Stack>
+                        </Item>
+                        : null
+                    }
+                    <ShaderTable rows={props.shaders}/>
                 </Item>
-                {errorMessage ?
-                    <Item sx={{color: theme.palette.dracula.red}}>
-                        <Stack>
-                            <Typography>
-                                {errorMessage}
-                            </Typography>
-                        </Stack>
-                    </Item>
-                    : null
-                }
-            </Grid>
-        </Grid>
     );
 }
 
 export async function getServerSideProps(context) {
+    context.res.setHeader(
+        'Cache-Control',
+        'public, s-maxage=10, stale-while-revalidate=59'
+    )
+    
     const { username } = context.params;
     const { user } = await supabase.auth.api.getUserByCookie(context.req);
 
@@ -183,7 +228,7 @@ export async function getServerSideProps(context) {
 
         let { data: shaderData, error: shaderError, status: shaderStatus } = await supabasePrivileged
             .from<definitions['shader']>('shader')
-            .select('*')
+            .select('id, name, visibility, created_at, thumb_url')
             .eq('author', user.id);
 
         return { props: {
@@ -200,7 +245,7 @@ export async function getServerSideProps(context) {
 
         let { data: shaderData, error: shaderError, status: shaderStatus } = await supabase
             .from<definitions['shader']>('shader')
-            .select('*')
+            .select('id, name, visibility, created_at, thumb_url')
             .eq('author', id);
 
         return { props: {

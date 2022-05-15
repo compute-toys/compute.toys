@@ -43,7 +43,6 @@ const Index = () => {
 
     return (
         <Box sx={{ flexGrow: 1 }}>
-            <LoginModal/>
             <Grid container spacing={2}>
                 <Grid item ref={renderParentNodeRef} xs={3} md={4} lg={5} xl={6}>
                     <Item>
