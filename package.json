@@ -26,10 +26,11 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-draggable": "^4.4.4",
-    "sharp": "^0.30.3",
+    "sharp": "^0.30.4",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^12.1.6",
     "@types/node": "^17.0.24",
     "@types/react": "^18.0.5",
     "depcheck": "^1.4.3",

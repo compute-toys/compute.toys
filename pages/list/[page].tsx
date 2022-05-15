@@ -174,7 +174,6 @@ const PagePicker = (props) => {
 export default function ShaderList(props) {
     return (
         <Fragment>
-            <LoginModal/>
             <Box sx={{
                 display: "inline-block",
                 position: "relative",
@@ -184,7 +183,6 @@ export default function ShaderList(props) {
                 <PagePicker page={props.page} totalCount={props.totalCount} style={{marginBottom: "10px"}}/>
                 <ShaderPicker page={props.page} shaders={props.shaders}/>
             </Box>
-
         </Fragment>
     );
 }
