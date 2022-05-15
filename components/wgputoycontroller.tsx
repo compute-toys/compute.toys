@@ -157,13 +157,14 @@ const WgpuToyController = (props) => {
 
                 const handleMouseUp = (e: MouseEvent) => {
                     wgputoy.set_mouse_click(false);
+                    canvas.onmousemove = null;
                 }
 
                 const handleMouseDown = (e: MouseEvent) => {
                     wgputoy.set_mouse_click(true);
+                    canvas.onmousemove = handleMouseMove;
                 }
 
-                canvas.onmousemove = handleMouseMove;
                 canvas.onmousedown = handleMouseDown;
                 canvas.onmouseup = handleMouseUp;
                 canvas.onmouseleave = handleMouseUp;
