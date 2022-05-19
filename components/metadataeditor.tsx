@@ -33,6 +33,7 @@ import useShaderSerDe, {UpsertResult} from "../lib/serializeshader";
 import Avatar from "./avatar";
 import {useAuth} from "../lib/authcontext";
 import {useRouter} from "next/router";
+import Link from 'next/link';
 
 const VisibilityInput = styled(InputBase)(({ theme }) => ({
     '& .MuiInputBase-input': {
@@ -94,13 +95,13 @@ export const MetadataEditor = () => {
                         value={title}
                         onChange={(event: ChangeEvent<HTMLInputElement>) => {setTitle(event.target.value)}}
                         sx={{
-                            input: {color: theme.palette.dracula.red},
-                            label: {color: theme.palette.dracula.red},
+                            input: {color: theme.palette.dracula.cyan},
+                            label: {color: theme.palette.dracula.cyan},
                         }}
-                        inputProps={{style: {fontSize: "1.25em", height: "1.0em", color: theme.palette.dracula.red}}}
+                        inputProps={{style: {fontSize: "1.25em", height: "1.0em", color: theme.palette.dracula.cyan}}}
                     />
                 :
-                    <Typography variant="h6" sx={{fontWeight: '400', color: theme.palette.dracula.red}}>
+                    <Typography variant="h6" sx={{fontWeight: '400', color: theme.palette.dracula.cyan}}>
                         {title}
                     </Typography>
                 }
@@ -140,12 +141,12 @@ export const MetadataEditor = () => {
                             setDescription(event.target.value)
                         }}
                         sx={{
-                            input: {color: theme.palette.dracula.purple},
-                            label: {color: theme.palette.dracula.purple}
+                            input: {color: theme.palette.dracula.orange},
+                            label: {color: theme.palette.dracula.orange}
                         }}
                     />
                     :
-                    <Typography variant="body1" sx={{fontWeight: '300', color: theme.palette.dracula.purple}}>
+                    <Typography variant="body1" sx={{fontWeight: '300', color: theme.palette.dracula.orange}}>
                         {description}
                     </Typography>
                 }
@@ -154,16 +155,21 @@ export const MetadataEditor = () => {
                 {authorProfile !== false ?
                     <Stack direction="row" alignItems="center" justifyContent="left" spacing={1}>
                         <Avatar url={authorProfile.avatar_url ?? null} size={24} displayOnNull={false}/>
-                        <Typography color={theme.palette.dracula.green}>{authorProfile.username ?? null}</Typography>
+                        <Typography color={theme.palette.dracula.green}>
+                            {authorProfile.username ? <Link href={`/profile/${authorProfile.username}`}>{authorProfile.username}</Link> : null}
+                        </Typography>
                     </Stack>
                     : null
                 }
             </Grid>
-            <Grid item xs={2} alignItems="center">
+            <Grid item xs={2} alignItems="center" textAlign="right">
                 {userIsAuthor() ?
-                    <Button sx={{padding: "0", color: theme.palette.dracula.cyan}} onClick={async () => {
-                        upsertShader();
-                    }}>Save</Button>
+                    <Button sx={{padding: "1", color: theme.palette.dracula.green, border: `1px solid ${theme.palette.dracula.currentLine}`}}
+                            onClick={async () => {
+                                upsertShader();
+                            }}>
+                        Save
+                    </Button>
                     : null }
             </Grid>
         </Grid>
