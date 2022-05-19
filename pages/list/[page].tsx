@@ -10,6 +10,7 @@ import Avatar from "components/avatar";
 import Box from "@mui/material/Box";
 import LoginModal from "components/loginmodal";
 import Link from 'next/link'
+import FakeLink from "../../components/fakelink";
 
 export const SHADERS_PER_PAGE = 12;
 export const SHADER_THUMB_SIZE_H = 256;
@@ -88,7 +89,11 @@ const ShaderPicker = (props) => {
                             subtitle={`by ${shader.profile.username}`}
                             style={{borderRadius: '4px'}}
                             actionIcon={
-                                <Box sx={{margin: "10px"}}><Avatar url={shader.profile.avatar_url} size={25}/></Box>
+                                <FakeLink href={`/profile/${shader.profile.username}`}>
+                                    <Box sx={{margin: "10px"}}>
+                                        <Avatar url={shader.profile.avatar_url} size={25}/>
+                                    </Box>
+                                </FakeLink>
                             }
                         />
                     </ImageListItem>

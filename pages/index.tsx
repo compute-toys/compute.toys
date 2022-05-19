@@ -18,6 +18,7 @@ import Grid from "@mui/material/Grid";
 import {forwardRef, Fragment, useState} from "react";
 import Timeline from "@mui/lab/Timeline";
 import {TimelineConnector, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator} from "@mui/lab";
+import FakeLink from "../components/fakelink";
 
 
 
@@ -41,7 +42,11 @@ const NewSubmissionBar = (props) => {
                         subtitle={`by ${shader.profile.username}`}
                         style={{borderRadius: '4px'}}
                         actionIcon={
-                            <Box sx={{margin: "10px"}}><Avatar url={shader.profile.avatar_url} size={25}/></Box>
+                            <FakeLink href={`/profile/${shader.profile.username}`}>
+                                <Box sx={{margin: "10px"}}>
+                                    <Avatar url={shader.profile.avatar_url} size={25}/>
+                                </Box>
+                            </FakeLink>
                         }
                     />
                 </ImageListItem>
@@ -110,10 +115,11 @@ export default function Home(props) {
             </Modal>
             <Alert variant={"outlined"} severity="warning" sx={{marginTop: "1em"}}>
                 <Typography variant={"subtitle1"} color={theme.palette.neutral.contrastText}>
-                    compute.toys is an early alpha project, using new browser features
+                    {`compute.toys is an early alpha project, using new browser features
                     that can only be enabled in the development versions of browsers.
                     At this time, only Chrome is supported. For instructions on
-                    how to set up your browser, <a style={{textDecoration: "underline"}} onClick={handleOpen}>click here</a>.
+                    how to set up your browser, `}
+                    <FakeLink textDecoration="underline" color={theme.palette.dracula.foreground} onClick={handleOpen}>click here</FakeLink>.
                 </Typography>
             </Alert>
             <Item sx={style}>
