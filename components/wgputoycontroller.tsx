@@ -34,13 +34,17 @@ const isPlayingAtom = atom(false);
     here, because they will fire off additional effects unnecessarily.
  */
 const WgpuToyController = (props) => {
-    const code = useAtomValue(codeAtom);
+
     const play = useAtomValue(playAtom);
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
     // must be transient so we can access updated value in play loop
     const [manualReload, setManualReload] = useTransientAtom(manualReloadAtom);
     const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
+    const [codeHot,] = useTransientAtom(codeAtom);
+    // transient atom can't be used with effect hook, and we want both
+    // "hot" access and effect hook access
+    const code = useAtomValue(codeAtom);
 
     const setParseError = useUpdateAtom(parseErrorAtom);
     const loadedTextures = useAtomValue(loadedTexturesAtom);
@@ -145,7 +149,7 @@ const WgpuToyController = (props) => {
 
     const reloadCallback = useCallback( () => {
         safeContext(wgputoy, (wgputoy) => {
-            wgputoy.set_shader(code);
+            wgputoy.set_shader(codeHot());
             console.log("reloading");
         });
     }, []);

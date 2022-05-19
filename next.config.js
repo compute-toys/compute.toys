@@ -27,6 +27,7 @@ const nextConfig = {
             config.plugins.push(new WasmChunksFixPlugin());
         }
         config.optimization.moduleIds = 'named';
+        config.devtool = 'inline-source-map';
         return config;
     }
 };

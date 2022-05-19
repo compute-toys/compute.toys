@@ -15,7 +15,7 @@ import Box from "@mui/material/Box";
 import Avatar from "components/avatar";
 import ImageList from "@mui/material/ImageList";
 import Grid from "@mui/material/Grid";
-import {Fragment, useState} from "react";
+import {forwardRef, Fragment, useState} from "react";
 import Timeline from "@mui/lab/Timeline";
 import {TimelineConnector, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator} from "@mui/lab";
 
@@ -73,7 +73,7 @@ const style = {
     color: theme.palette.dracula.foreground,
 };
 
-const ExplainerModal = () => {
+const ExplainerModal = forwardRef((props, ref) => {
     return (
         <Box sx={modalStyle}>
             <Stack spacing={2}>
@@ -89,7 +89,9 @@ const ExplainerModal = () => {
             </Stack>
         </Box>
         );
-}
+});
+
+ExplainerModal.displayName = "ExplainerModal";
 
 export default function Home(props) {
     const [open, setOpen] = useState(false);
