@@ -1,183 +1,181 @@
 import Head from 'next/head'
 import Link from 'next/link'
 
+import {Item, theme, getRainbowColor} from "theme/theme";
+
 import 'firacode'
 import '@fontsource/lobster'
-
-export default function Home() {
-  return (
-    <div className="container">
-      <Head>
-        <title>compute.toys</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main>
-        <h1 className="title">
-          <span style={{ color: 'white', fontFamily: 'Fira Code', fontSize: '3rem', fontWeight: 'normal' }}><span style={{ color: 'gray' }}>@</span>compute<span style={{ fontFamily: 'Lobster', fontSize: '110%' }}><span style={{ color: 'gray' }}>.</span>toys</span></span>
-        </h1>
-      </main>
-
-      <main>
-        <ul>
-          <li><Link href="/new">New</Link></li>
-          <li><Link href="/view/435e9bb5c60ef892df53ce2233bae197">Buddhabrot</Link></li>
-          <li><Link href="/view/53a3829482e4bce3f8329f19f1641f4c">Caustics</Link></li>
-          <li><Link href="/view/5f9677a0ccfbd63d7a8657ad9af3a856">Hash without sine</Link></li>
-          <li><Link href="/view/ab237d17e5cdc3759e25c6b4dc1a73aa">Texture colorspace projection</Link></li>
-          <li><Link href="/view/ebd53bc4d99f8edd63b623ef0439d10c">Simplex Noise</Link></li>
-          <li><Link href="/view/0c70160b4145514241ac78098ac6d19f">Demofox Path Tracing</Link></li>
-          <li><Link href="/view/24429fb91484c0bace7c402f1ac1d1bd">Assert demo</Link></li>
-          <li><Link href="/view/67af8481dde3948b74e05769827cb5ae">Importance sampling demo</Link></li>
-        </ul>
-      </main>
+import {ImageListItemBar, Stack, Typography, Alert, Modal} from "@mui/material";
+import {supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/supabaseclient";
+import {SHADER_THUMB_SIZE_H, SHADER_THUMB_SIZE_V} from "./list/[page]";
+import ImageListItem from "@mui/material/ImageListItem";
+import Image from "next/image";
+import {getFullyQualifiedSupabaseBucketURL} from "lib/urlutils";
+import Box from "@mui/material/Box";
+import Avatar from "components/avatar";
+import ImageList from "@mui/material/ImageList";
+import Grid from "@mui/material/Grid";
+import {Fragment, useState} from "react";
+import Timeline from "@mui/lab/Timeline";
+import {TimelineConnector, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator} from "@mui/lab";
 
 
-      <style jsx>{`
-        .container {
-          min-height: 100vh;
-          padding: 0 0.5rem;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
 
-        main {
-          padding: 5rem 0;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
+const NewSubmissionBar = (props) => {
+    return (
+        <ImageList gap={10} sx={{ width: SHADER_THUMB_SIZE_H*2.1 }}
+                   cols={2} rowHeight={SHADER_THUMB_SIZE_V}
+        >
+            { props.shaders.map((shader, index) => (
+                <ImageListItem key={shader.id}>
+                    <Image
+                        style={{borderRadius: '4px'}}
+                        src={getFullyQualifiedSupabaseBucketURL(SUPABASE_SHADERTHUMB_BUCKET_NAME, shader.thumb_url)}
+                        alt={shader.name}
+                        width={SHADER_THUMB_SIZE_H}
+                        height={SHADER_THUMB_SIZE_V}
+                        loading="lazy"
+                    />
+                    <ImageListItemBar
+                        title={<Link href={`/editor/${shader.id}`}>{shader.name}</Link>}
+                        subtitle={`by ${shader.profile.username}`}
+                        style={{borderRadius: '4px'}}
+                        actionIcon={
+                            <Box sx={{margin: "10px"}}><Avatar url={shader.profile.avatar_url} size={25}/></Box>
+                        }
+                    />
+                </ImageListItem>
+            ))}
+        </ImageList>
+    );
+}
 
-        footer {
-          width: 100%;
-          height: 100px;
-          border-top: 1px solid #eaeaea;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
+const modalStyle = {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 450,
+    bgcolor: 'background.paper',
+    border: '2px solid #000',
+    boxShadow: 24,
+    p: 4,
+};
 
-        footer img {
-          margin-left: 0.5rem;
-        }
+const style = {
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginTop: '16px',
+    width: "95%",
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
+    color: theme.palette.dracula.foreground,
+};
 
-        footer a {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
+const ExplainerModal = () => {
+    return (
+        <Box sx={modalStyle}>
+            <Stack spacing={2}>
+                <Typography color={getRainbowColor(6)}>{"Download, install, and open "}<a href={"https://www.google.com/chrome/dev/"}>Chrome Dev</a></Typography>
+                <Typography color={getRainbowColor(0)}>{`Enter about:flags into your search bar`}</Typography>
+                <Box><Image width="281" height="77" src={"/instructions/chromebar.png"}/></Box>
+                <Typography color={getRainbowColor(1)}>{`In the "Search flags" bar, enter "webgpu"`}</Typography>
+                <Box><Image width="450" height="58" src={"/instructions/webgpu.png"}/></Box>
+                <Typography color={getRainbowColor(2)}>{`Enable "Unsafe WebGPU"`}</Typography>
+                <Box><Image width="486" height="175" src={"/instructions/unsafe.png"}/></Box>
+                <Typography color={getRainbowColor(3)}>{`You may need to restart your browser`}</Typography>
+                <Typography color={getRainbowColor(4)}>{`You're done!`}</Typography>
+            </Stack>
+        </Box>
+        );
+}
 
-        a {
-          color: inherit;
-          text-decoration: none;
-        }
+export default function Home(props) {
+    const [open, setOpen] = useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
-        .title a {
-          color: #0070f3;
-          text-decoration: none;
-        }
+    return (
+        <Fragment>
+            <Modal
+                open={open}
+                onClose={handleClose}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+            >
+                <ExplainerModal/>
+            </Modal>
+            <Alert variant={"outlined"} severity="warning" sx={{marginTop: "1em"}}>
+                <Typography variant={"subtitle1"} color={theme.palette.neutral.contrastText}>
+                    compute.toys is an early alpha project, using new browser features that can only be enabled in the development versions of browsers. At this time, only Chrome is supported. For instructions on how to set up your browser, <a onClick={handleOpen}>click here</a>.
+                </Typography>
+            </Alert>
+            <Item sx={style}>
+                <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                        <Stack>
+                            <Typography>
+                                Recent submissions
+                            </Typography>
+                            <Box>
+                                <NewSubmissionBar shaders={props.shaders}/>
+                            </Box>
+                        </Stack>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Stack spacing={2}>
+                            <Typography variant={"h2"}>
+                                <span style={{ color: 'white', fontFamily: 'Fira Code' }}>
+                                    <span style={{ color: 'gray' }}>@</span>
+                                    compute
+                                    <span style={{ fontFamily: 'Lobster', fontSize: '110%' }}>
+                                        <span style={{ color: 'gray' }}>.</span>
+                                        toys
+                                    </span>
+                                </span>
+                            </Typography>
+                            <Typography variant={"h5"}>
+                                    <Link href="/new">New Shader</Link>
+                            </Typography>
+                            <Typography variant={"h5"}>
+                                <Link href="/list/0">Browse</Link>
+                            </Typography>
+                        </Stack>
 
-        .title a:hover,
-        .title a:focus,
-        .title a:active {
-          text-decoration: underline;
-        }
+                    </Grid>
 
-        .title {
-          margin: 0;
-          line-height: 1.15;
-          font-size: 4rem;
-        }
+                </Grid>
+            </Item>
+        </Fragment>
+    )
+}
 
-        .title,
-        .description {
-          text-align: center;
-        }
+export async function getServerSideProps(context) {
+    context.res.setHeader(
+        'Cache-Control',
+        'public, s-maxage=120, stale-while-revalidate=120'
+    )
 
-        .description {
-          line-height: 1.5;
-          font-size: 1.5rem;
-        }
+    const { data, count, error } = await supabase
+        .from('shader')
+        .select(`
+            id,
+            name,
+            profile (
+                username,
+                avatar_url
+            ),
+            thumb_url
+        `)
+        .order("created_at", {ascending: false})
+        .range(0, 3)
+        .eq('visibility', 'public');
 
-        code {
-          background: #fafafa;
-          border-radius: 5px;
-          padding: 0.75rem;
-          font-size: 1.1rem;
-          font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
-            DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-        }
-
-        .grid {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-wrap: wrap;
-
-          max-width: 800px;
-          margin-top: 3rem;
-        }
-
-        .card {
-          margin: 1rem;
-          flex-basis: 45%;
-          padding: 1.5rem;
-          text-align: left;
-          color: inherit;
-          text-decoration: none;
-          border: 1px solid #eaeaea;
-          border-radius: 10px;
-          transition: color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .card:hover,
-        .card:focus,
-        .card:active {
-          color: #0070f3;
-          border-color: #0070f3;
-        }
-
-        .card h3 {
-          margin: 0 0 1rem 0;
-          font-size: 1.5rem;
-        }
-
-        .card p {
-          margin: 0;
-          font-size: 1.25rem;
-          line-height: 1.5;
-        }
-
-        .logo {
-          height: 1em;
-        }
-
-        @media (max-width: 600px) {
-          .grid {
-            width: 100%;
-            flex-direction: column;
-          }
-        }
-      `}</style>
-
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-            sans-serif;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-      `}</style>
-    </div>
-  )
+    return {
+        props: {
+            shaders: data,
+            error: error
+        },
+    };
 }

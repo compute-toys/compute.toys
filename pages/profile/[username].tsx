@@ -218,7 +218,7 @@ export async function getServerSideProps(context) {
         }
     }
 
-    // bad way of doing this, and is it really necessary?
+    // TODO: bad way of doing this, and is it really necessary?
     if (user && user.id === id) {
         let { data: profileData, error: profileError, status: profileStatus } = await supabasePrivileged
             .from<definitions['profile']>('profile')

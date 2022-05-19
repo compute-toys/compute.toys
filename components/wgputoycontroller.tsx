@@ -38,11 +38,14 @@ const WgpuToyController = (props) => {
     const play = useAtomValue(playAtom);
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
-    const [manualReload, setManualReload] = useAtom(manualReloadAtom);
+    // must be transient so we can access updated value in play loop
+    const [manualReload, setManualReload] = useTransientAtom(manualReloadAtom);
+    const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
+
     const setParseError = useUpdateAtom(parseErrorAtom);
     const loadedTextures = useAtomValue(loadedTexturesAtom);
     const setEntryPoints = useUpdateAtom(entryPointsAtom);
-    const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
+
 
     const wgputoy = useAtomValue(wgputoyAtom);
     const canvas = useAtomValue(canvasElAtom);
@@ -72,6 +75,16 @@ const WgpuToyController = (props) => {
     const playCallback = useCallback((time: DOMHighResTimeStamp) => {
         safeContext(wgputoy, (wgputoy) => {
             updateUniforms();
+            /*
+                Handle manual reload in the play callback to handle race conditions
+                where manualReload gets set before the controller is loaded, which
+                results in the effect hook for manualReload never getting called
+             */
+            if (manualReload()) {
+                console.log(`caught manualReload ${manualReload()} in play loop`);
+                reloadCallback();
+                setManualReload(false);
+            }
             wgputoy.set_time_elapsed(time * 1e-3);
             wgputoy.render();
             setIsPlaying(true);
@@ -130,6 +143,13 @@ const WgpuToyController = (props) => {
         });
     }, []);
 
+    const reloadCallback = useCallback( () => {
+        safeContext(wgputoy, (wgputoy) => {
+            wgputoy.set_shader(code);
+            console.log("reloading");
+        });
+    }, []);
+
     // init effect
     useEffect(() => {
 
@@ -175,6 +195,7 @@ const WgpuToyController = (props) => {
 
         if (!isPlaying()) {
             console.log("first play reset called");
+            reloadCallback();
             resetCallback();
             playCallback(0);
         }
@@ -192,14 +213,15 @@ const WgpuToyController = (props) => {
     }, [play, isPlaying()])
 
     useEffect(() => {
-        if (hotReload || manualReload) {
-            safeContext(wgputoy, (wgputoy) => {
-                wgputoy.set_shader(code);
-                setManualReload(false);
-                console.log("reloading");
-            });
+        /*
+            only need to handle manual reload effect here for
+            special case where we're paused and a reload is called
+        */
+        if (hotReload || (!isPlaying() && manualReload())) {
+            reloadCallback();
+            setManualReload(false);
         }
-    }, [code, manualReload, hotReload]);
+    }, [code, hotReload, manualReload()]);
 
     useResizeObserver(parentRef,(entry) => {
         safeContext(wgputoy, (wgputoy) => {

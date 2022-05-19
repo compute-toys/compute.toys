@@ -68,3 +68,5 @@ export const sliderSerDeNeedsUpdateAtom = atom<boolean>(false);
 export const shaderDataUrlThumbAtom = atom<string>("");
 
 export const authorProfileAtom = atom<AuthorProfile | false>(false);
+
+export const saveColorTransitionSignalAtom = atom<string | false>(false);

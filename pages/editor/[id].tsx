@@ -15,7 +15,7 @@ import ResetButton from "components/resetbutton";
 import HotReloadToggle from "components/hotreloadtoggle";
 import ReloadButton from "components/reloadbutton";
 
-import { Frame, Item, theme } from "theme/theme";
+import {Frame, Item, theme} from "theme/theme";
 import {Accordion, AccordionDetails, AccordionSummary} from "@mui/material";
 
 import "firacode";
@@ -28,6 +28,8 @@ import {useUpdateAtom} from "jotai/utils";
 import LoginModal from "components/loginmodal";
 import {MetadataEditor} from "components/metadataeditor";
 import {useDBRouter} from "lib/dbrouter";
+import {saveColorTransitionSignalAtom} from "../../lib/atoms";
+import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 
 const Index = () => {
 
@@ -45,7 +47,7 @@ const Index = () => {
         <Box sx={{ flexGrow: 1 }}>
             <Grid container spacing={2}>
                 <Grid item ref={renderParentNodeRef} xs={3} md={4} lg={5} xl={6}>
-                    <Item>
+                    <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
                         <Frame elevation={12}>
                             <WgpuToyWrapper
                                 bindID={"editor-canvas"}
@@ -68,23 +70,25 @@ const Index = () => {
                                 <UniformSliders/>
                             </AccordionDetails>
                         </Accordion>
-                    </Item>
-                    <MetadataEditor/>
+                    </ItemWithTransitionSignal>
+                    <ItemWithTransitionSignal sx={{textAlign: "left", marginTop: "20px"}} transitionAtom={saveColorTransitionSignalAtom}>
+                        <MetadataEditor/>
+                    </ItemWithTransitionSignal>
                 </Grid>
                 <Grid item xs={9} md={8} lg={7} xl={6}>
-                <Item>
-                    <Monaco
-                        editorOptions={{
-                            stopRenderingLineAfter: 1000,
-                            fontFamily: "'Fira Code', monospace",
-                            //fontLigatures: true,
-                        }}
-                    />
-                    <Box sx={{paddingTop: "4px"}}>
-                        <ReloadButton/>
-                        <HotReloadToggle/>
-                    </Box>
-                </Item>
+                    <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
+                        <Monaco
+                            editorOptions={{
+                                stopRenderingLineAfter: 1000,
+                                fontFamily: "'Fira Code', monospace",
+                                //fontLigatures: true,
+                            }}
+                        />
+                        <Box sx={{paddingTop: "4px"}}>
+                            <ReloadButton/>
+                            <HotReloadToggle/>
+                        </Box>
+                    </ItemWithTransitionSignal>
                     <Grid container spacing={2}>
                         <Grid item><TexturePicker/></Grid>
                         <Grid item><EntryPointDisplay/></Grid>

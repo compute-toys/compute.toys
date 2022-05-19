@@ -6,9 +6,10 @@ import AddIcon from '@mui/icons-material/Add';
 import Box from "@mui/material/Box";
 import {CssTextField, getRainbowColor, theme} from "theme/theme";
 import { v4 as UUID } from 'uuid';
-import {sliderRefMapAtom, sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom} from "lib/atoms";
+import {manualReloadAtom, sliderRefMapAtom, sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom} from "lib/atoms";
 import {useAtom, useAtomValue} from "jotai";
 import {UniformActiveSettings} from "lib/serializeshader";
+import {useUpdateAtom} from "jotai/utils";
 
 export const WGPU_CONTEXT_MAX_UNIFORMS = 16;
 
@@ -177,6 +178,8 @@ export const UniformSliders = () => {
 
     const [sliderRefMap, setSliderRefMap] = useAtom(sliderRefMapAtom);
 
+    const setManualReload = useUpdateAtom(manualReloadAtom);
+
     const sliderRefCallback = (ref) => {
         ref && setSliderRefMap(sliderRefMap.set(ref.current.getUUID(), ref)); // set returns 'this'
     };
@@ -190,11 +193,15 @@ export const UniformSliders = () => {
     const deleteCallback = (uuid) => {
         setSliderRefMap( sliderArrayRefs => {sliderArrayRefs.delete(uuid); return sliderArrayRefs} );
         setSliderCount(sliderCount - 1);
+        // recompile with new prelude
+        setManualReload(true);
     };
 
     const addCallback = (uuid) => {
         uuid && setSliderRefMap(sliderRefMap.set(uuid, null));
         setSliderCount(sliderCount + 1);
+        // recompile with new prelude
+        setManualReload(true);
     };
 
     const sliderSerDeArray = useAtomValue(sliderSerDeArrayAtom);

@@ -3,7 +3,7 @@ import {
     authorProfileAtom,
     codeAtom,
     descriptionAtom,
-    loadedTexturesAtom, shaderIDAtom, sliderRefMapAtom,
+    loadedTexturesAtom, saveColorTransitionSignalAtom, shaderIDAtom, sliderRefMapAtom,
     sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom,
     titleAtom, visibilityAtom
 } from "lib/atoms";
@@ -13,6 +13,7 @@ import {MutableRefObject, useMemo, useRef} from "react";
 import {useAuth} from "lib/authcontext";
 import {UniformSliderRef} from "components/uniformsliders";
 import {useUpdateAtom} from "jotai/utils";
+import {theme} from "../theme/theme";
 
 export interface UniformActiveSettings {
     name: string,
@@ -53,8 +54,8 @@ const getSliderActiveSettings = (sliderRefMap: Map<string,MutableRefObject<Unifo
     // convert our map of references into a plain array of objects
     return [...sliderRefMap.keys()].map((uuid) => {
         return {
-            name: sliderRefMap[uuid].current.getUniform(),
-            value: sliderRefMap[uuid].current.getVal()
+            name: sliderRefMap.get(uuid).current.getUniform(),
+            value: sliderRefMap.get(uuid).current.getVal()
         } as UniformActiveSettings;
     })
 }
@@ -97,6 +98,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     const setDescription = useUpdateAtom(descriptionAtom);
     const setVisibility = useUpdateAtom(visibilityAtom);
     const setAuthorProfile = useUpdateAtom(authorProfileAtom);
+    const setSaveColorTransitionSignal = useUpdateAtom(saveColorTransitionSignalAtom);
 
     const get = async (id: number) => {
         try {
@@ -123,6 +125,8 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
 
             if (data) {
                 const shader = data;
+                // set page title
+                document.title = shader.name;
                 setTitle(shader.name);
                 setDescription(shader.description);
                 setVisibility(shader.visibility);
@@ -194,13 +198,16 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
 
             if (data) {
                 await uploadThumb(data["id"], dataUrl);
+                setSaveColorTransitionSignal(theme.palette.dracula.green)
                 return upsertResult(data["id"], true, true);
             } else {
+                setSaveColorTransitionSignal(theme.palette.dracula.red)
                 return upsertResult(null, false, false, "No data returned on creation");
             }
 
         } catch (error) {
             alert(error.message);
+            setSaveColorTransitionSignal(theme.palette.dracula.red)
             return upsertResult(null, false, false, error.message);
         }
     };
@@ -228,9 +235,11 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
             }
 
             await uploadThumb(id, dataUrl);
+            setSaveColorTransitionSignal(theme.palette.dracula.green)
             return upsertResult(id, false, true);
         } catch (error) {
             alert(error.message);
+            setSaveColorTransitionSignal(theme.palette.dracula.red)
             return upsertResult(id, false, false, error.message);
         }
     };
