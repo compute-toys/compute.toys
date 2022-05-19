@@ -151,7 +151,7 @@ export const MetadataEditor = () => {
                     </Typography>
                 }
             </Grid>
-            <Grid item xs={10} alignItems="center">
+            <Grid item xs={8} alignItems="center">
                 {authorProfile !== false ?
                     <Stack direction="row" alignItems="center" justifyContent="left" spacing={1}>
                         <Avatar url={authorProfile.avatar_url ?? null} size={24} displayOnNull={false}/>
@@ -162,7 +162,7 @@ export const MetadataEditor = () => {
                     : null
                 }
             </Grid>
-            <Grid item xs={2} alignItems="center" textAlign="right">
+            <Grid item xs={4} alignItems="center" textAlign="right">
                 {userIsAuthor() ?
                     <Button sx={{padding: "1", color: theme.palette.dracula.green, border: `1px solid ${theme.palette.dracula.currentLine}`}}
                             onClick={async () => {

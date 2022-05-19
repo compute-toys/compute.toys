@@ -56,7 +56,7 @@ export async function getServerSideProps(context) {
 
     return {
         props: {
-            shaders: data,
+            shaders: data ?? [],
             pageCount: count,
             totalCount: totalCount,
             error: error,

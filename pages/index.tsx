@@ -110,7 +110,10 @@ export default function Home(props) {
             </Modal>
             <Alert variant={"outlined"} severity="warning" sx={{marginTop: "1em"}}>
                 <Typography variant={"subtitle1"} color={theme.palette.neutral.contrastText}>
-                    compute.toys is an early alpha project, using new browser features that can only be enabled in the development versions of browsers. At this time, only Chrome is supported. For instructions on how to set up your browser, <a onClick={handleOpen}>click here</a>.
+                    compute.toys is an early alpha project, using new browser features
+                    that can only be enabled in the development versions of browsers.
+                    At this time, only Chrome is supported. For instructions on
+                    how to set up your browser, <a style={{textDecoration: "underline"}} onClick={handleOpen}>click here</a>.
                 </Typography>
             </Alert>
             <Item sx={style}>

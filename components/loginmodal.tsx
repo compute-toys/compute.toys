@@ -4,6 +4,10 @@ import {CssTextField, Item, theme} from "theme/theme";
 import {AuthConfirm, AuthLogIn, AuthResetPassword, AuthUpdatePassword, useAuth, VIEWS} from "lib/authcontext";
 import Avatar from "components/avatar";
 import Link from 'next/link'
+import Grid from "@mui/material/Grid";
+import Logo from "./logo";
+import Box from "@mui/material/Box";
+import styled from "@emotion/styled";
 
 interface LoginWindowProps {
     logIn: AuthLogIn,
@@ -240,6 +244,7 @@ export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
 
 LoginWindow.displayName = "LoginWindow";
 
+
 export default function LoginModal() {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
     const {view, profile, logIn, logOut, confirm, resetPassword, updatePassword} = useAuth();
@@ -269,11 +274,27 @@ export default function LoginModal() {
 
     return (
         <div>
-            <Stack direction="row" alignItems="center" justifyContent="right" spacing={1}>
-                <Avatar url={profile.avatar ?? null} size={24} displayOnNull={false}/>
-                <span>{profile.username ? <Link href={`/profile/${profile.username}`}>{profile.username}</Link> : null}</span>
-                <span>{logInOutButton}</span>
-            </Stack>
+            <Grid container>
+                <Grid item xs={8}>
+                    <Stack direction="row" alignItems="center" height="100%" marginLeft="1em" spacing={0}>
+                        <Typography variant="h6">
+                            <Logo/>
+                        </Typography>
+                        <Stack direction="row" marginLeft="2em" paddingTop="0.2em" zIndex="10" spacing={2}>
+                            <Link href="/new">new</Link>
+                            <Link href="/list/0">browse</Link>
+                        </Stack>
+                    </Stack>
+                </Grid>
+                <Grid item xs={4}>
+                    <Stack direction="row" alignItems="center" justifyContent="right" spacing={1}>
+                            <Avatar url={profile.avatar ?? null} size={24} displayOnNull={false}/>
+                            <Box height="100%" zIndex="10">{profile.username ? <Link href={`/profile/${profile.username}`}>{profile.username}</Link> : null}</Box>
+                            <span>{logInOutButton}</span>
+                    </Stack>
+                </Grid>
+
+            </Grid>
             <Modal
                 open={open}
                 onClose={handleClose}
