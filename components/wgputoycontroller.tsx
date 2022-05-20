@@ -1,7 +1,7 @@
 import {useCallback, useEffect} from "react";
 import {atom, useAtom, useAtomValue} from "jotai";
 import {
-    codeAtom, entryPointsAtom,
+    codeAtom, dbLoadedAtom, entryPointsAtom,
     hotReloadAtom,
     loadedTexturesAtom,
     manualReloadAtom,
@@ -35,13 +35,14 @@ const isPlayingAtom = atom(false);
  */
 const WgpuToyController = (props) => {
 
-    const play = useAtomValue(playAtom);
+    const [play, setPlay] = useAtom(playAtom);
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
     // must be transient so we can access updated value in play loop
     const [manualReload, setManualReload] = useTransientAtom(manualReloadAtom);
     const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
     const [codeHot,] = useTransientAtom(codeAtom);
+    const [dbLoaded,] = useTransientAtom(dbLoadedAtom);
     // transient atom can't be used with effect hook, and we want both
     // "hot" access and effect hook access
     const code = useAtomValue(codeAtom);
@@ -84,7 +85,7 @@ const WgpuToyController = (props) => {
                 where manualReload gets set before the controller is loaded, which
                 results in the effect hook for manualReload never getting called
              */
-            if (manualReload()) {
+            if (manualReload() && dbLoaded()) {
                 console.log(`caught manualReload ${manualReload()} in play loop`);
                 reloadCallback();
                 setManualReload(false);
@@ -199,7 +200,7 @@ const WgpuToyController = (props) => {
 
         if (!isPlaying()) {
             console.log("first play reset called");
-            reloadCallback();
+            setPlay(true);
             resetCallback();
             playCallback(0);
         }
