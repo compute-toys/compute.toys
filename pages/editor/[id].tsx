@@ -15,7 +15,7 @@ import ResetButton from "components/resetbutton";
 import HotReloadToggle from "components/hotreloadtoggle";
 import ReloadButton from "components/reloadbutton";
 
-import {Frame, Item, theme} from "theme/theme";
+import {Frame, theme} from "theme/theme";
 import {Accordion, AccordionDetails, AccordionSummary} from "@mui/material";
 
 import "firacode";
@@ -25,10 +25,9 @@ import TexturePicker from "components/texturepicker";
 import EntryPointDisplay from "components/entrypointdisplay";
 import {canvasParentElAtom} from "lib/wgputoyatoms";
 import {useUpdateAtom} from "jotai/utils";
-import LoginModal from "components/loginmodal";
 import {MetadataEditor} from "components/metadataeditor";
 import {useDBRouter} from "lib/dbrouter";
-import {saveColorTransitionSignalAtom} from "../../lib/atoms";
+import {saveColorTransitionSignalAtom} from "lib/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 
 const Index = () => {

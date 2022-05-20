@@ -1,5 +1,5 @@
 import { ChangeEventHandler } from 'react'
-import {Button, Fab} from "@mui/material";
+import {Button} from "@mui/material";
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 
 export type UploadButtonProps = {

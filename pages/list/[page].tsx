@@ -8,9 +8,8 @@ import {getFullyQualifiedSupabaseBucketURL} from "lib/urlutils";
 import {Button, ImageListItemBar, Stack} from "@mui/material";
 import Avatar from "components/avatar";
 import Box from "@mui/material/Box";
-import LoginModal from "components/loginmodal";
 import Link from 'next/link'
-import FakeLink from "../../components/fakelink";
+import FakeLink from "components/fakelink";
 
 export const SHADERS_PER_PAGE = 12;
 export const SHADER_THUMB_SIZE_H = 256;

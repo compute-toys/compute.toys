@@ -6,8 +6,8 @@ import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import {getRainbowColor, Item} from '../theme/theme';
 import {Skeleton} from "@mui/material";
-import {useAtom, useAtomValue} from "jotai";
-import {entryPointsAtom} from "../lib/atoms";
+import {useAtomValue} from "jotai";
+import {entryPointsAtom} from "lib/atoms";
 
 export default function EntryPointDisplay() {
     const entryPoints = useAtomValue(entryPointsAtom);

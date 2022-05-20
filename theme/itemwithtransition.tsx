@@ -8,7 +8,6 @@ export interface ItemWithTransitionSignalProps extends PaperProps {
 
 export const ItemWithTransitionSignal = (props: ItemWithTransitionSignalProps) => {
     const [transition, setTransition] = useAtom(props.transitionAtom);
-    console.log("transitioning: " + transition);
     if (transition) {
         setTimeout( function() { setTransition(false); }, 100);
     }

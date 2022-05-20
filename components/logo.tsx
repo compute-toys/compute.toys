@@ -9,7 +9,7 @@ export default function Logo(props) {
                 <span style={{ color: 'gray' }}>@</span>
                 compute
             </span>
-            <span style={{ fontFamily: 'Lobster', fontSize: '110%' }}>
+            <span style={{ color: 'white', fontFamily: 'Lobster', fontSize: '110%' }}>
                 <span style={{ color: 'gray' }}>.</span>
                 toys
             </span>

@@ -7,7 +7,6 @@ import Link from 'next/link'
 import Grid from "@mui/material/Grid";
 import Logo from "./logo";
 import Box from "@mui/material/Box";
-import styled from "@emotion/styled";
 
 interface LoginWindowProps {
     logIn: AuthLogIn,

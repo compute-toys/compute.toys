@@ -5,6 +5,7 @@ import {AuthProvider} from "lib/authcontext";
 import {ShadowCanvas} from "components/shadowcanvas";
 import LoginModal from "../components/loginmodal";
 import FavIconHead from "../components/faviconhead";
+import NoWgpuModal from "../components/nowgpumodal";
 
 export default function App({ Component, pageProps }: AppProps) {
     return (
@@ -14,6 +15,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <ShadowCanvas/>
             <CssBaseline/>
             <LoginModal/>
+            <NoWgpuModal/>
             <Component {...pageProps} />
         </ThemeProvider>
         </AuthProvider>

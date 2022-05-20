@@ -1,9 +1,9 @@
-import {atom, Getter, useAtom, useAtomValue} from "jotai";
+import {atom, Getter, useAtomValue} from "jotai";
 import {
     authorProfileAtom,
     codeAtom,
-    descriptionAtom,
-    loadedTexturesAtom, saveColorTransitionSignalAtom, shaderIDAtom, sliderRefMapAtom,
+    descriptionAtom, entryPointsAtom,
+    loadedTexturesAtom, saveColorTransitionSignalAtom, shaderDataUrlThumbAtom, shaderIDAtom, sliderRefMapAtom,
     sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom,
     titleAtom, visibilityAtom
 } from "lib/atoms";
@@ -12,8 +12,8 @@ import {definitions} from "types/supabase";
 import {MutableRefObject, useMemo, useRef} from "react";
 import {useAuth} from "lib/authcontext";
 import {UniformSliderRef} from "components/uniformsliders";
-import {useUpdateAtom} from "jotai/utils";
-import {theme} from "../theme/theme";
+import {useResetAtom, useUpdateAtom} from "jotai/utils";
+import {theme} from "theme/theme";
 
 export interface UniformActiveSettings {
     name: string,
@@ -74,6 +74,36 @@ export const useAtomGetter = () => {
     useAtomValue(derived);
     return getter.current;
 };
+
+export const useResetShaderData = () => {
+    const resetAuthorProfile                = useResetAtom(authorProfileAtom);
+    const resetShaderID                     = useResetAtom(shaderIDAtom);
+    const resetCode                         = useResetAtom(codeAtom);
+    const resetTitle                        = useResetAtom(titleAtom);
+    const resetDescription                  = useResetAtom(descriptionAtom);
+    const resetVisibility                   = useResetAtom(visibilityAtom);
+    const resetLoadedTextures               = useResetAtom(loadedTexturesAtom);
+    const resetEntryPoints                  = useResetAtom(entryPointsAtom);
+    const resetSliderSerDeArray             = useResetAtom(sliderSerDeArrayAtom);
+    const resetSliderSerDeNeedsUpdateAtom   = useResetAtom(sliderSerDeNeedsUpdateAtom);
+    const resetShaderDataUrlThumb           = useResetAtom(shaderDataUrlThumbAtom);
+
+    const reset = () => {
+        resetAuthorProfile();
+        resetShaderID();
+        resetCode();
+        resetTitle();
+        resetDescription();
+        resetVisibility();
+        resetLoadedTextures();
+        resetEntryPoints();
+        resetSliderSerDeArray();
+        resetSliderSerDeNeedsUpdateAtom();
+        resetShaderDataUrlThumb();
+    }
+
+    return reset;
+}
 
 export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
 

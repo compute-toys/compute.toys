@@ -86,7 +86,6 @@ const WgpuToyController = (props) => {
                 results in the effect hook for manualReload never getting called
              */
             if (manualReload() && dbLoaded()) {
-                console.log(`caught manualReload ${manualReload()} in play loop`);
                 reloadCallback();
                 setManualReload(false);
             }
@@ -107,7 +106,6 @@ const WgpuToyController = (props) => {
             const dimensions = getDimensions(parentRef.offsetWidth); //theoretically dangerous call?
             setWidth(dimensions.x);
             wgputoy.resize(dimensions.x, dimensions.y);
-            console.log("resetCallback called");
         });
     }, []);
 
@@ -151,7 +149,6 @@ const WgpuToyController = (props) => {
     const reloadCallback = useCallback( () => {
         safeContext(wgputoy, (wgputoy) => {
             wgputoy.set_shader(codeHot());
-            console.log("reloading");
         });
     }, []);
 
@@ -199,7 +196,6 @@ const WgpuToyController = (props) => {
         });
 
         if (!isPlaying()) {
-            console.log("first play reset called");
             setPlay(true);
             resetCallback();
             playCallback(0);
@@ -232,18 +228,15 @@ const WgpuToyController = (props) => {
         safeContext(wgputoy, (wgputoy) => {
             const target = entry.target as HTMLElement
             const dimensions = getDimensions(target.offsetWidth);
-            console.log("resize observer called");
             if (dimensions.x !== width()) {
                 setWidth(dimensions.x);
                 wgputoy.resize(dimensions.x, dimensions.y);
-                console.log("resizing");
             }
         });
     });
 
     useEffect(() => {
         if (reset) {
-            console.log("reset effect hook triggered");
             resetCallback();
             setReset(false);
         }

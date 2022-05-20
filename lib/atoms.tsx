@@ -3,6 +3,7 @@ import {ParseError} from "lib/parseerror";
 import {MutableRefObject} from "react";
 import {UniformSliderRef} from "components/uniformsliders";
 import {UniformActiveSettings} from "lib/serializeshader";
+import {atomWithReset} from "jotai/utils";
 
 export const DEFAULT_SHADER = `
 @stage(compute) @workgroup_size(16, 16)
@@ -44,11 +45,10 @@ export interface Texture {
 
 export type Visibility = 'private' | 'unlisted' | 'public';
 
-export const shaderIDAtom = atom<number | false>(false);
-export const codeAtom = atom<string>(DEFAULT_SHADER);
-export const titleAtom = atom<string>("New Shader");
-export const descriptionAtom = atom<string>("");
-export const visibilityAtom = atom<Visibility>("private");
+export type WgpuStatus = 'available' | 'unavailable' | 'unknown';
+
+export const wgpuAvailabilityAtom = atom<WgpuStatus>('unknown');
+
 export const playAtom = atom<boolean>(true);
 export const resetAtom = atom<boolean>(false);
 export const hotReloadAtom = atom<boolean>(false);
@@ -58,17 +58,27 @@ export const parseErrorAtom = atom<ParseError>({
     position: {row: 0, col: 0},
     success: true
 });
-export const loadedTexturesAtom = atom<Texture[]>([{img: '/textures/blank.png'}, {img: '/textures/blank.png'}]);
-export const entryPointsAtom = atom([]);
-export const sliderRefMapAtom = atom<Map<string,MutableRefObject<UniformSliderRef>>>(new Map<string,MutableRefObject<UniformSliderRef>>());
 
-export const sliderSerDeArrayAtom = atom<Array<UniformActiveSettings>>([]);
-export const sliderSerDeNeedsUpdateAtom = atom<boolean>(false);
-
-export const shaderDataUrlThumbAtom = atom<string>("");
-
-export const authorProfileAtom = atom<AuthorProfile | false>(false);
-
-export const saveColorTransitionSignalAtom = atom<string | false>(false);
 
 export const dbLoadedAtom = atom<boolean>(false);
+export const saveColorTransitionSignalAtom = atom<string | false>(false);
+
+export const authorProfileAtom = atomWithReset<AuthorProfile | false>(false);
+export const shaderIDAtom = atomWithReset<number | false>(false);
+export const codeAtom = atomWithReset<string>(DEFAULT_SHADER);
+export const titleAtom = atomWithReset<string>("New Shader");
+export const descriptionAtom = atomWithReset<string>("");
+export const visibilityAtom = atomWithReset<Visibility>("private");
+export const loadedTexturesAtom = atomWithReset<Texture[]>([{img: '/textures/blank.png'}, {img: '/textures/blank.png'}]);
+export const entryPointsAtom = atomWithReset([]);
+// sliderRefMap is managed by the slider component, no reset needed
+export const sliderRefMapAtom = atom<Map<string,MutableRefObject<UniformSliderRef>>>(new Map<string,MutableRefObject<UniformSliderRef>>());
+export const sliderSerDeArrayAtom = atomWithReset<Array<UniformActiveSettings>>([]);
+// TODO: should this reset to true?
+export const sliderSerDeNeedsUpdateAtom = atomWithReset<boolean>(true);
+export const shaderDataUrlThumbAtom = atomWithReset<string>("");
+
+
+
+
+

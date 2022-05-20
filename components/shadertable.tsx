@@ -14,13 +14,12 @@ import {
 import {MouseEvent, useState} from "react";
 import Box from "@mui/material/Box";
 import {visuallyHidden} from "@mui/utils";
-import FilterListIcon from '@mui/icons-material/FilterList';
 import Paper from "@mui/material/Paper";
-import {getFullyQualifiedSupabaseBucketURL} from "../lib/urlutils";
+import {getFullyQualifiedSupabaseBucketURL} from "lib/urlutils";
 import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from "lib/supabaseclient";
 import Image from 'next/image';
 import Link from 'next/link';
-import {toDateString, toUnixTime} from "../lib/dateutils";
+import {toDateString, toUnixTime} from "lib/dateutils";
 
 interface Data {
     name: string;

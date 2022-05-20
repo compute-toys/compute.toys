@@ -1,7 +1,7 @@
 import {useRouter} from "next/router";
 import {authorProfileAtom, codeAtom, dbLoadedAtom, DEFAULT_SHADER, manualReloadAtom, shaderIDAtom} from "lib/atoms";
 import {useUpdateAtom} from "jotai/utils";
-import useShaderSerDe from "lib/serializeshader";
+import useShaderSerDe, {useResetShaderData} from "lib/serializeshader";
 import {useEffect} from "react";
 
 function toNumber(str) {
@@ -13,10 +13,9 @@ function toNumber(str) {
 }
 
 export const useDBRouter = () => {
-    const setCode = useUpdateAtom(codeAtom);
+    const reset = useResetShaderData();
     const setManualReload = useUpdateAtom(manualReloadAtom);
     const setShaderID = useUpdateAtom(shaderIDAtom);
-    const setAuthorProfile = useUpdateAtom(authorProfileAtom);
     const setDBLoaded = useUpdateAtom(dbLoadedAtom);
 
     const [get, upsert] = useShaderSerDe();
@@ -34,8 +33,7 @@ export const useDBRouter = () => {
                 });
             } else if (router.query.id === 'new') {
                 setShaderID(false);
-                setCode(DEFAULT_SHADER);
-                setAuthorProfile(false)
+                reset();
                 setManualReload(true);
                 setDBLoaded(true);
             } else {

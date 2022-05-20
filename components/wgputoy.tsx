@@ -1,28 +1,34 @@
 import {Fragment, useCallback, useState} from "react";
 import {useUpdateAtom} from "jotai/utils";
-import {canvasElAtom, canvasParentElAtom, wgputoyAtom} from "lib/wgputoyatoms";
+import {canvasElAtom, canvasParentElAtom} from "lib/wgputoyatoms";
 import dynamic from "next/dynamic";
 import {useAtomValue} from "jotai";
 import {Skeleton} from "@mui/material";
 import {getDimensions} from "lib/canvasdimensions";
+import {wgpuAvailabilityAtom} from "lib/atoms";
 
 export const WgpuToyWrapper = (props) => {
     const setCanvasEl = useUpdateAtom(canvasElAtom);
+    const setWgpuAvailability = useUpdateAtom(wgpuAvailabilityAtom);
     const [loaded, setLoaded] = useState(false);
     const canvasParentEl = useAtomValue(canvasParentElAtom);
 
     const canvasRef = useCallback(canvas => {
-        if (canvas) {
-            setCanvasEl(canvas);
+        if ("gpu" in navigator) {
+            if (canvas) {
+                setWgpuAvailability('available');
+                setCanvasEl(canvas);
+            }
+        } else {
+            setWgpuAvailability('unavailable');
         }
     }, []);
 
     const onLoad = useCallback(() => {
-        console.log("onLoad callback");
         setLoaded(true);
     }, []);
 
-    // Nominally want to use lazy/Suspense here, but it's broken
+    // TODO: Nominally want to use lazy/Suspense here, but it's broken
     const Controller = dynamic(() => import('./wgputoycontroller'), {ssr: false});
 
     const dim = getDimensions(canvasParentEl ? canvasParentEl.offsetWidth : 256);
