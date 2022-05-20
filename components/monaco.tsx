@@ -42,8 +42,9 @@ const Monaco = (props) => {
         }
     }
 
+    // height fills the screen with room for texture picker
     return <Editor
-        height="80vh" // preference
+        height="calc(100vh - 270px)" // preference
         language="wgsl"
         onChange={(value, _event) => {
             setCode(value)
