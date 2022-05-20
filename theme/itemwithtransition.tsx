@@ -16,11 +16,4 @@ export const ItemWithTransitionSignal = (props: ItemWithTransitionSignalProps) =
     return (
         <Item sx={{...props.sx, transition: "background-color 0.1s ease-out", backgroundColor: transitionColor}}>{props.children}</Item>
     )
-    /*return (
-        <Item
-            sx={transition ?
-                {...props.sx, transition: "color 0.5s ease-out", color: transition}
-                :
-                {...props.sx, transition: "color 0.5s ease-out", color: theme.palette.text.secondary}}>{props.children}</Item>
-    )*/
 }

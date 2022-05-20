@@ -16,9 +16,7 @@ import Avatar from "components/avatar";
 import ImageList from "@mui/material/ImageList";
 import Grid from "@mui/material/Grid";
 import {forwardRef, Fragment, useState} from "react";
-import Timeline from "@mui/lab/Timeline";
-import {TimelineConnector, TimelineContent, TimelineDot, TimelineItem, TimelineSeparator} from "@mui/lab";
-import FakeLink from "../components/fakelink";
+import FakeLink from "components/fakelink";
 
 
 
@@ -71,7 +69,7 @@ const style = {
     marginLeft: 'auto',
     marginRight: 'auto',
     marginTop: '16px',
-    width: "95%",
+    width: "1050px",
     bgcolor: 'background.paper',
     boxShadow: 24,
     p: 4,
@@ -124,17 +122,7 @@ export default function Home(props) {
             </Alert>
             <Item sx={style}>
                 <Grid container spacing={2}>
-                    <Grid item xs={6}>
-                        <Stack>
-                            <Typography>
-                                Recent submissions
-                            </Typography>
-                            <Box>
-                                <NewSubmissionBar shaders={props.shaders}/>
-                            </Box>
-                        </Stack>
-                    </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={5}>
                         <Stack spacing={2}>
                             <Typography variant={"h2"}>
                                 <span style={{ color: 'white', fontFamily: 'Fira Code' }}>
@@ -147,15 +135,31 @@ export default function Home(props) {
                                 </span>
                             </Typography>
                             <Typography variant={"h5"}>
-                                    <Link href="/new">New Shader</Link>
+                                <Link href="/new">New Shader</Link>
                             </Typography>
                             <Typography variant={"h5"}>
                                 <Link href="/list/0">Browse</Link>
                             </Typography>
+                            <FakeLink textDecoration="underline" href="https://discord.gg/pNzH6gFQ2T">
+                                <Stack direction="row" spacing={2} justifyContent={"center"}>
+                                    <Image width="35" height="27" src="/discord-white.png"/>
+                                    <Typography variant={"h5"}>
+                                        Join us on Discord
+                                    </Typography>
+                                </Stack>
+                            </FakeLink>
                         </Stack>
-
                     </Grid>
-
+                    <Grid item xs={7}>
+                        <Stack sx={{textAlign: "-webkit-center"}}>
+                            <Typography>
+                                Recent submissions
+                            </Typography>
+                            <Box>
+                                <NewSubmissionBar shaders={props.shaders}/>
+                            </Box>
+                        </Stack>
+                    </Grid>
                 </Grid>
             </Item>
         </Fragment>

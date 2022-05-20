@@ -70,3 +70,5 @@ export const shaderDataUrlThumbAtom = atom<string>("");
 export const authorProfileAtom = atom<AuthorProfile | false>(false);
 
 export const saveColorTransitionSignalAtom = atom<string | false>(false);
+
+export const dbLoadedAtom = atom<boolean>(false);
