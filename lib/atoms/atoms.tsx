@@ -1,8 +1,8 @@
 import {atom} from 'jotai';
-import {ParseError} from "lib/parseerror";
+import {ParseError} from "types/parseerror";
 import {MutableRefObject} from "react";
-import {UniformSliderRef} from "components/uniformsliders";
-import {UniformActiveSettings} from "lib/serializeshader";
+import {UniformSliderRef} from "components/editor/uniformsliders";
+import {UniformActiveSettings} from "lib/db/serializeshader";
 import {atomWithReset} from "jotai/utils";
 
 export const DEFAULT_SHADER = `
@@ -53,6 +53,7 @@ export const playAtom = atom<boolean>(true);
 export const resetAtom = atom<boolean>(false);
 export const hotReloadAtom = atom<boolean>(false);
 export const manualReloadAtom = atom<boolean>(false);
+export const requestFullscreenAtom = atom<boolean>(false);
 export const parseErrorAtom = atom<ParseError>({
     summary: "",
     position: {row: 0, col: 0},
@@ -76,6 +77,7 @@ export const sliderRefMapAtom = atom<Map<string,MutableRefObject<UniformSliderRe
 export const sliderSerDeArrayAtom = atomWithReset<Array<UniformActiveSettings>>([]);
 // TODO: should this reset to true?
 export const sliderSerDeNeedsUpdateAtom = atomWithReset<boolean>(true);
+export const sliderUpdateSignalAtom = atom<boolean>(false);
 export const shaderDataUrlThumbAtom = atomWithReset<string>("");
 
 

@@ -1,5 +1,4 @@
 import {
-    IconButton,
     Table,
     TableBody,
     TableCell,
@@ -8,18 +7,17 @@ import {
     TableRow,
     TableSortLabel,
     Toolbar,
-    Tooltip,
     Typography
 } from "@mui/material";
 import {MouseEvent, useState} from "react";
 import Box from "@mui/material/Box";
 import {visuallyHidden} from "@mui/utils";
 import Paper from "@mui/material/Paper";
-import {getFullyQualifiedSupabaseBucketURL} from "lib/urlutils";
-import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from "lib/supabaseclient";
+import {getFullyQualifiedSupabaseBucketURL} from "lib/util/urlutils";
+import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from "lib/db/supabaseclient";
 import Image from 'next/image';
 import Link from 'next/link';
-import {toDateString, toUnixTime} from "lib/dateutils";
+import {toDateString, toUnixTime} from "lib/util/dateutils";
 
 interface Data {
     name: string;

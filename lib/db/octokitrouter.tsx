@@ -8,7 +8,7 @@ import {
     titleAtom,
     Visibility,
     visibilityAtom
-} from "lib/atoms";
+} from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
 import {useEffect} from "react";
 

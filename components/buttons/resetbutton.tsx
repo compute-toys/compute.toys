@@ -1,7 +1,7 @@
 import ReplayIcon from "@mui/icons-material/Replay";
 import {Button} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
-import {resetAtom} from "lib/atoms";
+import {resetAtom} from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
 
 export const ResetButton = () => {

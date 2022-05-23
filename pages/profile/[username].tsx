@@ -1,18 +1,49 @@
 import {ChangeEvent, Fragment, useEffect, useState} from "react";
-import {supabase} from "lib/supabaseclient";
-import {supabasePrivileged} from "lib/supabaseprivilegedclient";
-import {useAuth, VIEWS} from "lib/authcontext";
+import {supabase, SUPABASE_SHADER_TABLE_NAME} from "lib/db/supabaseclient";
+import {supabasePrivileged} from "lib/db/supabaseprivilegedclient";
+import {useAuth, VIEWS} from "lib/db/authcontext";
 import {Button, Modal, Stack, Table, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
-import Avatar from "components/avatar";
-import UploadButton from "components/uploadbutton";
+import Avatar from "components/global/avatar";
+import UploadButton from "components/buttons/uploadbutton";
 import {CssTextField, Item, theme} from "theme/theme";
 import {definitions} from "../../types/supabase";
-import Grid from "@mui/material/Grid";
-import { toDateString } from "lib/dateutils";
+import { toDateString } from "lib/util/dateutils";
 import {ShaderTable} from "../../components/shadertable";
+import {ShaderActiveSettings} from "../../lib/db/serializeshader";
 
 const PROFILE_AVATAR_WIDTH = 96;
+
+async function loadShaders(username: string) {
+    try {
+
+        let {data, error, status} = await supabase
+            .from<definitions["shader"]>(SUPABASE_SHADER_TABLE_NAME)
+            .select(`
+                    *,
+                    profile!inner(username)  
+                `)
+            // @ts-ignore
+            .eq("profile.username", username);
+
+        if (error && status !== 406) {
+            throw error;
+        }
+
+        if (data) {
+
+            return {
+                shaders: data,
+                error: null
+            };
+        }
+    } catch (error) {
+        return {
+            shaders: [],
+            error: error.message
+        }
+    }
+}
 
 export default function Profile(props) {
     const [loading, setLoading] = useState(false);
@@ -22,7 +53,23 @@ export default function Profile(props) {
     const [unsavedChanges, setUnsavedChanges] = useState(false);
     const {user} = useAuth();
 
+    const [shaders, setShaders] = useState([]);
+    const [editable, setEditable] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
+
+    useEffect(() => {
+        // RLS prevents editing server-side
+        setEditable(props.profile.id === (user ? user.id : ""));
+    });
+
+    useEffect(() => {
+        loadShaders(props.profile.username).then((res) => {
+            setShaders(res.shaders);
+            setErrorMessage(res.error);
+        })
+    }, [])
+
+
 
     //https://github.com/supabase/supabase/blob/master/examples/nextjs-ts-user-management/components/Account.tsx
     const uploadAvatar = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -111,86 +158,86 @@ export default function Profile(props) {
     };
 
     return (
-                <Item sx={style}>
-                    <Stack direction="row">
-                        <Stack direction="row">
-                            <Box><Box sx={{position: "relative", width: `${PROFILE_AVATAR_WIDTH}px`}}>
-                                <Avatar url={avatar} size={PROFILE_AVATAR_WIDTH} displayOnNull={true}/>
-                                {props.editable ?
-                                        <UploadButton onUpload={uploadAvatar} loading={uploading} sx={{
-                                            color: theme.palette.dracula.cyan,
-                                            position: "absolute",
-                                            bottom: 0,
-                                            right: 0,
-                                            minWidth: "20px"
-                                        }} iconSx={{filter: "drop-shadow(0px 0px 3px rgb(0 0 0 / 0.8))"}} />
-                                    : null}
-                            </Box></Box>
-                        </Stack>
-                        <Stack sx={{justifyContent: "left", textAlign: "left", marginLeft: "2em", width: "100%"}}>
-                            <Typography variant="h6">
-                                {props.profile.username}
-                            </Typography>
-                            <Typography>
-                                Since: {toDateString(props.profile.created_at)}
-                            </Typography>
-                            {props.editable ?
-                                <Fragment>
-                                    <CssTextField
-                                        multiline
-                                        fullWidth
-                                        id="profile-about"
-                                        aria-label={"About user"}
-                                        size="small"
-                                        label={"About"}
-                                        value={aboutEditor || ""}
-                                        rows={3}
-                                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                                            setAboutEditor(event.target.value);
-                                            setUnsavedChanges(true);
-                                        }}
-                                        sx={{
-                                            marginTop: "1em",
-                                            input: {color: theme.palette.dracula.foreground},
-                                            label: {color: theme.palette.dracula.foreground}
-                                        }}
-                                    />
-                                    {unsavedChanges ?
-                                        <Button
-                                            onClick={(e) => {
-                                                saveChanges()
-                                            }}
-                                            sx={loading ? {color: theme.status.disabled} : {color: theme.palette.dracula.orange}}
-                                            disabled={loading}
-                                        >
-                                            <span>{loading ? 'Loading' : 'Save'}</span>
-                                        </Button>
+        <Item sx={style}>
+            <Stack direction="row">
+                <Stack direction="row">
+                    <Box><Box sx={{position: "relative", width: `${PROFILE_AVATAR_WIDTH}px`}}>
+                        <Avatar url={avatar} size={PROFILE_AVATAR_WIDTH} displayOnNull={true}/>
+                        {editable ?
+                                <UploadButton onUpload={uploadAvatar} loading={uploading} sx={{
+                                    color: theme.palette.dracula.cyan,
+                                    position: "absolute",
+                                    bottom: 0,
+                                    right: 0,
+                                    minWidth: "20px"
+                                }} iconSx={{filter: "drop-shadow(0px 0px 3px rgb(0 0 0 / 0.8))"}} />
+                            : null}
+                    </Box></Box>
+                </Stack>
+                <Stack sx={{justifyContent: "left", textAlign: "left", marginLeft: "2em", width: "100%"}}>
+                    <Typography variant="h6">
+                        {props.profile.username}
+                    </Typography>
+                    <Typography>
+                        Since: {toDateString(props.profile.created_at)}
+                    </Typography>
+                    {editable ?
+                        <Fragment>
+                            <CssTextField
+                                multiline
+                                fullWidth
+                                id="profile-about"
+                                aria-label={"About user"}
+                                size="small"
+                                label={"About"}
+                                value={aboutEditor || ""}
+                                rows={3}
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                    setAboutEditor(event.target.value);
+                                    setUnsavedChanges(true);
+                                }}
+                                sx={{
+                                    marginTop: "1em",
+                                    input: {color: theme.palette.dracula.foreground},
+                                    label: {color: theme.palette.dracula.foreground}
+                                }}
+                            />
+                            {unsavedChanges ?
+                                <Button
+                                    onClick={(e) => {
+                                        saveChanges()
+                                    }}
+                                    sx={loading ? {color: theme.status.disabled} : {color: theme.palette.dracula.orange}}
+                                    disabled={loading}
+                                >
+                                    <span>{loading ? 'Loading' : 'Save'}</span>
+                                </Button>
 
-                                        : null
-                                    }
-                                </Fragment>
-
-                                :
-                                <Typography>
-                                    About: {props.profile.about}
-                                </Typography>
+                                : null
                             }
+                        </Fragment>
 
-
-                        </Stack>
-                    </Stack>
-                    {errorMessage ?
-                        <Item sx={{color: theme.palette.dracula.red}}>
-                            <Stack>
-                                <Typography>
-                                    {errorMessage}
-                                </Typography>
-                            </Stack>
-                        </Item>
-                        : null
+                        :
+                        <Typography>
+                            About: {props.profile.about}
+                        </Typography>
                     }
-                    <ShaderTable rows={props.shaders}/>
+
+
+                </Stack>
+            </Stack>
+            {errorMessage ?
+                <Item sx={{color: theme.palette.dracula.red}}>
+                    <Stack>
+                        <Typography>
+                            {errorMessage}
+                        </Typography>
+                    </Stack>
                 </Item>
+                : null
+            }
+            <ShaderTable rows={shaders}/>
+        </Item>
     );
 }
 
@@ -201,15 +248,12 @@ export async function getServerSideProps(context) {
     )
     
     const { username } = context.params;
-    const { user } = await supabase.auth.api.getUserByCookie(context.req);
 
     let { data: idData, error: idError, status: idStatus } = await supabase
         .from<definitions['profile']>('profile')
-        .select(`id`)
+        .select(`*`)
         .eq('username', username)
         .single();
-
-    const { id } = idData;
 
     if (idError) {
         context.res.statusCode = 404;
@@ -218,40 +262,7 @@ export async function getServerSideProps(context) {
         }
     }
 
-    // TODO: bad way of doing this, and is it really necessary?
-    if (user && user.id === id) {
-        let { data: profileData, error: profileError, status: profileStatus } = await supabasePrivileged
-            .from<definitions['profile']>('profile')
-            .select(`*`)
-            .eq('id', user.id)
-            .single();
-
-        let { data: shaderData, error: shaderError, status: shaderStatus } = await supabasePrivileged
-            .from<definitions['shader']>('shader')
-            .select('id, name, visibility, created_at, thumb_url')
-            .eq('author', user.id);
-
-        return { props: {
-                profile: profileData,
-                shaders: shaderData,
-                editable: true
-            } };
-    } else {
-        let { data: profileData, error: profileError, status: profileStatus } = await supabase
-            .from<definitions['profile']>('profile')
-            .select(`*`)
-            .eq('id', id)
-            .single();
-
-        let { data: shaderData, error: shaderError, status: shaderStatus } = await supabase
-            .from<definitions['shader']>('shader')
-            .select('id, name, visibility, created_at, thumb_url')
-            .eq('author', id);
-
-        return { props: {
-                profile: profileData,
-                shaders: shaderData,
-                editable: false
-            } };
-    }
+    return { props: {
+            profile: idData,
+        } };
 }

@@ -3,7 +3,7 @@ import PauseCircleIcon from "@mui/icons-material/PauseCircle";
 import {Button} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
 import {useAtom, useAtomValue} from "jotai";
-import {playAtom} from "lib/atoms";
+import {playAtom} from "lib/atoms/atoms";
 
 const PlayPauseIcon = () => {
     const play = useAtomValue(playAtom);

@@ -1,8 +1,8 @@
 import {ChangeEvent, forwardRef, Fragment, useEffect, useReducer, useState} from "react";
 import {Button, Modal, Stack, Typography} from "@mui/material";
 import {CssTextField, Item, theme} from "theme/theme";
-import {AuthConfirm, AuthLogIn, AuthResetPassword, AuthUpdatePassword, useAuth, VIEWS} from "lib/authcontext";
-import Avatar from "components/avatar";
+import {AuthConfirm, AuthLogIn, AuthResetPassword, AuthUpdatePassword, useAuth, VIEWS} from "lib/db/authcontext";
+import Avatar from "components/global/avatar";
 import Link from 'next/link'
 import Grid from "@mui/material/Grid";
 import Logo from "./logo";

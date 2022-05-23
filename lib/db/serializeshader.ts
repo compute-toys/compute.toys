@@ -6,12 +6,12 @@ import {
     loadedTexturesAtom, saveColorTransitionSignalAtom, shaderDataUrlThumbAtom, shaderIDAtom, sliderRefMapAtom,
     sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom,
     titleAtom, visibilityAtom
-} from "lib/atoms";
-import {supabase, SUPABASE_SHADER_TABLE_NAME, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/supabaseclient";
+} from "lib/atoms/atoms";
+import {supabase, SUPABASE_SHADER_TABLE_NAME, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/db/supabaseclient";
 import {definitions} from "types/supabase";
 import {MutableRefObject, useMemo, useRef} from "react";
-import {useAuth} from "lib/authcontext";
-import {UniformSliderRef} from "components/uniformsliders";
+import {useAuth} from "lib/db/authcontext";
+import {UniformSliderRef} from "components/editor/uniformsliders";
 import {useResetAtom, useUpdateAtom} from "jotai/utils";
 import {theme} from "theme/theme";
 

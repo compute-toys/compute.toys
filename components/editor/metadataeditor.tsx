@@ -20,17 +20,17 @@ import {
     Visibility,
     visibilityAtom,
     AuthorProfile,
-} from "lib/atoms";
+} from "lib/atoms/atoms";
 import {styled} from "@mui/material/styles";
 import {
     shadowCanvasElAtom,
     shadowCanvasToDataUrl
-} from "./shadowcanvas";
-import {canvasElAtom} from "../lib/wgputoyatoms";
+} from "../global/shadowcanvas";
+import {canvasElAtom} from "../../lib/atoms/wgputoyatoms";
 import {useUpdateAtom} from "jotai/utils";
-import useShaderSerDe, {UpsertResult} from "../lib/serializeshader";
-import Avatar from "./avatar";
-import {useAuth} from "../lib/authcontext";
+import useShaderSerDe, {UpsertResult} from "../../lib/db/serializeshader";
+import Avatar from "../global/avatar";
+import {useAuth} from "../../lib/db/authcontext";
 import {useRouter} from "next/router";
 import Link from 'next/link';
 

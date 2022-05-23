@@ -3,7 +3,7 @@ import {useEffect, useRef} from "react";
 import {wgslLanguageDef, wgslConfiguration} from 'public/grammars/wgsl'
 import {defineMonacoTheme} from "theme/monacotheme";
 import {useAtom} from "jotai";
-import {codeAtom, parseErrorAtom} from "lib/atoms";
+import {codeAtom, parseErrorAtom} from "lib/atoms/atoms";
 
 
 const Monaco = (props) => {

@@ -1,7 +1,7 @@
 // MUI sizing from refs:
 // https://github.com/mui/material-ui/issues/15662
 
-import Monaco from 'components/monaco';
+import Monaco from 'components/editor/monaco';
 import {WgpuToyWrapper} from "components/wgputoy";
 
 import {useCallback} from 'react';
@@ -10,24 +10,24 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-import PlayPauseButton from "components/playpausebutton"
-import ResetButton from "components/resetbutton";
-import HotReloadToggle from "components/hotreloadtoggle";
-import ReloadButton from "components/reloadbutton";
+import PlayPauseButton from "components/buttons/playpausebutton"
+import ResetButton from "components/buttons/resetbutton";
+import HotReloadToggle from "components/buttons/hotreloadtoggle";
+import ReloadButton from "components/buttons/reloadbutton";
 
 import {Frame, theme} from "theme/theme";
 import {Accordion, AccordionDetails, AccordionSummary} from "@mui/material";
 
 import "firacode";
 
-import UniformSliders from "components/uniformsliders";
-import TexturePicker from "components/texturepicker";
-import EntryPointDisplay from "components/entrypointdisplay";
-import {canvasParentElAtom} from "lib/wgputoyatoms";
+import UniformSliders from "components/editor/uniformsliders";
+import TexturePicker from "components/editor/texturepicker";
+import EntryPointDisplay from "components/editor/entrypointdisplay";
+import {canvasParentElAtom} from "lib/atoms/wgputoyatoms";
 import {useUpdateAtom} from "jotai/utils";
-import {MetadataEditor} from "components/metadataeditor";
-import {useDBRouter} from "lib/dbrouter";
-import {saveColorTransitionSignalAtom} from "lib/atoms";
+import {MetadataEditor} from "components/editor/metadataeditor";
+import {useDBRouter} from "lib/db/dbrouter";
+import {saveColorTransitionSignalAtom} from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 
 const Index = () => {
@@ -58,17 +58,7 @@ const Index = () => {
                         </Frame>
                         <PlayPauseButton />
                         <ResetButton />
-                        <Accordion sx={{color: theme.palette.dracula.foreground, backgroundColor: theme.palette.primary.darker}}>
-                            <AccordionSummary
-                                sx={{fontSize: 14}}
-                                expandIcon={<ExpandMoreIcon sx={{color: theme.palette.dracula.foreground}}/>}
-                                aria-controls="uniform-accordion"
-                                id="uniform-accordion"
-                            >Uniforms</AccordionSummary>
-                            <AccordionDetails sx={{padding: "0px 2px 8px"}}>
-                                <UniformSliders/>
-                            </AccordionDetails>
-                        </Accordion>
+                        <UniformSliders/>
                     </ItemWithTransitionSignal>
                     <ItemWithTransitionSignal sx={{textAlign: "left", marginTop: "20px"}} transitionAtom={saveColorTransitionSignalAtom}>
                         <MetadataEditor/>

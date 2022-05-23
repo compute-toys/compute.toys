@@ -2,14 +2,14 @@ import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import {Fragment} from "react";
 import Image from 'next/image';
-import {supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/supabaseclient";
+import {supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/db/supabaseclient";
 import {Item, theme} from 'theme/theme';
-import {getFullyQualifiedSupabaseBucketURL} from "lib/urlutils";
+import {getFullyQualifiedSupabaseBucketURL} from "lib/util/urlutils";
 import {Button, ImageListItemBar, Stack} from "@mui/material";
-import Avatar from "components/avatar";
+import Avatar from "components/global/avatar";
 import Box from "@mui/material/Box";
 import Link from 'next/link'
-import FakeLink from "components/fakelink";
+import FakeLink from "components/global/fakelink";
 
 export const SHADERS_PER_PAGE = 12;
 export const SHADER_THUMB_SIZE_H = 256;

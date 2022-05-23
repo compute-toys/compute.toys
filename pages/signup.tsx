@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {useAuth, VIEWS} from "lib/authcontext";
+import {useAuth, VIEWS} from "lib/db/authcontext";
 import {Button, Modal, Stack, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
 import {CssTextField, Item, theme} from "theme/theme";

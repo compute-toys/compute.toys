@@ -3,7 +3,7 @@ import {Fragment, useEffect, useState} from "react";
 import Box from "@mui/material/Box";
 import {Modal, Stack, Typography} from "@mui/material";
 import Logo from "./logo";
-import {wgpuAvailabilityAtom} from "lib/atoms";
+import {wgpuAvailabilityAtom} from "lib/atoms/atoms";
 import {useAtomValue} from "jotai";
 
 const modalStyle = {

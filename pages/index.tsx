@@ -6,17 +6,17 @@ import {Item, theme, getRainbowColor} from "theme/theme";
 import 'firacode'
 import '@fontsource/lobster'
 import {ImageListItemBar, Stack, Typography, Alert, Modal} from "@mui/material";
-import {supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/supabaseclient";
+import {supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/db/supabaseclient";
 import {SHADER_THUMB_SIZE_H, SHADER_THUMB_SIZE_V} from "./list/[page]";
 import ImageListItem from "@mui/material/ImageListItem";
 import Image from "next/image";
-import {getFullyQualifiedSupabaseBucketURL} from "lib/urlutils";
+import {getFullyQualifiedSupabaseBucketURL} from "lib/util/urlutils";
 import Box from "@mui/material/Box";
-import Avatar from "components/avatar";
+import Avatar from "components/global/avatar";
 import ImageList from "@mui/material/ImageList";
 import Grid from "@mui/material/Grid";
 import {forwardRef, Fragment, useState} from "react";
-import FakeLink from "components/fakelink";
+import FakeLink from "components/global/fakelink";
 
 
 

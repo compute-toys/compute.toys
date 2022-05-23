@@ -1,15 +1,22 @@
 import {ChangeEvent, FocusEvent, forwardRef, MutableRefObject, useEffect, useRef, useState} from "react";
 import {useTheme} from "@mui/material/styles";
-import {Button, Slider, Stack, TextField} from "@mui/material";
+import {Accordion, AccordionDetails, AccordionSummary, Button, Slider, Stack, TextField} from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import Box from "@mui/material/Box";
 import {CssTextField, getRainbowColor, theme} from "theme/theme";
 import { v4 as UUID } from 'uuid';
-import {manualReloadAtom, sliderRefMapAtom, sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom} from "lib/atoms";
+import {
+    manualReloadAtom,
+    sliderRefMapAtom,
+    sliderSerDeArrayAtom,
+    sliderSerDeNeedsUpdateAtom,
+    sliderUpdateSignalAtom
+} from "lib/atoms/atoms";
 import {useAtom, useAtomValue} from "jotai";
-import {UniformActiveSettings} from "lib/serializeshader";
+import {UniformActiveSettings} from "lib/db/serializeshader";
 import {useUpdateAtom} from "jotai/utils";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export const WGPU_CONTEXT_MAX_UNIFORMS = 16;
 
@@ -92,6 +99,7 @@ const UniformSlider = (props: UniformSliderProps) => {
 
     const [sliderVal, setSliderVal] = useState(initFromHost ? props.sliderSerDeArray[props.index].value : 0);
     const [sliderUniform, setSliderUniform] = useState(initFromHost ? props.sliderSerDeArray[props.index].name : "uniform_" + props.index);
+    const setSliderUpdateSignal = useUpdateAtom(sliderUpdateSignalAtom);
 
     const sliderRef = useRef<UniformSliderRef>();
     const inputRef = useRef<HTMLInputElement>();
@@ -110,6 +118,7 @@ const UniformSlider = (props: UniformSliderProps) => {
             }
         };
         props.setRefCallback(sliderRef);
+        setSliderUpdateSignal(true);
     });
 
     return (
@@ -210,28 +219,38 @@ export const UniformSliders = () => {
     useEffect(() => {
         if (sliderSerDeNeedsUpdate) {
             sliderRefMap.clear();
-            sliderSerDeArray.forEach(() => {addCallback(UUID())})
+            sliderSerDeArray.forEach(() => {addCallback(UUID())});
             setSliderSerDeNeedsUpdate(false);
         }
     }, [sliderSerDeNeedsUpdate])
 
     return (
-        <Box>
-            <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
-                {[...sliderRefMap.keys()].map((uuid, index) => (
-                    <UniformSlider key={uuid} uuid={uuid} index={index} sliderSerDeArray={sliderSerDeArray} sliderRefMap={sliderRefMap} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
-                ))}
-            </Stack>
-            {sliderCount < WGPU_CONTEXT_MAX_UNIFORMS ?
-                <Button sx={{color: theme.palette.primary.light, padding: "0px"}}
-                        onClick={() => {
-                            addCallback(UUID());
-                        }}>
-                    <AddIcon/>
-                </Button>
-            : null
-            }
-        </Box>
+        <Accordion sx={{color: theme.palette.dracula.foreground, backgroundColor: theme.palette.primary.darker}}>
+            <AccordionSummary
+                sx={{fontSize: 14}}
+                expandIcon={<ExpandMoreIcon sx={{color: theme.palette.dracula.foreground}}/>}
+                aria-controls="uniform-accordion"
+                id="uniform-accordion"
+            >Uniforms</AccordionSummary>
+            <AccordionDetails sx={{padding: "0px 2px 8px"}}>
+                <Box>
+                    <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
+                        {[...sliderRefMap.keys()].map((uuid, index) => (
+                            <UniformSlider key={uuid} uuid={uuid} index={index} sliderSerDeArray={sliderSerDeArray} sliderRefMap={sliderRefMap} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
+                        ))}
+                    </Stack>
+                    {sliderCount < WGPU_CONTEXT_MAX_UNIFORMS ?
+                        <Button sx={{color: theme.palette.primary.light, padding: "0px"}}
+                                onClick={() => {
+                                    addCallback(UUID());
+                                }}>
+                            <AddIcon/>
+                        </Button>
+                    : null
+                    }
+                </Box>
+            </AccordionDetails>
+        </Accordion>
     );
 }
 

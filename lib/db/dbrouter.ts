@@ -1,7 +1,7 @@
 import {useRouter} from "next/router";
-import {authorProfileAtom, codeAtom, dbLoadedAtom, DEFAULT_SHADER, manualReloadAtom, shaderIDAtom} from "lib/atoms";
+import {authorProfileAtom, codeAtom, dbLoadedAtom, DEFAULT_SHADER, manualReloadAtom, shaderIDAtom} from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
-import useShaderSerDe, {useResetShaderData} from "lib/serializeshader";
+import useShaderSerDe, {useResetShaderData} from "lib/db/serializeshader";
 import {useEffect} from "react";
 
 function toNumber(str) {

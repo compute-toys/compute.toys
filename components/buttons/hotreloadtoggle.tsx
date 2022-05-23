@@ -2,7 +2,7 @@ import {Button} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
 import {AcUnit, LocalFireDepartment} from "@mui/icons-material";
 import {useAtom, useAtomValue} from "jotai";
-import {hotReloadAtom} from "lib/atoms";
+import {hotReloadAtom} from "lib/atoms/atoms";
 
 const HotColdIcon = () => {
     const hotReload = useAtomValue(hotReloadAtom);

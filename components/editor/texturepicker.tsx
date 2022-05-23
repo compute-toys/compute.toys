@@ -7,7 +7,7 @@ import {Fragment, useRef, useState} from "react";
 import {DisabledByDefaultSharp} from "@mui/icons-material";
 import Image from 'next/image';
 import {useAtomValue} from "jotai";
-import {loadedTexturesAtom, Texture} from "lib/atoms";
+import {loadedTexturesAtom, Texture} from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
 
 export interface LoadedTextures {

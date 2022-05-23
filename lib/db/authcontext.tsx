@@ -1,6 +1,6 @@
 // https://www.misha.wtf/blog/nextjs-supabase-auth
 import {createContext, useContext, useEffect, useState} from 'react';
-import {supabase, SUPABASE_PROFILE_TABLE_NAME} from "lib/supabaseclient";
+import {supabase, SUPABASE_PROFILE_TABLE_NAME} from "lib/db/supabaseclient";
 import {AuthChangeEvent, Session, User} from "@supabase/gotrue-js";
 
 export const EVENTS = {

@@ -7,8 +7,8 @@ import {
     manualReloadAtom,
     parseErrorAtom,
     playAtom,
-    resetAtom, sliderRefMapAtom
-} from "lib/atoms";
+    resetAtom, sliderRefMapAtom, sliderSerDeNeedsUpdateAtom, sliderUpdateSignalAtom
+} from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
 import {
     canvasElAtom,
@@ -16,10 +16,10 @@ import {
     safeContext,
     safeContextWithCanvas,
     wgputoyAtom
-} from "lib/wgputoyatoms";
+} from "lib/atoms/wgputoyatoms";
 import {useTransientAtom} from "jotai-game";
 import useResizeObserver from "@react-hook/resize-observer";
-import {getDimensions} from "lib/canvasdimensions";
+import {getDimensions} from "types/canvasdimensions";
 
 const requestAnimationFrameIDAtom = atom(0);
 const widthAtom = atom(0);
@@ -39,6 +39,7 @@ const WgpuToyController = (props) => {
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
     // must be transient so we can access updated value in play loop
+    const [sliderUpdateSignal, setSliderUpdateSignal] = useTransientAtom(sliderUpdateSignalAtom);
     const [manualReload, setManualReload] = useTransientAtom(manualReloadAtom);
     const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
     const [codeHot,] = useTransientAtom(codeAtom);
@@ -77,17 +78,42 @@ const WgpuToyController = (props) => {
         });
     }, []);
 
+    // TODO: debug only, delete this when no longer needed
+    const printUniforms = useCallback(() => {
+        safeContext(wgputoy, (wgputoy) => {
+            if (sliderRefMap) {
+                let names: string[] = [];
+                let values: number[] = [];
+                [...sliderRefMap.keys()].map(uuid => {
+                    if (sliderRefMap.get(uuid)) {
+                        names.push(sliderRefMap.get(uuid).current.getUniform());
+                        values.push(sliderRefMap.get(uuid).current.getVal());
+                    }
+                }, this);
+                console.log(names);
+                console.log(values);
+            }
+        });
+    }, []);
+
     const playCallback = useCallback((time: DOMHighResTimeStamp) => {
         safeContext(wgputoy, (wgputoy) => {
-            updateUniforms();
+            if (sliderUpdateSignal()) {
+                updateUniforms();
+            }
             /*
                 Handle manual reload in the play callback to handle race conditions
                 where manualReload gets set before the controller is loaded, which
-                results in the effect hook for manualReload never getting called
+                results in the effect hook for manualReload never getting called.
+
+                Seems to be safe to do this for slider updates, wgpu appears to cache
+                builds if they're unchanged.
              */
-            if (manualReload() && dbLoaded()) {
+            console.log(manualReload(), dbLoaded(), sliderUpdateSignal());
+            if ((manualReload() && dbLoaded()) || (sliderUpdateSignal() && dbLoaded())) {
                 reloadCallback();
                 setManualReload(false);
+                setSliderUpdateSignal(false);
             }
             wgputoy.set_time_elapsed(time * 1e-3);
             wgputoy.render();

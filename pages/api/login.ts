@@ -1,6 +1,6 @@
 import {NextApiRequest, NextApiResponse} from "next";
-import {supabasePrivileged} from "lib/supabaseprivilegedclient";
-import { supabase } from "lib/supabaseclient";
+import {supabasePrivileged} from "lib/db/supabaseprivilegedclient";
+import { supabase } from "lib/db/supabaseclient";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const {username, password} = req.body;
