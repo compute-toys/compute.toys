@@ -179,6 +179,7 @@ const UniformSlider = (props: UniformSliderProps) => {
     );
 };
 
+
 export const UniformSliders = () => {
     const theme = useTheme();
 
@@ -219,10 +220,20 @@ export const UniformSliders = () => {
     useEffect(() => {
         if (sliderSerDeNeedsUpdate) {
             sliderRefMap.clear();
-            sliderSerDeArray.forEach(() => {addCallback(UUID())});
+            //calling addCallback here doesn't quite work, it gets stale values of sliderCount
+            sliderSerDeArray.forEach(() => {
+                setSliderRefMap(sliderRefMap.set(UUID(), null));
+            });
+            setSliderCount(sliderSerDeArray.length);
+            setManualReload(true);
             setSliderSerDeNeedsUpdate(false);
         }
-    }, [sliderSerDeNeedsUpdate])
+    }, [sliderSerDeNeedsUpdate]);
+
+    const uniformTitle = (sliderCount > 0) ?
+        <span style={{color: theme.palette.dracula.foreground}}>{`Uniforms [${sliderCount}]`}</span>
+        :
+        <span style={{color: theme.status.disabled}}>Uniforms</span>;
 
     return (
         <Accordion sx={{color: theme.palette.dracula.foreground, backgroundColor: theme.palette.primary.darker}}>
@@ -231,7 +242,7 @@ export const UniformSliders = () => {
                 expandIcon={<ExpandMoreIcon sx={{color: theme.palette.dracula.foreground}}/>}
                 aria-controls="uniform-accordion"
                 id="uniform-accordion"
-            >Uniforms</AccordionSummary>
+            >{uniformTitle}</AccordionSummary>
             <AccordionDetails sx={{padding: "0px 2px 8px"}}>
                 <Box>
                     <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
