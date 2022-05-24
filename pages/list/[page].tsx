@@ -106,13 +106,13 @@ export const MAX_PAGE_BUTTONS = 5
 
 const PageButton = (props) => {
     return (
-        <Button>
-            <Link href={`/list/${props.index}`}>
+        <Link href={`/list/${props.index}`} passHref>
+            <Button>
                 <a style={props.highlight ? {color: theme.palette.dracula.foreground} : {color: theme.palette.dracula.selection}}>
                     {props.index.toString()}
                 </a>
-            </Link>
-        </Button>
+            </Button>
+        </Link>
     );
 }
 
