@@ -8,15 +8,14 @@ import {useCallback} from 'react';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import PlayPauseButton from "components/buttons/playpausebutton"
 import ResetButton from "components/buttons/resetbutton";
 import HotReloadToggle from "components/buttons/hotreloadtoggle";
 import ReloadButton from "components/buttons/reloadbutton";
+import FullscreenButton from "../../components/buttons/fullscreenbutton";
 
-import {Frame, theme} from "theme/theme";
-import {Accordion, AccordionDetails, AccordionSummary} from "@mui/material";
+import {Frame} from "theme/theme";
 
 import "firacode";
 
@@ -29,6 +28,7 @@ import {MetadataEditor} from "components/editor/metadataeditor";
 import {useDBRouter} from "lib/db/dbrouter";
 import {saveColorTransitionSignalAtom} from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
+
 
 const Index = () => {
 
@@ -56,8 +56,16 @@ const Index = () => {
                                 }}
                             />
                         </Frame>
-                        <PlayPauseButton />
-                        <ResetButton />
+                        <Grid container>
+                            <Grid item xs={2}/>
+                            <Grid item xs={8}>
+                                <PlayPauseButton />
+                                <ResetButton />
+                            </Grid>
+                            <Grid item sx={{textAlign: 'right'}} xs={2}>
+                                <FullscreenButton />
+                            </Grid>
+                        </Grid>
                         <UniformSliders/>
                     </ItemWithTransitionSignal>
                     <ItemWithTransitionSignal sx={{textAlign: "left", marginTop: "20px"}} transitionAtom={saveColorTransitionSignalAtom}>

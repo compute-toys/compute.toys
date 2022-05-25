@@ -1,10 +1,10 @@
 import {ChangeEvent, FocusEvent, forwardRef, MutableRefObject, useEffect, useRef, useState} from "react";
-import {useTheme} from "@mui/material/styles";
+import {styled, useTheme} from "@mui/material/styles";
 import {Accordion, AccordionDetails, AccordionSummary, Button, Slider, Stack, TextField} from "@mui/material";
 import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import Box from "@mui/material/Box";
-import {CssTextField, getRainbowColor, theme} from "theme/theme";
+import {getRainbowColor, theme} from "theme/theme";
 import { v4 as UUID } from 'uuid';
 import {
     manualReloadAtom,
@@ -35,6 +35,29 @@ interface UniformSliderProps {
     sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>
 }
 
+// needs float: left to avoid drifting away from the absolute-positioned label
+export const StyledTextField = styled(TextField)({
+    '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+            borderColor: theme.palette.dracula.currentLine,
+        },
+        '&:hover fieldset': {
+            borderColor: theme.palette.dracula.currentLine,
+        },
+        '&.Mui-focused fieldset': {
+            borderColor: theme.palette.dracula.foreground,
+        },
+        '&.Mui-focused input': {
+            color: theme.palette.dracula.foreground,
+        },
+        '& input:disabled': {
+            color: theme.status.disabled,
+            WebkitTextFillColor: theme.status.disabled
+        },
+        float: 'left'
+    },
+});
+
 const validate = (text: string, this_uuid: string, sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>) => {
     let matched = text.match(/^[a-zA-Z][a-zA-Z0-9_]*$/);
     const nameValid = (matched && matched.length === 1);
@@ -62,7 +85,7 @@ const CustomTextField = forwardRef((props: any, inputRef: MutableRefObject<any>)
         }
     };
 
-    return (<CssTextField
+    return (<StyledTextField
         error={err}
         id="outlined-name"
         aria-label={"Uniform name input"}
@@ -72,7 +95,7 @@ const CustomTextField = forwardRef((props: any, inputRef: MutableRefObject<any>)
             gridColumn: 'span 3',
             verticalAlign: 'middle',
             input: {color: getRainbowColor(props.index)},
-            label: {color: getRainbowColor(props.index)}
+            label: {color: getRainbowColor(props.index)},
         }}
         inputRef={inputRef}
         size="small"

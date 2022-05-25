@@ -16,9 +16,15 @@ export const WgpuToyWrapper = (props) => {
     const canvasRef = useCallback(canvas => {
         if ("gpu" in navigator) {
             if (canvas) {
-                setWgpuAvailability('available');
-                setCanvasEl(canvas);
+                if (canvas.getContext("webgpu")) {
+                    setWgpuAvailability('available');
+                    setCanvasEl(canvas);
+                } else {
+                    setWgpuAvailability('unavailable');
+                }
             }
+            // there may be a case where we don't have the canvas *yet*
+            // but will get it on a subsequent callback, so no else{} here
         } else {
             setWgpuAvailability('unavailable');
         }

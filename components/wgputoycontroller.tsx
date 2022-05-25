@@ -6,7 +6,7 @@ import {
     loadedTexturesAtom,
     manualReloadAtom,
     parseErrorAtom,
-    playAtom,
+    playAtom, requestFullscreenAtom,
     resetAtom, sliderRefMapAtom, sliderSerDeNeedsUpdateAtom, sliderUpdateSignalAtom
 } from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
@@ -38,6 +38,7 @@ const WgpuToyController = (props) => {
     const [play, setPlay] = useAtom(playAtom);
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
+
     // must be transient so we can access updated value in play loop
     const [sliderUpdateSignal, setSliderUpdateSignal] = useTransientAtom(sliderUpdateSignalAtom);
     const [manualReload, setManualReload] = useTransientAtom(manualReloadAtom);
@@ -52,7 +53,6 @@ const WgpuToyController = (props) => {
     const loadedTextures = useAtomValue(loadedTexturesAtom);
     const setEntryPoints = useUpdateAtom(entryPointsAtom);
 
-
     const wgputoy = useAtomValue(wgputoyAtom);
     const canvas = useAtomValue(canvasElAtom);
 
@@ -61,6 +61,8 @@ const WgpuToyController = (props) => {
     const [width, setWidth] = useTransientAtom(widthAtom);
     const [requestAnimationFrameID, setRequestAnimationFrameID] = useTransientAtom(requestAnimationFrameIDAtom);
     const sliderRefMap = useAtomValue(sliderRefMapAtom);
+
+    const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
 
     const updateUniforms = useCallback(() => {
         safeContext(wgputoy, (wgputoy) => {
@@ -78,24 +80,6 @@ const WgpuToyController = (props) => {
         });
     }, []);
 
-    // TODO: debug only, delete this when no longer needed
-    const printUniforms = useCallback(() => {
-        safeContext(wgputoy, (wgputoy) => {
-            if (sliderRefMap) {
-                let names: string[] = [];
-                let values: number[] = [];
-                [...sliderRefMap.keys()].map(uuid => {
-                    if (sliderRefMap.get(uuid)) {
-                        names.push(sliderRefMap.get(uuid).current.getUniform());
-                        values.push(sliderRefMap.get(uuid).current.getVal());
-                    }
-                }, this);
-                console.log(names);
-                console.log(values);
-            }
-        });
-    }, []);
-
     const playCallback = useCallback((time: DOMHighResTimeStamp) => {
         safeContext(wgputoy, (wgputoy) => {
             if (sliderUpdateSignal()) {
@@ -109,7 +93,6 @@ const WgpuToyController = (props) => {
                 Seems to be safe to do this for slider updates, wgpu appears to cache
                 builds if they're unchanged.
              */
-            console.log(manualReload(), dbLoaded(), sliderUpdateSignal());
             if ((manualReload() && dbLoaded()) || (sliderUpdateSignal() && dbLoaded())) {
                 reloadCallback();
                 setManualReload(false);
@@ -175,6 +158,14 @@ const WgpuToyController = (props) => {
     const reloadCallback = useCallback( () => {
         safeContext(wgputoy, (wgputoy) => {
             wgputoy.set_shader(codeHot());
+        });
+    }, []);
+
+    const requestFullscreen = useCallback( () => {
+        safeContextWithCanvas(wgputoy, canvas, (wgputoy, canvas) => {
+            if (!document.fullscreenElement) {
+                canvas.requestFullscreen({navigationUI: "hide"});
+            }
         });
     }, []);
 
@@ -252,12 +243,26 @@ const WgpuToyController = (props) => {
 
     useResizeObserver(parentRef,(entry) => {
         safeContext(wgputoy, (wgputoy) => {
-            const target = entry.target as HTMLElement
-            const dimensions = getDimensions(target.offsetWidth);
-            if (dimensions.x !== width()) {
-                setWidth(dimensions.x);
-                wgputoy.resize(dimensions.x, dimensions.y);
+            if (document.fullscreenElement) {
+                const scale = window.devicePixelRatio;
+                const targetWidth = Math.floor(screen.width / scale);
+                const targetHeight = Math.floor(screen.height / scale);
+                if (targetWidth !== width()) {
+                    //console.log("resizing (fullscreen), x: " + targetWidth + " y: " + targetHeight + " scale: " + scale);
+                    setWidth(targetWidth);
+                    wgputoy.resize(targetWidth, targetHeight);
+                }
+            } else {
+                const target = entry.target as HTMLElement
+                //console.log("resize observer got target x: " + target.offsetWidth);
+                const dimensions = getDimensions(target.offsetWidth);
+                if (dimensions.x !== width()) {
+                    //console.log("resizing, x: " + dimensions.x + " y: " + dimensions.y);
+                    setWidth(dimensions.x);
+                    wgputoy.resize(dimensions.x, dimensions.y);
+                }
             }
+
         });
     });
 
@@ -275,6 +280,13 @@ const WgpuToyController = (props) => {
     useEffect(() => {
         loadTexture(1, loadedTextures[1].img);
     }, [loadedTextures[1]]);
+
+    useEffect(() => {
+        if (requestFullscreenSignal) {
+            requestFullscreen();
+            setRequestFullscreenSignal(false);
+        }
+    }, [requestFullscreenSignal])
 
     return null;
 }
