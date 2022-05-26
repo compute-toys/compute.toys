@@ -114,7 +114,7 @@ const WgpuToyController = (props) => {
         safeContext(wgputoy, (wgputoy) => {
             const dimensions = getDimensions(parentRef.offsetWidth); //theoretically dangerous call?
             setWidth(dimensions.x);
-            wgputoy.resize(dimensions.x, dimensions.y);
+            wgputoy.reset();
         });
     }, []);
 
@@ -241,30 +241,25 @@ const WgpuToyController = (props) => {
         }
     }, [code, hotReload, manualReload()]);
 
-    useResizeObserver(parentRef,(entry) => {
+    const updateResolution = () => {
         safeContext(wgputoy, (wgputoy) => {
+            let dimensions = {x: 0, y: 0}; // dimensions in device (physical) pixels
             if (document.fullscreenElement) {
-                const scale = window.devicePixelRatio;
-                const targetWidth = Math.floor(screen.width / scale);
-                const targetHeight = Math.floor(screen.height / scale);
-                if (targetWidth !== width()) {
-                    //console.log("resizing (fullscreen), x: " + targetWidth + " y: " + targetHeight + " scale: " + scale);
-                    setWidth(targetWidth);
-                    wgputoy.resize(targetWidth, targetHeight);
-                }
+                // calculate actual screen resolution, accounting for both zoom and hidpi
+                // https://stackoverflow.com/a/55839671/78204
+                dimensions.x = Math.round(window.screen.width  * window.devicePixelRatio / (window.outerWidth / window.innerWidth) / 80) * 80;
+                dimensions.y = Math.round(window.screen.height * window.devicePixelRatio / (window.outerWidth / window.innerWidth) / 60) * 60;
             } else {
-                const target = entry.target as HTMLElement
-                //console.log("resize observer got target x: " + target.offsetWidth);
-                const dimensions = getDimensions(target.offsetWidth);
-                if (dimensions.x !== width()) {
-                    //console.log("resizing, x: " + dimensions.x + " y: " + dimensions.y);
-                    setWidth(dimensions.x);
-                    wgputoy.resize(dimensions.x, dimensions.y);
-                }
+                dimensions = getDimensions(parentRef.offsetWidth * window.devicePixelRatio);
             }
+            if (dimensions.x !== width()) setWidth(dimensions.x);
 
+            let scale = window.devicePixelRatio; // TODO: allow this to be set in the UI, but default to DPR
+            wgputoy.resize(dimensions.x, dimensions.y, scale);
         });
-    });
+    }
+
+    useResizeObserver(parentRef, updateResolution);
 
     useEffect(() => {
         if (reset) {
