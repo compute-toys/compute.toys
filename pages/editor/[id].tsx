@@ -28,6 +28,7 @@ import {MetadataEditor} from "components/editor/metadataeditor";
 import {useDBRouter} from "lib/db/dbrouter";
 import {saveColorTransitionSignalAtom} from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
+import Explainer from "../../components/editor/explainer";
 
 
 const Index = () => {
@@ -84,6 +85,7 @@ const Index = () => {
                         <Box sx={{paddingTop: "4px"}}>
                             <ReloadButton/>
                             <HotReloadToggle/>
+                            <Explainer/>
                         </Box>
                     </ItemWithTransitionSignal>
                     <Grid container spacing={2}>

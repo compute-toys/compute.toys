@@ -24,7 +24,7 @@ const DraggablePicker = (props) => {
     const nodeRef = useRef(null);
 
     return (
-        <Draggable nodeRef={nodeRef} bounds="body" positionOffset={{x:'0',y:'0'}}>
+        <Draggable handle=".picker-handle" nodeRef={nodeRef} bounds="body" positionOffset={{x:'0',y:'0'}}>
             <Item ref={nodeRef} elevation={12}
                   sx={
                       props.hidden ? {display: 'none'} :
@@ -37,7 +37,7 @@ const DraggablePicker = (props) => {
                       }
                   }
             >
-                <div style={{display: 'flex', justifyContent: 'end',
+                <div className="picker-handle" style={{display: 'flex', justifyContent: 'end',
                     backgroundImage: 'repeating-linear-gradient(-45deg, rgba(255,255,255, 0.25), rgba(255,255,255, 0.25) 2px, transparent 1px, transparent 6px)',
                     backgroundSize: '4px 4px'
                 }}>

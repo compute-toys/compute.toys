@@ -105,12 +105,13 @@ const ShaderPicker = (props) => {
 export const MAX_PAGE_BUTTONS = 5
 
 const PageButton = (props) => {
+
     return (
-        <Link href={`/list/${props.index}`} passHref>
+        <Link href={`/list/${props.index}`}>
             <Button>
-                <a style={props.highlight ? {color: theme.palette.dracula.foreground} : {color: theme.palette.dracula.selection}}>
+                <span style={props.highlight ? {color: theme.palette.dracula.foreground} : {color: theme.palette.dracula.selection}}>
                     {props.index.toString()}
-                </a>
+                </span>
             </Button>
         </Link>
     );
