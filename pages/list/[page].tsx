@@ -105,6 +105,7 @@ const ShaderPicker = (props) => {
 export const MAX_PAGE_BUTTONS = 5
 
 const PageButton = (props) => {
+
     return (
         <Link href={`/list/${props.index}`} passHref>
             <Button>
