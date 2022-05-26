@@ -82,11 +82,11 @@ const ExplainerModal = forwardRef((props, ref) => {
             <Stack spacing={2}>
                 <Typography color={getRainbowColor(6)}>{"Download, install, and open "}<a href={"https://www.google.com/chrome/dev/"}>Chrome Dev</a></Typography>
                 <Typography color={getRainbowColor(0)}>{`Enter about:flags into your search bar`}</Typography>
-                <Box><Image width="281" height="77" src={"/instructions/chromebar.png"}/></Box>
+                <Box><Image alt="Chrome search bar" width="281" height="77" src={"/instructions/chromebar.png"}/></Box>
                 <Typography color={getRainbowColor(1)}>{`In the "Search flags" bar, enter "webgpu"`}</Typography>
-                <Box><Image width="450" height="58" src={"/instructions/webgpu.png"}/></Box>
+                <Box><Image alt="Search flags bar" width="450" height="58" src={"/instructions/webgpu.png"}/></Box>
                 <Typography color={getRainbowColor(2)}>{`Enable "Unsafe WebGPU"`}</Typography>
-                <Box><Image width="486" height="175" src={"/instructions/unsafe.png"}/></Box>
+                <Box><Image alt="Enable unsafe WebGPU" width="486" height="175" src={"/instructions/unsafe.png"}/></Box>
                 <Typography color={getRainbowColor(3)}>{`You may need to restart your browser`}</Typography>
                 <Typography color={getRainbowColor(4)}>{`You're done!`}</Typography>
             </Stack>
@@ -142,7 +142,7 @@ export default function Home(props) {
                             </Typography>
                             <FakeLink textDecoration="underline" href="https://discord.gg/pNzH6gFQ2T">
                                 <Stack direction="row" spacing={2} justifyContent={"center"}>
-                                    <Image width="35" height="27" src="/discord-white.png"/>
+                                    <Image alt="Join us on Discord" width="35" height="27" src="/discord-white.png"/>
                                     <Typography variant={"h5"}>
                                         Join us on Discord
                                     </Typography>

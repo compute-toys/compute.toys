@@ -54,7 +54,7 @@ const DraggableExplainer = (props) => {
                     <DisabledByDefaultSharp viewBox="1.5 1.5 19.5 19.5" onClick={() => props.setHidden(true)} color={'primary'}/>
                 </div>
                 <div style={{width: 'min-content', overflowY: 'scroll', padding: '8px', height: `${EXPLAINER_INNER_HEIGHT}px`, color: theme.palette.primary.main}}>
-                    <Logo/> is a playground for WebGPU compute shaders. Everything here is written in WGSL, which is WebGPU's native shader language. For up-to-date information on WGSL, please see the <a href="https://www.w3.org/TR/webgpu/">WGSL draft specification</a>.
+                    <Logo/> is a playground for WebGPU compute shaders. Everything here is written in WGSL, which is WebGPU&apos;s native shader language. For up-to-date information on WGSL, please see the <a href="https://www.w3.org/TR/webgpu/">WGSL draft specification</a>.
 
                     <br/><br/>
                     <Logo/> supplies keyboard input, mouse input, selectable input textures, custom values controlled by sliders, and the current frame and elapsed time.
@@ -96,7 +96,7 @@ const DraggableExplainer = (props) => {
                     <pre style={{color: theme.palette.neutral.main}}>passLoad(2, int2(1,1), 0)</pre>
 
                     Unlike <HiLite>pass_in</HiLite> and <HiLite>pass_out</HiLite>, the atomic storage buffer <HiLite>atomic_storage</HiLite> has read_write storage access.
-                    This means that you can use WGSL's built-in functions to do atomic operations on this buffer in any order,
+                    This means that you can use WGSL&apos;s built-in functions to do atomic operations on this buffer in any order,
                     enabling you to safely perform work across many threads at once and accumulate the result in one place.
 
                     <br/><br/>
@@ -108,10 +108,10 @@ const DraggableExplainer = (props) => {
                         assert(0, isfinite(col.x))<br/>
                         assert(1, isfinite(col.y))
                     </pre>
-                    
+
                     Every shader begins with a common <i>prelude</i>. The prelude contains the data inputs and outputs for this shader, as well as a few helper functions and type definitions to make working with <Logo/> a more streamlined and familiar process. Please refer to the prelude for a complete listing of the available data in your shader.
                     <br/><br/>
-                    Here are the current contents of this shader's prelude:
+                    Here are the current contents of this shader&apos;s prelude:
 
                     <pre style={{color: theme.palette.neutral.main}}><Prelude/></pre>
 

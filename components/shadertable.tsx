@@ -225,6 +225,7 @@ export const ShaderTable = (props) => {
                                                     height={TABLE_PREVIEW_HEIGHT}
                                                     width={TABLE_PREVIEW_WIDTH}
                                                     src={getFullyQualifiedSupabaseBucketURL(SUPABASE_SHADERTHUMB_BUCKET_NAME, row.thumb_url)}
+                                                    alt={row.name}
                                                 />
                                             </TableCell>
                                             <TableCell
