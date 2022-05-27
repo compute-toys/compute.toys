@@ -1,6 +1,7 @@
 import {atom} from "jotai";
 import {init_wgpu, WgpuContext, WgpuToyRenderer} from "lib/wgputoy";
 import {Size} from "types/size";
+import {getDimensions} from "../../types/canvasdimensions";
 
 const isSSR = typeof window === "undefined";
 
@@ -15,11 +16,13 @@ export const canvasParentElAtom = atom<HTMLElement | null, HTMLElement | null, v
     (get, set, newValue) => set(canvasParentElBaseAtom, newValue ? newValue : false)
 );
 
-export const canvasParentSizeAtom = atom<Size>({width: 0, height: 0});
+//export const canvasParentSizeAtom = atom<Size>({width: 0, height: 0});
 
 export const wgputoyInitAtom = atom<Promise<WgpuContext | false>>(async (get) => {
-    if (!isSSR && get(canvasElAtom) !== false) {
-        return init_wgpu(300, 150, (get(canvasElAtom) as HTMLCanvasElement).id)
+    if (!isSSR && get(canvasElAtom) !== false && get(canvasParentElAtom)) {
+        const parentEl = get(canvasParentElAtom);
+        const dim = getDimensions(parentEl.offsetWidth);
+        return init_wgpu(dim.x, dim.y, (get(canvasElAtom) as HTMLCanvasElement).id);
     } else {
         return false;
     }
