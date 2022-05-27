@@ -19,7 +19,7 @@ export const canvasParentSizeAtom = atom<Size>({width: 0, height: 0});
 
 export const wgputoyInitAtom = atom<Promise<WgpuContext | false>>(async (get) => {
     if (!isSSR && get(canvasElAtom) !== false) {
-        return init_wgpu((get(canvasElAtom) as HTMLCanvasElement).id)
+        return init_wgpu(300, 150, (get(canvasElAtom) as HTMLCanvasElement).id)
     } else {
         return false;
     }
