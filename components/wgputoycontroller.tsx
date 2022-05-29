@@ -1,4 +1,4 @@
-import {useCallback, useEffect} from "react";
+import {useCallback, useEffect, useState} from "react";
 import {atom, useAtom, useAtomValue} from "jotai";
 import {
     codeAtom, dbLoadedAtom, entryPointsAtom,
@@ -33,6 +33,9 @@ const isPlayingAtom = atom(false);
     Note that "exhaustive deps" are deliberately not used in effect hooks
     here, because they will fire off additional effects unnecessarily.
  */
+
+const scaleAtom = atom<number>(1.0);
+
 const WgpuToyController = (props) => {
 
     const [play, setPlay] = useAtom(playAtom);
@@ -59,6 +62,7 @@ const WgpuToyController = (props) => {
     const parentRef = useAtomValue<HTMLElement | null>(canvasParentElAtom);
 
     const [width, setWidth] = useTransientAtom(widthAtom);
+    const [scale, setScale] = useTransientAtom(scaleAtom);
     const [requestAnimationFrameID, setRequestAnimationFrameID] = useTransientAtom(requestAnimationFrameIDAtom);
     const sliderRefMap = useAtomValue(sliderRefMapAtom);
 
@@ -252,12 +256,14 @@ const WgpuToyController = (props) => {
             } else {
                 dimensions = getDimensions(parentRef.offsetWidth * window.devicePixelRatio);
             }
-            if (dimensions.x !== width()) setWidth(dimensions.x);
-
-            let scale = window.devicePixelRatio; // TODO: allow this to be set in the UI, but default to DPR
-            wgputoy.resize(dimensions.x, dimensions.y, scale);
+            if (dimensions.x !== width() || window.devicePixelRatio !== scale()) {
+                setWidth(dimensions.x);
+                setScale(window.devicePixelRatio);
+                // TODO: allow this to be set in the UI, but default to DPR
+                wgputoy.resize(dimensions.x, dimensions.y, 1.0);
+            }
         });
-    }
+    };
 
     useResizeObserver(parentRef, updateResolution);
 
