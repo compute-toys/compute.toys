@@ -79,6 +79,7 @@ const Index = () => {
                             editorOptions={{
                                 stopRenderingLineAfter: 1000,
                                 fontFamily: "'Fira Code', monospace",
+                                'bracketPairColorization.enabled': true,
                                 //fontLigatures: true,
                             }}
                         />
