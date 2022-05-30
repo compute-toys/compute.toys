@@ -20,6 +20,7 @@ import {
 import {useTransientAtom} from "jotai-game";
 import useResizeObserver from "@react-hook/resize-observer";
 import {getDimensions} from "types/canvasdimensions";
+import {WgpuToyRenderer} from "../lib/wgputoy";
 
 const requestAnimationFrameIDAtom = atom(0);
 const widthAtom = atom(0);
@@ -35,6 +36,7 @@ const isPlayingAtom = atom(false);
  */
 
 const scaleAtom = atom<number>(1.0);
+const needsInitialResetAtom = atom<boolean>(false);
 
 const WgpuToyController = (props) => {
 
@@ -45,6 +47,7 @@ const WgpuToyController = (props) => {
     // must be transient so we can access updated value in play loop
     const [sliderUpdateSignal, setSliderUpdateSignal] = useTransientAtom(sliderUpdateSignalAtom);
     const [manualReload, setManualReload] = useTransientAtom(manualReloadAtom);
+    const [needsInitialReset, setNeedsInitialReset] = useTransientAtom(needsInitialResetAtom);
     const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
     const [codeHot,] = useTransientAtom(codeAtom);
     const [dbLoaded,] = useTransientAtom(dbLoadedAtom);
@@ -52,7 +55,7 @@ const WgpuToyController = (props) => {
     // "hot" access and effect hook access
     const code = useAtomValue(codeAtom);
 
-    const setParseError = useUpdateAtom(parseErrorAtom);
+    const [parseError, setParseError] = useTransientAtom(parseErrorAtom);
     const loadedTextures = useAtomValue(loadedTexturesAtom);
     const setEntryPoints = useUpdateAtom(entryPointsAtom);
 
@@ -84,6 +87,21 @@ const WgpuToyController = (props) => {
         });
     }, []);
 
+    const reloadCallback = useCallback( () => {
+        safeContext(wgputoy, (wgputoy) => {
+            wgputoy.set_shader(codeHot());
+        });
+    }, []);
+
+    const awaitableReloadCallback = async () => {
+        if (wgputoy !== false) {
+            wgputoy.set_shader(codeHot());
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     const playCallback = useCallback((time: DOMHighResTimeStamp) => {
         safeContext(wgputoy, (wgputoy) => {
             if (sliderUpdateSignal()) {
@@ -97,7 +115,18 @@ const WgpuToyController = (props) => {
                 Seems to be safe to do this for slider updates, wgpu appears to cache
                 builds if they're unchanged.
              */
-            if ((manualReload() && dbLoaded()) || (sliderUpdateSignal() && dbLoaded())) {
+            if (needsInitialReset() && dbLoaded()) {
+                awaitableReloadCallback()
+                    .then((ready) => {
+                        // we don't want to reset in general except on load
+                        if (ready && parseError().success) {
+                            resetCallback();
+                            setManualReload(false);
+                            setSliderUpdateSignal(false);
+                            setNeedsInitialReset(false);
+                        }
+                    })
+            } else if ((manualReload() && dbLoaded()) || (sliderUpdateSignal() && dbLoaded())) {
                 reloadCallback();
                 setManualReload(false);
                 setSliderUpdateSignal(false);
@@ -159,12 +188,6 @@ const WgpuToyController = (props) => {
         });
     }, []);
 
-    const reloadCallback = useCallback( () => {
-        safeContext(wgputoy, (wgputoy) => {
-            wgputoy.set_shader(codeHot());
-        });
-    }, []);
-
     const requestFullscreen = useCallback( () => {
         safeContextWithCanvas(wgputoy, canvas, (wgputoy, canvas) => {
             if (!document.fullscreenElement) {
@@ -218,7 +241,7 @@ const WgpuToyController = (props) => {
 
         if (!isPlaying()) {
             setPlay(true);
-            resetCallback();
+            setNeedsInitialReset(true);
             playCallback(0);
         }
 
