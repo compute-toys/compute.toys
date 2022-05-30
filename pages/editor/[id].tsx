@@ -29,6 +29,7 @@ import {useDBRouter} from "lib/db/dbrouter";
 import {saveColorTransitionSignalAtom} from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import Explainer from "../../components/editor/explainer";
+import ConfigurationPicker from "../../components/editor/configurationpicker";
 
 
 const Index = () => {
@@ -91,6 +92,7 @@ const Index = () => {
                     </ItemWithTransitionSignal>
                     <Grid container spacing={2}>
                         <Grid item><TexturePicker/></Grid>
+                        <Grid item><ConfigurationPicker/></Grid>
                         <Grid item><EntryPointDisplay/></Grid>
                     </Grid>
                 </Grid>

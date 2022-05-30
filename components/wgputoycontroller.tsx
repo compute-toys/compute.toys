@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from "react";
 import {atom, useAtom, useAtomValue} from "jotai";
 import {
-    codeAtom, dbLoadedAtom, entryPointsAtom,
+    codeAtom, dbLoadedAtom, entryPointsAtom, float32EnabledAtom,
     hotReloadAtom,
     loadedTexturesAtom,
     manualReloadAtom,
@@ -70,6 +70,7 @@ const WgpuToyController = (props) => {
     const sliderRefMap = useAtomValue(sliderRefMapAtom);
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
+    const float32Enabled = useAtomValue(float32EnabledAtom);
 
     const updateUniforms = useCallback(() => {
         safeContext(wgputoy, (wgputoy) => {
@@ -311,6 +312,18 @@ const WgpuToyController = (props) => {
             setRequestFullscreenSignal(false);
         }
     }, [requestFullscreenSignal])
+
+    useEffect(() => {
+        safeContext(wgputoy, (wgputoy) => {
+            wgputoy.set_pass_f32(float32Enabled);
+            if (dbLoaded()) {
+                awaitableReloadCallback()
+                    .then(() => {
+                        resetCallback();
+                    })
+            }
+        })
+    }, [float32Enabled])
 
     return null;
 }

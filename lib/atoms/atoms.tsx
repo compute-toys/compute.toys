@@ -79,6 +79,7 @@ export const sliderSerDeArrayAtom = atomWithReset<Array<UniformActiveSettings>>(
 export const sliderSerDeNeedsUpdateAtom = atomWithReset<boolean>(true);
 export const sliderUpdateSignalAtom = atom<boolean>(false);
 export const shaderDataUrlThumbAtom = atomWithReset<string>("");
+export const float32EnabledAtom = atomWithReset<boolean>(false);
 
 
 
