@@ -282,7 +282,7 @@ const WgpuToyController = (props) => {
             if (dimensions.x !== width() || window.devicePixelRatio !== scale()) {
                 setWidth(dimensions.x);
                 setScale(window.devicePixelRatio);
-                // TODO: allow this to be set in the UI, but default to DPR
+                // TODO: allow this to be set in the UI, but default to 100% (native resolution)
                 wgputoy.resize(dimensions.x, dimensions.y, 1.0);
             }
         });
