@@ -2,7 +2,7 @@ import {atom, Getter, useAtomValue} from "jotai";
 import {
     authorProfileAtom,
     codeAtom,
-    descriptionAtom, entryPointsAtom,
+    descriptionAtom, entryPointsAtom, float32EnabledAtom,
     loadedTexturesAtom, saveColorTransitionSignalAtom, shaderDataUrlThumbAtom, shaderIDAtom, sliderRefMapAtom,
     sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom,
     titleAtom, visibilityAtom
@@ -28,7 +28,8 @@ export interface TextureActiveSettings {
 export interface ShaderActiveSettings {
     code: string,
     uniforms: Array<UniformActiveSettings>,
-    textures: Array<TextureActiveSettings>
+    textures: Array<TextureActiveSettings>,
+    float32Enabled?: boolean
 }
 
 export interface UpsertResult {
@@ -87,6 +88,7 @@ export const useResetShaderData = () => {
     const resetSliderSerDeArray             = useResetAtom(sliderSerDeArrayAtom);
     const resetSliderSerDeNeedsUpdateAtom   = useResetAtom(sliderSerDeNeedsUpdateAtom);
     const resetShaderDataUrlThumb           = useResetAtom(shaderDataUrlThumbAtom);
+    const resetFloat32Enabled               = useResetAtom(float32EnabledAtom);
 
     const reset = () => {
         resetAuthorProfile();
@@ -100,6 +102,7 @@ export const useResetShaderData = () => {
         resetSliderSerDeArray();
         resetSliderSerDeNeedsUpdateAtom();
         resetShaderDataUrlThumb();
+        resetFloat32Enabled();
     }
 
     return reset;
@@ -129,6 +132,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     const setVisibility = useUpdateAtom(visibilityAtom);
     const setAuthorProfile = useUpdateAtom(authorProfileAtom);
     const setSaveColorTransitionSignal = useUpdateAtom(saveColorTransitionSignalAtom);
+    const setFloat32Enabled = useUpdateAtom(float32EnabledAtom);
 
     const get = async (id: number) => {
         try {
@@ -162,17 +166,20 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                 setVisibility(shader.visibility);
 
                 const body = JSON.parse(shader.body);
+                const float32Enabled = 'float32Enabled' in body ? body.float32Enabled : false;
 
                 const shaderActiveSettings: ShaderActiveSettings = {
                     code: JSON.parse(body.code),
                     uniforms: body.uniforms,
-                    textures: body.textures
+                    textures: body.textures,
+                    float32Enabled: float32Enabled
                 }
 
                 setCode(shaderActiveSettings.code);
                 setLoadedTextures(shaderActiveSettings.textures);
                 setSliderSerDeArray(shaderActiveSettings.uniforms);
                 setSliderSerDeNeedsUpdateAtom(true);
+                setFloat32Enabled(float32Enabled);
                 // Typescript can't infer type of joined table
                 // @ts-ignore
                 setAuthorProfile(shader.profile)
@@ -218,7 +225,8 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                     body: JSON.stringify({
                         code: JSON.stringify(atomGetter(codeAtom)),
                         uniforms: getSliderActiveSettings(atomGetter(sliderRefMapAtom)),
-                        textures: atomGetter(loadedTexturesAtom)
+                        textures: atomGetter(loadedTexturesAtom),
+                        float32Enabled: atomGetter(float32EnabledAtom)
                     })
                 }]).single();
 
@@ -254,7 +262,8 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                     body: JSON.stringify({
                         code: JSON.stringify(atomGetter(codeAtom)),
                         uniforms: getSliderActiveSettings(atomGetter(sliderRefMapAtom)),
-                        textures: atomGetter(loadedTexturesAtom)
+                        textures: atomGetter(loadedTexturesAtom),
+                        float32Enabled: atomGetter(float32EnabledAtom)
                     })
                 })
                 .eq('id', id)
