@@ -267,7 +267,7 @@ export const UniformSliders = () => {
                 id="uniform-accordion"
             >{uniformTitle}</AccordionSummary>
             <AccordionDetails sx={{padding: "0px 2px 8px"}}>
-                <Box>
+                <Box sx={{ maxHeight: '30vh', overflow: 'auto' }}>
                     <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
                         {[...sliderRefMap.keys()].map((uuid, index) => (
                             <UniformSlider key={uuid} uuid={uuid} index={index} sliderSerDeArray={sliderSerDeArray} sliderRefMap={sliderRefMap} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
