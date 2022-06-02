@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from "react";
 import {atom, useAtom, useAtomValue} from "jotai";
 import {
-    codeAtom, dbLoadedAtom, entryPointsAtom, float32EnabledAtom,
+    codeAtom, dbLoadedAtom, entryPointsAtom, float32EnabledAtom, halfResolutionAtom,
     hotReloadAtom,
     loadedTexturesAtom,
     manualReloadAtom,
@@ -71,6 +71,7 @@ const WgpuToyController = (props) => {
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
     const float32Enabled = useAtomValue(float32EnabledAtom);
+    const halfResolution = useAtomValue(halfResolutionAtom);
 
     const updateUniforms = useCallback(() => {
         safeContext(wgputoy, (wgputoy) => {
@@ -280,16 +281,19 @@ const WgpuToyController = (props) => {
             } else {
                 dimensions = getDimensions(parentRef.offsetWidth * window.devicePixelRatio);
             }
-            if (dimensions.x !== width() || window.devicePixelRatio !== scale()) {
+            let newScale = halfResolution ? .5 : 1.;
+            if (dimensions.x !== width() || newScale !== scale()) {
                 setWidth(dimensions.x);
-                setScale(window.devicePixelRatio);
+                setScale(newScale);
                 // TODO: allow this to be set in the UI, but default to 100% (native resolution)
-                wgputoy.resize(dimensions.x, dimensions.y, 1.0);
+                wgputoy.resize(dimensions.x, dimensions.y, newScale);
             }
         });
     };
 
     useResizeObserver(parentRef, updateResolution);
+
+    useEffect(updateResolution, [halfResolution]);
 
     useEffect(() => {
         if (reset) {

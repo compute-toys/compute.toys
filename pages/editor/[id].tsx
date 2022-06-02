@@ -13,6 +13,7 @@ import PlayPauseButton from "components/buttons/playpausebutton"
 import ResetButton from "components/buttons/resetbutton";
 import HotReloadToggle from "components/buttons/hotreloadtoggle";
 import ReloadButton from "components/buttons/reloadbutton";
+import ScaleButton from 'components/buttons/scalebutton';
 import FullscreenButton from "../../components/buttons/fullscreenbutton";
 
 import {Frame} from "theme/theme";
@@ -65,6 +66,7 @@ const Index = () => {
                                 <ResetButton />
                             </Grid>
                             <Grid item sx={{textAlign: 'right'}} xs={2}>
+                                <ScaleButton />
                                 <FullscreenButton />
                             </Grid>
                         </Grid>
