@@ -18,7 +18,7 @@ import {UniformActiveSettings} from "lib/db/serializeshader";
 import {useUpdateAtom} from "jotai/utils";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-export const WGPU_CONTEXT_MAX_UNIFORMS = 16;
+export const WGPU_CONTEXT_MAX_UNIFORMS = 32;
 
 export interface UniformSliderRef {
     getVal: () => number;
