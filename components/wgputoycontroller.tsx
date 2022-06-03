@@ -20,9 +20,8 @@ import {
 import {useTransientAtom} from "jotai-game";
 import useResizeObserver from "@react-hook/resize-observer";
 import {getDimensions} from "types/canvasdimensions";
-import {WgpuToyRenderer} from "../lib/wgputoy";
+import useAnimationFrame from "use-animation-frame";
 
-const requestAnimationFrameIDAtom = atom(0);
 const widthAtom = atom(0);
 const isPlayingAtom = atom(false);
 
@@ -66,7 +65,6 @@ const WgpuToyController = (props) => {
 
     const [width, setWidth] = useTransientAtom(widthAtom);
     const [scale, setScale] = useTransientAtom(scaleAtom);
-    const [requestAnimationFrameID, setRequestAnimationFrameID] = useTransientAtom(requestAnimationFrameIDAtom);
     const sliderRefMap = useAtomValue(sliderRefMapAtom);
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
@@ -104,45 +102,49 @@ const WgpuToyController = (props) => {
         }
     };
 
-    const playCallback = useCallback((time: DOMHighResTimeStamp) => {
-        safeContext(wgputoy, (wgputoy) => {
-            if (sliderUpdateSignal()) {
-                updateUniforms();
-            }
-            /*
-                Handle manual reload in the play callback to handle race conditions
-                where manualReload gets set before the controller is loaded, which
-                results in the effect hook for manualReload never getting called.
+    useAnimationFrame(e => {
+        if (sliderUpdateSignal()) {
+            updateUniforms();
+        }
+        /*
+            Handle manual reload in the play callback to handle race conditions
+            where manualReload gets set before the controller is loaded, which
+            results in the effect hook for manualReload never getting called.
 
-                Seems to be safe to do this for slider updates, wgpu appears to cache
-                builds if they're unchanged.
-             */
-            if (needsInitialReset() && dbLoaded()) {
-                awaitableReloadCallback()
-                    .then((ready) => {
-                        // we don't want to reset in general except on load
-                        if (ready && parseError().success) {
-                            resetCallback();
-                            setManualReload(false);
-                            setSliderUpdateSignal(false);
-                            setNeedsInitialReset(false);
-                        }
-                    })
-            } else if ((manualReload() && dbLoaded()) || (sliderUpdateSignal() && dbLoaded())) {
-                reloadCallback();
-                setManualReload(false);
-                setSliderUpdateSignal(false);
-            }
-            wgputoy.set_time_elapsed(time * 1e-3);
+            Seems to be safe to do this for slider updates, wgpu appears to cache
+            builds if they're unchanged.
+         */
+        if (needsInitialReset() && dbLoaded()) {
+            awaitableReloadCallback()
+                .then((ready) => {
+                    // we don't want to reset in general except on load
+                    if (ready && parseError().success) {
+                        resetCallback();
+                        setManualReload(false);
+                        setSliderUpdateSignal(false);
+                        setNeedsInitialReset(false);
+                    }
+                })
+        } else if ((manualReload() && dbLoaded()) || (sliderUpdateSignal() && dbLoaded())) {
+            reloadCallback();
+            setManualReload(false);
+            setSliderUpdateSignal(false);
+        }
+    });
+
+    useAnimationFrame(e => safeContext(wgputoy, wgputoy => {
+        if (isPlaying()) {
+            wgputoy.set_time_elapsed(e.time);
             wgputoy.render();
-            setIsPlaying(true);
-            setRequestAnimationFrameID(requestAnimationFrame(playCallback));
-        });
+        }
+    }));
+
+    const playCallback = useCallback(() => {
+        setIsPlaying(true);
     }, []);
 
     const pauseCallback = useCallback(() => {
         setIsPlaying(false);
-        cancelAnimationFrame(requestAnimationFrameID());
     }, []);
 
     const resetCallback = useCallback(() => {
@@ -244,7 +246,7 @@ const WgpuToyController = (props) => {
         if (!isPlaying()) {
             setPlay(true);
             setNeedsInitialReset(true);
-            playCallback(0);
+            playCallback();
         }
 
         // Return a pauseCallback for the cleanup lifecycle
@@ -253,7 +255,7 @@ const WgpuToyController = (props) => {
 
     useEffect(() => {
         if (play && !isPlaying()) {
-            playCallback(0);
+            playCallback();
         } else if (!play && isPlaying()) {
             pauseCallback();
         }
