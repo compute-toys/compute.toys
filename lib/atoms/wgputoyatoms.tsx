@@ -21,7 +21,7 @@ export const canvasParentElAtom = atom<HTMLElement | null, HTMLElement | null, v
 export const wgputoyInitAtom = atom<Promise<WgpuContext | false>>(async (get) => {
     if (!isSSR && get(canvasElAtom) !== false && get(canvasParentElAtom)) {
         const parentEl = get(canvasParentElAtom);
-        const dim = getDimensions(parentEl.offsetWidth);
+        const dim = getDimensions(parentEl.offsetWidth * window.devicePixelRatio);
         return init_wgpu(dim.x, dim.y, (get(canvasElAtom) as HTMLCanvasElement).id);
     } else {
         return false;
