@@ -7,7 +7,8 @@ import {
     manualReloadAtom,
     parseErrorAtom,
     playAtom, requestFullscreenAtom,
-    resetAtom, sliderRefMapAtom, sliderSerDeNeedsUpdateAtom, sliderUpdateSignalAtom
+    resetAtom, sliderRefMapAtom, sliderUpdateSignalAtom,
+    saveColorTransitionSignalAtom,
 } from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
 import {
@@ -21,6 +22,7 @@ import {useTransientAtom} from "jotai-game";
 import useResizeObserver from "@react-hook/resize-observer";
 import {getDimensions} from "types/canvasdimensions";
 import useAnimationFrame from "use-animation-frame";
+import {theme} from "theme/theme";
 
 const widthAtom = atom(0);
 const isPlayingAtom = atom(false);
@@ -50,6 +52,7 @@ const WgpuToyController = (props) => {
     const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
     const [codeHot,] = useTransientAtom(codeAtom);
     const [dbLoaded,] = useTransientAtom(dbLoadedAtom);
+    const [hotReloadHot,] = useTransientAtom(hotReloadAtom);
     // transient atom can't be used with effect hook, and we want both
     // "hot" access and effect hook access
     const code = useAtomValue(codeAtom);
@@ -57,6 +60,7 @@ const WgpuToyController = (props) => {
     const [parseError, setParseError] = useTransientAtom(parseErrorAtom);
     const loadedTextures = useAtomValue(loadedTexturesAtom);
     const setEntryPoints = useUpdateAtom(entryPointsAtom);
+    const setSaveColorTransitionSignal = useUpdateAtom(saveColorTransitionSignalAtom);
 
     const wgputoy = useAtomValue(wgputoyAtom);
     const canvas = useAtomValue(canvasElAtom);
@@ -170,6 +174,7 @@ const WgpuToyController = (props) => {
             position: {row: Number(row), col: Number(col)},
             success: false
         }));
+        if (!hotReloadHot()) setSaveColorTransitionSignal(theme.palette.dracula.orange);
     }, []);
 
     const loadTexture = useCallback((index: number, uri: string) => {
