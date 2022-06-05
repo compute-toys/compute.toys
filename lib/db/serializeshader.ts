@@ -49,7 +49,7 @@ const upsertResult = (id: number | null, needsRedirect: boolean, success: boolea
 }
 
 export type HOST_GET = (id: number) => Promise<void>;
-export type HOST_UPSERT = (dataUrl: string) => Promise<UpsertResult>;
+export type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
 
 const getSliderActiveSettings = (sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>) => {
     // convert our map of references into a plain array of objects
@@ -283,8 +283,8 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
         }
     };
 
-    const upsert = async (dataUrl: string) => {
-        if (atomGetter(shaderIDAtom)) {
+    const upsert = async (dataUrl: string, forceCreate: boolean) => {
+        if (atomGetter(shaderIDAtom) && !forceCreate) {
             return update(atomGetter(shaderIDAtom) as number, dataUrl);
         } else {
             return create(dataUrl);
