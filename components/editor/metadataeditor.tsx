@@ -19,7 +19,7 @@ import {
     titleAtom,
     Visibility,
     visibilityAtom,
-    AuthorProfile,
+    shaderIDAtom,
 } from "lib/atoms/atoms";
 import {styled} from "@mui/material/styles";
 import {
@@ -49,6 +49,7 @@ export const MetadataEditor = () => {
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
     const [visibility, setVisibility] = useAtom(visibilityAtom);
+    const shaderID = useAtomValue(shaderIDAtom);
     const setShaderDataUrlThumb = useUpdateAtom(shaderDataUrlThumbAtom);
     const shadowCanvasEl = useAtomValue(shadowCanvasElAtom);
     const canvasEl = useAtomValue(canvasElAtom);
@@ -58,13 +59,13 @@ export const MetadataEditor = () => {
     const router = useRouter();
 
     //TODO: not the best place for this logic
-    const upsertShader = async () => {
+    const upsertShader = async (forceCreate: boolean) => {
         const dataUrl = await shadowCanvasToDataUrl(canvasEl, shadowCanvasEl);
 
         // we have the dataUrl "in hand," if we use an atom here
         // we'll have to wait to roundtrip it, so pass it instead.
         setShaderDataUrlThumb(dataUrl);
-        const result: UpsertResult = await upsertToHost(dataUrl);
+        const result: UpsertResult = await upsertToHost(dataUrl, forceCreate);
         if (result.success && result.needsRedirect) {
             router.push(`/view/${result.id}`);
         }
@@ -162,10 +163,21 @@ export const MetadataEditor = () => {
                 }
             </Grid>
             <Grid item xs={4} alignItems="center" textAlign="right">
+                {shaderID && user ?
+                    <Button sx={{padding: "1", color: theme.palette.dracula.green, border: `1px solid ${theme.palette.dracula.currentLine}`}}
+                            onClick={async () => {
+                                setTitle(`Fork of ${title}`.substring(0, 30));
+                                setDescription(`Forked from https://compute.toys/view/${shaderID}`);
+                                setVisibility('private');
+                                upsertShader(true);
+                            }}>
+                        Fork
+                    </Button>
+                    : null }
                 {userIsAuthor() ?
                     <Button sx={{padding: "1", color: theme.palette.dracula.green, border: `1px solid ${theme.palette.dracula.currentLine}`}}
                             onClick={async () => {
-                                upsertShader();
+                                upsertShader(false);
                             }}>
                         Save
                     </Button>
