@@ -67,7 +67,7 @@ export default function Profile(props) {
             setShaders(res.shaders);
             setErrorMessage(res.error);
         })
-    }, [])
+    }, [user])
 
 
 
