@@ -143,7 +143,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                     description,
                     visibility,
                     body,
-                    profile (
+                    profile:author (
                         username,
                         avatar_url,
                         id
