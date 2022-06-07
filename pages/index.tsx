@@ -177,7 +177,7 @@ export async function getServerSideProps(context) {
         .select(`
             id,
             name,
-            profile (
+            profile:author (
                 username,
                 avatar_url
             ),

@@ -21,7 +21,7 @@ async function loadShaders(username: string) {
             .from<definitions["shader"]>(SUPABASE_SHADER_TABLE_NAME)
             .select(`
                     *,
-                    profile!inner(profile:username)  
+                    profile:author!inner(username)  
                 `)
             // @ts-ignore
             .eq("profile.username", username);
