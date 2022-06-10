@@ -72,10 +72,8 @@ export const descriptionAtom = atomWithReset<string>("");
 export const visibilityAtom = atomWithReset<Visibility>("private");
 export const loadedTexturesAtom = atomWithReset<Texture[]>([{img: '/textures/blank.png'}, {img: '/textures/blank.png'}]);
 export const entryPointsAtom = atomWithReset([]);
-// sliderRefMap is managed by the slider component, no reset needed
-export const sliderRefMapAtom = atom<Map<string,MutableRefObject<UniformSliderRef>>>(new Map<string,MutableRefObject<UniformSliderRef>>());
-export const sliderSerDeArrayAtom = atomWithReset<Array<UniformActiveSettings>>([]);
-// TODO: should this reset to true?
+// we create a new refmap when deserializing from DB, don't need a reset
+export const sliderRefMapAtom = atom<Map<string,UniformSliderRef>>(new Map<string,UniformSliderRef>());
 export const sliderSerDeNeedsUpdateAtom = atomWithReset<boolean>(true);
 export const sliderUpdateSignalAtom = atom<boolean>(false);
 export const shaderDataUrlThumbAtom = atomWithReset<string>("");

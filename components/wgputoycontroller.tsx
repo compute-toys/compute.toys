@@ -8,7 +8,7 @@ import {
     parseErrorAtom,
     playAtom, requestFullscreenAtom,
     resetAtom, sliderRefMapAtom, sliderUpdateSignalAtom,
-    saveColorTransitionSignalAtom,
+    saveColorTransitionSignalAtom
 } from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
 import {
@@ -26,6 +26,8 @@ import {theme} from "theme/theme";
 
 const widthAtom = atom(0);
 const isPlayingAtom = atom(false);
+const scaleAtom = atom<number>(1.0);
+const needsInitialResetAtom = atom<boolean>(false);
 
 /*
     Controller component. Returns null because we expect to be notified
@@ -35,10 +37,6 @@ const isPlayingAtom = atom(false);
     Note that "exhaustive deps" are deliberately not used in effect hooks
     here, because they will fire off additional effects unnecessarily.
  */
-
-const scaleAtom = atom<number>(1.0);
-const needsInitialResetAtom = atom<boolean>(false);
-
 const WgpuToyController = (props) => {
 
     const [play, setPlay] = useAtom(playAtom);
@@ -53,8 +51,10 @@ const WgpuToyController = (props) => {
     const [codeHot,] = useTransientAtom(codeAtom);
     const [dbLoaded,] = useTransientAtom(dbLoadedAtom);
     const [hotReloadHot,] = useTransientAtom(hotReloadAtom);
+    const [sliderRefMap,] = useTransientAtom(sliderRefMapAtom);
+
     // transient atom can't be used with effect hook, and we want both
-    // "hot" access and effect hook access
+    // "hot" access and effect hook access for code
     const code = useAtomValue(codeAtom);
 
     const [parseError, setParseError] = useTransientAtom(parseErrorAtom);
@@ -69,74 +69,77 @@ const WgpuToyController = (props) => {
 
     const [width, setWidth] = useTransientAtom(widthAtom);
     const [scale, setScale] = useTransientAtom(scaleAtom);
-    const sliderRefMap = useAtomValue(sliderRefMapAtom);
+
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
     const float32Enabled = useAtomValue(float32EnabledAtom);
     const halfResolution = useAtomValue(halfResolutionAtom);
 
-    const updateUniforms = useCallback(() => {
-        safeContext(wgputoy, (wgputoy) => {
-            if (sliderRefMap) {
-                let names: string[] = [];
-                let values: number[] = [];
-                [...sliderRefMap.keys()].map(uuid => {
-                    if (sliderRefMap.get(uuid)) {
-                        names.push(sliderRefMap.get(uuid).current.getUniform());
-                        values.push(sliderRefMap.get(uuid).current.getVal());
-                    }
-                }, this);
-                if (names.length > 0) wgputoy.set_custom_floats(names, Float32Array.from(values));
+    const updateUniforms = useCallback(async () => {
+        if (wgputoy !== false) {
+            let names: string[] = [];
+            let values: number[] = [];
+            [...sliderRefMap().keys()].map(uuid => {
+                names.push(sliderRefMap().get(uuid).getUniform());
+                values.push(sliderRefMap().get(uuid).getVal());
+            }, this);
+            if (names.length > 0) {
+                await wgputoy.set_custom_floats(names, Float32Array.from(values));
             }
-        });
+            setSliderUpdateSignal(false);
+        }
     }, []);
 
     const reloadCallback = useCallback( () => {
-        safeContext(wgputoy, (wgputoy) => {
-            wgputoy.set_shader(codeHot());
+        updateUniforms().then(() => {
+            safeContext(wgputoy, (wgputoy) => {
+                wgputoy.set_shader(codeHot());
+                setManualReload(false);
+            });
         });
+
     }, []);
 
     const awaitableReloadCallback = async () => {
-        if (wgputoy !== false) {
-            wgputoy.set_shader(codeHot());
-            return true;
-        } else {
-            return false;
-        }
+        return updateUniforms().then(() => {
+            if (wgputoy !== false) {
+                wgputoy.set_shader(codeHot());
+                setManualReload(false);
+                return true;
+            } else {
+                return false;
+            }
+        });
     };
 
-    useAnimationFrame(e => {
-        if (sliderUpdateSignal()) {
-            updateUniforms();
-        }
-        /*
-            Handle manual reload in the play callback to handle race conditions
-            where manualReload gets set before the controller is loaded, which
-            results in the effect hook for manualReload never getting called.
-
-            Seems to be safe to do this for slider updates, wgpu appears to cache
-            builds if they're unchanged.
-         */
+     /*
+        Handle manual reload in the play callback to handle race conditions
+        where manualReload gets set before the controller is loaded, which
+        results in the effect hook for manualReload never getting called.
+     */
+    const liveReloadCallback = useCallback(() => {
         if (needsInitialReset() && dbLoaded()) {
             awaitableReloadCallback()
                 .then((ready) => {
                     // we don't want to reset in general except on load
                     if (ready && parseError().success) {
                         resetCallback();
-                        setManualReload(false);
-                        setSliderUpdateSignal(false);
                         setNeedsInitialReset(false);
                     }
                 })
-        } else if ((manualReload() && dbLoaded()) || (sliderUpdateSignal() && dbLoaded())) {
+        } else if (dbLoaded() && manualReload()) {
             reloadCallback();
-            setManualReload(false);
-            setSliderUpdateSignal(false);
         }
-    });
+    }, [])
 
     useAnimationFrame(e => safeContext(wgputoy, wgputoy => {
+        if (sliderUpdateSignal()) {
+            updateUniforms().then(() => {
+                liveReloadCallback();
+            });
+        } else {
+            liveReloadCallback();
+        }
         if (isPlaying()) {
             wgputoy.set_time_elapsed(e.time);
             wgputoy.render();
@@ -271,9 +274,8 @@ const WgpuToyController = (props) => {
             only need to handle manual reload effect here for
             special case where we're paused and a reload is called
         */
-        if (hotReload || (!isPlaying() && manualReload())) {
+        if ((hotReload || (!isPlaying() && manualReload()))) {
             reloadCallback();
-            setManualReload(false);
         }
     }, [code, hotReload, manualReload()]);
 

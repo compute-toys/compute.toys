@@ -25,6 +25,7 @@ export const useDBRouter = () => {
         if (router.isReady && typeof router.query.id === 'string') {
             const id = toNumber(router.query.id);
             setDBLoaded(false);
+            reset();
             if (id) {
                 get(id).then(() => {
                     setShaderID(id);
@@ -33,7 +34,6 @@ export const useDBRouter = () => {
                 });
             } else if (router.query.id === 'new') {
                 setShaderID(false);
-                reset();
                 setManualReload(true);
                 setDBLoaded(true);
             } else {

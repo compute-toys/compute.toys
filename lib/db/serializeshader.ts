@@ -4,14 +4,14 @@ import {
     codeAtom,
     descriptionAtom, entryPointsAtom, float32EnabledAtom,
     loadedTexturesAtom, saveColorTransitionSignalAtom, shaderDataUrlThumbAtom, shaderIDAtom, sliderRefMapAtom,
-    sliderSerDeArrayAtom, sliderSerDeNeedsUpdateAtom,
+    sliderSerDeNeedsUpdateAtom,
     titleAtom, visibilityAtom
 } from "lib/atoms/atoms";
 import {supabase, SUPABASE_SHADER_TABLE_NAME, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/db/supabaseclient";
 import {definitions} from "types/supabase";
-import {MutableRefObject, useMemo, useRef} from "react";
+import {useMemo, useRef} from "react";
 import {useAuth} from "lib/db/authcontext";
-import {UniformSliderRef} from "components/editor/uniformsliders";
+import {fromUniformActiveSettings, UniformSliderRef} from "components/editor/uniformsliders";
 import {useResetAtom, useUpdateAtom} from "jotai/utils";
 import {theme} from "theme/theme";
 
@@ -51,12 +51,12 @@ const upsertResult = (id: number | null, needsRedirect: boolean, success: boolea
 export type HOST_GET = (id: number) => Promise<void>;
 export type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
 
-const getSliderActiveSettings = (sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>) => {
+const getSliderActiveSettings = (sliderRefMap: Map<string,UniformSliderRef>) => {
     // convert our map of references into a plain array of objects
     return [...sliderRefMap.keys()].map((uuid) => {
         return {
-            name: sliderRefMap.get(uuid).current.getUniform(),
-            value: sliderRefMap.get(uuid).current.getVal()
+            name: sliderRefMap.get(uuid).getUniform(),
+            value: sliderRefMap.get(uuid).getVal()
         } as UniformActiveSettings;
     })
 }
@@ -85,7 +85,6 @@ export const useResetShaderData = () => {
     const resetVisibility                   = useResetAtom(visibilityAtom);
     const resetLoadedTextures               = useResetAtom(loadedTexturesAtom);
     const resetEntryPoints                  = useResetAtom(entryPointsAtom);
-    const resetSliderSerDeArray             = useResetAtom(sliderSerDeArrayAtom);
     const resetSliderSerDeNeedsUpdateAtom   = useResetAtom(sliderSerDeNeedsUpdateAtom);
     const resetShaderDataUrlThumb           = useResetAtom(shaderDataUrlThumbAtom);
     const resetFloat32Enabled               = useResetAtom(float32EnabledAtom);
@@ -99,7 +98,6 @@ export const useResetShaderData = () => {
         resetVisibility();
         resetLoadedTextures();
         resetEntryPoints();
-        resetSliderSerDeArray();
         resetSliderSerDeNeedsUpdateAtom();
         resetShaderDataUrlThumb();
         resetFloat32Enabled();
@@ -125,8 +123,8 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
      */
     const setCode = useUpdateAtom(codeAtom);
     const setLoadedTextures = useUpdateAtom(loadedTexturesAtom);
-    const setSliderSerDeArray = useUpdateAtom(sliderSerDeArrayAtom);
-    const setSliderSerDeNeedsUpdateAtom = useUpdateAtom(sliderSerDeNeedsUpdateAtom);
+    const setSliderSerDeNeedsUpdate = useUpdateAtom(sliderSerDeNeedsUpdateAtom);
+    const setSliderRefMap = useUpdateAtom(sliderRefMapAtom);
     const setTitle = useUpdateAtom(titleAtom);
     const setDescription = useUpdateAtom(descriptionAtom);
     const setVisibility = useUpdateAtom(visibilityAtom);
@@ -177,8 +175,9 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
 
                 setCode(shaderActiveSettings.code);
                 setLoadedTextures(shaderActiveSettings.textures);
-                setSliderSerDeArray(shaderActiveSettings.uniforms);
-                setSliderSerDeNeedsUpdateAtom(true);
+                setSliderRefMap(fromUniformActiveSettings(shaderActiveSettings.uniforms));
+                // need to inform the slider component of a change so it can get a count of all the enabled sliders
+                setSliderSerDeNeedsUpdate(true);
                 setFloat32Enabled(float32Enabled);
                 // Typescript can't infer type of joined table
                 // @ts-ignore

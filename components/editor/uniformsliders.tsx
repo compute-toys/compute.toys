@@ -9,11 +9,10 @@ import { v4 as UUID } from 'uuid';
 import {
     manualReloadAtom,
     sliderRefMapAtom,
-    sliderSerDeArrayAtom,
     sliderSerDeNeedsUpdateAtom,
     sliderUpdateSignalAtom
 } from "lib/atoms/atoms";
-import {useAtom, useAtomValue} from "jotai";
+import {useAtom} from "jotai";
 import {UniformActiveSettings} from "lib/db/serializeshader";
 import {useUpdateAtom} from "jotai/utils";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -27,12 +26,34 @@ export interface UniformSliderRef {
 }
 
 interface UniformSliderProps {
-    setRefCallback: (r: MutableRefObject<UniformSliderRef>) => void
+    setRefCallback: (r: UniformSliderRef) => void
     deleteCallback: (uuid: string) => void
     uuid: string
     index: number
-    sliderSerDeArray: Array<UniformActiveSettings>
-    sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>
+    sliderRefMap: Map<string,UniformSliderRef>
+}
+
+export const fromUniformActiveSettings = (sliderSerDeArray: Array<UniformActiveSettings>) => {
+    let sliderRefMap = new Map<string, UniformSliderRef>();
+
+    sliderSerDeArray.forEach((slider: UniformActiveSettings) => {
+        const uuid = UUID();
+        const sliderRef : UniformSliderRef = {
+            getVal: () => {
+                return slider.value;
+            },
+            getUniform: () => {
+                return slider.name;
+            },
+            getUUID: () => {
+                return uuid;
+            }
+        };
+        sliderRefMap.set(uuid, sliderRef);
+    });
+
+    return sliderRefMap;
+
 }
 
 // needs float: left to avoid drifting away from the absolute-positioned label
@@ -58,11 +79,11 @@ export const StyledTextField = styled(TextField)({
     },
 });
 
-const validate = (text: string, this_uuid: string, sliderRefMap: Map<string,MutableRefObject<UniformSliderRef>>) => {
+const validate = (text: string, this_uuid: string, sliderRefMap: Map<string,UniformSliderRef>) => {
     let matched = text.match(/^[a-zA-Z][a-zA-Z0-9_]*$/);
     const nameValid = (matched && matched.length === 1);
     const foundDuplicate = [...sliderRefMap.keys()].find((uuid, index) => {
-        return this_uuid !== uuid && sliderRefMap.get(uuid).current.getUniform() === text
+        return this_uuid !== uuid && sliderRefMap.get(uuid).getUniform() === text
     });
     return nameValid && !foundDuplicate;
 }
@@ -118,18 +139,19 @@ CustomTextField.displayName = "CustomTextField";
 
 const UniformSlider = (props: UniformSliderProps) => {
 
-    const initFromHost = props.sliderSerDeArray[props.index] !== undefined;
+    //const initFromHost = props.sliderSerDeArray[props.index] !== undefined;
+    const initFromHost = props.sliderRefMap.has(props.uuid) && props.sliderRefMap.get(props.uuid);
 
-    const [sliderVal, setSliderVal] = useState(initFromHost ? props.sliderSerDeArray[props.index].value : 0);
-    const [sliderUniform, setSliderUniform] = useState(initFromHost ? props.sliderSerDeArray[props.index].name : "uniform_" + props.index);
+    const [sliderVal, setSliderVal] = useState(initFromHost ? props.sliderRefMap.get(props.uuid).getVal() : 0);
+    const [sliderUniform, setSliderUniform] = useState(initFromHost ? props.sliderRefMap.get(props.uuid).getUniform() : "uniform_" + props.index);
     const setSliderUpdateSignal = useUpdateAtom(sliderUpdateSignalAtom);
 
-    const sliderRef = useRef<UniformSliderRef>();
+    let sliderRef : UniformSliderRef;
     const inputRef = useRef<HTMLInputElement>();
 
     // TODO: check if dependency array can be more restrictive here
     useEffect( () => {
-        sliderRef.current = {
+        sliderRef = {
             getVal: () => {
                 return sliderVal;
             },
@@ -208,13 +230,13 @@ export const UniformSliders = () => {
 
     // keeps a count of sliders and also force an update when the count changes
     const [sliderCount, setSliderCount] = useState(0);
-
+    const [sliderSerDeNeedsUpdate, setSliderSerDeNeedsUpdate] = useAtom(sliderSerDeNeedsUpdateAtom);
     const [sliderRefMap, setSliderRefMap] = useAtom(sliderRefMapAtom);
 
     const setManualReload = useUpdateAtom(manualReloadAtom);
 
     const sliderRefCallback = (ref) => {
-        ref && setSliderRefMap(sliderRefMap.set(ref.current.getUUID(), ref)); // set returns 'this'
+        ref && setSliderRefMap(sliderRefMap.set(ref.getUUID(), ref)); // set returns 'this'
     };
 
     /*
@@ -231,27 +253,30 @@ export const UniformSliders = () => {
     };
 
     const addCallback = (uuid) => {
-        uuid && setSliderRefMap(sliderRefMap.set(uuid, null));
+        const sliderRef : UniformSliderRef = {
+            getVal: () => {
+                return 0;
+            },
+            getUniform: () => {
+                return "uniform_" + sliderCount;
+            },
+            getUUID: () => {
+                return uuid;
+            }
+        };
+        uuid && setSliderRefMap(sliderRefMap.set(uuid, sliderRef));
         setSliderCount(sliderCount + 1);
         // recompile with new prelude
         setManualReload(true);
     };
 
-    const sliderSerDeArray = useAtomValue(sliderSerDeArrayAtom);
-    const [sliderSerDeNeedsUpdate, setSliderSerDeNeedsUpdate] = useAtom(sliderSerDeNeedsUpdateAtom);
-
     useEffect(() => {
         if (sliderSerDeNeedsUpdate) {
-            sliderRefMap.clear();
-            //calling addCallback here doesn't quite work, it gets stale values of sliderCount
-            sliderSerDeArray.forEach(() => {
-                setSliderRefMap(sliderRefMap.set(UUID(), null));
-            });
-            setSliderCount(sliderSerDeArray.length);
-            setManualReload(true);
+            setSliderCount([...sliderRefMap.keys()].length);
             setSliderSerDeNeedsUpdate(false);
+            setManualReload(true);
         }
-    }, [sliderSerDeNeedsUpdate]);
+    });
 
     const uniformTitle = (sliderCount > 0) ?
         <span style={{color: theme.palette.dracula.foreground}}>{`Uniforms [${sliderCount}]`}</span>
@@ -270,7 +295,7 @@ export const UniformSliders = () => {
                 <Box sx={{ maxHeight: '30vh', overflow: 'auto' }}>
                     <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
                         {[...sliderRefMap.keys()].map((uuid, index) => (
-                            <UniformSlider key={uuid} uuid={uuid} index={index} sliderSerDeArray={sliderSerDeArray} sliderRefMap={sliderRefMap} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
+                            <UniformSlider key={uuid} uuid={uuid} index={index} sliderRefMap={sliderRefMap} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
                         ))}
                     </Stack>
                     {sliderCount < WGPU_CONTEXT_MAX_UNIFORMS ?
