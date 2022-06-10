@@ -95,6 +95,7 @@ const CustomTextField = forwardRef((props: any, inputRef: MutableRefObject<any>)
      */
     const [temporaryFieldValue, setTemporaryFieldValue] = useState("Uniform");
     const [err, setErr] = useState(false);
+    const setManualReload = useUpdateAtom(manualReloadAtom);
 
     useEffect(() => {
         setTemporaryFieldValue(props.sliderUniform);
@@ -127,6 +128,7 @@ const CustomTextField = forwardRef((props: any, inputRef: MutableRefObject<any>)
         onBlur={ (event: FocusEvent<HTMLInputElement>) => {
             if (validate(event.target.value, props.uuid, props.sliderRefMap)) {
                 props.setSliderUniform(event.target.value);
+                setManualReload(true);
                 setErr(false);
             } else {
                 setErr(true);
@@ -258,7 +260,7 @@ export const UniformSliders = () => {
                 return 0;
             },
             getUniform: () => {
-                return "uniform_" + sliderCount;
+                return "uniform_" + (sliderCount + 1);
             },
             getUUID: () => {
                 return uuid;
@@ -293,7 +295,7 @@ export const UniformSliders = () => {
             >{uniformTitle}</AccordionSummary>
             <AccordionDetails sx={{padding: "0px 2px 8px"}}>
                 <Box sx={{ maxHeight: '30vh', overflow: 'auto' }}>
-                    <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center">
+                    <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center" marginTop="32px">
                         {[...sliderRefMap.keys()].map((uuid, index) => (
                             <UniformSlider key={uuid} uuid={uuid} index={index} sliderRefMap={sliderRefMap} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
                         ))}
