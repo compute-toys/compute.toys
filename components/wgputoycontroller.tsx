@@ -228,27 +228,35 @@ const WgpuToyController = (props) => {
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', handleKeyUp);
 
-        safeContextWithCanvas(wgputoy, canvas, (wgputoy, canvas) => {
-                const handleMouseMove = (e: MouseEvent) => {
-                    wgputoy.set_mouse_pos(e.offsetX, e.offsetY)
-                }
+        const handleMouseMove = (e: MouseEvent) => {
+            safeContextWithCanvas(wgputoy, canvas, (wgputoy, canvas) => {
+                wgputoy.set_mouse_pos(e.offsetX, e.offsetY)
+            });
+        }
 
-                const handleMouseUp = (e: MouseEvent) => {
-                    wgputoy.set_mouse_click(false);
-                    canvas.onmousemove = null;
-                }
+        const handleMouseUp = (e: MouseEvent) => {
+            safeContextWithCanvas(wgputoy, canvas, (wgputoy, canvas) => {
+                wgputoy.set_mouse_click(false);
+                canvas.onmousemove = null;
+            });
+        }
 
-                const handleMouseDown = (e: MouseEvent) => {
-                    wgputoy.set_mouse_click(true);
-                    canvas.onmousemove = handleMouseMove;
-                }
+        const handleMouseDown = (e: MouseEvent) => {
+            safeContextWithCanvas(wgputoy, canvas, (wgputoy, canvas) => {
+                wgputoy.set_mouse_click(true);
+                canvas.onmousemove = handleMouseMove;
+            });
+        }
 
-                canvas.onmousedown = handleMouseDown;
-                canvas.onmouseup = handleMouseUp;
-                canvas.onmouseleave = handleMouseUp;
+        if (canvas !== false) {
+            canvas.onmousedown = handleMouseDown;
+            canvas.onmouseup = handleMouseUp;
+            canvas.onmouseleave = handleMouseUp;
+        }
 
-                wgputoy.on_success(handleSuccess);
-                wgputoy.on_error(handleError);
+        safeContext(wgputoy, (wgputoy) => {
+            wgputoy.on_success(handleSuccess);
+            wgputoy.on_error(handleError);
         });
 
         if (!isPlaying()) {

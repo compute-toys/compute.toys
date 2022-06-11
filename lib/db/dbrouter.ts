@@ -1,5 +1,7 @@
 import {useRouter} from "next/router";
 import {authorProfileAtom, codeAtom, dbLoadedAtom, DEFAULT_SHADER, manualReloadAtom, shaderIDAtom} from "lib/atoms/atoms";
+import { wgputoyAtom } from "lib/atoms/wgputoyatoms";
+import { useAtomValue } from "jotai";
 import {useUpdateAtom} from "jotai/utils";
 import useShaderSerDe, {useResetShaderData} from "lib/db/serializeshader";
 import {useEffect} from "react";
@@ -17,6 +19,7 @@ export const useDBRouter = () => {
     const setManualReload = useUpdateAtom(manualReloadAtom);
     const setShaderID = useUpdateAtom(shaderIDAtom);
     const setDBLoaded = useUpdateAtom(dbLoadedAtom);
+    const wgputoy = useAtomValue(wgputoyAtom);
 
     const [get, upsert] = useShaderSerDe();
 
@@ -43,4 +46,20 @@ export const useDBRouter = () => {
             }
         }
     }, [router.isReady, router.query.id]);
+    useEffect(() => {
+        const handleRouteChange = (url, { shallow }) => {
+            if (wgputoy !== false) {
+                console.log("Destroying WebGPU renderer");
+                wgputoy.free();
+            }
+        }
+
+        router.events.on('routeChangeStart', handleRouteChange)
+
+        // If the component is unmounted, unsubscribe
+        // from the event with the `off` method:
+        return () => {
+            router.events.off('routeChangeStart', handleRouteChange)
+        }
+    }, [wgputoy]);
 }
