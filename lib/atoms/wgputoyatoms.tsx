@@ -1,6 +1,5 @@
 import {atom} from "jotai";
-import {init_wgpu, WgpuContext, WgpuToyRenderer} from "lib/wgputoy";
-import {Size} from "types/size";
+import {create_renderer, WgpuToyRenderer} from "lib/wgputoy";
 import {getDimensions} from "../../types/canvasdimensions";
 
 // just to check if the object has already been freed (ptr=0)
@@ -23,23 +22,12 @@ export const canvasParentElAtom = atom<HTMLElement | null, HTMLElement | null, v
     (get, set, newValue) => set(canvasParentElBaseAtom, newValue ? newValue : false)
 );
 
-//export const canvasParentSizeAtom = atom<Size>({width: 0, height: 0});
-
-export const wgputoyInitAtom = atom<Promise<WgpuContext | false>>(async (get) => {
+export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async (get) => {
     if (!isSSR && get(canvasElAtom) !== false && get(canvasParentElAtom)) {
         const parentEl = get(canvasParentElAtom);
         const dim = getDimensions(parentEl.offsetWidth * window.devicePixelRatio);
-        console.log("Initialising WebGPU");
-        return init_wgpu(dim.x, dim.y, (get(canvasElAtom) as HTMLCanvasElement).id);
-    } else {
-        return false;
-    }
-});
-
-export const wgputoyAtom = atom<WgpuToyRenderer | false>((get) => {
-    if (!isSSR && get(wgputoyInitAtom) !== false) {
-        console.log("Creating renderer");
-        return new WgpuToyRenderer(get(wgputoyInitAtom) as WgpuContext);
+        console.log("Initialising WebGPU renderer");
+        return create_renderer(dim.x, dim.y, (get(canvasElAtom) as HTMLCanvasElement).id);
     } else {
         return false;
     }
