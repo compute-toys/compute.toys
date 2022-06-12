@@ -210,65 +210,73 @@ const WgpuToyController = (props) => {
     }, []);
 
     // init effect
+    useEffect(props.onLoad, []);
+
     useEffect(() => {
-
-        props.onLoad();
-
         const handleKeyDown = (e) => {
             if (isSafeContext(wgputoy)) {
                 if (typeof(e.keyCode) === 'number') wgputoy.set_keydown(e.keyCode, true);
             }
         }
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
+    useEffect(() => {
         const handleKeyUp = (e) => {
             if (isSafeContext(wgputoy)) {
                 if (typeof(e.keyCode) === 'number') wgputoy.set_keydown(e.keyCode, false);
             }
         }
-
-        document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', handleKeyUp);
+        return () => document.removeEventListener('keyup', handleKeyUp);
+    }, []);
 
-        const handleMouseMove = (e: MouseEvent) => {
-            if (isSafeContext(wgputoy)) {
-                wgputoy.set_mouse_pos(e.offsetX, e.offsetY)
-            }
-        }
-
-        const handleMouseUp = (e: MouseEvent) => {
-            if (isSafeContext(wgputoy) && canvas !== false) {
-                wgputoy.set_mouse_click(false);
-                canvas.onmousemove = null;
-            }
-        }
-
-        const handleMouseDown = (e: MouseEvent) => {
-            if (isSafeContext(wgputoy) && canvas !== false) {
-                wgputoy.set_mouse_click(true);
-                canvas.onmousemove = handleMouseMove;
-            }
-        }
-
+    useEffect(() => {
         if (canvas !== false) {
+            const handleMouseMove = (e: MouseEvent) => {
+                if (isSafeContext(wgputoy)) {
+                    wgputoy.set_mouse_pos(e.offsetX, e.offsetY)
+                }
+            }
+
+            const handleMouseUp = (e: MouseEvent) => {
+                if (isSafeContext(wgputoy)) {
+                    wgputoy.set_mouse_click(false);
+                    canvas.onmousemove = null;
+                }
+            }
+
+            const handleMouseDown = (e: MouseEvent) => {
+                if (isSafeContext(wgputoy)) {
+                    wgputoy.set_mouse_click(true);
+                    canvas.onmousemove = handleMouseMove;
+                }
+            }
+
             canvas.onmousedown = handleMouseDown;
             canvas.onmouseup = handleMouseUp;
             canvas.onmouseleave = handleMouseUp;
         }
+    }, []);
 
+    useEffect(() => {
         if (isSafeContext(wgputoy)) {
             wgputoy.on_success(handleSuccess);
             wgputoy.on_error(handleError);
         }
+    }, []);
 
+    useEffect(() => {
         if (!isPlaying()) {
             setPlay(true);
             setNeedsInitialReset(true);
             playCallback();
         }
-
-        // Return a pauseCallback for the cleanup lifecycle
-        return pauseCallback;
     }, []);
+
+    // Return a pauseCallback for the cleanup lifecycle
+    useEffect(() => pauseCallback, []);
 
     useEffect(() => {
         if (play && !isPlaying()) {
