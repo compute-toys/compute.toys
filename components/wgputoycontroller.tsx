@@ -14,8 +14,7 @@ import {useUpdateAtom} from "jotai/utils";
 import {
     canvasElAtom,
     canvasParentElAtom,
-    safeContext,
-    safeContextWithCanvas,
+    isSafeContext,
     wgputoyAtom
 } from "lib/atoms/wgputoyatoms";
 import {useTransientAtom} from "jotai-game";
@@ -76,7 +75,7 @@ const WgpuToyController = (props) => {
     const halfResolution = useAtomValue(halfResolutionAtom);
 
     const updateUniforms = useCallback(async () => {
-        if (wgputoy !== false) {
+        if (isSafeContext(wgputoy)) {
             let names: string[] = [];
             let values: number[] = [];
             [...sliderRefMap().keys()].map(uuid => {
@@ -92,17 +91,17 @@ const WgpuToyController = (props) => {
 
     const reloadCallback = useCallback( () => {
         updateUniforms().then(() => {
-            safeContext(wgputoy, (wgputoy) => {
+            if (isSafeContext(wgputoy)) {
                 wgputoy.set_shader(codeHot());
                 setManualReload(false);
-            });
+            }
         });
 
     }, []);
 
     const awaitableReloadCallback = async () => {
         return updateUniforms().then(() => {
-            if (wgputoy !== false) {
+            if (isSafeContext(wgputoy)) {
                 wgputoy.set_shader(codeHot());
                 setManualReload(false);
                 return true;
@@ -132,19 +131,21 @@ const WgpuToyController = (props) => {
         }
     }, [])
 
-    useAnimationFrame(e => safeContext(wgputoy, wgputoy => {
-        if (sliderUpdateSignal()) {
-            updateUniforms().then(() => {
+    useAnimationFrame(e => {
+        if (isSafeContext(wgputoy)) {
+            if (sliderUpdateSignal()) {
+                updateUniforms().then(() => {
+                    liveReloadCallback();
+                });
+            } else {
                 liveReloadCallback();
-            });
-        } else {
-            liveReloadCallback();
+            }
+            if (isPlaying()) {
+                wgputoy.set_time_elapsed(e.time);
+                wgputoy.render();
+            }
         }
-        if (isPlaying()) {
-            wgputoy.set_time_elapsed(e.time);
-            wgputoy.render();
-        }
-    }));
+    });
 
     const playCallback = useCallback(() => {
         setIsPlaying(true);
@@ -155,11 +156,11 @@ const WgpuToyController = (props) => {
     }, []);
 
     const resetCallback = useCallback(() => {
-        safeContext(wgputoy, (wgputoy) => {
+        if (isSafeContext(wgputoy)) {
             const dimensions = getDimensions(parentRef.offsetWidth); //theoretically dangerous call?
             setWidth(dimensions.x);
             wgputoy.reset();
-        });
+        }
     }, []);
 
     const handleSuccess = useCallback((entryPoints) => {
@@ -181,7 +182,7 @@ const WgpuToyController = (props) => {
     }, []);
 
     const loadTexture = useCallback((index: number, uri: string) => {
-        safeContext(wgputoy, (wgputoy) => {
+        if (isSafeContext(wgputoy)) {
             fetch(uri).then(
                 response => {
                     if (!response.ok) {
@@ -197,15 +198,15 @@ const WgpuToyController = (props) => {
                     }
                 }
             ).catch(error => console.error(error));
-        });
+        }
     }, []);
 
     const requestFullscreen = useCallback( () => {
-        safeContextWithCanvas(wgputoy, canvas, (wgputoy, canvas) => {
+        if (isSafeContext(wgputoy) && canvas !== false) {
             if (!document.fullscreenElement) {
                 canvas.requestFullscreen({navigationUI: "hide"});
             }
-        });
+        }
     }, []);
 
     // init effect
@@ -214,38 +215,38 @@ const WgpuToyController = (props) => {
         props.onLoad();
 
         const handleKeyDown = (e) => {
-            safeContext(wgputoy, (wgputoy) => {
+            if (isSafeContext(wgputoy)) {
                 if (typeof(e.keyCode) === 'number') wgputoy.set_keydown(e.keyCode, true);
-            });
+            }
         }
 
         const handleKeyUp = (e) => {
-            safeContext(wgputoy, (wgputoy) => {
+            if (isSafeContext(wgputoy)) {
                 if (typeof(e.keyCode) === 'number') wgputoy.set_keydown(e.keyCode, false);
-            });
+            }
         }
 
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', handleKeyUp);
 
         const handleMouseMove = (e: MouseEvent) => {
-            safeContextWithCanvas(wgputoy, canvas, (wgputoy, canvas) => {
+            if (isSafeContext(wgputoy)) {
                 wgputoy.set_mouse_pos(e.offsetX, e.offsetY)
-            });
+            }
         }
 
         const handleMouseUp = (e: MouseEvent) => {
-            safeContextWithCanvas(wgputoy, canvas, (wgputoy, canvas) => {
+            if (isSafeContext(wgputoy) && canvas !== false) {
                 wgputoy.set_mouse_click(false);
                 canvas.onmousemove = null;
-            });
+            }
         }
 
         const handleMouseDown = (e: MouseEvent) => {
-            safeContextWithCanvas(wgputoy, canvas, (wgputoy, canvas) => {
+            if (isSafeContext(wgputoy) && canvas !== false) {
                 wgputoy.set_mouse_click(true);
                 canvas.onmousemove = handleMouseMove;
-            });
+            }
         }
 
         if (canvas !== false) {
@@ -254,10 +255,10 @@ const WgpuToyController = (props) => {
             canvas.onmouseleave = handleMouseUp;
         }
 
-        safeContext(wgputoy, (wgputoy) => {
+        if (isSafeContext(wgputoy)) {
             wgputoy.on_success(handleSuccess);
             wgputoy.on_error(handleError);
-        });
+        }
 
         if (!isPlaying()) {
             setPlay(true);
@@ -288,7 +289,7 @@ const WgpuToyController = (props) => {
     }, [code, hotReload, manualReload()]);
 
     const updateResolution = () => {
-        safeContext(wgputoy, (wgputoy) => {
+        if (isSafeContext(wgputoy)) {
             let dimensions = {x: 0, y: 0}; // dimensions in device (physical) pixels
             if (document.fullscreenElement) {
                 // calculate actual screen resolution, accounting for both zoom and hidpi
@@ -305,7 +306,7 @@ const WgpuToyController = (props) => {
                 // TODO: allow this to be set in the UI, but default to 100% (native resolution)
                 wgputoy.resize(dimensions.x, dimensions.y, newScale);
             }
-        });
+        }
     };
 
     useResizeObserver(parentRef, updateResolution);
@@ -335,7 +336,7 @@ const WgpuToyController = (props) => {
     }, [requestFullscreenSignal])
 
     useEffect(() => {
-        safeContext(wgputoy, (wgputoy) => {
+        if (isSafeContext(wgputoy)) {
             wgputoy.set_pass_f32(float32Enabled);
             if (dbLoaded()) {
                 awaitableReloadCallback()
@@ -343,7 +344,7 @@ const WgpuToyController = (props) => {
                         resetCallback();
                     })
             }
-        })
+        }
     }, [float32Enabled])
 
     return null;

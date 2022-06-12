@@ -1,6 +1,6 @@
 import {Fragment, useEffect, useState} from "react";
 import {useAtomValue} from "jotai";
-import {wgputoyAtom} from "lib/atoms/wgputoyatoms";
+import {isSafeContext, wgputoyAtom} from "lib/atoms/wgputoyatoms";
 import {WgpuToyRenderer} from "lib/wgputoy";
 
 /*
@@ -13,7 +13,7 @@ export default function PreludeShim(props) {
     const [prelude, setPrelude] = useState("");
 
     useEffect(() => {
-        setPrelude(wgpuToy !== false ? (wgpuToy as WgpuToyRenderer).prelude() : "")
+        setPrelude(isSafeContext(wgpuToy) ? wgpuToy.prelude() : "")
     }, [wgpuToy])
 
     return <Fragment>{prelude}</Fragment>;

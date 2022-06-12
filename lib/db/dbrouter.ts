@@ -1,6 +1,6 @@
 import {useRouter} from "next/router";
 import {authorProfileAtom, codeAtom, dbLoadedAtom, DEFAULT_SHADER, manualReloadAtom, shaderIDAtom} from "lib/atoms/atoms";
-import { wgputoyAtom } from "lib/atoms/wgputoyatoms";
+import { isSafeContext, wgputoyAtom } from "lib/atoms/wgputoyatoms";
 import { useAtomValue } from "jotai";
 import {useUpdateAtom} from "jotai/utils";
 import useShaderSerDe, {useResetShaderData} from "lib/db/serializeshader";
@@ -48,7 +48,7 @@ export const useDBRouter = () => {
     }, [router.isReady, router.query.id]);
     useEffect(() => {
         const handleRouteChange = (url, { shallow }) => {
-            if (wgputoy !== false) {
+            if (isSafeContext(wgputoy)) {
                 console.log("Destroying WebGPU renderer");
                 wgputoy.free();
             }

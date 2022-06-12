@@ -45,14 +45,5 @@ export const wgputoyAtom = atom<WgpuToyRenderer | false>((get) => {
     }
 });
 
-export const safeContext = (context: WgpuToyRenderer | false, callback: (context: WgpuToyRenderer) => void) => {
-    if (context !== false && context.ptr !== 0) {
-        callback(context as WgpuToyRenderer);
-    }
-};
-
-export const safeContextWithCanvas = (context: WgpuToyRenderer | false, canvas: HTMLCanvasElement | false, callback: (context: WgpuToyRenderer, canvas: HTMLCanvasElement) => void) => {
-    if (context !== false && context.ptr !== 0 && canvas !== false) {
-        callback(context as WgpuToyRenderer, canvas as HTMLCanvasElement);
-    }
-};
+// type predicate
+export const isSafeContext = (context: WgpuToyRenderer | false): context is WgpuToyRenderer => (context !== false && context.ptr !== 0);
