@@ -14,6 +14,7 @@ import {useAuth} from "lib/db/authcontext";
 import {fromUniformActiveSettings, UniformSliderRef} from "components/editor/uniformsliders";
 import {useResetAtom, useUpdateAtom} from "jotai/utils";
 import {theme} from "theme/theme";
+import { fixup_shader_code } from "lib/util/fixup";
 
 export interface UniformActiveSettings {
     name: string,
@@ -167,7 +168,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                 const float32Enabled = 'float32Enabled' in body ? body.float32Enabled : false;
 
                 const shaderActiveSettings: ShaderActiveSettings = {
-                    code: JSON.parse(body.code),
+                    code: fixup_shader_code(JSON.parse(body.code)),
                     uniforms: body.uniforms,
                     textures: body.textures,
                     float32Enabled: float32Enabled

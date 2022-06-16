@@ -51,6 +51,7 @@ export const useDBRouter = () => {
             if (isSafeContext(wgputoy)) {
                 console.log("Destroying WebGPU renderer");
                 wgputoy.free();
+                window['wgsl_error_handler'] = null;
             }
         }
 

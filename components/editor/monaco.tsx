@@ -38,6 +38,25 @@ const Monaco = (props) => {
             monaco.languages.register({ id: 'wgsl' });
             monaco.languages.setMonarchTokensProvider('wgsl', wgslLanguageDef());
             monaco.languages.setLanguageConfiguration('wgsl', wgslConfiguration());
+            monaco.languages.registerHoverProvider('wgsl', {
+                async provideHover(model, position) {
+                    const n = position.lineNumber;
+                    const line = model.getLineContent(n).split(' ');
+                    if (line[0] === '#include') {
+                        let name = line[1].slice(1, -1);
+                        let resp = await fetch(`/include/${name}.wgsl`);
+                        if (resp.status !== 200) return;
+                        let text = await resp.text();
+                        return {
+                            range: new monacoRef.current.Range(n, 1, n, model.getLineMaxColumn(n)),
+                            contents: [
+                                { value: '**SOURCE**' },
+                                { value: '```wgsl\n' + text + '\n```' }
+                            ]
+                        };
+                    }
+                }
+            });
             defineMonacoTheme(monaco, 'global');
         }
     }

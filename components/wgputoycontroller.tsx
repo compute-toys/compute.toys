@@ -160,6 +160,7 @@ const WgpuToyController = (props) => {
             const dimensions = getDimensions(parentRef.offsetWidth); //theoretically dangerous call?
             setWidth(dimensions.x);
             wgputoy.reset();
+            wgputoy.set_shader(codeHot());
         }
     }, []);
 
@@ -172,7 +173,7 @@ const WgpuToyController = (props) => {
         }));
     }, []);
 
-    const handleError = useCallback((summary, row, col) => {
+    const handleError = useCallback((summary: string, row: number, col: number) => {
         setParseError(error => ({
             summary: summary,
             position: {row: Number(row), col: Number(col)},
@@ -180,6 +181,8 @@ const WgpuToyController = (props) => {
         }));
         if (!hotReloadHot()) setSaveColorTransitionSignal(theme.palette.dracula.orange);
     }, []);
+
+    if (window) window['wgsl_error_handler'] = handleError;
 
     const loadTexture = useCallback((index: number, uri: string) => {
         if (isSafeContext(wgputoy)) {
@@ -263,7 +266,6 @@ const WgpuToyController = (props) => {
     useEffect(() => {
         if (isSafeContext(wgputoy)) {
             wgputoy.on_success(handleSuccess);
-            wgputoy.on_error(handleError);
         }
     }, []);
 
@@ -313,6 +315,7 @@ const WgpuToyController = (props) => {
                 setScale(newScale);
                 // TODO: allow this to be set in the UI, but default to 100% (native resolution)
                 wgputoy.resize(dimensions.x, dimensions.y, newScale);
+                wgputoy.set_shader(codeHot());
             }
         }
     };

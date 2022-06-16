@@ -54,7 +54,8 @@ const DraggableExplainer = (props) => {
                     <DisabledByDefaultSharp viewBox="1.5 1.5 19.5 19.5" onClick={() => props.setHidden(true)} color={'primary'}/>
                 </div>
                 <div style={{width: 'min-content', overflowY: 'scroll', padding: '8px', height: `${EXPLAINER_INNER_HEIGHT}px`, color: theme.palette.primary.main}}>
-                    <Logo/> is a playground for WebGPU compute shaders. Everything here is written in WGSL, which is WebGPU&apos;s native shader language. For up-to-date information on WGSL, please see the <a href="https://www.w3.org/TR/webgpu/">WGSL draft specification</a>.
+                    <Logo/> is a playground for WebGPU compute shaders. Everything here is written in WGSL, which is WebGPU&apos;s native shader language.
+                    For up-to-date information on WGSL, please see the <a href="https://www.w3.org/TR/WGSL/">WGSL draft specification</a>.
 
                     <br/><br/>
                     <Logo/> supplies keyboard input, mouse input, selectable input textures, custom values controlled by sliders, and the current frame and elapsed time.
@@ -86,18 +87,31 @@ const DraggableExplainer = (props) => {
                     For compute shader input and output <Logo/> provides:<br/>
                     one input texture array <HiLite>pass_in</HiLite>,<br/>
                     one output storage texture array <HiLite>pass_out</HiLite>,<br/>
-                    one output screen storage texture <HiLite>screen</HiLite>,<br/>
-                    and one atomic storage buffer <HiLite>atomic_storage</HiLite>.
+                    and one output screen storage texture <HiLite>screen</HiLite>.
 
                     <br/><br/>
-                    After each frame, <HiLite>pass_in</HiLite> and <HiLite>pass_out</HiLite> are swapped with each other in a <i>ping-pong buffer</i> arrangement.
+                    The shader can write to <HiLite>pass_out</HiLite>, which will be copied into <HiLite>pass_in</HiLite> after the current entrypoint has returned.
+                    <HiLite> pass_in</HiLite> will always contain whatever has been written to <HiLite>pass_out</HiLite> during all of the <em>previous</em> entrypoints.
+                    The contents of <HiLite>pass_in</HiLite> will not change while an entrypoint is running.
                     <HiLite> pass_in</HiLite> and <HiLite>pass_out</HiLite> are both texture arrays with 4 texture layers.
                     For example, you can access the third layer of <HiLite>pass_in</HiLite> at LOD 0 and coordinate (1,1) by using the built-in helper function:<br/>
                     <pre style={{color: theme.palette.neutral.main}}>passLoad(2, int2(1,1), 0)</pre>
 
-                    Unlike <HiLite>pass_in</HiLite> and <HiLite>pass_out</HiLite>, the atomic storage buffer <HiLite>atomic_storage</HiLite> has read_write storage access.
-                    This means that you can use WGSL&apos;s built-in functions to do atomic operations on this buffer in any order,
+                    <Logo/> also provides an experimental WGSL preprocessor. It currently allows the use of a handful of basic directives:
+                    <ul>
+                        <li><HiLite>#define NAME VALUE</HiLite> for simple macros (function-like parameter substitution is not yet supported)</li>
+                        <li><HiLite>#include &quot;PATH&quot;</HiLite> for accessing built-in libraries</li>
+                        <li><HiLite>#workgroup_count ENTRYPOINT X Y Z</HiLite> for specifying how many workgroups should be dispatched for an entrypoint</li>
+                        <li><HiLite>#dispatch_count ENTRYPOINT N</HiLite> for dispatching an entrypoint multiple times in a row</li>
+                        <li><HiLite>#storage NAME TYPE</HiLite> for declaring a storage buffer</li>
+                    </ul>
+
+                    Read-write storage buffers can be declared using the <HiLite>#storage</HiLite> directive. For example, you can create a buffer of atomic counters:
+                    <pre style={{color: theme.palette.neutral.main}}>#storage atomic_storage array&lt;atomic&lt;i32&gt;&gt;</pre>
+                    You could use WGSL&apos;s built-in functions to do atomic operations on this buffer in any order,
                     enabling you to safely perform work across many threads at once and accumulate the result in one place.
+                    Note that any writes to read-write storage buffers are immediately visible to subsequent reads
+                    (unlike the situation with <HiLite>pass_in</HiLite> and <HiLite>pass_out</HiLite>).
 
                     <br/><br/>
                     The final visual output of every shader is written to the <HiLite>screen</HiLite> storage texture, which displays the result in the canvas on this page.
@@ -109,7 +123,9 @@ const DraggableExplainer = (props) => {
                         assert(1, isfinite(col.y))
                     </pre>
 
-                    Every shader begins with a common <i>prelude</i>. The prelude contains the data inputs and outputs for this shader, as well as a few helper functions and type definitions to make working with <Logo/> a more streamlined and familiar process. Please refer to the prelude for a complete listing of the available data in your shader.
+                    Every shader begins with a common <i>prelude</i>. The prelude contains the data inputs and outputs for this shader,
+                    as well as a few helper functions and type definitions to make working with <Logo/> a more streamlined and familiar process.
+                    Please refer to the prelude for a complete listing of the available data in your shader.
                     <br/><br/>
                     Here are the current contents of this shader&apos;s prelude:
 

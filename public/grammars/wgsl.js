@@ -464,6 +464,16 @@ export const wgslLanguageDef = () => {
           /(\.)(?:[a-zA-Z][a-zA-Z0-9_]+)/, 'field'
         ],
         {include: '@numbers'},
+
+        // The preprocessor checks must be before whitespace as they check /^\s*#/ which
+        // otherwise fails to match later after other whitespace has been removed.
+
+        // Inclusion
+        [/^\s*#\s*include/, { token: 'keyword.directive.include', next: '@include' }],
+
+        // Preprocessor directive
+        [/^\s*#\s*\w+/, 'keyword.directive'],
+
         // Whitespace + comments
         {include: '@whitespace'},
         [
@@ -491,6 +501,27 @@ export const wgslLanguageDef = () => {
         [/\/\*/, 'comment', '@push'],
         ['\\*/', 'comment', '@pop'],
         [/[\/*]/, 'comment']
+      ],
+
+      include: [
+        [
+          /(\s*)(<)([^<>]*)(>)/,
+          [
+            '',
+            'keyword.directive.include.begin',
+            'string.include.identifier',
+            { token: 'keyword.directive.include.end', next: '@pop' }
+          ]
+        ],
+        [
+          /(\s*)(")([^"]*)(")/,
+          [
+            '',
+            'keyword.directive.include.begin',
+            'string.include.identifier',
+            { token: 'keyword.directive.include.end', next: '@pop' }
+          ]
+        ]
       ],
 
       numbers: [
