@@ -16,15 +16,21 @@ const Monaco = (props) => {
     useEffect(() => {
         if(monacoRef.current && parseError) {
             // consider whether multi-model editing needs to be handled for some reason
+            const model = monacoRef.current.editor.getModels()[0];
             if(parseError.success) {
-                monacoRef.current.editor.setModelMarkers(monacoRef.current.editor.getModels()[0], "owner",[]);
+                monacoRef.current.editor.setModelMarkers(model, "owner", []);
             } else {
-                monacoRef.current.editor.setModelMarkers(monacoRef.current.editor.getModels()[0], "owner",
+                let line = parseError.position.row;
+                if (parseError.position.col == model.getLineMaxColumn(line)) {
+                    // naga emits some weird positions
+                    line += 1;
+                }
+                monacoRef.current.editor.setModelMarkers(model, "owner",
                     [{
-                        startLineNumber: parseError.position.row,
-                        startColumn: parseError.position.col,
-                        endLineNumber: parseError.position.row,
-                        endColumn: 1000, // ugly way to do this, but we don't get end from WGSL
+                        startLineNumber: line,
+                        startColumn: model.getLineFirstNonWhitespaceColumn(line),
+                        endLineNumber: line,
+                        endColumn: model.getLineMaxColumn(line),
                         message: parseError.summary,
                         severity: monacoRef.current.MarkerSeverity.Error
                     }]);
