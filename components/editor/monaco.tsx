@@ -17,10 +17,10 @@ const Monaco = (props) => {
         if(monacoRef.current && parseError) {
             // consider whether multi-model editing needs to be handled for some reason
             const model = monacoRef.current.editor.getModels()[0];
+            let line = parseError.position.row;
             if(parseError.success) {
                 monacoRef.current.editor.setModelMarkers(model, "owner", []);
-            } else {
-                let line = parseError.position.row;
+            } else if (0 < line && line < model.getLineCount()) {
                 if (parseError.position.col == model.getLineMaxColumn(line)) {
                     // naga emits some weird positions
                     line += 1;
@@ -31,6 +31,16 @@ const Monaco = (props) => {
                         startColumn: model.getLineFirstNonWhitespaceColumn(line),
                         endLineNumber: line,
                         endColumn: model.getLineMaxColumn(line),
+                        message: parseError.summary,
+                        severity: monacoRef.current.MarkerSeverity.Error
+                    }]);
+            } else {
+                monacoRef.current.editor.setModelMarkers(model, "owner",
+                    [{
+                        startLineNumber: 1,
+                        startColumn: 1,
+                        endLineNumber: model.getLineCount(),
+                        endColumn: model.getLineMaxColumn(model.getLineCount()),
                         message: parseError.summary,
                         severity: monacoRef.current.MarkerSeverity.Error
                     }]);
