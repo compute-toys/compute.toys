@@ -60,7 +60,7 @@ const Monaco = (props) => {
                     const line = model.getLineContent(n).split(' ');
                     if (line[0] === '#include') {
                         let name = line[1].slice(1, -1);
-                        let resp = await fetch(`/include/${name}.wgsl`);
+                        let resp = await fetch(`https://compute-toys.github.io/include/${name}.wgsl`);
                         if (resp.status !== 200) return;
                         let text = await resp.text();
                         return {

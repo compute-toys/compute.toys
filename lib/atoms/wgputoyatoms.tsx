@@ -1,5 +1,5 @@
 import {atom} from "jotai";
-import {create_renderer, WgpuToyRenderer} from "lib/wgputoy";
+import {WgpuToyRenderer} from "lib/wgputoy";
 import {getDimensions} from "../../types/canvasdimensions";
 
 // just to check if the object has already been freed (ptr=0)
@@ -23,6 +23,9 @@ export const canvasParentElAtom = atom<HTMLElement | null, HTMLElement | null, v
 );
 
 export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async (get) => {
+    // https://github.com/webpack/webpack/issues/11347
+    const wasm = await import("lib/wgputoy/wgputoy_bg.wasm");
+    const {create_renderer} = await import("lib/wgputoy/wgputoy_bg.js");
     if (!isSSR && get(canvasElAtom) !== false && get(canvasParentElAtom)) {
         const parentEl = get(canvasParentElAtom);
         const dim = getDimensions(parentEl.offsetWidth * window.devicePixelRatio);

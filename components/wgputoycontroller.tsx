@@ -92,7 +92,12 @@ const WgpuToyController = (props) => {
     const reloadCallback = useCallback( () => {
         updateUniforms().then(() => {
             if (isSafeContext(wgputoy)) {
-                wgputoy.set_shader(codeHot());
+                wgputoy.preprocess(codeHot()).then(s => {
+                    if (s) {
+                        wgputoy.compile(s);
+                        wgputoy.render();
+                    }
+                });
                 setManualReload(false);
             }
         });
@@ -102,8 +107,12 @@ const WgpuToyController = (props) => {
     const awaitableReloadCallback = async () => {
         return updateUniforms().then(() => {
             if (isSafeContext(wgputoy)) {
-                wgputoy.set_shader(codeHot());
-                setManualReload(false);
+                wgputoy.preprocess(codeHot()).then(s => {
+                    if (s) {
+                        wgputoy.compile(s);
+                        wgputoy.render();
+                    }
+                });
                 return true;
             } else {
                 return false;
@@ -160,7 +169,7 @@ const WgpuToyController = (props) => {
             const dimensions = getDimensions(parentRef.offsetWidth); //theoretically dangerous call?
             setWidth(dimensions.x);
             wgputoy.reset();
-            wgputoy.set_shader(codeHot());
+            reloadCallback();
         }
     }, []);
 
@@ -315,7 +324,7 @@ const WgpuToyController = (props) => {
                 setScale(newScale);
                 // TODO: allow this to be set in the UI, but default to 100% (native resolution)
                 wgputoy.resize(dimensions.x, dimensions.y, newScale);
-                wgputoy.set_shader(codeHot());
+                reloadCallback();
             }
         }
     };
