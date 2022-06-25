@@ -16,10 +16,10 @@ const nextConfig = {
             { source: '/new',       destination: '/editor/new' },
             { source: '/view/:id',  destination: '/editor/:id' },
         ]
-    },    
+    },
     webpack(config, { isServer, dev }) {
         config.experiments = {
-            asyncWebAssembly: true,
+            syncWebAssembly: true,
             layers: true
         };
         if (isServer && !dev) {

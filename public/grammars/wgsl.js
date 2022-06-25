@@ -432,17 +432,11 @@ export const wgslLanguageDef = () => {
         ],
         // Annotations
         // Overly complex...
+        [/[@]compute/, 'attribute.stage.type'],
         [
           /(@)([a-zA-Z][a-zA-Z0-9_]+)(\()((?:\d+[\d,\s]*)|(?:[a-zA-Z][a-zA-Z0-9_]+))(\))/,
           {
             cases: {
-              '$2==stage': ['attribute', 'attribute.stage', 'delimiter.parenthesis',
-                {
-                  cases: {
-                    '@stageKeywords': 'attribute.stage.type',
-                    '@default': 'invalid'
-                  }
-                }, 'delimiter.parenthesis'],
               '$2==builtin': ['attribute', 'attribute.builtin', 'delimiter.parenthesis',
                 {
                   cases: {

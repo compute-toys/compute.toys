@@ -6,7 +6,7 @@ import {UniformActiveSettings} from "lib/db/serializeshader";
 import {atomWithReset} from "jotai/utils";
 
 export const DEFAULT_SHADER = `
-@stage(compute) @workgroup_size(16, 16)
+@compute @workgroup_size(16, 16)
 fn main_image(@builtin(global_invocation_id) id: uint3) {
     // Viewport resolution (in pixels)
     let screen_size = uint2(textureDimensions(screen));
