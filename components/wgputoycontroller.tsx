@@ -156,6 +156,7 @@ const WgpuToyController = (props) => {
                 t += e.delta;
                 setTimer(t);
                 wgputoy.set_time_elapsed(t);
+                wgputoy.set_time_delta(e.delta);
                 wgputoy.render();
             }
         }
