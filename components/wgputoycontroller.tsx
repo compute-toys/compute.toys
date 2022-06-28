@@ -230,8 +230,10 @@ const WgpuToyController = (props) => {
                 if (typeof(e.keyCode) === 'number') wgputoy.set_keydown(e.keyCode, true);
             }
         }
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
+        if (canvas) {
+            canvas.addEventListener('keydown', handleKeyDown);
+            return () => canvas.removeEventListener('keydown', handleKeyDown);
+        }
     }, []);
 
     useEffect(() => {
@@ -240,8 +242,10 @@ const WgpuToyController = (props) => {
                 if (typeof(e.keyCode) === 'number') wgputoy.set_keydown(e.keyCode, false);
             }
         }
-        document.addEventListener('keyup', handleKeyUp);
-        return () => document.removeEventListener('keyup', handleKeyUp);
+        if (canvas) {
+            canvas.addEventListener('keyup', handleKeyUp);
+            return () => canvas.removeEventListener('keyup', handleKeyUp);
+        }
     }, []);
 
     useEffect(() => {
