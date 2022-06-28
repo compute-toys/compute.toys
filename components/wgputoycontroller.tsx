@@ -8,7 +8,8 @@ import {
     parseErrorAtom,
     playAtom, requestFullscreenAtom,
     resetAtom, sliderRefMapAtom, sliderUpdateSignalAtom,
-    saveColorTransitionSignalAtom
+    saveColorTransitionSignalAtom,
+    timerAtom
 } from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
 import {
@@ -51,6 +52,7 @@ const WgpuToyController = (props) => {
     const [dbLoaded,] = useTransientAtom(dbLoadedAtom);
     const [hotReloadHot,] = useTransientAtom(hotReloadAtom);
     const [sliderRefMap,] = useTransientAtom(sliderRefMapAtom);
+    const [timer, setTimer] = useTransientAtom(timerAtom);
 
     // transient atom can't be used with effect hook, and we want both
     // "hot" access and effect hook access for code
@@ -150,7 +152,10 @@ const WgpuToyController = (props) => {
                 liveReloadCallback();
             }
             if (isPlaying()) {
-                wgputoy.set_time_elapsed(e.time);
+                let t = timer();
+                t += e.delta;
+                setTimer(t);
+                wgputoy.set_time_elapsed(t);
                 wgputoy.render();
             }
         }
@@ -168,6 +173,7 @@ const WgpuToyController = (props) => {
         if (isSafeContext(wgputoy)) {
             const dimensions = getDimensions(parentRef.offsetWidth); //theoretically dangerous call?
             setWidth(dimensions.x);
+            setTimer(0);
             wgputoy.reset();
             reloadCallback();
         }

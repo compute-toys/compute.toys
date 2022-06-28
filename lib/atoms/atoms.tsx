@@ -60,6 +60,7 @@ export const parseErrorAtom = atom<ParseError>({
     success: true
 });
 
+export const timerAtom = atom<number>(0);
 
 export const dbLoadedAtom = atom<boolean>(false);
 export const saveColorTransitionSignalAtom = atom<string | false>(false);

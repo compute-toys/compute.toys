@@ -9,6 +9,8 @@ import {useCallback} from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 
+import Timer from "components/timer";
+
 import PlayPauseButton from "components/buttons/playpausebutton"
 import ResetButton from "components/buttons/resetbutton";
 import HotReloadToggle from "components/buttons/hotreloadtoggle";
@@ -60,7 +62,9 @@ const Index = () => {
                             />
                         </Frame>
                         <Grid container>
-                            <Grid item xs={2}/>
+                            <Grid item sx={{textAlign: 'left'}} xs={2}>
+                                <Timer />
+                            </Grid>
                             <Grid item xs={8}>
                                 <PlayPauseButton />
                                 <ResetButton />
