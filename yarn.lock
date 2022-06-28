@@ -3451,6 +3451,11 @@ use-animation-frame@^0.1.4:
   resolved "https://registry.yarnpkg.com/use-animation-frame/-/use-animation-frame-0.1.4.tgz#cd8d41e2218f141c4512d976af61f9b7febef9e0"
   integrity sha512-wMf5iAA22rL2mPyQSxH6dh8b7rjkLpYkVTZ5LaoGtE5uGjvSLZn1EtqNWIbkTfzMG6gnwGvX+o8zfzxvaPlRGw==
 
+use-interpolation@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/use-interpolation/-/use-interpolation-0.2.0.tgz#9159255c8641da9d903eb9a002c9bafeb50568c2"
+  integrity sha512-VN1saqEw3tRK9pAcHauANMF70i9M6kIS1uIHOhBRZ/vVU7/TJ9gQfqic6smn3U4kdGn93jOpVQTKqv3pTBWuLg==
+
 utf-8-validate@^5.0.2:
   version "5.0.9"
   resolved "https://registry.yarnpkg.com/utf-8-validate/-/utf-8-validate-5.0.9.tgz#ba16a822fbeedff1a58918f2a6a6b36387493ea3"

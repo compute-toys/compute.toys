@@ -9,8 +9,6 @@ import {useCallback} from 'react';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 
-import Timer from "components/timer";
-
 import PlayPauseButton from "components/buttons/playpausebutton"
 import ResetButton from "components/buttons/resetbutton";
 import HotReloadToggle from "components/buttons/hotreloadtoggle";
@@ -33,6 +31,7 @@ import {saveColorTransitionSignalAtom} from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import Explainer from "../../components/editor/explainer";
 import ConfigurationPicker from "../../components/editor/configurationpicker";
+import dynamic from "next/dynamic";
 
 
 const Index = () => {
@@ -44,6 +43,8 @@ const Index = () => {
             setCanvasParentEl(parent);
         }
     }, []);
+    
+    const Timer = dynamic(() => import('components/timer'), {ssr: false});
 
     useDBRouter();
 
