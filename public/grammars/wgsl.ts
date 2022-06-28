@@ -1,5 +1,6 @@
-export const wgslConfiguration = () => {
-  return {
+import type {languages} from 'monaco-editor';
+
+export const wgslConfiguration: languages.LanguageConfiguration = {
     comments: {
       lineComment: '//',
       blockComment: ['/*', '*/']
@@ -19,11 +20,9 @@ export const wgslConfiguration = () => {
       {open: '[', close: ']'},
       {open: '(', close: ')'}
     ]
-  };
 }
 
-export const wgslLanguageDef = () => {
-  return {
+export const wgslLanguageDef = <languages.IMonarchLanguage>{
     tokenPostfix: '.wgsl',
     defaultToken: 'invalid',
 
@@ -527,5 +526,4 @@ export const wgslLanguageDef = () => {
         [/(0[xX][0-9a-fA-F]+|0|[1-9][0-9]*)[iu]?/, {token: 'number'}],
       ]
     }
-  };
 }
