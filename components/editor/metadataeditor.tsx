@@ -1,4 +1,4 @@
-import {ChangeEvent} from "react";
+import {ChangeEvent, useEffect} from "react";
 import {CssTextField, theme} from "theme/theme";
 import {
     Button,
@@ -81,6 +81,17 @@ export const MetadataEditor = () => {
         }
         return false;
     }
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                upsertShader(false);
+            }
+        }
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [upsertShader]);
 
     return (
         <Grid container spacing={2} sx={{padding: "10px"}}>
