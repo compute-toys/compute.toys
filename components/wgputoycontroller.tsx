@@ -9,7 +9,8 @@ import {
     playAtom, requestFullscreenAtom,
     resetAtom, sliderRefMapAtom, sliderUpdateSignalAtom,
     saveColorTransitionSignalAtom,
-    timerAtom
+    timerAtom,
+    isPlayingAtom
 } from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
 import {
@@ -25,7 +26,6 @@ import useAnimationFrame from "use-animation-frame";
 import {theme} from "theme/theme";
 
 const widthAtom = atom(0);
-const isPlayingAtom = atom(false);
 const scaleAtom = atom<number>(1.0);
 const needsInitialResetAtom = atom<boolean>(false);
 

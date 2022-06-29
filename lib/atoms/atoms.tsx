@@ -59,6 +59,7 @@ export const parseErrorAtom = atom<ParseError>({
     position: {row: 0, col: 0},
     success: true
 });
+export const isPlayingAtom = atom<boolean>(false);
 
 export const timerAtom = atom<number>(0);
 
