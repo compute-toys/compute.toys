@@ -45,6 +45,7 @@ const Index = () => {
     }, []);
     
     const Timer = dynamic(() => import('components/timer'), {ssr: false});
+    const Resolution = dynamic(() => import('components/resolution'), {ssr: false});
 
     useDBRouter();
 
@@ -66,11 +67,12 @@ const Index = () => {
                             <Grid item sx={{textAlign: 'left'}} xs={2}>
                                 <Timer />
                             </Grid>
-                            <Grid item xs={8}>
+                            <Grid item xs={7}>
                                 <PlayPauseButton />
                                 <ResetButton />
                             </Grid>
-                            <Grid item sx={{textAlign: 'right'}} xs={2}>
+                            <Grid item sx={{textAlign: 'right'}} xs={3}>
+                                <Resolution />
                                 <ScaleButton />
                                 <FullscreenButton />
                             </Grid>

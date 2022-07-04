@@ -10,7 +10,10 @@ import {
     resetAtom, sliderRefMapAtom, sliderUpdateSignalAtom,
     saveColorTransitionSignalAtom,
     timerAtom,
-    isPlayingAtom
+    isPlayingAtom,
+    scaleAtom,
+    widthAtom,
+    heightAtom
 } from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
 import {
@@ -25,8 +28,6 @@ import {getDimensions} from "types/canvasdimensions";
 import useAnimationFrame from "use-animation-frame";
 import {theme} from "theme/theme";
 
-const widthAtom = atom(0);
-const scaleAtom = atom<number>(1.0);
 const needsInitialResetAtom = atom<boolean>(false);
 
 /*
@@ -69,6 +70,7 @@ const WgpuToyController = (props) => {
     const parentRef = useAtomValue<HTMLElement | null>(canvasParentElAtom);
 
     const [width, setWidth] = useTransientAtom(widthAtom);
+    const [height, setHeight] = useTransientAtom(heightAtom);
     const [scale, setScale] = useTransientAtom(scaleAtom);
 
 
@@ -334,6 +336,7 @@ const WgpuToyController = (props) => {
             let newScale = halfResolution ? .5 : 1.;
             if (dimensions.x !== width() || newScale !== scale()) {
                 setWidth(dimensions.x);
+                setHeight(dimensions.y);
                 setScale(newScale);
                 wgputoy.resize(dimensions.x, dimensions.y, newScale);
                 reloadCallback();
