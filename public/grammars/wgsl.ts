@@ -397,6 +397,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
       '||'
     ],
 
+    escapes: /\\([nrt0\"''\\]|x\h{2}|u\{\h{1,6}\})/,
     delimiters: /[,]/,
     symbols: /[\#\!\%\&\*\+\-\.\/\:\;\<\=\>\@\^\|_\?]+/,
     intSuffixes: /[iu]/,
@@ -456,6 +457,10 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         [
           /(\.)(?:[a-zA-Z][a-zA-Z0-9_]+)/, 'field'
         ],
+
+        // Strings
+        [/"/, { token: 'string.quote', bracket: '@open', next: '@string' }],
+
         {include: '@numbers'},
 
         // The preprocessor checks must be before whitespace as they check /^\s*#/ which
@@ -494,6 +499,13 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         [/\/\*/, 'comment', '@push'],
         ['\\*/', 'comment', '@pop'],
         [/[\/*]/, 'comment']
+      ],
+
+      string: [
+        [/[^\\"]+/, 'string'],
+        [/@escapes/, 'string.escape'],
+        [/\\./, 'string.escape.invalid'],
+        [/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }]
       ],
 
       include: [
