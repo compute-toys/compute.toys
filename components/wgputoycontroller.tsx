@@ -259,7 +259,9 @@ const WgpuToyController = (props) => {
         if (canvas !== false) {
             const handleMouseMove = (e: MouseEvent) => {
                 if (isSafeContext(wgputoy)) {
-                    wgputoy.set_mouse_pos(e.offsetX, e.offsetY)
+                    wgputoy.set_mouse_pos(
+                        e.offsetX / canvas.clientWidth,
+                        e.offsetY / canvas.clientHeight);
                 }
             }
 
@@ -333,7 +335,6 @@ const WgpuToyController = (props) => {
             if (dimensions.x !== width() || newScale !== scale()) {
                 setWidth(dimensions.x);
                 setScale(newScale);
-                // TODO: allow this to be set in the UI, but default to 100% (native resolution)
                 wgputoy.resize(dimensions.x, dimensions.y, newScale);
                 reloadCallback();
             }
