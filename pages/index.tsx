@@ -17,6 +17,7 @@ import ImageList from "@mui/material/ImageList";
 import Grid from "@mui/material/Grid";
 import {forwardRef, Fragment, useState} from "react";
 import FakeLink from "components/global/fakelink";
+import Logo from 'components/global/logo';
 
 
 
@@ -113,11 +114,9 @@ export default function Home(props) {
             </Modal>
             <Alert variant={"outlined"} severity="warning" sx={{marginTop: "1em"}}>
                 <Typography variant={"subtitle1"} color={theme.palette.neutral.contrastText}>
-                    {`compute.toys is an early alpha project, using new browser features
-                    that can only be enabled in the development versions of browsers.
-                    At this time, only Chrome is supported. For instructions on
-                    how to set up your browser, `}
-                    <FakeLink textDecoration="underline" color={theme.palette.dracula.foreground} onClick={handleOpen}>click here</FakeLink>.
+                    <Logo/> is an experimental editor for <a href="https://developer.chrome.com/articles/gpu-compute/">WebGPU compute shaders</a>.
+                    At this time, only <a href={"https://www.google.com/chrome/beta/"}>Chrome Beta</a> (<a href="https://developer.chrome.com/blog/webgpu-release/">v113+</a>) is supported,
+                    as <a href="https://caniuse.com/webgpu">WebGPU is not yet fully supported by other browsers</a>.
                 </Typography>
             </Alert>
             <Item sx={style}>

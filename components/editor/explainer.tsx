@@ -56,6 +56,7 @@ const DraggableExplainer = (props) => {
                 <div style={{width: 'min-content', overflowY: 'scroll', padding: '8px', height: `${EXPLAINER_INNER_HEIGHT}px`, color: theme.palette.primary.main}}>
                     <Logo/> is a playground for WebGPU compute shaders. Everything here is written in WGSL, which is WebGPU&apos;s native shader language.
                     For up-to-date information on WGSL, please see the <a href="https://www.w3.org/TR/WGSL/">WGSL draft specification</a>.
+                    You can also <a href="https://google.github.io/tour-of-wgsl/">take a tour of WGSL</a>.
 
                     <br/><br/>
                     <Logo/> supplies keyboard input, mouse input, selectable input textures, custom values controlled by sliders, and the current frame and elapsed time.
