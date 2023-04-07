@@ -25,11 +25,12 @@ export const canvasParentElAtom = atom<HTMLElement | null, HTMLElement | null, v
 export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async (get) => {
     // https://github.com/webpack/webpack/issues/11347
     const wasm = await import("lib/wgputoy/wgputoy_bg.wasm");
-    const {create_renderer} = await import("lib/wgputoy/wgputoy_bg.js");
+    const {__wbg_set_wasm, create_renderer} = await import("lib/wgputoy/wgputoy_bg.js");
     if (!isSSR && get(canvasElAtom) !== false && get(canvasParentElAtom)) {
         const parentEl = get(canvasParentElAtom);
         const dim = getDimensions(parentEl.offsetWidth * window.devicePixelRatio);
         console.log("Initialising WebGPU renderer");
+        __wbg_set_wasm(wasm);
         return create_renderer(dim.x, dim.y, (get(canvasElAtom) as HTMLCanvasElement).id);
     } else {
         return false;
