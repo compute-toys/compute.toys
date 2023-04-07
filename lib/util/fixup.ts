@@ -4,5 +4,6 @@ export function fixup_shader_code(code: string): string {
         if (code.includes('float_storage')) code = '#storage float_storage array<vec4<f32>>\n\n' + code;
     }
     code = code.replace(/@stage\(compute\)/g, '@compute');
+    code = code.replace(/^type /gm, 'alias ');
     return code;
 }

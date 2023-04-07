@@ -76,7 +76,8 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
     ],
 
     typedefKeywords: [
-      'type'
+      'type',
+      'alias'
     ],
 
     enumKeywords: [
