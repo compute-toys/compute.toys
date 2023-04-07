@@ -63,4 +63,11 @@ export const useDBRouter = () => {
             router.events.off('routeChangeStart', handleRouteChange)
         }
     }, [wgputoy]);
+    useEffect(() => {
+        router.beforePopState(({ url, as, options }) => {
+            // https://github.com/vercel/next.js/discussions/30215
+            window.location.href = as;
+            return false;
+        })
+    }, [router]);
 }
