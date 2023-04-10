@@ -1,9 +1,9 @@
 {
   "private": true,
   "scripts": {
-    "predev": "cp -R ../pkg/. ./lib/wgputoy/",
+    "predev": "cp -R ../wgpu-compute-toy/pkg/. ./lib/wgputoy/",
     "dev": "next dev",
-    "prebuild": "cp -R ../pkg/. ./lib/wgputoy/",
+    "prebuild": "cp -R ../wgpu-compute-toy/pkg/. ./lib/wgputoy/",
     "build": "next build",
     "start": "next start"
   },
