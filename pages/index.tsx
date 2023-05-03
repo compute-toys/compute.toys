@@ -115,7 +115,7 @@ export default function Home(props) {
             <Alert variant={"outlined"} severity="warning" sx={{marginTop: "1em"}}>
                 <Typography variant={"subtitle1"} color={theme.palette.neutral.contrastText}>
                     <Logo/> is an experimental editor for <a href="https://developer.chrome.com/articles/gpu-compute/">WebGPU compute shaders</a>.
-                    At this time, only <a href={"https://www.google.com/chrome/beta/"}>Chrome Beta</a> (<a href="https://developer.chrome.com/blog/webgpu-release/">v113+</a>) is supported,
+                    At this time, only <a href={"https://www.google.com/chrome/"}>Chrome</a> (<a href="https://developer.chrome.com/blog/webgpu-release/">v113+</a>) is supported,
                     as <a href="https://caniuse.com/webgpu">WebGPU is not yet fully supported by other browsers</a>.
                 </Typography>
             </Alert>
