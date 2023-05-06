@@ -2,6 +2,16 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
     enabled: false
 })
 
+function getImageDomains() {
+    const domains = ['dl.polyhaven.org'];
+    if (process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME) {
+        domains.push(process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME);
+    } else {
+        console.warn('NEXT_PUBLIC_SUPABASE_HOSTNAME is not set, images from supabase will not be loaded');
+    }
+    return domains;
+}
+
 // cleanup pending these issues:
 // https://github.com/vercel/next.js/issues/32612
 // https://github.com/vercel/next.js/issues/34940
@@ -9,7 +19,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 const nextConfig = {
     reactStrictMode: true,
     images: {
-        domains: ['dl.polyhaven.org', process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME]
+        domains: getImageDomains(),
     },
     async rewrites() {
         return [
