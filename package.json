@@ -1,9 +1,9 @@
 {
   "private": true,
   "scripts": {
-    "predev": "cp -R ../wgpu-compute-toy/pkg/. ./lib/wgputoy/",
+    "predev": "shx cp -R ../wgpu-compute-toy/pkg/. ./lib/wgputoy/",
     "dev": "next dev",
-    "prebuild": "cp -R ../wgpu-compute-toy/pkg/. ./lib/wgputoy/",
+    "prebuild": "shx cp -R ../wgpu-compute-toy/pkg/. ./lib/wgputoy/",
     "build": "next build",
     "start": "next start"
   },
@@ -38,6 +38,7 @@
     "eslint": "^8.13.0",
     "eslint-config-next": "^12.1.5",
     "monaco-editor": "^0.33.0",
+    "shx": "^0.3.4",
     "typescript": "^4.6.3"
   }
 }
