@@ -102,6 +102,8 @@ export default function Home(props) {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
+    if (props.error) console.error(props.error);
+
     return (
         <Fragment>
             <Modal
@@ -170,6 +172,15 @@ export async function getServerSideProps(context) {
         'Cache-Control',
         'public, s-maxage=120, stale-while-revalidate=120'
     )
+
+    if (supabase === null) {
+        return {
+            props: {
+                shaders: [],
+                error: "Supabase client not initialized"
+            },
+        };
+    }
 
     const { data, count, error } = await supabase
         .from('shader')
