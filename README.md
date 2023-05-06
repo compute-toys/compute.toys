@@ -4,7 +4,7 @@ This is the source code of the [compute.toys](https://compute.toys) website.
 
 ## Development
 
-- clone this repository and the [wgpu-compute-toy](https://github.com/compute-toys/wgpu-compute-toy) repository into the same directory
+- clone this repository and the [wgpu-compute-toy](https://github.com/compute-toys/wgpu-compute-toy) repository into the same parent directory
 - [build wgpu-compute-toy with wasm-pack](https://github.com/compute-toys/wgpu-compute-toy#web)
 - [install Yarn](https://yarnpkg.com/getting-started/install)
 - run `yarn` inside the compute.toys directory to install dependencies
