@@ -72,6 +72,7 @@ export const saveColorTransitionSignalAtom = atom<string | false>(false);
 export const authorProfileAtom = atomWithReset<AuthorProfile | false>(false);
 export const shaderIDAtom = atomWithReset<number | false>(false);
 export const codeAtom = atomWithReset<string>(DEFAULT_SHADER);
+export const codeHasBeenModifiedAtom= atom<boolean>(false);
 export const titleAtom = atomWithReset<string>("New Shader");
 export const descriptionAtom = atomWithReset<string>("");
 export const visibilityAtom = atomWithReset<Visibility>("private");

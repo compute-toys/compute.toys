@@ -4,7 +4,7 @@
 import Monaco from 'components/editor/monaco';
 import { WgpuToyWrapper } from "components/wgputoy";
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -26,15 +26,17 @@ import EntryPointDisplay from "components/editor/entrypointdisplay";
 import { canvasParentElAtom } from "lib/atoms/wgputoyatoms";
 import { useUpdateAtom } from "jotai/utils";
 import { MetadataEditor } from "components/editor/metadataeditor";
-import { saveColorTransitionSignalAtom } from "lib/atoms/atoms";
+import { codeHasBeenModifiedAtom, saveColorTransitionSignalAtom } from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import Explainer from "./explainer";
 import ConfigurationPicker from "./configurationpicker";
 import dynamic from "next/dynamic";
 import { supabase } from "lib/db/supabaseclient";
+import { useAtom } from 'jotai';
 
 export const Editor = () => {
     const setCanvasParentEl = useUpdateAtom(canvasParentElAtom);
+    const [codeHasBeenModified, setCodeHasBeenModified] = useAtom(codeHasBeenModifiedAtom);
 
     const renderParentNodeRef = useCallback((parent) => {
         if (parent) {
@@ -53,6 +55,15 @@ export const Editor = () => {
             </ItemWithTransitionSignal>
         );
     }
+
+
+    useEffect(() => {
+        const alertOnAttemptTabClose = (e)=>{ if(codeHasBeenModified) e.preventDefault();}
+        window.addEventListener('beforeunload', alertOnAttemptTabClose)
+        return () => {
+            window.removeEventListener('beforeunload', alertOnAttemptTabClose)
+        }
+      });
 
     const leftPanel = (
         <div ref={renderParentNodeRef}>

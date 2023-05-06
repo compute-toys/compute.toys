@@ -3,12 +3,13 @@ import {useEffect, useRef} from "react";
 import {wgslLanguageDef, wgslConfiguration} from 'public/grammars/wgsl'
 import {defineMonacoTheme} from "theme/monacotheme";
 import {useAtom} from "jotai";
-import {codeAtom, parseErrorAtom} from "lib/atoms/atoms";
+import {codeAtom, codeHasBeenModifiedAtom, parseErrorAtom} from "lib/atoms/atoms";
 
 declare type Monaco = typeof import('monaco-editor');
 
 const Monaco = (props) => {
     const [code, setCode] = useAtom(codeAtom);
+    const [codeHasBeenModified, setCodeHasBeenModified] = useAtom(codeHasBeenModifiedAtom);
     const [parseError, setParseError] = useAtom(parseErrorAtom);
 
     const monacoRef = useRef<Monaco | null>(null);
@@ -84,11 +85,13 @@ const Monaco = (props) => {
         height="calc(100vh - 270px)" // preference
         language="wgsl"
         onChange={(value, _event) => {
+            setCodeHasBeenModified(true)
             setCode(value)
         }}
         beforeMount={editorWillMount}
         onMount={(editor, monaco: Monaco) => {
             monacoRef.current = monaco;
+            setCodeHasBeenModified(false) // does this get called when you change shaders?
 
             // https://github.com/microsoft/monaco-editor/issues/392
             document.fonts.ready.then(() => monaco.editor.remeasureFonts());
