@@ -14,7 +14,7 @@ import ResetButton from "components/buttons/resetbutton";
 import HotReloadToggle from "components/buttons/hotreloadtoggle";
 import ReloadButton from "components/buttons/reloadbutton";
 import ScaleButton from 'components/buttons/scalebutton';
-import FullscreenButton from "../../components/buttons/fullscreenbutton";
+import FullscreenButton from "../buttons/fullscreenbutton";
 
 import {Frame} from "theme/theme";
 
@@ -26,16 +26,13 @@ import EntryPointDisplay from "components/editor/entrypointdisplay";
 import {canvasParentElAtom} from "lib/atoms/wgputoyatoms";
 import {useUpdateAtom} from "jotai/utils";
 import {MetadataEditor} from "components/editor/metadataeditor";
-import {useDBRouter} from "lib/db/dbrouter";
 import {saveColorTransitionSignalAtom} from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
-import Explainer from "../../components/editor/explainer";
-import ConfigurationPicker from "../../components/editor/configurationpicker";
+import Explainer from "./explainer";
+import ConfigurationPicker from "./configurationpicker";
 import dynamic from "next/dynamic";
 
-
-const Index = () => {
-
+export const Editor = () => {
     const setCanvasParentEl = useUpdateAtom(canvasParentElAtom);
 
     const renderParentNodeRef = useCallback((parent) => {
@@ -43,11 +40,9 @@ const Index = () => {
             setCanvasParentEl(parent);
         }
     }, []);
-    
+
     const Timer = dynamic(() => import('components/timer'), {ssr: false});
     const Resolution = dynamic(() => import('components/resolution'), {ssr: false});
-
-    useDBRouter();
 
     return (
         <Box sx={{ flexGrow: 1 }}>
@@ -109,5 +104,3 @@ const Index = () => {
         </Box>
     );
 }
-
-export default Index;

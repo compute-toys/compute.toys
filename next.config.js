@@ -21,11 +21,14 @@ const nextConfig = {
     images: {
         domains: getImageDomains(),
     },
-    async rewrites() {
+    async redirects() {
         return [
-            { source: '/new',       destination: '/editor/new' },
-            { source: '/view/:id',  destination: '/editor/:id' },
-        ]
+            {
+                source: '/editor/:id',
+                destination: '/view/:id',
+                permanent: true,
+            },
+        ];
     },
     webpack(config, { isServer, dev }) {
         config.experiments = {

@@ -80,7 +80,7 @@ export const MetadataEditor = () => {
     // disables frontend controls if not author (backend will reject changes otherwise)
     const userIsAuthor = () => {
         if (user) {
-            // handles the case where shader has no author, i.e. is /editor/new
+            // handles the case where shader has no author, i.e. is /new
             if (!authorProfile || user.id === authorProfile.id) {
                 return true;
             }
