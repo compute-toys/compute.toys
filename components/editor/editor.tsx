@@ -26,7 +26,7 @@ import EntryPointDisplay from "components/editor/entrypointdisplay";
 import { canvasParentElAtom } from "lib/atoms/wgputoyatoms";
 import { useUpdateAtom } from "jotai/utils";
 import { MetadataEditor } from "components/editor/metadataeditor";
-import { codeHasBeenModifiedAtom, saveColorTransitionSignalAtom } from "lib/atoms/atoms";
+import { codeHasBeenModifiedAtom, manualReloadAtom, saveColorTransitionSignalAtom } from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import Explainer from "./explainer";
 import ConfigurationPicker from "./configurationpicker";
@@ -37,6 +37,7 @@ import { useAtom } from 'jotai';
 export const Editor = () => {
     const setCanvasParentEl = useUpdateAtom(canvasParentElAtom);
     const [codeHasBeenModified, setCodeHasBeenModified] = useAtom(codeHasBeenModifiedAtom);
+    const [manualReload, setManualReload] = useAtom(manualReloadAtom);
 
     const renderParentNodeRef = useCallback((parent) => {
         if (parent) {
@@ -56,6 +57,19 @@ export const Editor = () => {
         );
     }
 
+    const handleKeyPress = useCallback((event) => {
+        // Alt + Enter
+        if ((event.altKey && event.keyCode === 13)) {
+            setManualReload(true)
+        }
+    }, []);
+
+    useEffect(() => {
+        document.addEventListener('keydown', handleKeyPress);
+        return () => {
+            document.removeEventListener('keydown', handleKeyPress);
+        };
+    }, [handleKeyPress]);
 
     useEffect(() => {
         const alertOnAttemptTabClose = (e)=>{ if(codeHasBeenModified) e.preventDefault();}
@@ -63,7 +77,7 @@ export const Editor = () => {
         return () => {
             window.removeEventListener('beforeunload', alertOnAttemptTabClose)
         }
-      });
+    });
 
     const leftPanel = (
         <div ref={renderParentNodeRef}>
