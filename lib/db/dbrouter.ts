@@ -25,17 +25,17 @@ export const useDBRouter = () => {
 
     const router = useRouter();
     useEffect(() => {
-        if (router.isReady && typeof router.query.id === 'string') {
-            const id = toNumber(router.query.id);
+        if (router.isReady) {
             setDBLoaded(false);
             reset();
-            if (id) {
+            if (typeof router.query.id === 'string' && toNumber(router.query.id)) {
+                const id = toNumber(router.query.id);
                 get(id).then(() => {
                     setShaderID(id);
                     setManualReload(true);
                     setDBLoaded(true);
                 });
-            } else if (router.query.id === 'new') {
+            } else if (router.route === '/new') {
                 setShaderID(false);
                 setManualReload(true);
                 setDBLoaded(true);
