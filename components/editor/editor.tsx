@@ -94,6 +94,7 @@ export const Editor = () => {
                         stopRenderingLineAfter: 1000,
                         fontFamily: "'Fira Code', monospace",
                         'bracketPairColorization.enabled': true,
+                        mouseWheelZoom: true,
                         //fontLigatures: true,
                     }}
                 />
