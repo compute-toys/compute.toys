@@ -31,6 +31,7 @@ import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import Explainer from "./explainer";
 import ConfigurationPicker from "./configurationpicker";
 import dynamic from "next/dynamic";
+import { supabase } from "lib/db/supabaseclient";
 
 export const Editor = () => {
     const setCanvasParentEl = useUpdateAtom(canvasParentElAtom);
@@ -43,6 +44,15 @@ export const Editor = () => {
 
     const Timer = dynamic(() => import('components/timer'), {ssr: false});
     const Resolution = dynamic(() => import('components/resolution'), {ssr: false});
+
+    let metadataEditor = null;
+    if (supabase) {
+        metadataEditor = (
+            <ItemWithTransitionSignal sx={{ textAlign: "left", marginTop: "20px" }} transitionAtom={saveColorTransitionSignalAtom}>
+                <MetadataEditor />
+            </ItemWithTransitionSignal>
+        );
+    }
 
     return (
         <Box sx={{ flexGrow: 1 }}>
@@ -74,9 +84,7 @@ export const Editor = () => {
                         </Grid>
                         <UniformSliders/>
                     </ItemWithTransitionSignal>
-                    <ItemWithTransitionSignal sx={{textAlign: "left", marginTop: "20px"}} transitionAtom={saveColorTransitionSignalAtom}>
-                        <MetadataEditor/>
-                    </ItemWithTransitionSignal>
+                    {metadataEditor}
                 </Grid>
                 <Grid item xs={9} md={8} lg={7} xl={6}>
                     <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>

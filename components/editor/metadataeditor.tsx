@@ -33,7 +33,6 @@ import Avatar from "../global/avatar";
 import {useAuth} from "../../lib/db/authcontext";
 import {useRouter} from "next/router";
 import Link from 'next/link';
-import { supabase } from "lib/db/supabaseclient";
 
 const VisibilityInput = styled(InputBase)(({ theme }) => ({
     '& .MuiInputBase-input': {
@@ -47,11 +46,6 @@ const VisibilityInput = styled(InputBase)(({ theme }) => ({
 }));
 
 export const MetadataEditor = () => {
-    if (supabase === null) {
-        console.warn("MetadataEditor: supabase client not initialized");
-        return null;
-    }
-
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
     const [visibility, setVisibility] = useAtom(visibilityAtom);
