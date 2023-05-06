@@ -2,14 +2,15 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
     enabled: false
 })
 
-function getImageDomains() {
-    const domains = ['dl.polyhaven.org'];
+function getImageConfig() {
+    const config = { domains: ['dl.polyhaven.org'] };
     if (process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME) {
-        domains.push(process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME);
+        config.domains.push(process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME);
     } else {
         console.warn('NEXT_PUBLIC_SUPABASE_HOSTNAME is not set, images from supabase will not be loaded');
+        config.unoptimized = true;
     }
-    return domains;
+    return config;
 }
 
 // cleanup pending these issues:
@@ -18,9 +19,7 @@ function getImageDomains() {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    images: {
-        domains: getImageDomains(),
-    },
+    images: getImageConfig(),
     async redirects() {
         return [
             {
