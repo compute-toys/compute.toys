@@ -7,7 +7,9 @@ on:
     types: [opened, synchronize, reopened]
 permissions:
   contents: read
+  metadata: read
   pull-requests: write
+  deployments: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,7 +26,9 @@ jobs:
           override: true
           target: wasm32-unknown-unknown
       - name: Rust Cache
-        uses: Swatinem/rust-cache@v1.3.0
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: wgpu-compute-toy
       - run: cargo install wasm-pack
       - uses: actions/setup-node@v3
         with:
