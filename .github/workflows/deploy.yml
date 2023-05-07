@@ -1,0 +1,41 @@
+name: Deploy
+on:
+  push:
+    branches: [deploy]
+  pull_request:
+    branches: [deploy]
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout from repo
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          target: wasm32-unknown-unknown
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1.3.0
+      - run: cargo install wasm-pack
+      - uses: actions/setup-node@v3
+        with:
+          node-version: node
+          cache: 'yarn'
+      - run: yarn
+      - run: yarn build
+      - name: Deploy to Vercel Action
+        uses: BetaHuhn/deploy-to-vercel-action@v1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
