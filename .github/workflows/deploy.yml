@@ -7,7 +7,6 @@ on:
     types: [opened, synchronize, reopened]
 permissions:
   contents: read
-  metadata: read
   pull-requests: write
   deployments: write
 jobs:
