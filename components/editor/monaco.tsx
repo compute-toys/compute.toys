@@ -1,17 +1,16 @@
 import Editor from '@monaco-editor/react'
-import {useEffect, useRef} from "react";
+import {useEffect, useState, useRef} from "react";
 import {wgslLanguageDef, wgslConfiguration} from 'public/grammars/wgsl'
 import {defineMonacoTheme} from "theme/monacotheme";
 import {useAtom, useAtomValue} from "jotai";
-import {codeAtom, codeHasBeenModifiedAtom, parseErrorAtom} from "lib/atoms/atoms";
-import { useUpdateAtom } from 'jotai/utils';
+import {codeAtom,  parseErrorAtom} from "lib/atoms/atoms";
 
 declare type Monaco = typeof import('monaco-editor');
 
 const Monaco = (props) => {
     const [code, setCode] = useAtom(codeAtom);
-    const setCodeHasBeenModified = useUpdateAtom(codeHasBeenModifiedAtom);
     const parseError = useAtomValue(parseErrorAtom);
+    const [codeHasBeenModifiedAtLeastOnce, setCodeHasBeenModifiedAtLeastOnce] = useState(false)
 
     const monacoRef = useRef<Monaco | null>(null);
 
@@ -81,19 +80,31 @@ const Monaco = (props) => {
         }
     }
 
+    useEffect(() => {
+        const alertOnAttemptedTabClose = (e)=>{ 
+            if(codeHasBeenModifiedAtLeastOnce) {
+                e.preventDefault();
+            }
+        }
+        window.addEventListener('beforeunload', alertOnAttemptedTabClose)
+        return () => {
+            window.removeEventListener('beforeunload', alertOnAttemptedTabClose)
+        }
+    });
+    
+
     // height fills the screen with room for texture picker
     return <Editor
         height="calc(100vh - 270px)" // preference
         language="wgsl"
         onChange={(value, _event) => {
-            setCodeHasBeenModified(true)
             setCode(value)
+            setCodeHasBeenModifiedAtLeastOnce(true)
         }}
         beforeMount={editorWillMount}
         onMount={(editor, monaco: Monaco) => {
             monacoRef.current = monaco;
-            setCodeHasBeenModified(false) // does this get called when you change shaders?
-
+            setCodeHasBeenModifiedAtLeastOnce(false) // does this get called when you change shaders?
             // https://github.com/microsoft/monaco-editor/issues/392
             document.fonts.ready.then(() => monaco.editor.remeasureFonts());
         }}

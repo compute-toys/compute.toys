@@ -26,17 +26,16 @@ import EntryPointDisplay from "components/editor/entrypointdisplay";
 import { canvasParentElAtom } from "lib/atoms/wgputoyatoms";
 import { useUpdateAtom } from "jotai/utils";
 import { MetadataEditor } from "components/editor/metadataeditor";
-import { codeHasBeenModifiedAtom, manualReloadAtom, saveColorTransitionSignalAtom } from "lib/atoms/atoms";
+import { manualReloadAtom, saveColorTransitionSignalAtom } from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import Explainer from "./explainer";
 import ConfigurationPicker from "./configurationpicker";
 import dynamic from "next/dynamic";
 import { supabase } from "lib/db/supabaseclient";
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 
 export const Editor = () => {
     const setCanvasParentEl = useUpdateAtom(canvasParentElAtom);
-    const codeHasBeenModified = useAtomValue(codeHasBeenModifiedAtom);
     const setManualReload = useUpdateAtom(manualReloadAtom);
 
     const renderParentNodeRef = useCallback((parent) => {
@@ -71,13 +70,6 @@ export const Editor = () => {
         };
     }, [handleKeyPress]);
 
-    useEffect(() => {
-        const alertOnAttemptTabClose = (e)=>{ if(codeHasBeenModified) e.preventDefault();}
-        window.addEventListener('beforeunload', alertOnAttemptTabClose)
-        return () => {
-            window.removeEventListener('beforeunload', alertOnAttemptTabClose)
-        }
-    });
 
     const leftPanel = (
         <div ref={renderParentNodeRef}>
