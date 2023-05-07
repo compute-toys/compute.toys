@@ -1,0 +1,3 @@
+[submodule "wgpu-compute-toy"]
+	path = wgpu-compute-toy
+	url = https://github.com/compute-toys/wgpu-compute-toy.git

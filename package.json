@@ -1,9 +1,9 @@
 {
   "private": true,
   "scripts": {
-    "predev": "shx cp -R ../wgpu-compute-toy/pkg/. ./lib/wgputoy/",
+    "predev": "wasm-pack build --dev wgpu-compute-toy --out-dir ../lib/wgputoy",
     "dev": "next dev",
-    "prebuild": "shx cp -R ../wgpu-compute-toy/pkg/. ./lib/wgputoy/",
+    "prebuild": "wasm-pack build --release wgpu-compute-toy --out-dir ../lib/wgputoy",
     "build": "next build",
     "start": "next start"
   },
