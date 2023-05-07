@@ -2,15 +2,16 @@ import Editor from '@monaco-editor/react'
 import {useEffect, useRef} from "react";
 import {wgslLanguageDef, wgslConfiguration} from 'public/grammars/wgsl'
 import {defineMonacoTheme} from "theme/monacotheme";
-import {useAtom} from "jotai";
+import {useAtom, useAtomValue} from "jotai";
 import {codeAtom, codeHasBeenModifiedAtom, parseErrorAtom} from "lib/atoms/atoms";
+import { useUpdateAtom } from 'jotai/utils';
 
 declare type Monaco = typeof import('monaco-editor');
 
 const Monaco = (props) => {
     const [code, setCode] = useAtom(codeAtom);
-    const [codeHasBeenModified, setCodeHasBeenModified] = useAtom(codeHasBeenModifiedAtom);
-    const [parseError, setParseError] = useAtom(parseErrorAtom);
+    const setCodeHasBeenModified = useUpdateAtom(codeHasBeenModifiedAtom);
+    const parseError = useAtomValue(parseErrorAtom);
 
     const monacoRef = useRef<Monaco | null>(null);
 

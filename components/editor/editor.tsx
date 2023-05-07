@@ -32,12 +32,12 @@ import Explainer from "./explainer";
 import ConfigurationPicker from "./configurationpicker";
 import dynamic from "next/dynamic";
 import { supabase } from "lib/db/supabaseclient";
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 
 export const Editor = () => {
     const setCanvasParentEl = useUpdateAtom(canvasParentElAtom);
-    const [codeHasBeenModified, setCodeHasBeenModified] = useAtom(codeHasBeenModifiedAtom);
-    const [manualReload, setManualReload] = useAtom(manualReloadAtom);
+    const codeHasBeenModified = useAtomValue(codeHasBeenModifiedAtom);
+    const setManualReload = useUpdateAtom(manualReloadAtom);
 
     const renderParentNodeRef = useCallback((parent) => {
         if (parent) {
