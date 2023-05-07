@@ -34,6 +34,7 @@ export const defineMonacoTheme = (monaco, name: string) => {
             { token: 'number',                   foreground: theme.palette.dracula.green },
         ],
         colors: {
+            'editor.background': theme.palette.background.paper,
         }
     });
 }
