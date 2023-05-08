@@ -21,11 +21,15 @@
 		"submodule": "git submodule update --init --recursive",
 		"wasm-pack": "curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh",
 		"yarn": "yarn"
-	}
+	},
 
 	// Configure tool-specific properties.
 	// "customizations": {},
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
+
+	"hostRequirements": {
+		"memory": "8gb"
+	}
 }
