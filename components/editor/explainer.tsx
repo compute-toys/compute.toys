@@ -47,12 +47,13 @@ const DraggableExplainer = (props) => {
                           }
                   }
             >
-                <div className="explainer-handle" style={{display: 'flex', justifyContent: 'end',
+                <div style={{display: 'flex', justifyContent: 'end',
                     backgroundImage: 'repeating-linear-gradient(-45deg, rgba(255,255,255, 0.25), rgba(255,255,255, 0.25) 2px, transparent 1px, transparent 6px)',
                     backgroundSize: '4px 4px'
                 }}>
                     {/* Annoying viewbox tweak to align with drag bar*/}
-                    <DisabledByDefaultSharp viewBox="1.5 1.5 19.5 19.5" onClick={() => props.setHidden(true)} color={'primary'}/>
+                    <div style={{width: "100%"}} className="explainer-handle" ></div>
+                    <DisabledByDefaultSharp viewBox="1.5 1.5 19.5 19.5" onClick={() => props.setHidden(true)} color={'primary'} sx={{cursor: "pointer"}} />
                 </div>
                 <div style={{width: 'min-content', overflowY: 'scroll', padding: '8px', height: `${EXPLAINER_INNER_HEIGHT}px`, color: theme.palette.primary.main}}>
                     <Logo/> is a playground for WebGPU compute shaders. Everything here is written in WGSL, which is WebGPU&apos;s native shader language.
