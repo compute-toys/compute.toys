@@ -114,9 +114,11 @@ export const Editor = () => {
                     </Box>
                 </Box>
             </ItemWithTransitionSignal>
-            <Grid container spacing={2}>
-                <Grid item><TexturePicker /></Grid>
-                <Grid item><ConfigurationPicker /></Grid>
+            <Grid container spacing={2} sx={{alignItems: "flex-start"}}>
+                <Grid item container spacing={2} sx={{width: "fit-content"}} >
+                    <Grid item><TexturePicker /></Grid>
+                    <Grid item><ConfigurationPicker /></Grid>
+                </Grid>
                 <Grid item><EntryPointDisplay /></Grid>
             </Grid>
         </div>
