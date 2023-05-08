@@ -189,6 +189,7 @@ const WgpuToyController = (props) => {
             position: {row: 0, col: 0},
             success: true
         }));
+        if (!hotReloadHot()) setSaveColorTransitionSignal("#2C2D34");
     }, []);
 
     const handleError = useCallback((summary: string, row: number, col: number) => {
