@@ -10,6 +10,7 @@ import {Button} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import dynamic from "next/dynamic";
+import Link from 'next/link';
 
 const HiLite = (props) => {
     const theme = useTheme();
@@ -59,6 +60,7 @@ const DraggableExplainer = (props) => {
                     You can also <a href="https://google.github.io/tour-of-wgsl/">take a tour of WGSL</a>.
 
                     <br/><br/>
+                    <h1>Inputs</h1>
                     <Logo/> supplies keyboard input, mouse input, selectable input textures, custom values controlled by sliders, and the current frame and elapsed time.
                     <br/><br/>
                     Mouse input can be accessed from the <HiLite>mouse</HiLite> struct:
@@ -85,6 +87,7 @@ const DraggableExplainer = (props) => {
                     <pre style={{color: theme.palette.neutral.main}}>
                         keyDown(32u) // returns true when the spacebar is pressed
                     </pre>
+                    <h1>Outputs</h1>
                     For compute shader input and output <Logo/> provides:<br/>
                     one input texture array <HiLite>pass_in</HiLite>,<br/>
                     one output storage texture array <HiLite>pass_out</HiLite>,<br/>
@@ -98,6 +101,7 @@ const DraggableExplainer = (props) => {
                     For example, you can access the third layer of <HiLite>pass_in</HiLite> at LOD 0 and coordinate (1,1) by using the built-in helper function:<br/>
                     <pre style={{color: theme.palette.neutral.main}}>passLoad(2, int2(1,1), 0)</pre>
 
+                    <h1>Preprocessor</h1>
                     <Logo/> also provides an experimental WGSL preprocessor. It currently allows the use of a handful of basic directives:
                     <ul>
                         <li><HiLite>#define NAME VALUE</HiLite> for simple macros (function-like parameter substitution is not yet supported)</li>
@@ -107,6 +111,7 @@ const DraggableExplainer = (props) => {
                         <li><HiLite>#storage NAME TYPE</HiLite> for declaring a storage buffer</li>
                     </ul>
 
+                    <h1>Storage</h1>
                     Read-write storage buffers can be declared using the <HiLite>#storage</HiLite> directive. For example, you can create a buffer of atomic counters:
                     <pre style={{color: theme.palette.neutral.main}}>#storage atomic_storage array&lt;atomic&lt;i32&gt;&gt;</pre>
                     You could use WGSL&apos;s built-in functions to do atomic operations on this buffer in any order,
@@ -123,6 +128,27 @@ const DraggableExplainer = (props) => {
                         assert(0, isfinite(col.x))<br/>
                         assert(1, isfinite(col.y))
                     </pre>
+                    
+                    <h1>Examples</h1>
+
+                    <div style={{fontWeight: "bold", fontSize: "0.8rem"}}>
+                        <Link href={`https://compute.toys/view/77`}>Simple single pass shader</Link>
+                        <br/><br/>
+                        <Link href={`https://compute.toys/view/76`}>Preprocessor #include</Link>
+                        <br/><br/>
+                        <Link href={`https://compute.toys/view/59`}>Terminal overlay</Link>
+                        <br/><br/>
+                        <Link href={`https://compute.toys/view/76`}>Storage</Link>
+                        <br/><br/>
+                        <Link href={`https://compute.toys/view/48`}>Preprocessor #dispatch_count</Link>
+                        <br/><br/>
+                        <Link href={`https://compute.toys/view/47`}>Preprocessor #workgroup_count</Link>
+                        <br/><br/>
+                        <Link href={`https://compute.toys/view/17`}>Assert</Link>
+                        <br/><br/>
+                    </div>
+
+                    <h1>Prelude</h1>
 
                     Every shader begins with a common <i>prelude</i>. The prelude contains the data inputs and outputs for this shader,
                     as well as a few helper functions and type definitions to make working with <Logo/> a more streamlined and familiar process.
