@@ -273,7 +273,7 @@ export default function LoginModal() {
 
     return (
         <div>
-            <Grid container>
+            <Grid style={{padding: "0.33rem"}} container>
                 <Grid item xs={8}>
                     <Stack direction="row" alignItems="center" height="100%" marginLeft="1em" spacing={0}>
                         <Typography variant="h6">
