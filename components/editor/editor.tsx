@@ -4,7 +4,7 @@
 import Monaco from 'components/editor/monaco';
 import { WgpuToyWrapper } from "components/wgputoy";
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -26,7 +26,7 @@ import EntryPointDisplay from "components/editor/entrypointdisplay";
 import { canvasParentElAtom } from "lib/atoms/wgputoyatoms";
 import { useUpdateAtom } from "jotai/utils";
 import { MetadataEditor } from "components/editor/metadataeditor";
-import { saveColorTransitionSignalAtom } from "lib/atoms/atoms";
+import { manualReloadAtom, saveColorTransitionSignalAtom } from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import Explainer from "./explainer";
 import ConfigurationPicker from "./configurationpicker";
@@ -35,6 +35,7 @@ import { supabase } from "lib/db/supabaseclient";
 
 export const Editor = () => {
     const setCanvasParentEl = useUpdateAtom(canvasParentElAtom);
+    const setManualReload = useUpdateAtom(manualReloadAtom);
 
     const renderParentNodeRef = useCallback((parent) => {
         if (parent) {
@@ -94,6 +95,7 @@ export const Editor = () => {
                         stopRenderingLineAfter: 1000,
                         fontFamily: "'Fira Code', monospace",
                         'bracketPairColorization.enabled': true,
+                        mouseWheelZoom: true,
                         //fontLigatures: true,
                     }}
                 />

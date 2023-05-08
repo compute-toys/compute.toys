@@ -153,7 +153,7 @@ const WgpuToyController = (props) => {
             } else {
                 liveReloadCallback();
             }
-            if (isPlaying()) {
+            if (isPlaying() || manualReload()) {
                 let t = timer();
                 t += e.delta;
                 setTimer(t);
@@ -189,6 +189,7 @@ const WgpuToyController = (props) => {
             position: {row: 0, col: 0},
             success: true
         }));
+        if (!hotReloadHot()) setSaveColorTransitionSignal("#24252C");
     }, []);
 
     const handleError = useCallback((summary: string, row: number, col: number) => {
