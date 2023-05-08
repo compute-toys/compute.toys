@@ -3,7 +3,7 @@ import {useEffect, useState, useRef} from "react";
 import {wgslLanguageDef, wgslConfiguration} from 'public/grammars/wgsl'
 import {defineMonacoTheme} from "theme/monacotheme";
 import {useAtom, useAtomValue} from "jotai";
-import {codeAtom,  parseErrorAtom} from "lib/atoms/atoms";
+import {codeAtom,  dbLoadedAtom,  parseErrorAtom} from "lib/atoms/atoms";
 
 declare type Monaco = typeof import('monaco-editor');
 
@@ -11,6 +11,7 @@ const Monaco = (props) => {
     const [code, setCode] = useAtom(codeAtom);
     const parseError = useAtomValue(parseErrorAtom);
     const [codeHasBeenModifiedAtLeastOnce, setCodeHasBeenModifiedAtLeastOnce] = useState(false)
+    const dbLoaded = useAtomValue(dbLoadedAtom);
 
     const monacoRef = useRef<Monaco | null>(null);
 
@@ -81,6 +82,11 @@ const Monaco = (props) => {
     }
 
     useEffect(() => {
+        setCodeHasBeenModifiedAtLeastOnce(false)
+    },[dbLoaded])
+    
+
+    useEffect(() => {
         const alertOnAttemptedTabClose = (e)=>{ 
             if(codeHasBeenModifiedAtLeastOnce) {
                 e.preventDefault();
@@ -91,6 +97,8 @@ const Monaco = (props) => {
             window.removeEventListener('beforeunload', alertOnAttemptedTabClose)
         }
     });
+
+
     
 
     // height fills the screen with room for texture picker

@@ -32,7 +32,6 @@ import Explainer from "./explainer";
 import ConfigurationPicker from "./configurationpicker";
 import dynamic from "next/dynamic";
 import { supabase } from "lib/db/supabaseclient";
-import { useAtomValue } from 'jotai';
 
 export const Editor = () => {
     const setCanvasParentEl = useUpdateAtom(canvasParentElAtom);
@@ -58,7 +57,7 @@ export const Editor = () => {
 
     const handleKeyPress = useCallback((event) => {
         // Alt + Enter
-        if ((event.altKey && event.keyCode === 13)) {
+        if (event.altKey && event.keyCode === 13) {
             setManualReload(true)
         }
     }, []);
