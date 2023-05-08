@@ -3,7 +3,9 @@ import {useEffect, useState, useRef} from "react";
 import {wgslLanguageDef, wgslConfiguration} from 'public/grammars/wgsl'
 import {defineMonacoTheme} from "theme/monacotheme";
 import {useAtom, useAtomValue} from "jotai";
-import {codeAtom,  dbLoadedAtom,  parseErrorAtom} from "lib/atoms/atoms";
+import {codeAtom,  dbLoadedAtom,  isPlayingAtom,  manualReloadAtom,  parseErrorAtom, playAtom, resetAtom} from "lib/atoms/atoms";
+import { useAtomCallback, useUpdateAtom } from 'jotai/utils';
+import { useTransientAtom } from 'jotai-game';
 
 declare type Monaco = typeof import('monaco-editor');
 
@@ -12,6 +14,10 @@ const Monaco = (props) => {
     const parseError = useAtomValue(parseErrorAtom);
     const [codeHasBeenModifiedAtLeastOnce, setCodeHasBeenModifiedAtLeastOnce] = useState(false)
     const dbLoaded = useAtomValue(dbLoadedAtom);
+    const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
+    const setPlay = useUpdateAtom(playAtom);
+    const setManualReload = useUpdateAtom(manualReloadAtom);
+    const setReset = useUpdateAtom(resetAtom);
 
     const monacoRef = useRef<Monaco | null>(null);
 
@@ -112,7 +118,18 @@ const Monaco = (props) => {
         beforeMount={editorWillMount}
         onMount={(editor, monaco: Monaco) => {
             monacoRef.current = monaco;
-            setCodeHasBeenModifiedAtLeastOnce(false) // does this get called when you change shaders?
+            // Compile shortcut
+            editor.addCommand( monaco.KeyMod.Alt | monaco.KeyCode.Enter, () => {
+                setManualReload(true)
+            })
+            // Play/Pause shortcut
+            editor.addCommand( monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow, () => {
+                setPlay(!isPlaying())
+            })
+            // Rewind shortcut
+            editor.addCommand( monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow, () => {
+                setReset(true)
+            })
             // https://github.com/microsoft/monaco-editor/issues/392
             document.fonts.ready.then(() => monaco.editor.remeasureFonts());
         }}

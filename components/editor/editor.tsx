@@ -55,21 +55,6 @@ export const Editor = () => {
         );
     }
 
-    const handleKeyPress = useCallback((event) => {
-        // Alt + Enter
-        if (event.altKey && event.keyCode === 13) {
-            setManualReload(true)
-        }
-    }, []);
-
-    useEffect(() => {
-        document.addEventListener('keydown', handleKeyPress);
-        return () => {
-            document.removeEventListener('keydown', handleKeyPress);
-        };
-    }, [handleKeyPress]);
-
-
     const leftPanel = (
         <div ref={renderParentNodeRef}>
             <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
