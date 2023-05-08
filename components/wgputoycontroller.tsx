@@ -153,7 +153,7 @@ const WgpuToyController = (props) => {
             } else {
                 liveReloadCallback();
             }
-            if (isPlaying()) {
+            if (isPlaying() || manualReload()) {
                 let t = timer();
                 t += e.delta;
                 setTimer(t);
