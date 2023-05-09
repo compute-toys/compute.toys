@@ -43,7 +43,7 @@ export const PlayPauseButton = () => {
             }
             setPlay(!play);
         }}
-        title={'Play/Pause <Ctrl + Alt + Up> \nOnly Pause Time <Ctrl + Click>'}
+        title={'Play/Pause <Ctrl + Alt + Up> \nPause Time, but keep rendering <Ctrl + Click>'}
         sx={play ? {color: theme.palette.primary.contrastText} : 
             pauseTimeWhileStillRendering ? {color: "orange"} : 
             {color: theme.palette.primary.light}}><PlayPauseIcon />
