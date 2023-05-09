@@ -128,7 +128,7 @@ const DraggableExplainer = (props) => {
                         assert(0, isfinite(col.x))<br/>
                         assert(1, isfinite(col.y))
                     </pre>
-                    
+
                     <h1>Examples</h1>
 
                     <div style={{fontWeight: "bold", fontSize: "0.8rem"}}>
@@ -157,6 +157,11 @@ const DraggableExplainer = (props) => {
                     Here are the current contents of this shader&apos;s prelude:
 
                     <pre style={{color: theme.palette.neutral.main}}><Prelude/></pre>
+
+                    <b>Note:</b> Matrix types in WGSL are stored in column-major order.
+                    This means a matrix of type <HiLite>mat2x3<f32></HiLite> (aka <HiLite>mat2x3f</HiLite> or <HiLite>float2x3</HiLite>)
+                    is constructed from 2 column vectors of type <HiLite>vec3<f32></HiLite> (aka <HiLite>vec3f</HiLite> or <HiLite>float3</HiLite>).
+                    This is backward from HLSL and convention in mathematics.
 
                 </div>
 
