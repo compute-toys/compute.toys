@@ -104,7 +104,7 @@ export const Editor = () => {
                 />
                 <Box sx={{ paddingTop: "4px" }}>
                     <Box sx={{display: "flex", justifyContent: "space-between"}}>
-                        <Button /> {/* invisible button, used only for centering */}
+                        <Button style={{pointerEvents: "none"}} /> {/* invisible button, used only for centering */}
                         <div>
                             <ReloadButton />
                             <HotReloadToggle />
