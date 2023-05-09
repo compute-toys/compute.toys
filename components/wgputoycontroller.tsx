@@ -42,6 +42,7 @@ const needsInitialResetAtom = atom<boolean>(false);
 const WgpuToyController = (props) => {
 
     const [play, setPlay] = useAtom(playAtom);
+    const [pauseTimeWhileStillRendering, setPauseTimeWhileStillRendering] = useAtom(pauseTimeWhileStillRenderingAtom);
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
 
@@ -145,7 +146,6 @@ const WgpuToyController = (props) => {
         }
     }, [])
 
-    const [pauseTimeWhileStillRendering, setPauseTimeWhileStillRendering] = useAtom(pauseTimeWhileStillRenderingAtom);
 
     useAnimationFrame(e => {
         if (isSafeContext(wgputoy)) {
