@@ -8,7 +8,14 @@ export const ResetButton = () => {
     const setReset = useUpdateAtom(resetAtom);
 
     const theme = useTheme();
-    return <Button onClick={() => setReset(true)} sx={{color: theme.palette.primary.light}}><ReplayIcon /></Button>;
+    return (
+        <Button 
+            title='Reset <Ctrl + Alt + Down>' 
+            onClick={() => setReset(true)} 
+            sx={{color: theme.palette.primary.light}}>
+                <ReplayIcon />
+        </Button>
+    );
 }
 
 export default ResetButton;
