@@ -8,6 +8,7 @@ import { useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
+import {Button} from "@mui/material";
 
 import PlayPauseButton from "components/buttons/playpausebutton"
 import ResetButton from "components/buttons/resetbutton";
@@ -26,12 +27,13 @@ import EntryPointDisplay from "components/editor/entrypointdisplay";
 import { canvasParentElAtom } from "lib/atoms/wgputoyatoms";
 import { useUpdateAtom } from "jotai/utils";
 import { MetadataEditor } from "components/editor/metadataeditor";
-import { manualReloadAtom, saveColorTransitionSignalAtom } from "lib/atoms/atoms";
+import { manualReloadAtom, saveColorTransitionSignalAtom, vimAtom } from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import Explainer from "./explainer";
 import ConfigurationPicker from "./configurationpicker";
 import dynamic from "next/dynamic";
 import { supabase } from "lib/db/supabaseclient";
+import VimButton from 'components/buttons/vimbutton';
 
 export const Editor = () => {
     const setCanvasParentEl = useUpdateAtom(canvasParentElAtom);
@@ -90,6 +92,7 @@ export const Editor = () => {
     const rightPanel = (
         <div>
             <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
+                <div className='vim-status'></div>
                 <Monaco
                     editorOptions={{
                         stopRenderingLineAfter: 1000,
@@ -100,9 +103,15 @@ export const Editor = () => {
                     }}
                 />
                 <Box sx={{ paddingTop: "4px" }}>
-                    <ReloadButton />
-                    <HotReloadToggle />
-                    <Explainer />
+                    <Box sx={{display: "flex", justifyContent: "space-between"}}>
+                        <Button /> {/* invisible button, used only for centering */}
+                        <div>
+                            <ReloadButton />
+                            <HotReloadToggle />
+                            <Explainer />
+                        </div>
+                        <VimButton />
+                    </Box>
                 </Box>
             </ItemWithTransitionSignal>
             <Grid container spacing={2}>
