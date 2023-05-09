@@ -159,8 +159,8 @@ const DraggableExplainer = (props) => {
                     <pre style={{color: theme.palette.neutral.main}}><Prelude/></pre>
 
                     <b>Note:</b> Matrix types in WGSL are stored in column-major order.
-                    This means a matrix of type <HiLite>mat2x3<f32></HiLite> (aka <HiLite>mat2x3f</HiLite> or <HiLite>float2x3</HiLite>)
-                    is constructed from 2 column vectors of type <HiLite>vec3<f32></HiLite> (aka <HiLite>vec3f</HiLite> or <HiLite>float3</HiLite>).
+                    This means a matrix of type <HiLite>mat2x3&lt;f32&gt;</HiLite> (aka <HiLite>mat2x3f</HiLite> or <HiLite>float2x3</HiLite>)
+                    is constructed from 2 column vectors of type <HiLite>vec3&lt;f32&gt;</HiLite> (aka <HiLite>vec3f</HiLite> or <HiLite>float3</HiLite>).
                     This is backward from HLSL and convention in mathematics.
 
                 </div>
