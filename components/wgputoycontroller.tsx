@@ -13,7 +13,8 @@ import {
     isPlayingAtom,
     scaleAtom,
     widthAtom,
-    heightAtom
+    heightAtom,
+    pauseTimeWhileStillRenderingAtom
 } from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
 import {
@@ -41,6 +42,7 @@ const needsInitialResetAtom = atom<boolean>(false);
 const WgpuToyController = (props) => {
 
     const [play, setPlay] = useAtom(playAtom);
+    const [pauseTimeWhileStillRendering, setPauseTimeWhileStillRendering] = useAtom(pauseTimeWhileStillRenderingAtom);
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
 
@@ -144,6 +146,7 @@ const WgpuToyController = (props) => {
         }
     }, [])
 
+
     useAnimationFrame(e => {
         if (isSafeContext(wgputoy)) {
             if (sliderUpdateSignal()) {
@@ -153,9 +156,10 @@ const WgpuToyController = (props) => {
             } else {
                 liveReloadCallback();
             }
-            if (isPlaying() || manualReload()) {
+            if (isPlaying() || manualReload() || pauseTimeWhileStillRendering) {
                 let t = timer();
-                t += e.delta;
+                if(!pauseTimeWhileStillRendering)
+                    t += e.delta;
                 setTimer(t);
                 wgputoy.set_time_elapsed(t);
                 wgputoy.set_time_delta(e.delta);
@@ -308,6 +312,7 @@ const WgpuToyController = (props) => {
     useEffect(() => {
         if (play && !isPlaying()) {
             playCallback();
+            setPauseTimeWhileStillRendering(false)
         } else if (!play && isPlaying()) {
             pauseCallback();
         }

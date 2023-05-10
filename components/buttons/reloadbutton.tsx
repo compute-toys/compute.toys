@@ -25,6 +25,7 @@ export const ReloadButton = () => {
             onClick={() => {
                 setManualReload(true);
             }}
+            title='Recompile <Alt + Enter>'
             sx={hotReload ? {color: theme.status.disabled} : {color: theme.palette.primary.light}}
         >
             <PlayIcon/>
