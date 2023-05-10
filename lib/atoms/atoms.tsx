@@ -60,6 +60,7 @@ export const parseErrorAtom = atom<ParseError>({
     success: true
 });
 export const isPlayingAtom = atom<boolean>(false);
+export const vimAtom = atom<boolean>(false);
 
 export const timerAtom = atom<number>(0);
 export const widthAtom = atom<number>(0);
