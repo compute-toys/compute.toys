@@ -345,6 +345,12 @@ const WgpuToyController = (props) => {
                 setHeight(dimensions.y);
                 setScale(newScale);
                 wgputoy.resize(dimensions.x, dimensions.y, newScale);
+                if (canvas) {
+                    canvas.width = dimensions.x;
+                    canvas.height = dimensions.y;
+                    canvas.style.width = `${dimensions.x / window.devicePixelRatio}px`;
+                    canvas.style.height = `${dimensions.y / window.devicePixelRatio}px`;
+                }
                 reloadCallback();
             }
         }
