@@ -26,6 +26,6 @@ export default function Timer() {
     });
 
     if (timer > 0 && fps > 0) {
-        return <Fragment><Box marginTop="7px" marginLeft="20px"><span style={{color: theme.palette.dracula.foreground, lineHeight: "25px", display: "inline-block"}}>{timer.toFixed(1)}s / {fps.toFixed(1)} FPS</span></Box></Fragment>
+        return <Fragment><Box marginTop="7px" marginLeft="1.3rem"><span style={{color: theme.palette.dracula.foreground, lineHeight: "25px", display: "inline-block"}}>{timer.toFixed(1)}s / {fps.toFixed(1)} FPS</span></Box></Fragment>
     }
 }
