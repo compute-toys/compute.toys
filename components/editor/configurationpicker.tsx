@@ -14,10 +14,7 @@ export default function ConfigurationPicker() {
             display: "inline-block",
             marginTop: "18px",
             textAlign: "left",
-            color: theme.palette.dracula.foreground,
-            minHeight: "-webkit-fill-available"}} 
-            style={{minHeight: "-moz-fill-available"}}
-            >
+            color: theme.palette.dracula.foreground}}>
             <List
                 sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
                 subheader={<ListSubheader sx={{color: theme.palette.dracula.foreground}}>Settings</ListSubheader>}
