@@ -1,5 +1,7 @@
 # compute.toys
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/compute-toys/compute.toys?quickstart=1)
+
 This is the source code of the [compute.toys](https://compute.toys) website.
 
 ## Development

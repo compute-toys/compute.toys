@@ -1,17 +1,29 @@
 import Editor from '@monaco-editor/react'
-import {useEffect, useRef} from "react";
+import {useEffect, useState, useRef} from "react";
 import {wgslLanguageDef, wgslConfiguration} from 'public/grammars/wgsl'
 import {defineMonacoTheme} from "theme/monacotheme";
-import {useAtom} from "jotai";
-import {codeAtom, parseErrorAtom} from "lib/atoms/atoms";
+import {useAtom, useAtomValue} from "jotai";
+import {codeAtom,  dbLoadedAtom,  isPlayingAtom,  manualReloadAtom,  parseErrorAtom, playAtom, resetAtom, vimAtom} from "lib/atoms/atoms";
+import { useAtomCallback, useUpdateAtom } from 'jotai/utils';
+import { useTransientAtom } from 'jotai-game';
 
 declare type Monaco = typeof import('monaco-editor');
 
 const Monaco = (props) => {
     const [code, setCode] = useAtom(codeAtom);
-    const [parseError, setParseError] = useAtom(parseErrorAtom);
+    const parseError = useAtomValue(parseErrorAtom);
+    const [codeHasBeenModifiedAtLeastOnce, setCodeHasBeenModifiedAtLeastOnce] = useState(false)
+    const dbLoaded = useAtomValue(dbLoadedAtom);
+    const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
+    const setPlay = useUpdateAtom(playAtom);
+    const setManualReload = useUpdateAtom(manualReloadAtom);
+    const setReset = useUpdateAtom(resetAtom);
+    const vim = useAtomValue(vimAtom)
+    const [vimContext, setVimContext] = useState(undefined)
+    const [editor, setEditor] = useState(undefined)
 
     const monacoRef = useRef<Monaco | null>(null);
+    
 
     useEffect(() => {
         const monaco = monacoRef.current;
@@ -79,17 +91,67 @@ const Monaco = (props) => {
         }
     }
 
+    useEffect(() => {
+        setCodeHasBeenModifiedAtLeastOnce(false)
+    },[dbLoaded])
+    
+
+    useEffect(() => {
+        const alertOnAttemptedTabClose = (e)=>{ 
+            if(codeHasBeenModifiedAtLeastOnce) {
+                e.preventDefault();
+            }
+        }
+        window.addEventListener('beforeunload', alertOnAttemptedTabClose)
+        return () => {
+            window.removeEventListener('beforeunload', alertOnAttemptedTabClose)
+        }
+    });
+
+    useEffect(()=>{
+        if(vim){
+            // @ts-ignore
+            window.require.config({
+                paths: {
+                    "monaco-vim": "https://unpkg.com/monaco-vim/dist/monaco-vim"
+                }
+            });
+            // @ts-ignore
+            window.require(["monaco-vim"], function (MonacoVim) {
+                const statusNode = document.querySelector(".vim-status");
+                setVimContext ( MonacoVim.initVimMode(editor, statusNode) );
+            });
+        } else {
+            if(vimContext){
+                vimContext.dispose()
+            }
+        }
+    }, [vim])
+      
     // height fills the screen with room for texture picker
     return <Editor
         height="calc(100vh - 270px)" // preference
         language="wgsl"
         onChange={(value, _event) => {
             setCode(value)
+            setCodeHasBeenModifiedAtLeastOnce(true)
         }}
         beforeMount={editorWillMount}
-        onMount={(editor, monaco: Monaco) => {
+        onMount={(_editor, monaco: Monaco) => {
             monacoRef.current = monaco;
-
+            setEditor(_editor)
+            // Compile shortcut
+            _editor.addCommand( monaco.KeyMod.Alt | monaco.KeyCode.Enter, () => {
+                setManualReload(true)
+            })
+            // Play/Pause shortcut
+            _editor.addCommand( monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow, () => {
+                setPlay(!isPlaying())
+            })
+            // Rewind shortcut
+            _editor.addCommand( monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow, () => {
+                setReset(true)
+            })
             // https://github.com/microsoft/monaco-editor/issues/392
             document.fonts.ready.then(() => monaco.editor.remeasureFonts());
         }}

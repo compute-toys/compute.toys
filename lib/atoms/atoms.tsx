@@ -50,6 +50,7 @@ export type WgpuStatus = 'available' | 'unavailable' | 'unknown';
 export const wgpuAvailabilityAtom = atom<WgpuStatus>('unknown');
 
 export const playAtom = atom<boolean>(true);
+export const pauseTimeWhileStillRenderingAtom = atom<boolean>(false);
 export const resetAtom = atom<boolean>(false);
 export const hotReloadAtom = atom<boolean>(false);
 export const manualReloadAtom = atom<boolean>(false);
@@ -60,6 +61,7 @@ export const parseErrorAtom = atom<ParseError>({
     success: true
 });
 export const isPlayingAtom = atom<boolean>(false);
+export const vimAtom = atom<boolean>(false);
 
 export const timerAtom = atom<number>(0);
 export const widthAtom = atom<number>(0);

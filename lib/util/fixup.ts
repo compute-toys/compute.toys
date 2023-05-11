@@ -6,5 +6,7 @@ export function fixup_shader_code(code: string): string {
     code = code.replace(/@stage\(compute\)/g, '@compute');
     code = code.replace(/^type /gm, 'alias ');
     code = code.replace(/^let /gm, 'const ');
+    code = code.replace(/alias\s+bool([2-4])\s*=\s*vec\1<\s*bool\s*>\s*;/gm, '');
+    code = code.replace(/alias\s+float([2-4])x([2-4])\s*=\s*mat\1x\2<\s*f32\s*>\s*;/gm, '');
     return code;
 }
