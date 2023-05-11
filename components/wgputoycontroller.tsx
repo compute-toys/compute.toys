@@ -14,7 +14,8 @@ import {
     scaleAtom,
     widthAtom,
     heightAtom,
-    pauseTimeWhileStillRenderingAtom
+    pauseTimeWhileStillRenderingAtom,
+    recordingAtom
 } from "lib/atoms/atoms";
 import {useUpdateAtom} from "jotai/utils";
 import {
@@ -45,6 +46,7 @@ const WgpuToyController = (props) => {
     const [pauseTimeWhileStillRendering, setPauseTimeWhileStillRendering] = useAtom(pauseTimeWhileStillRenderingAtom);
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
+    const [recording, setRecording] = useAtom(recordingAtom);
 
     // must be transient so we can access updated value in play loop
     const [sliderUpdateSignal, setSliderUpdateSignal] = useTransientAtom(sliderUpdateSignalAtom);
@@ -261,6 +263,71 @@ const WgpuToyController = (props) => {
             return () => canvas.removeEventListener('keyup', handleKeyUp);
         }
     }, []);
+    
+    
+    useEffect(()=>{
+        if(!canvas){ 
+            return;
+        }
+        function createMediaRecorder(canvas: HTMLCanvasElement){
+            let options: any = { audioBitsPerSecond : 0, videoBitsPerSecond : 8000000 }; 
+
+            const types = ['video/webm;codecs=h264', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8'];
+            
+            for(let type of types) {
+                if(MediaRecorder.isTypeSupported(type)){
+                    options.mimeType = type;
+                }
+            }
+            if(!options.mimeType){
+                options.mimeType = 'video/webm'
+            }
+
+            const mediaRecorder = new MediaRecorder(canvas.captureStream(), options);
+            const chunks = [];
+            
+            mediaRecorder.ondataavailable = function(e) {
+                if (e.data.size > 0) {
+                    chunks.push(e.data);
+                }
+            };
+         
+            mediaRecorder.onstop = function() {
+                setRecording(false)
+                let blob     = new Blob(chunks, {type: "video/mp4"});
+                chunks.length = 0;
+                const url      = window.URL.createObjectURL(blob);
+                let a        = document.createElement("a");
+                document.body.appendChild(a);
+                // @ts-ignore
+                a.style      = "display: none";
+                a.href       = url;
+                a.download   = "shader.mp4";
+                a.click();
+                window.URL.revokeObjectURL(url);
+             };
+
+            // @ts-ignore
+            window.mediaRecorder = mediaRecorder
+            return mediaRecorder
+        }
+        
+        // @ts-ignore
+        let mediaRecorder: MediaRecorder = window.mediaRecorder
+        if(recording){
+            if(!mediaRecorder){
+                mediaRecorder = createMediaRecorder(canvas)
+            }
+            
+            if (mediaRecorder.state === "inactive") {
+                mediaRecorder.start();
+            }                 
+        } else if (!recording && mediaRecorder) {
+            if (mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }                 
+        }
+    }, [recording])
 
     useEffect(() => {
         if (canvas !== false) {
