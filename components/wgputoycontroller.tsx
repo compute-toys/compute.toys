@@ -156,10 +156,12 @@ const WgpuToyController = (props) => {
             } else {
                 liveReloadCallback();
             }
-            if (isPlaying() || manualReload() || pauseTimeWhileStillRendering) {
+            if(pauseTimeWhileStillRendering || (sliderUpdateSignal() && !isPlaying())){
+                wgputoy.set_time_delta(e.delta);
+                wgputoy.render();
+            } else if (isPlaying() || manualReload()) {
                 let t = timer();
-                if(!pauseTimeWhileStillRendering)
-                    t += e.delta;
+                t += e.delta;
                 setTimer(t);
                 wgputoy.set_time_elapsed(t);
                 wgputoy.set_time_delta(e.delta);
