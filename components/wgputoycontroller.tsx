@@ -269,6 +269,9 @@ const WgpuToyController = (props) => {
                     wgputoy.set_mouse_pos(
                         e.offsetX / canvas.clientWidth,
                         e.offsetY / canvas.clientHeight);
+                    if(!isPlaying()){
+                        wgputoy.render()
+                    }
                 }
             }
 
