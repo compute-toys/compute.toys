@@ -34,6 +34,7 @@ import ConfigurationPicker from "./configurationpicker";
 import dynamic from "next/dynamic";
 import { supabase } from "lib/db/supabaseclient";
 import VimButton from 'components/buttons/vimbutton';
+import RecordButton from 'components/buttons/recordbutton';
 
 export const Editor = () => {
     const setCanvasParentEl = useUpdateAtom(canvasParentElAtom);
@@ -76,6 +77,7 @@ export const Editor = () => {
                     <Grid item xs={7}>
                         <PlayPauseButton />
                         <ResetButton />
+                        <RecordButton />
                     </Grid>
                     <Grid item sx={{ textAlign: 'right' }} xs={3}>
                         <Resolution />
