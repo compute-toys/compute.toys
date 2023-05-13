@@ -423,7 +423,10 @@ const WgpuToyController = (props) => {
                     canvas.style.width = `${dimensions.x / window.devicePixelRatio}px`;
                     canvas.style.height = `${dimensions.y / window.devicePixelRatio}px`;
                 }
-                // reloadCallback();
+                if(!isPlaying()){ 
+                    wgputoy.render()
+                }
+
             }
         }
     };
