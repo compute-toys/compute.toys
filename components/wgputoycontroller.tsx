@@ -186,6 +186,9 @@ const WgpuToyController = (props) => {
             setWidth(dimensions.x);
             setTimer(0);
             wgputoy.reset();
+            if(!isPlaying()){
+                wgputoy.render();
+            }
             reloadCallback();
         }
     }, []);
