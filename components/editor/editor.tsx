@@ -8,7 +8,7 @@ import { useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import {Button} from "@mui/material";
+import {Button, useMediaQuery, useTheme} from "@mui/material";
 
 import PlayPauseButton from "components/buttons/playpausebutton"
 import ResetButton from "components/buttons/resetbutton";
@@ -89,6 +89,8 @@ export const Editor = () => {
         </div>
     );
 
+    const theme = useTheme();
+
     const rightPanel = (
         <div>
             <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
@@ -114,7 +116,7 @@ export const Editor = () => {
                     </Box>
                 </Box>
             </ItemWithTransitionSignal>
-            <Grid container spacing={2}>
+            <Grid container spacing={2} sx={{flexWrap: useMediaQuery(theme.breakpoints.up('sm')) ? "nowrap" : "wrap"}}>
                 <Grid item><TexturePicker /></Grid>
                 <Grid item><ConfigurationPicker /></Grid>
                 <Grid item><EntryPointDisplay /></Grid>

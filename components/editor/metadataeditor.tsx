@@ -94,7 +94,7 @@ export const MetadataEditor = () => {
     }, [upsertShader]);
 
     return (
-        <Grid container spacing={2} sx={{padding: "10px"}}>
+        <Grid container spacing={2} sx={{paddingX: "22px", paddingY: "10px"}}>
             <Grid item xs={8}>
                 {userIsAuthor() ?
                     <CssTextField

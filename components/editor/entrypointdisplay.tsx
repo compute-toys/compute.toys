@@ -12,7 +12,10 @@ import {entryPointsAtom} from "lib/atoms/atoms";
 export default function EntryPointDisplay() {
     const entryPoints = useAtomValue(entryPointsAtom);
     return (
-        <Item sx={{display: "inline-block", marginTop: "18px"}}>
+        <Item 
+            sx={{display: "inline-block", marginTop: "18px", minHeight: "-webkit-fill-available"}} 
+            style={{minHeight: "-moz-fill-available"}} 
+        >
             <Timeline sx={{alignItems: "baseline", padding: "0px"}}>
                 {entryPoints.map((entryPoint, index) => (
                     <TimelineItem key={entryPoint} sx={index < entryPoints.length - 1 ? {} : {minHeight: "35px"}}>

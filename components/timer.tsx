@@ -1,3 +1,4 @@
+import { Box } from "@mui/material";
 import { useAtomValue } from "jotai";
 import { useTransientAtom } from "jotai-game";
 import { isPlayingAtom, timerAtom } from "lib/atoms/atoms";
@@ -25,6 +26,6 @@ export default function Timer() {
     });
 
     if (timer > 0 && fps > 0) {
-        return <Fragment><span style={{color: theme.palette.dracula.foreground}}>{timer.toFixed(1)}s / {fps.toFixed(1)} FPS</span></Fragment>
+        return <Fragment><Box marginTop="7px" marginLeft="1.3rem"><span style={{color: theme.palette.dracula.foreground, lineHeight: "25px", display: "inline-block"}}>{timer.toFixed(1)}s / {fps.toFixed(1)} FPS</span></Box></Fragment>
     }
 }
