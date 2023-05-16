@@ -135,7 +135,7 @@ const DraggableExplainer = (props) => {
                     <div style={{fontWeight: "bold", fontSize: "0.8rem"}}>
                         <Link href={`https://compute.toys/view/77`}>Simple single pass shader</Link>
                         <br/><br/>
-                        <Link href={`https://compute.toys/view/76`}>Preprocessor #include</Link>
+                        <Link href={`https://compute.toys/view/46`}>Preprocessor #include</Link>
                         <br/><br/>
                         <Link href={`https://compute.toys/view/59`}>Terminal overlay</Link>
                         <br/><br/>
