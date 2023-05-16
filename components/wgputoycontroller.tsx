@@ -354,6 +354,7 @@ const WgpuToyController = (props) => {
             const handleMouseDown = (e: MouseEvent) => {
                 if (isSafeContext(wgputoy)) {
                     wgputoy.set_mouse_click(true);
+                    handleMouseMove(e);
                     canvas.onmousemove = handleMouseMove;
                 }
             }
