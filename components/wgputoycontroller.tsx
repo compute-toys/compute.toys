@@ -17,7 +17,7 @@ import {
     pauseTimeWhileStillRenderingAtom,
     recordingAtom
 } from "lib/atoms/atoms";
-import {useUpdateAtom} from "jotai/utils";
+import {useSetAtom} from "jotai";
 import {
     canvasElAtom,
     canvasParentElAtom,
@@ -65,8 +65,8 @@ const WgpuToyController = (props) => {
 
     const [parseError, setParseError] = useTransientAtom(parseErrorAtom);
     const loadedTextures = useAtomValue(loadedTexturesAtom);
-    const setEntryPoints = useUpdateAtom(entryPointsAtom);
-    const setSaveColorTransitionSignal = useUpdateAtom(saveColorTransitionSignalAtom);
+    const setEntryPoints = useSetAtom(entryPointsAtom);
+    const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
 
     const wgputoy = useAtomValue(wgputoyAtom);
     const canvas = useAtomValue(canvasElAtom);

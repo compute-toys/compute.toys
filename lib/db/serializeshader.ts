@@ -12,7 +12,8 @@ import {definitions} from "types/supabase";
 import {useMemo, useRef} from "react";
 import {useAuth} from "lib/db/authcontext";
 import {fromUniformActiveSettings, UniformSliderRef} from "components/editor/uniformsliders";
-import {useResetAtom, useUpdateAtom} from "jotai/utils";
+import {useResetAtom} from "jotai/utils";
+import {useSetAtom} from "jotai";
 import {theme} from "theme/theme";
 import { fixup_shader_code } from "lib/util/fixup";
 
@@ -122,16 +123,16 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
         we need to serialize change. Instead, we use a hack
         to read the atoms imperatively when they are needed.
      */
-    const setCode = useUpdateAtom(codeAtom);
-    const setLoadedTextures = useUpdateAtom(loadedTexturesAtom);
-    const setSliderSerDeNeedsUpdate = useUpdateAtom(sliderSerDeNeedsUpdateAtom);
-    const setSliderRefMap = useUpdateAtom(sliderRefMapAtom);
-    const setTitle = useUpdateAtom(titleAtom);
-    const setDescription = useUpdateAtom(descriptionAtom);
-    const setVisibility = useUpdateAtom(visibilityAtom);
-    const setAuthorProfile = useUpdateAtom(authorProfileAtom);
-    const setSaveColorTransitionSignal = useUpdateAtom(saveColorTransitionSignalAtom);
-    const setFloat32Enabled = useUpdateAtom(float32EnabledAtom);
+    const setCode = useSetAtom(codeAtom);
+    const setLoadedTextures = useSetAtom(loadedTexturesAtom);
+    const setSliderSerDeNeedsUpdate = useSetAtom(sliderSerDeNeedsUpdateAtom);
+    const setSliderRefMap = useSetAtom(sliderRefMapAtom);
+    const setTitle = useSetAtom(titleAtom);
+    const setDescription = useSetAtom(descriptionAtom);
+    const setVisibility = useSetAtom(visibilityAtom);
+    const setAuthorProfile = useSetAtom(authorProfileAtom);
+    const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
+    const setFloat32Enabled = useSetAtom(float32EnabledAtom);
 
     const get = async (id: number) => {
         try {

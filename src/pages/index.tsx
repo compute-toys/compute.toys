@@ -4,12 +4,12 @@ import { ShadowCanvas } from "components/global/shadowcanvas";
 import FavIconHead from "components/global/faviconhead";
 import NoWgpuModal from "components/global/nowgpumodal";
 import { Editor } from 'components/editor/editor';
-import { useUpdateAtom } from 'jotai/utils';
+import { useSetAtom } from 'jotai';
 import { dbLoadedAtom } from 'lib/atoms/atoms';
 
 export default function App() {
     // FIXME: pretend the DB has loaded otherwise wgputoycontroller silently fails for e.g. manual reloads
-    const setDBLoaded = useUpdateAtom(dbLoadedAtom);
+    const setDBLoaded = useSetAtom(dbLoadedAtom);
     setDBLoaded(true);
 
     return (

@@ -8,14 +8,14 @@ import {DisabledByDefaultSharp} from "@mui/icons-material";
 import Image from 'next/image';
 import {useAtomValue} from "jotai";
 import {loadedTexturesAtom, Texture} from "lib/atoms/atoms";
-import {useUpdateAtom} from "jotai/utils";
+import {useSetAtom} from "jotai";
 
 export interface LoadedTextures {
     [key: number]: string
 }
 
 const DraggablePicker = (props) => {
-    const setLoadedTextures = useUpdateAtom(loadedTexturesAtom);
+    const setLoadedTextures = useSetAtom(loadedTexturesAtom);
 
     let size = 128;
 

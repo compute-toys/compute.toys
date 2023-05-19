@@ -2,7 +2,7 @@ import {useRouter} from "next/router";
 import {authorProfileAtom, codeAtom, dbLoadedAtom, DEFAULT_SHADER, manualReloadAtom, shaderIDAtom} from "lib/atoms/atoms";
 import { isSafeContext, wgputoyAtom } from "lib/atoms/wgputoyatoms";
 import { useAtomValue } from "jotai";
-import {useUpdateAtom} from "jotai/utils";
+import {useSetAtom} from "jotai";
 import useShaderSerDe, {useResetShaderData} from "lib/db/serializeshader";
 import {useEffect} from "react";
 
@@ -16,9 +16,9 @@ function toNumber(str) {
 
 export const useDBRouter = () => {
     const reset = useResetShaderData();
-    const setManualReload = useUpdateAtom(manualReloadAtom);
-    const setShaderID = useUpdateAtom(shaderIDAtom);
-    const setDBLoaded = useUpdateAtom(dbLoadedAtom);
+    const setManualReload = useSetAtom(manualReloadAtom);
+    const setShaderID = useSetAtom(shaderIDAtom);
+    const setDBLoaded = useSetAtom(dbLoadedAtom);
     const wgputoy = useAtomValue(wgputoyAtom);
 
     const [get, upsert] = useShaderSerDe();

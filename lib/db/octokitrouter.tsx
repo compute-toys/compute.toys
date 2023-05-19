@@ -9,15 +9,15 @@ import {
     Visibility,
     visibilityAtom
 } from "lib/atoms/atoms";
-import {useUpdateAtom} from "jotai/utils";
+import {useSetAtom} from "jotai";
 import {useEffect} from "react";
 
 export const useOctokitRouter = () => {
-    const setCode = useUpdateAtom(codeAtom);
-    const setManualReload = useUpdateAtom(manualReloadAtom);
-    const setTitle = useUpdateAtom(titleAtom);
-    const setDescription = useUpdateAtom(descriptionAtom);
-    const setVisibility = useUpdateAtom(visibilityAtom);
+    const setCode = useSetAtom(codeAtom);
+    const setManualReload = useSetAtom(manualReloadAtom);
+    const setTitle = useSetAtom(titleAtom);
+    const setDescription = useSetAtom(descriptionAtom);
+    const setVisibility = useSetAtom(visibilityAtom);
 
     const router = useRouter();
     useEffect(() => {

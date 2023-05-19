@@ -1,4 +1,4 @@
-import {useUpdateAtom} from "jotai/utils";
+import {useSetAtom} from "jotai";
 import {useCallback} from "react";
 import {atom} from "jotai";
 import {getDimensions} from "types/canvasdimensions";
@@ -75,7 +75,7 @@ export const shadowCanvasToDataUrl = async (canvasEl: HTMLCanvasElement | false,
 }
 
 export const ShadowCanvas = () => {
-    const setShadowCanvasEl = useUpdateAtom(shadowCanvasElAtom);
+    const setShadowCanvasEl = useSetAtom(shadowCanvasElAtom);
 
     const shadowCanvasRef = useCallback(canvas => {
         if (canvas) {

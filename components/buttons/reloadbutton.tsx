@@ -3,7 +3,7 @@ import {useTheme} from "@mui/material/styles";
 import {PlayArrowRounded, PlayDisabledRounded} from "@mui/icons-material";
 import {useAtomValue} from "jotai";
 import {hotReloadAtom, manualReloadAtom} from "lib/atoms/atoms";
-import {useUpdateAtom} from "jotai/utils";
+import {useSetAtom} from "jotai";
 
 const PlayIcon = () => {
     const hotReload = useAtomValue(hotReloadAtom);
@@ -16,7 +16,7 @@ const PlayIcon = () => {
 
 export const ReloadButton = () => {
     const hotReload = useAtomValue(hotReloadAtom);
-    const setManualReload = useUpdateAtom(manualReloadAtom);
+    const setManualReload = useSetAtom(manualReloadAtom);
 
     const theme = useTheme();
 

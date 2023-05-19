@@ -1,5 +1,5 @@
 import {Fragment, useCallback, useState} from "react";
-import {useUpdateAtom} from "jotai/utils";
+import {useSetAtom} from "jotai";
 import {canvasElAtom, canvasParentElAtom} from "lib/atoms/wgputoyatoms";
 import dynamic from "next/dynamic";
 import {useAtomValue} from "jotai";
@@ -8,8 +8,8 @@ import {getDimensions} from "types/canvasdimensions";
 import {wgpuAvailabilityAtom} from "lib/atoms/atoms";
 
 export const WgpuToyWrapper = (props) => {
-    const setCanvasEl = useUpdateAtom(canvasElAtom);
-    const setWgpuAvailability = useUpdateAtom(wgpuAvailabilityAtom);
+    const setCanvasEl = useSetAtom(canvasElAtom);
+    const setWgpuAvailability = useSetAtom(wgpuAvailabilityAtom);
     const [loaded, setLoaded] = useState(false);
     const canvasParentEl = useAtomValue(canvasParentElAtom);
 

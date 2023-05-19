@@ -2,10 +2,10 @@ import {Button} from "@mui/material";
 import {useTheme} from "@mui/material/styles";
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import {requestFullscreenAtom} from "lib/atoms/atoms";
-import {useUpdateAtom} from "jotai/utils";
+import {useSetAtom} from "jotai";
 
 export const FullscreenButton = () => {
-    const setRequestFullscreen = useUpdateAtom(requestFullscreenAtom);
+    const setRequestFullscreen = useSetAtom(requestFullscreenAtom);
 
     const theme = useTheme();
 

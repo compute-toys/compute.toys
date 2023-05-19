@@ -25,7 +25,7 @@ import UniformSliders from "components/editor/uniformsliders";
 import TexturePicker from "components/editor/texturepicker";
 import EntryPointDisplay from "components/editor/entrypointdisplay";
 import { canvasParentElAtom } from "lib/atoms/wgputoyatoms";
-import { useUpdateAtom } from "jotai/utils";
+import { useSetAtom } from "jotai";
 import { MetadataEditor } from "components/editor/metadataeditor";
 import { manualReloadAtom, saveColorTransitionSignalAtom, vimAtom } from "lib/atoms/atoms";
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
@@ -37,8 +37,8 @@ import VimButton from 'components/buttons/vimbutton';
 import RecordButton from 'components/buttons/recordbutton';
 
 export const Editor = () => {
-    const setCanvasParentEl = useUpdateAtom(canvasParentElAtom);
-    const setManualReload = useUpdateAtom(manualReloadAtom);
+    const setCanvasParentEl = useSetAtom(canvasParentElAtom);
+    const setManualReload = useSetAtom(manualReloadAtom);
 
     const renderParentNodeRef = useCallback((parent) => {
         if (parent) {

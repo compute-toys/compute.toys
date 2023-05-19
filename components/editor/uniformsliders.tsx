@@ -14,7 +14,7 @@ import {
 } from "lib/atoms/atoms";
 import {useAtom} from "jotai";
 import {UniformActiveSettings} from "lib/db/serializeshader";
-import {useUpdateAtom} from "jotai/utils";
+import {useSetAtom} from "jotai";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export const WGPU_CONTEXT_MAX_UNIFORMS = 32;
@@ -95,7 +95,7 @@ const CustomTextField = forwardRef((props: any, inputRef: MutableRefObject<any>)
      */
     const [temporaryFieldValue, setTemporaryFieldValue] = useState("Uniform");
     const [err, setErr] = useState(false);
-    const setManualReload = useUpdateAtom(manualReloadAtom);
+    const setManualReload = useSetAtom(manualReloadAtom);
 
     useEffect(() => {
         setTemporaryFieldValue(props.sliderUniform);
@@ -146,7 +146,7 @@ const UniformSlider = (props: UniformSliderProps) => {
 
     const [sliderVal, setSliderVal] = useState(initFromHost ? props.sliderRefMap.get(props.uuid).getVal() : 0);
     const [sliderUniform, setSliderUniform] = useState(initFromHost ? props.sliderRefMap.get(props.uuid).getUniform() : "uniform_" + props.index);
-    const setSliderUpdateSignal = useUpdateAtom(sliderUpdateSignalAtom);
+    const setSliderUpdateSignal = useSetAtom(sliderUpdateSignalAtom);
 
     let sliderRef : UniformSliderRef;
     const inputRef = useRef<HTMLInputElement>();
@@ -235,7 +235,7 @@ export const UniformSliders = () => {
     const [sliderSerDeNeedsUpdate, setSliderSerDeNeedsUpdate] = useAtom(sliderSerDeNeedsUpdateAtom);
     const [sliderRefMap, setSliderRefMap] = useAtom(sliderRefMapAtom);
 
-    const setManualReload = useUpdateAtom(manualReloadAtom);
+    const setManualReload = useSetAtom(manualReloadAtom);
 
     const sliderRefCallback = (ref) => {
         ref && setSliderRefMap(sliderRefMap.set(ref.getUUID(), ref)); // set returns 'this'

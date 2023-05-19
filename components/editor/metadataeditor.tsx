@@ -27,7 +27,7 @@ import {
     shadowCanvasToDataUrl
 } from "../global/shadowcanvas";
 import {canvasElAtom} from "../../lib/atoms/wgputoyatoms";
-import {useUpdateAtom} from "jotai/utils";
+import {useSetAtom} from "jotai";
 import useShaderSerDe, {UpsertResult} from "../../lib/db/serializeshader";
 import Avatar from "../global/avatar";
 import {useAuth} from "../../lib/db/authcontext";
@@ -50,7 +50,7 @@ export const MetadataEditor = () => {
     const [description, setDescription] = useAtom(descriptionAtom);
     const [visibility, setVisibility] = useAtom(visibilityAtom);
     const shaderID = useAtomValue(shaderIDAtom);
-    const setShaderDataUrlThumb = useUpdateAtom(shaderDataUrlThumbAtom);
+    const setShaderDataUrlThumb = useSetAtom(shaderDataUrlThumbAtom);
     const shadowCanvasEl = useAtomValue(shadowCanvasElAtom);
     const canvasEl = useAtomValue(canvasElAtom);
     const authorProfile = useAtomValue(authorProfileAtom);
