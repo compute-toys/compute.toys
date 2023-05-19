@@ -1,12 +1,12 @@
-import {useEffect, useState} from "react";
-import {useAuth, VIEWS} from "lib/db/authcontext";
-import {Button, Modal, Stack, Typography} from "@mui/material";
-import Box from "@mui/material/Box";
-import {CssTextField, Item, theme} from "theme/theme";
+import { Button, Stack, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import { useAuth } from 'lib/db/authcontext';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { CssTextField, Item, theme } from 'theme/theme';
 
 export const SignUp = () => {
-    const {signUp, confirm} = useAuth();
+    const { signUp, confirm } = useAuth();
     const router = useRouter();
 
     const [usernameEditor, setUsernameEditor] = useState(null);
@@ -32,13 +32,13 @@ export const SignUp = () => {
         bgcolor: 'background.paper',
         border: '2px solid #000',
         boxShadow: 24,
-        p: 4,
+        p: 4
     };
 
     // https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript
     // emails are basically "unvalidatable," we use a simple one that catches almost all cases here
     const validateEmail = () => {
-        if(/^\S+@\S+\.\S+$/.test(emailEditor)) {
+        if (/^\S+@\S+\.\S+$/.test(emailEditor)) {
             setEmailValid(true);
             setErrorMessage(null);
             return true;
@@ -50,21 +50,21 @@ export const SignUp = () => {
     };
 
     const validateUsername = () => {
-        if(/^[A-Za-z0-9]{6,24}$/.test(usernameEditor)) {
+        if (/^[A-Za-z0-9]{6,24}$/.test(usernameEditor)) {
             setUsernameValid(true);
             setErrorMessage(null);
             return true;
         } else {
             setUsernameValid(false);
-            setErrorMessage("Username must be alphanumeric, between 6 and 24 characters");
+            setErrorMessage('Username must be alphanumeric, between 6 and 24 characters');
             return false;
         }
-    }
+    };
 
     const validatePassword = () => {
         if (!password1Editor || !password2Editor || password1Editor !== password2Editor) {
             setPasswordValid(false);
-            setErrorMessage("Passwords must match");
+            setErrorMessage('Passwords must match');
             return false;
         } else {
             const valid = password1Editor.length >= 8;
@@ -73,12 +73,12 @@ export const SignUp = () => {
                 setPasswordValid(true);
                 return true;
             } else {
-                setErrorMessage("Password must be at least 8 characters in length");
+                setErrorMessage('Password must be at least 8 characters in length');
                 setPasswordValid(false);
                 return false;
             }
         }
-    }
+    };
 
     useEffect(() => {
         if (emailValid && passwordValid && usernameValid) {
@@ -86,165 +86,163 @@ export const SignUp = () => {
         } else {
             setAllValid(false);
         }
-    }, [emailValid, usernameValid, passwordValid])
+    }, [emailValid, usernameValid, passwordValid]);
 
     const submit = async () => {
-        const {error} = await signUp(emailEditor, usernameEditor, password1Editor);
+        const { error } = await signUp(emailEditor, usernameEditor, password1Editor);
         if (error) {
-            setErrorMessage(error.message)
+            setErrorMessage(error.message);
             setSuccess(false);
         } else {
             setSuccess(true);
         }
-    }
+    };
 
     const submitConfirmation = async () => {
-        const {error} = await confirm(emailEditor, tokenEditor, "signup");
+        const { error } = await confirm(emailEditor, tokenEditor, 'signup');
         if (error) {
-            setErrorMessage(error.message)
+            setErrorMessage(error.message);
             setConfirmed(false);
         } else {
             router.back();
             setConfirmed(true);
         }
-    }
+    };
 
     return (
-            <Box sx={style}>
-                <Stack spacing={1}>
-                    <Item sx={{color: theme.palette.dracula.orange}}>
-                        <Typography>
-                            {"Sign up to save your shaders"}
-                        </Typography>
-                    </Item>
-                    <Item sx={{color: theme.palette.dracula.purple}}>
+        <Box sx={style}>
+            <Stack spacing={1}>
+                <Item sx={{ color: theme.palette.dracula.orange }}>
+                    <Typography>{'Sign up to save your shaders'}</Typography>
+                </Item>
+                <Item sx={{ color: theme.palette.dracula.purple }}>
+                    <Stack>
+                        <Typography>Email address (required)</Typography>
+                        <Stack direction="row" justifyContent={'center'} sx={{ marginTop: '10px' }}>
+                            <CssTextField
+                                disabled={success}
+                                id="email-login-input"
+                                size={'small'}
+                                value={emailEditor || ''}
+                                onChange={e => {
+                                    setEmailEditor(e.target.value);
+                                }}
+                                onBlur={e => {
+                                    validateEmail();
+                                }}
+                            />
+                        </Stack>
+                    </Stack>
+                </Item>
+                <Item sx={{ color: theme.palette.dracula.cyan }}>
+                    <Stack>
+                        <Typography>Username (required)</Typography>
+                        <Stack direction="row" justifyContent={'center'} sx={{ marginTop: '10px' }}>
+                            <CssTextField
+                                disabled={success}
+                                id="username-login-input"
+                                size={'small'}
+                                value={usernameEditor || ''}
+                                onChange={e => setUsernameEditor(e.target.value)}
+                                onBlur={e => {
+                                    validateUsername();
+                                }}
+                            />
+                        </Stack>
+                    </Stack>
+                </Item>
+                <Item sx={{ color: theme.palette.dracula.pink }}>
+                    <Stack>
+                        <Typography>Password (required)</Typography>
+                        <Stack direction="row" justifyContent={'center'} sx={{ marginTop: '10px' }}>
+                            <CssTextField
+                                disabled={success}
+                                id="password-login-input"
+                                size={'small'}
+                                value={password1Editor || ''}
+                                onChange={e => setPassword1Editor(e.target.value)}
+                                onBlur={e => {
+                                    validatePassword();
+                                }}
+                                type={'password'}
+                            />
+                        </Stack>
+                    </Stack>
+                </Item>
+                <Item sx={{ color: theme.palette.dracula.pink }}>
+                    <Stack>
+                        <Typography>Password again (required)</Typography>
+                        <Stack direction="row" justifyContent={'center'} sx={{ marginTop: '10px' }}>
+                            <CssTextField
+                                disabled={success}
+                                id="password-login-input"
+                                size={'small'}
+                                value={password2Editor || ''}
+                                onChange={e => setPassword2Editor(e.target.value)}
+                                onBlur={e => {
+                                    validatePassword();
+                                }}
+                                type={'password'}
+                            />
+                        </Stack>
+                    </Stack>
+                </Item>
+                {allValid && !success ? (
+                    <Item sx={{ color: theme.palette.dracula.purple }}>
                         <Stack>
-                            <Typography>
-                                Email address (required)
-                            </Typography>
-                            <Stack direction="row" justifyContent={"center"} sx={{marginTop: "10px"}}>
-                                <CssTextField
-                                    disabled={success}
-                                    id="email-login-input"
-                                    size={"small"}
-                                    value={emailEditor || ""}
-                                    onChange={(e) => {setEmailEditor(e.target.value)}}
-                                    onBlur={(e) => {validateEmail()}}
-                                />
-                            </Stack>
+                            <Typography>All done?</Typography>
+                            <Button
+                                onClick={() => submit()}
+                                sx={{ color: theme.palette.dracula.purple }}
+                            >
+                                Submit
+                            </Button>
                         </Stack>
                     </Item>
-                    <Item sx={{color: theme.palette.dracula.cyan}}>
+                ) : null}
+                {errorMessage ? (
+                    <Item sx={{ color: theme.palette.dracula.red }}>
                         <Stack>
-                            <Typography>
-                                Username (required)
-                            </Typography>
-                            <Stack direction="row" justifyContent={"center"} sx={{marginTop: "10px"}}>
-                                <CssTextField
-                                    disabled={success}
-                                    id="username-login-input"
-                                    size={"small"}
-                                    value={usernameEditor || ""}
-                                    onChange={(e) => setUsernameEditor(e.target.value)}
-                                    onBlur={(e) => {validateUsername()}}
-                                />
-                            </Stack>
+                            <Typography>{errorMessage}</Typography>
                         </Stack>
                     </Item>
-                    <Item sx={{color: theme.palette.dracula.pink}}>
+                ) : null}
+                {success ? (
+                    <Item sx={{ color: theme.palette.dracula.cyan }}>
                         <Stack>
-                            <Typography>
-                                Password (required)
-                            </Typography>
-                            <Stack direction="row" justifyContent={"center"} sx={{marginTop: "10px"}}>
+                            <Typography>Enter your email confirmation code</Typography>
+                            <Stack
+                                direction="row"
+                                justifyContent={'center'}
+                                sx={{ marginTop: '10px' }}
+                            >
                                 <CssTextField
-                                    disabled={success}
-                                    id="password-login-input"
-                                    size={"small"}
-                                    value={password1Editor || ""}
-                                    onChange={(e) => setPassword1Editor(e.target.value)}
-                                    onBlur={(e) => {validatePassword()}}
-                                    type={"password"}
+                                    disabled={confirmed}
+                                    id="confirmation-login-input"
+                                    size={'small'}
+                                    value={tokenEditor || ''}
+                                    onChange={e => setTokenEditor(e.target.value)}
                                 />
                             </Stack>
+                            <Button
+                                onClick={() => submitConfirmation()}
+                                sx={{ color: theme.palette.dracula.cyan }}
+                            >
+                                Confirm
+                            </Button>
                         </Stack>
                     </Item>
-                    <Item sx={{color: theme.palette.dracula.pink}}>
+                ) : null}
+                {confirmed ? (
+                    <Item sx={{ color: theme.palette.dracula.green }}>
                         <Stack>
-                            <Typography>
-                                Password again (required)
-                            </Typography>
-                            <Stack direction="row" justifyContent={"center"} sx={{marginTop: "10px"}}>
-                                <CssTextField
-                                    disabled={success}
-                                    id="password-login-input"
-                                    size={"small"}
-                                    value={password2Editor || ""}
-                                    onChange={(e) => setPassword2Editor(e.target.value)}
-                                    onBlur={(e) => {validatePassword()}}
-                                    type={"password"}
-                                />
-                            </Stack>
+                            <Typography>Success!</Typography>
                         </Stack>
                     </Item>
-                    {(allValid && !success) ?
-                        <Item sx={{color: theme.palette.dracula.purple}}>
-                            <Stack>
-                                <Typography>
-                                    All done?
-                                </Typography>
-                                <Button onClick={() => submit()} sx={{color: theme.palette.dracula.purple}}>
-                                    Submit
-                                </Button>
-                            </Stack>
-                        </Item>
-                        : null
-                    }
-                    {errorMessage ?
-                        <Item sx={{color: theme.palette.dracula.red}}>
-                            <Stack>
-                                <Typography>
-                                    {errorMessage}
-                                </Typography>
-                            </Stack>
-                        </Item>
-                        : null
-                    }
-                    {success ?
-                        <Item sx={{color: theme.palette.dracula.cyan}}>
-                            <Stack>
-                                <Typography>
-                                    Enter your email confirmation code
-                                </Typography>
-                                <Stack direction="row" justifyContent={"center"} sx={{marginTop: "10px"}}>
-                                    <CssTextField
-                                        disabled={confirmed}
-                                        id="confirmation-login-input"
-                                        size={"small"}
-                                        value={tokenEditor || ""}
-                                        onChange={(e) => setTokenEditor(e.target.value)}
-                                    />
-                                </Stack>
-                                <Button onClick={() => submitConfirmation()} sx={{color: theme.palette.dracula.cyan}}>
-                                    Confirm
-                                </Button>
-                            </Stack>
-                        </Item>
-                        : null
-                    }
-                    {confirmed ?
-                        <Item sx={{color: theme.palette.dracula.green}}>
-                            <Stack>
-                                <Typography>
-                                    Success!
-                                </Typography>
-                            </Stack>
-                        </Item>
-                        : null
-                    }
-                </Stack>
-            </Box>
+                ) : null}
+            </Stack>
+        </Box>
     );
-}
+};
 
 export default SignUp;

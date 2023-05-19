@@ -5,7 +5,8 @@
     "dev": "next dev",
     "prebuild": "wasm-pack build --release wgpu-compute-toy --out-dir ../lib/wgputoy",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "fmt": "prettier --write **/*.ts **/*.tsx"
   },
   "dependencies": {
     "@emotion/react": "^11.9.0",
@@ -38,6 +39,8 @@
     "eslint": "^8.13.0",
     "eslint-config-next": "^12.1.5",
     "monaco-editor": "^0.33.0",
+    "prettier": "^2.8.8",
+    "prettier-plugin-organize-imports": "^3.2.2",
     "shx": "^0.3.4",
     "typescript": "^4.6.3",
     "vercel": "^29.1.1"

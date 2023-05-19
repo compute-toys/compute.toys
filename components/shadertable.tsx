@@ -8,16 +8,16 @@ import {
     TableSortLabel,
     Toolbar,
     Typography
-} from "@mui/material";
-import {MouseEvent, useState} from "react";
-import Box from "@mui/material/Box";
-import {visuallyHidden} from "@mui/utils";
-import Paper from "@mui/material/Paper";
-import {getFullyQualifiedSupabaseBucketURL} from "lib/util/urlutils";
-import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from "lib/db/supabaseclient";
+} from '@mui/material';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import { visuallyHidden } from '@mui/utils';
+import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
+import { toUnixTime } from 'lib/util/dateutils';
+import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Image from 'next/image';
 import Link from 'next/link';
-import {toDateString, toUnixTime} from "lib/util/dateutils";
+import { MouseEvent, useState } from 'react';
 
 interface Data {
     name: string;
@@ -30,7 +30,7 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
     if (orderBy === 'created_at') {
         // this is slow, preferable to do this upfront
         const time_b = toUnixTime(b[orderBy] as unknown as string);
-        const time_a = toUnixTime(a[orderBy] as unknown as string)
+        const time_a = toUnixTime(a[orderBy] as unknown as string);
         if (time_b < time_a) {
             return -1;
         }
@@ -53,11 +53,8 @@ type Order = 'asc' | 'desc';
 
 function getComparator<Key extends keyof any>(
     order: Order,
-    orderBy: Key,
-): (
-    a: { [key in Key]: number | string },
-    b: { [key in Key]: number | string },
-) => number {
+    orderBy: Key
+): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
     return order === 'desc'
         ? (a, b) => descendingComparator(a, b, orderBy)
         : (a, b) => -descendingComparator(a, b, orderBy);
@@ -110,15 +107,14 @@ interface EnhancedTableProps {
 
 function EnhancedTableHead(props: EnhancedTableProps) {
     const { order, orderBy, onRequestSort } = props;
-    const createSortHandler =
-        (property: keyof Data) => (event: MouseEvent<unknown>) => {
-            onRequestSort(event, property);
-        };
+    const createSortHandler = (property: keyof Data) => (event: MouseEvent<unknown>) => {
+        onRequestSort(event, property);
+    };
 
     return (
         <TableHead>
             <TableRow>
-                {headCells.map((headCell) => (
+                {headCells.map(headCell =>
                     headCell.unsortable ? (
                         <TableCell
                             key={headCell.id}
@@ -143,20 +139,21 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                                 {headCell.label}
                                 {orderBy === headCell.id ? (
                                     <Box component="span" sx={visuallyHidden}>
-                                        {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                        {order === 'desc'
+                                            ? 'sorted descending'
+                                            : 'sorted ascending'}
                                     </Box>
                                 ) : null}
                             </TableSortLabel>
                         </TableCell>
                     )
-                ))}
+                )}
             </TableRow>
         </TableHead>
     );
 }
 
-interface EnhancedTableToolbarProps {
-}
+interface EnhancedTableToolbarProps {}
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
     return (
@@ -164,15 +161,12 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
             sx={{
                 pl: { sm: 2 },
                 pr: { xs: 1, sm: 1 },
-                minHeight: "32px !important",
-                height: "32px",
-                marginTop: "32px"
+                minHeight: '32px !important',
+                height: '32px',
+                marginTop: '32px'
             }}
         >
-            <Typography
-                variant="h6"
-                id="tableTitle"
-            >
+            <Typography variant="h6" id="tableTitle">
                 Shaders
             </Typography>
         </Toolbar>
@@ -182,14 +176,11 @@ const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
 const TABLE_PREVIEW_WIDTH = 48;
 const TABLE_PREVIEW_HEIGHT = 27;
 
-export const ShaderTable = (props) => {
+export const ShaderTable = props => {
     const [order, setOrder] = useState<Order>('asc');
     const [orderBy, setOrderBy] = useState<keyof Data>('created_at');
 
-    const handleRequestSort = (
-        event: MouseEvent<unknown>,
-        property: keyof Data,
-    ) => {
+    const handleRequestSort = (event: MouseEvent<unknown>, property: keyof Data) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
         setOrderBy(property);
@@ -198,33 +189,30 @@ export const ShaderTable = (props) => {
     return (
         <Box sx={{ width: '100%' }}>
             <Paper sx={{ width: '100%', mb: 2 }}>
-                <EnhancedTableToolbar/>
+                <EnhancedTableToolbar />
                 <TableContainer>
-                    <Table
-                        sx={{ minWidth: 750 }}
-                        aria-labelledby="tableTitle"
-                        size={'small'}
-                    >
+                    <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size={'small'}>
                         <EnhancedTableHead
                             order={order}
                             orderBy={orderBy}
                             onRequestSort={handleRequestSort}
                         />
                         <TableBody>
-                            {props.rows.slice().sort(getComparator(order, orderBy))
+                            {props.rows
+                                .slice()
+                                .sort(getComparator(order, orderBy))
                                 .map((row, index) => {
                                     const labelId = `enhanced-table-checkbox-${index}`;
                                     return (
-                                        <TableRow
-                                            hover
-                                            tabIndex={-1}
-                                            key={row.name}
-                                        >
+                                        <TableRow hover tabIndex={-1} key={row.name}>
                                             <TableCell align="left">
                                                 <Image
                                                     height={TABLE_PREVIEW_HEIGHT}
                                                     width={TABLE_PREVIEW_WIDTH}
-                                                    src={getFullyQualifiedSupabaseBucketURL(SUPABASE_SHADERTHUMB_BUCKET_NAME, row.thumb_url)}
+                                                    src={getFullyQualifiedSupabaseBucketURL(
+                                                        SUPABASE_SHADERTHUMB_BUCKET_NAME,
+                                                        row.thumb_url
+                                                    )}
                                                     alt={row.name}
                                                 />
                                             </TableCell>
@@ -248,5 +236,4 @@ export const ShaderTable = (props) => {
             </Paper>
         </Box>
     );
-
-}
+};

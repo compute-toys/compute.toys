@@ -1,34 +1,40 @@
-import {useCallback, useEffect, useState} from "react";
-import {atom, useAtom, useAtomValue} from "jotai";
+import useResizeObserver from '@react-hook/resize-observer';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useTransientAtom } from 'jotai-game';
 import {
-    codeAtom, dbLoadedAtom, entryPointsAtom, float32EnabledAtom, halfResolutionAtom,
+    codeAtom,
+    dbLoadedAtom,
+    entryPointsAtom,
+    float32EnabledAtom,
+    halfResolutionAtom,
+    heightAtom,
     hotReloadAtom,
+    isPlayingAtom,
     loadedTexturesAtom,
     manualReloadAtom,
     parseErrorAtom,
-    playAtom, requestFullscreenAtom,
-    resetAtom, sliderRefMapAtom, sliderUpdateSignalAtom,
-    saveColorTransitionSignalAtom,
-    timerAtom,
-    isPlayingAtom,
-    scaleAtom,
-    widthAtom,
-    heightAtom,
     pauseTimeWhileStillRenderingAtom,
-    recordingAtom
-} from "lib/atoms/atoms";
-import {useSetAtom} from "jotai";
+    playAtom,
+    recordingAtom,
+    requestFullscreenAtom,
+    resetAtom,
+    saveColorTransitionSignalAtom,
+    scaleAtom,
+    sliderRefMapAtom,
+    sliderUpdateSignalAtom,
+    timerAtom,
+    widthAtom
+} from 'lib/atoms/atoms';
 import {
     canvasElAtom,
     canvasParentElAtom,
     isSafeContext,
     wgputoyAtom
-} from "lib/atoms/wgputoyatoms";
-import {useTransientAtom} from "jotai-game";
-import useResizeObserver from "@react-hook/resize-observer";
-import {getDimensions} from "types/canvasdimensions";
-import useAnimationFrame from "use-animation-frame";
-import {theme} from "theme/theme";
+} from 'lib/atoms/wgputoyatoms';
+import { useCallback, useEffect } from 'react';
+import { theme } from 'theme/theme';
+import { getDimensions } from 'types/canvasdimensions';
+import useAnimationFrame from 'use-animation-frame';
 
 const needsInitialResetAtom = atom<boolean>(false);
 
@@ -40,10 +46,11 @@ const needsInitialResetAtom = atom<boolean>(false);
     Note that "exhaustive deps" are deliberately not used in effect hooks
     here, because they will fire off additional effects unnecessarily.
  */
-const WgpuToyController = (props) => {
-
+const WgpuToyController = props => {
     const [play, setPlay] = useAtom(playAtom);
-    const [pauseTimeWhileStillRendering, setPauseTimeWhileStillRendering] = useAtom(pauseTimeWhileStillRenderingAtom);
+    const [pauseTimeWhileStillRendering, setPauseTimeWhileStillRendering] = useAtom(
+        pauseTimeWhileStillRenderingAtom
+    );
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
     const [recording, setRecording] = useAtom(recordingAtom);
@@ -53,10 +60,10 @@ const WgpuToyController = (props) => {
     const [manualReload, setManualReload] = useTransientAtom(manualReloadAtom);
     const [needsInitialReset, setNeedsInitialReset] = useTransientAtom(needsInitialResetAtom);
     const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
-    const [codeHot,] = useTransientAtom(codeAtom);
-    const [dbLoaded,] = useTransientAtom(dbLoadedAtom);
-    const [hotReloadHot,] = useTransientAtom(hotReloadAtom);
-    const [sliderRefMap,] = useTransientAtom(sliderRefMapAtom);
+    const [codeHot] = useTransientAtom(codeAtom);
+    const [dbLoaded] = useTransientAtom(dbLoadedAtom);
+    const [hotReloadHot] = useTransientAtom(hotReloadAtom);
+    const [sliderRefMap] = useTransientAtom(sliderRefMapAtom);
     const [timer, setTimer] = useTransientAtom(timerAtom);
 
     // transient atom can't be used with effect hook, and we want both
@@ -77,7 +84,6 @@ const WgpuToyController = (props) => {
     const [height, setHeight] = useTransientAtom(heightAtom);
     const [scale, setScale] = useTransientAtom(scaleAtom);
 
-
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
     const float32Enabled = useAtomValue(float32EnabledAtom);
     const halfResolution = useAtomValue(halfResolutionAtom);
@@ -97,7 +103,7 @@ const WgpuToyController = (props) => {
         }
     }, []);
 
-    const reloadCallback = useCallback( () => {
+    const reloadCallback = useCallback(() => {
         updateUniforms().then(() => {
             if (isSafeContext(wgputoy)) {
                 wgputoy.preprocess(codeHot()).then(s => {
@@ -109,7 +115,6 @@ const WgpuToyController = (props) => {
                 setManualReload(false);
             }
         });
-
     }, []);
 
     const awaitableReloadCallback = async () => {
@@ -128,26 +133,24 @@ const WgpuToyController = (props) => {
         });
     };
 
-     /*
+    /*
         Handle manual reload in the play callback to handle race conditions
         where manualReload gets set before the controller is loaded, which
         results in the effect hook for manualReload never getting called.
      */
     const liveReloadCallback = useCallback(() => {
         if (needsInitialReset() && dbLoaded()) {
-            awaitableReloadCallback()
-                .then((ready) => {
-                    // we don't want to reset in general except on load
-                    if (ready && parseError().success) {
-                        resetCallback();
-                        setNeedsInitialReset(false);
-                    }
-                })
+            awaitableReloadCallback().then(ready => {
+                // we don't want to reset in general except on load
+                if (ready && parseError().success) {
+                    resetCallback();
+                    setNeedsInitialReset(false);
+                }
+            });
         } else if (dbLoaded() && manualReload()) {
             reloadCallback();
         }
-    }, [])
-
+    }, []);
 
     useAnimationFrame(e => {
         if (isSafeContext(wgputoy)) {
@@ -158,7 +161,7 @@ const WgpuToyController = (props) => {
             } else {
                 liveReloadCallback();
             }
-            if(pauseTimeWhileStillRendering || (sliderUpdateSignal() && !isPlaying())){
+            if (pauseTimeWhileStillRendering || (sliderUpdateSignal() && !isPlaying())) {
                 wgputoy.set_time_delta(e.delta);
                 wgputoy.render();
             } else if (isPlaying() || manualReload()) {
@@ -190,20 +193,20 @@ const WgpuToyController = (props) => {
         }
     }, []);
 
-    const handleSuccess = useCallback((entryPoints) => {
+    const handleSuccess = useCallback(entryPoints => {
         setEntryPoints(entryPoints);
         setParseError(error => ({
-            summary: "",
-            position: {row: 0, col: 0},
+            summary: '',
+            position: { row: 0, col: 0 },
             success: true
         }));
-        if (!hotReloadHot()) setSaveColorTransitionSignal("#24252C");
+        if (!hotReloadHot()) setSaveColorTransitionSignal('#24252C');
     }, []);
 
     const handleError = useCallback((summary: string, row: number, col: number) => {
         setParseError(error => ({
             summary: summary,
-            position: {row: Number(row), col: Number(col)},
+            position: { row: Number(row), col: Number(col) },
             success: false
         }));
         if (!hotReloadHot()) setSaveColorTransitionSignal(theme.palette.dracula.orange);
@@ -213,28 +216,29 @@ const WgpuToyController = (props) => {
 
     const loadTexture = useCallback((index: number, uri: string) => {
         if (isSafeContext(wgputoy)) {
-            fetch(uri).then(
-                response => {
+            fetch(uri)
+                .then(response => {
                     if (!response.ok) {
                         throw new Error('Failed to load image');
                     }
                     return response.blob();
-                }).then(b => b.arrayBuffer()).then(
-                data => {
+                })
+                .then(b => b.arrayBuffer())
+                .then(data => {
                     if (uri.match(/\.hdr/i)) {
-                        wgputoy.load_channel_hdr(index, new Uint8Array(data))
+                        wgputoy.load_channel_hdr(index, new Uint8Array(data));
                     } else {
-                        wgputoy.load_channel(index, new Uint8Array(data))
+                        wgputoy.load_channel(index, new Uint8Array(data));
                     }
-                }
-            ).catch(error => console.error(error));
+                })
+                .catch(error => console.error(error));
         }
     }, []);
 
-    const requestFullscreen = useCallback( () => {
+    const requestFullscreen = useCallback(() => {
         if (isSafeContext(wgputoy) && canvas !== false) {
             if (!document.fullscreenElement) {
-                canvas.requestFullscreen({navigationUI: "hide"});
+                canvas.requestFullscreen({ navigationUI: 'hide' });
             }
         }
     }, []);
@@ -243,11 +247,11 @@ const WgpuToyController = (props) => {
     useEffect(props.onLoad, []);
 
     useEffect(() => {
-        const handleKeyDown = (e) => {
+        const handleKeyDown = e => {
             if (isSafeContext(wgputoy)) {
-                if (typeof(e.keyCode) === 'number') wgputoy.set_keydown(e.keyCode, true);
+                if (typeof e.keyCode === 'number') wgputoy.set_keydown(e.keyCode, true);
             }
-        }
+        };
         if (canvas) {
             canvas.addEventListener('keydown', handleKeyDown);
             return () => canvas.removeEventListener('keydown', handleKeyDown);
@@ -255,81 +259,87 @@ const WgpuToyController = (props) => {
     }, []);
 
     useEffect(() => {
-        const handleKeyUp = (e) => {
+        const handleKeyUp = e => {
             if (isSafeContext(wgputoy)) {
-                if (typeof(e.keyCode) === 'number') wgputoy.set_keydown(e.keyCode, false);
+                if (typeof e.keyCode === 'number') wgputoy.set_keydown(e.keyCode, false);
             }
-        }
+        };
         if (canvas) {
             canvas.addEventListener('keyup', handleKeyUp);
             return () => canvas.removeEventListener('keyup', handleKeyUp);
         }
     }, []);
-    
-    
-    useEffect(()=>{
-        if(!canvas){ 
+
+    useEffect(() => {
+        if (!canvas) {
             return;
         }
-        function createMediaRecorder(canvas: HTMLCanvasElement){
-            let options: any = { audioBitsPerSecond : 0, videoBitsPerSecond : 8000000 }; 
+        function createMediaRecorder(canvas: HTMLCanvasElement) {
+            let options: any = {
+                audioBitsPerSecond: 0,
+                videoBitsPerSecond: 8000000
+            };
 
-            const types = ['video/webm;codecs=h264', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8'];
-            
-            for(let type of types) {
-                if(MediaRecorder.isTypeSupported(type)){
+            const types = [
+                'video/webm;codecs=h264',
+                'video/webm;codecs=vp9',
+                'video/webm;codecs=vp8'
+            ];
+
+            for (let type of types) {
+                if (MediaRecorder.isTypeSupported(type)) {
                     options.mimeType = type;
                 }
             }
-            if(!options.mimeType){
-                options.mimeType = 'video/webm'
+            if (!options.mimeType) {
+                options.mimeType = 'video/webm';
             }
 
             const mediaRecorder = new MediaRecorder(canvas.captureStream(), options);
             const chunks = [];
-            
-            mediaRecorder.ondataavailable = function(e) {
+
+            mediaRecorder.ondataavailable = function (e) {
                 if (e.data.size > 0) {
                     chunks.push(e.data);
                 }
             };
-         
-            mediaRecorder.onstop = function() {
-                setRecording(false)
-                let blob     = new Blob(chunks, {type: "video/mp4"});
+
+            mediaRecorder.onstop = function () {
+                setRecording(false);
+                let blob = new Blob(chunks, { type: 'video/mp4' });
                 chunks.length = 0;
-                const url      = window.URL.createObjectURL(blob);
-                let a        = document.createElement("a");
+                const url = window.URL.createObjectURL(blob);
+                let a = document.createElement('a');
                 document.body.appendChild(a);
                 // @ts-ignore
-                a.style      = "display: none";
-                a.href       = url;
-                a.download   = "shader.mp4";
+                a.style = 'display: none';
+                a.href = url;
+                a.download = 'shader.mp4';
                 a.click();
                 window.URL.revokeObjectURL(url);
-             };
+            };
 
             // @ts-ignore
-            window.mediaRecorder = mediaRecorder
-            return mediaRecorder
+            window.mediaRecorder = mediaRecorder;
+            return mediaRecorder;
         }
-        
+
         // @ts-ignore
-        let mediaRecorder: MediaRecorder = window.mediaRecorder
-        if(recording){
-            if(!mediaRecorder){
-                mediaRecorder = createMediaRecorder(canvas)
+        let mediaRecorder: MediaRecorder = window.mediaRecorder;
+        if (recording) {
+            if (!mediaRecorder) {
+                mediaRecorder = createMediaRecorder(canvas);
             }
-            
-            if (mediaRecorder.state === "inactive") {
+
+            if (mediaRecorder.state === 'inactive') {
                 mediaRecorder.start();
-            }                 
+            }
         } else if (!recording && mediaRecorder) {
-            if (mediaRecorder.state !== "inactive") {
+            if (mediaRecorder.state !== 'inactive') {
                 mediaRecorder.stop();
-            }                 
+            }
         }
-    }, [recording])
+    }, [recording]);
 
     useEffect(() => {
         if (canvas !== false) {
@@ -337,19 +347,20 @@ const WgpuToyController = (props) => {
                 if (isSafeContext(wgputoy)) {
                     wgputoy.set_mouse_pos(
                         e.offsetX / canvas.clientWidth,
-                        e.offsetY / canvas.clientHeight);
-                    if(!isPlaying()){
-                        wgputoy.render()
+                        e.offsetY / canvas.clientHeight
+                    );
+                    if (!isPlaying()) {
+                        wgputoy.render();
                     }
                 }
-            }
+            };
 
             const handleMouseUp = (e: MouseEvent) => {
                 if (isSafeContext(wgputoy)) {
                     wgputoy.set_mouse_click(false);
                     canvas.onmousemove = null;
                 }
-            }
+            };
 
             const handleMouseDown = (e: MouseEvent) => {
                 if (isSafeContext(wgputoy)) {
@@ -357,7 +368,7 @@ const WgpuToyController = (props) => {
                     handleMouseMove(e);
                     canvas.onmousemove = handleMouseMove;
                 }
-            }
+            };
 
             canvas.onmousedown = handleMouseDown;
             canvas.onmouseup = handleMouseUp;
@@ -385,34 +396,44 @@ const WgpuToyController = (props) => {
     useEffect(() => {
         if (play && !isPlaying()) {
             playCallback();
-            setPauseTimeWhileStillRendering(false)
+            setPauseTimeWhileStillRendering(false);
         } else if (!play && isPlaying()) {
             pauseCallback();
         }
-    }, [play, isPlaying()])
+    }, [play, isPlaying()]);
 
     useEffect(() => {
         /*
             only need to handle manual reload effect here for
             special case where we're paused and a reload is called
         */
-        if ((hotReload || (!isPlaying() && manualReload()))) {
+        if (hotReload || (!isPlaying() && manualReload())) {
             reloadCallback();
         }
     }, [code, hotReload, manualReload()]);
 
     const updateResolution = () => {
         if (isSafeContext(wgputoy)) {
-            let dimensions = {x: 0, y: 0}; // dimensions in device (physical) pixels
+            let dimensions = { x: 0, y: 0 }; // dimensions in device (physical) pixels
             if (document.fullscreenElement) {
                 // calculate actual screen resolution, accounting for both zoom and hidpi
                 // https://stackoverflow.com/a/55839671/78204
-                dimensions.x = Math.round(window.screen.width  * window.devicePixelRatio / (window.outerWidth / window.innerWidth) / 80) * 80;
-                dimensions.y = Math.round(window.screen.height * window.devicePixelRatio / (window.outerWidth / window.innerWidth) / 60) * 60;
+                dimensions.x =
+                    Math.round(
+                        (window.screen.width * window.devicePixelRatio) /
+                            (window.outerWidth / window.innerWidth) /
+                            80
+                    ) * 80;
+                dimensions.y =
+                    Math.round(
+                        (window.screen.height * window.devicePixelRatio) /
+                            (window.outerWidth / window.innerWidth) /
+                            60
+                    ) * 60;
             } else {
                 dimensions = getDimensions(parentRef.offsetWidth * window.devicePixelRatio);
             }
-            let newScale = halfResolution ? .5 : 1.;
+            let newScale = halfResolution ? 0.5 : 1;
             if (dimensions.x !== width() || newScale !== scale()) {
                 setWidth(dimensions.x);
                 setHeight(dimensions.y);
@@ -453,21 +474,20 @@ const WgpuToyController = (props) => {
             requestFullscreen();
             setRequestFullscreenSignal(false);
         }
-    }, [requestFullscreenSignal])
+    }, [requestFullscreenSignal]);
 
     useEffect(() => {
         if (isSafeContext(wgputoy)) {
             wgputoy.set_pass_f32(float32Enabled);
             if (dbLoaded()) {
-                awaitableReloadCallback()
-                    .then(() => {
-                        resetCallback();
-                    })
+                awaitableReloadCallback().then(() => {
+                    resetCallback();
+                });
             }
         }
-    }, [float32Enabled])
+    }, [float32Enabled]);
 
     return null;
-}
+};
 
 export default WgpuToyController;
