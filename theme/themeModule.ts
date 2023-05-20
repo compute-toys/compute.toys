@@ -1,5 +1,4 @@
-import { Palette, PaletteOptions, PaletteColor, PaletteColorOptions, SimplePaletteColorOptions, ThemeOptions, Theme } from "@mui/material/styles";
-import {CSSProperties} from "react";
+import { CSSProperties } from 'react';
 
 declare module '@mui/material/styles' {
     export interface Theme {
@@ -15,18 +14,18 @@ declare module '@mui/material/styles' {
     }
 
     export interface DraculaPalette {
-        background:  string;
+        background: string;
         currentLine: string;
-        selection:   string;
-        foreground:  string;
-        comment:     string;
-        cyan:        string;
-        green:       string;
-        orange:      string;
-        pink:        string;
-        purple:      string;
-        red:         string;
-        yellow:      string;
+        selection: string;
+        foreground: string;
+        comment: string;
+        cyan: string;
+        green: string;
+        orange: string;
+        pink: string;
+        purple: string;
+        red: string;
+        yellow: string;
     }
 
     export interface PaletteOptions {
@@ -47,4 +46,3 @@ declare module '@mui/material/styles' {
         };
     }
 }
-

@@ -1,7 +1,7 @@
-import { useAtomValue } from "jotai";
-import { heightAtom, scaleAtom, widthAtom } from "lib/atoms/atoms";
-import { Fragment } from "react";
-import { theme } from "theme/theme";
+import { useAtomValue } from 'jotai';
+import { heightAtom, scaleAtom, widthAtom } from 'lib/atoms/atoms';
+import { Fragment } from 'react';
+import { theme } from 'theme/theme';
 
 export default function Resolution() {
     const width = useAtomValue(widthAtom);
@@ -9,6 +9,13 @@ export default function Resolution() {
     const scale = useAtomValue(scaleAtom);
 
     if (width > 0 && height > 0) {
-        return <Fragment><span style={{color: theme.palette.dracula.foreground}}>{Math.floor(width * scale)}x{Math.floor(height * scale)}</span></Fragment>
+        return (
+            <Fragment>
+                <span style={{ color: theme.palette.dracula.foreground }}>
+                    {Math.floor(width * scale)}x{Math.floor(height * scale)}
+                </span>
+            </Fragment>
+        );
     }
+    return null;
 }
