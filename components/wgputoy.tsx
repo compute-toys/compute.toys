@@ -45,7 +45,11 @@ export const WgpuToyWrapper = props => {
             <canvas
                 ref={canvasRef}
                 id={props.bindID}
-                style={loaded ? {...props.style, ...{ outline: 'none' } } : { position: 'fixed', display: 'hidden' }}
+                style={
+                    loaded
+                        ? { ...props.style, ...{ outline: 'none' } }
+                        : { position: 'fixed', display: 'hidden' }
+                }
                 tabIndex={1}
             />
             {loaded ? null : <Skeleton variant="rectangular" width={dim.x} height={dim.y} />}
