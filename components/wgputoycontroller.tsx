@@ -185,8 +185,6 @@ const WgpuToyController = props => {
 
     const resetCallback = useCallback(() => {
         if (isSafeContext(wgputoy)) {
-            const dimensions = getDimensions(parentRef.offsetWidth); //theoretically dangerous call?
-            setWidth(dimensions.x);
             setTimer(0);
             wgputoy.reset();
             reloadCallback();
@@ -441,13 +439,13 @@ const WgpuToyController = props => {
                 setHeight(dimensions.y);
                 setScale(newScale);
                 wgputoy.resize(dimensions.x, dimensions.y, newScale);
-                if (canvas) {
-                    canvas.width = dimensions.x;
-                    canvas.height = dimensions.y;
-                    canvas.style.width = `${dimensions.x / window.devicePixelRatio}px`;
-                    canvas.style.height = `${dimensions.y / window.devicePixelRatio}px`;
-                }
                 reloadCallback();
+            }
+            if (canvas) {
+                canvas.width = dimensions.x;
+                canvas.height = dimensions.y;
+                canvas.style.width = `${dimensions.x / window.devicePixelRatio}px`;
+                canvas.style.height = `${dimensions.y / window.devicePixelRatio}px`;
             }
         }
     };
