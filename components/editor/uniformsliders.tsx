@@ -1,21 +1,36 @@
-import {ChangeEvent, FocusEvent, forwardRef, MutableRefObject, useEffect, useRef, useState} from "react";
-import {styled, useTheme} from "@mui/material/styles";
-import {Accordion, AccordionDetails, AccordionSummary, Button, Slider, Stack, TextField} from "@mui/material";
-import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
-import Box from "@mui/material/Box";
-import {getRainbowColor, theme} from "theme/theme";
-import { v4 as UUID } from 'uuid';
+import ClearIcon from '@mui/icons-material/Clear';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Button,
+    Slider,
+    Stack,
+    TextField
+} from '@mui/material';
+import Box from '@mui/material/Box';
+import { styled, useTheme } from '@mui/material/styles';
+import { useAtom, useSetAtom } from 'jotai';
 import {
     manualReloadAtom,
     sliderRefMapAtom,
     sliderSerDeNeedsUpdateAtom,
     sliderUpdateSignalAtom
-} from "lib/atoms/atoms";
-import {useAtom} from "jotai";
-import {UniformActiveSettings} from "lib/db/serializeshader";
-import {useSetAtom} from "jotai";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+} from 'lib/atoms/atoms';
+import { UniformActiveSettings } from 'lib/db/serializeshader';
+import {
+    ChangeEvent,
+    FocusEvent,
+    forwardRef,
+    MutableRefObject,
+    useEffect,
+    useRef,
+    useState
+} from 'react';
+import { getRainbowColor, theme } from 'theme/theme';
+import { v4 as UUID } from 'uuid';
 
 export const WGPU_CONTEXT_MAX_UNIFORMS = 32;
 
@@ -26,19 +41,19 @@ export interface UniformSliderRef {
 }
 
 interface UniformSliderProps {
-    setRefCallback: (r: UniformSliderRef) => void
-    deleteCallback: (uuid: string) => void
-    uuid: string
-    index: number
-    sliderRefMap: Map<string,UniformSliderRef>
+    setRefCallback: (r: UniformSliderRef) => void;
+    deleteCallback: (uuid: string) => void;
+    uuid: string;
+    index: number;
+    sliderRefMap: Map<string, UniformSliderRef>;
 }
 
 export const fromUniformActiveSettings = (sliderSerDeArray: Array<UniformActiveSettings>) => {
-    let sliderRefMap = new Map<string, UniformSliderRef>();
+    const sliderRefMap = new Map<string, UniformSliderRef>();
 
     sliderSerDeArray.forEach((slider: UniformActiveSettings) => {
         const uuid = UUID();
-        const sliderRef : UniformSliderRef = {
+        const sliderRef: UniformSliderRef = {
             getVal: () => {
                 return slider.value;
             },
@@ -53,106 +68,113 @@ export const fromUniformActiveSettings = (sliderSerDeArray: Array<UniformActiveS
     });
 
     return sliderRefMap;
-
-}
+};
 
 // needs float: left to avoid drifting away from the absolute-positioned label
 export const StyledTextField = styled(TextField)({
     '& .MuiOutlinedInput-root': {
         '& fieldset': {
-            borderColor: theme.palette.dracula.currentLine,
+            borderColor: theme.palette.dracula.currentLine
         },
         '&:hover fieldset': {
-            borderColor: theme.palette.dracula.currentLine,
+            borderColor: theme.palette.dracula.currentLine
         },
         '&.Mui-focused fieldset': {
-            borderColor: theme.palette.dracula.foreground,
+            borderColor: theme.palette.dracula.foreground
         },
         '&.Mui-focused input': {
-            color: theme.palette.dracula.foreground,
+            color: theme.palette.dracula.foreground
         },
         '& input:disabled': {
             color: theme.status.disabled,
             WebkitTextFillColor: theme.status.disabled
         },
         float: 'left'
-    },
+    }
 });
 
-const validate = (text: string, this_uuid: string, sliderRefMap: Map<string,UniformSliderRef>) => {
-    let matched = text.match(/^[a-zA-Z][a-zA-Z0-9_]*$/);
-    const nameValid = (matched && matched.length === 1);
+const validate = (text: string, this_uuid: string, sliderRefMap: Map<string, UniformSliderRef>) => {
+    const matched = text.match(/^[a-zA-Z][a-zA-Z0-9_]*$/);
+    const nameValid = matched && matched.length === 1;
     const foundDuplicate = [...sliderRefMap.keys()].find((uuid, index) => {
-        return this_uuid !== uuid && sliderRefMap.get(uuid).getUniform() === text
+        return this_uuid !== uuid && sliderRefMap.get(uuid).getUniform() === text;
     });
     return nameValid && !foundDuplicate;
-}
+};
 
 const CustomTextField = forwardRef((props: any, inputRef: MutableRefObject<any>) => {
     /*
         Avoid re-rendering the containing (parent) component
         by storing in-progress edits in local state
      */
-    const [temporaryFieldValue, setTemporaryFieldValue] = useState("Uniform");
+    const [temporaryFieldValue, setTemporaryFieldValue] = useState('Uniform');
     const [err, setErr] = useState(false);
     const setManualReload = useSetAtom(manualReloadAtom);
 
     useEffect(() => {
         setTemporaryFieldValue(props.sliderUniform);
-    },[props.sliderUniform]);
+    }, [props.sliderUniform]);
 
-    const onEnterKey = (event) => {
-        if(event.keyCode == 13){ // enter
+    const onEnterKey = event => {
+        if (event.keyCode == 13) {
+            // enter
             inputRef.current.blur();
         }
     };
 
-    return (<StyledTextField
-        error={err}
-        id="outlined-name"
-        aria-label={"Uniform name input"}
-        sx={{
-            display: 'table-cell',
-            gridRow: '1',
-            gridColumn: 'span 3',
-            verticalAlign: 'middle',
-            input: {color: getRainbowColor(props.index)},
-            label: {color: getRainbowColor(props.index)},
-        }}
-        inputRef={inputRef}
-        size="small"
-        label={err ? "Invalid" : "Name"}
-        value={temporaryFieldValue}
-        onKeyDown={onEnterKey}
-        onChange={(event: ChangeEvent<HTMLInputElement>) => {setTemporaryFieldValue(event.target.value)}}
-        onBlur={ (event: FocusEvent<HTMLInputElement>) => {
-            if (validate(event.target.value, props.uuid, props.sliderRefMap)) {
-                props.setSliderUniform(event.target.value);
-                setManualReload(true);
-                setErr(false);
-            } else {
-                setErr(true);
-            }
-        }}
-    />);
+    return (
+        <StyledTextField
+            error={err}
+            id="outlined-name"
+            aria-label={'Uniform name input'}
+            sx={{
+                display: 'table-cell',
+                gridRow: '1',
+                gridColumn: 'span 3',
+                verticalAlign: 'middle',
+                input: { color: getRainbowColor(props.index) },
+                label: { color: getRainbowColor(props.index) }
+            }}
+            inputRef={inputRef}
+            size="small"
+            label={err ? 'Invalid' : 'Name'}
+            value={temporaryFieldValue}
+            onKeyDown={onEnterKey}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                setTemporaryFieldValue(event.target.value);
+            }}
+            onBlur={(event: FocusEvent<HTMLInputElement>) => {
+                if (validate(event.target.value, props.uuid, props.sliderRefMap)) {
+                    props.setSliderUniform(event.target.value);
+                    setManualReload(true);
+                    setErr(false);
+                } else {
+                    setErr(true);
+                }
+            }}
+        />
+    );
 });
 
-CustomTextField.displayName = "CustomTextField";
+CustomTextField.displayName = 'CustomTextField';
 
 const UniformSlider = (props: UniformSliderProps) => {
-
     //const initFromHost = props.sliderSerDeArray[props.index] !== undefined;
     const initFromHost = props.sliderRefMap.has(props.uuid) && props.sliderRefMap.get(props.uuid);
 
-    const [sliderVal, setSliderVal] = useState(initFromHost ? props.sliderRefMap.get(props.uuid).getVal() : 0);
-    const [sliderUniform, setSliderUniform] = useState(initFromHost ? props.sliderRefMap.get(props.uuid).getUniform() : "uniform_" + props.index);
+    const [sliderVal, setSliderVal] = useState(
+        initFromHost ? props.sliderRefMap.get(props.uuid).getVal() : 0
+    );
+    const [sliderUniform, setSliderUniform] = useState(
+        initFromHost ? props.sliderRefMap.get(props.uuid).getUniform() : 'uniform_' + props.index
+    );
     const setSliderUpdateSignal = useSetAtom(sliderUpdateSignalAtom);
 
-    let sliderRef : UniformSliderRef;
+    let sliderRef: UniformSliderRef;
     const inputRef = useRef<HTMLInputElement>();
 
     // TODO: check if dependency array can be more restrictive here
-    useEffect( () => {
+    useEffect(() => {
         sliderRef = {
             getVal: () => {
                 return sliderVal;
@@ -189,7 +211,7 @@ const UniformSlider = (props: UniformSliderProps) => {
                 sliderRefMap={props.sliderRefMap}
             />
             <Slider
-                aria-label={sliderUniform + " slider"}
+                aria-label={sliderUniform + ' slider'}
                 sx={{
                     display: 'table-cell',
                     gridRow: '1',
@@ -204,28 +226,33 @@ const UniformSlider = (props: UniformSliderProps) => {
                 max={1.0}
                 valueLabelDisplay="auto"
                 value={sliderVal}
-                onChange={ (event: Event, newValue: number | number[]) => {
-                    setSliderVal( newValue as number)
+                onChange={(event: Event, newValue: number | number[]) => {
+                    setSliderVal(newValue as number);
                 }}
             />
             <Button
-                aria-label={"Delete " + sliderUniform + " slider"}
+                aria-label={'Delete ' + sliderUniform + ' slider'}
                 sx={{
-                    display: 'table-cell', gridRow: '1', gridColumn: 'span 1',
+                    display: 'table-cell',
+                    gridRow: '1',
+                    gridColumn: 'span 1',
                     color: theme.palette.dracula.foreground,
-                    verticalAlign: 'middle', lineHeight: '0',
-                    padding: '0px', marginLeft: '2em', marginRight: '8px',
+                    verticalAlign: 'middle',
+                    lineHeight: '0',
+                    padding: '0px',
+                    marginLeft: '2em',
+                    marginRight: '8px',
                     minWidth: '32px'
                 }}
                 onClick={() => {
                     props.deleteCallback(props.uuid);
-                }}>
-                <ClearIcon/>
+                }}
+            >
+                <ClearIcon />
             </Button>
         </Box>
     );
 };
-
 
 export const UniformSliders = () => {
     const theme = useTheme();
@@ -237,7 +264,7 @@ export const UniformSliders = () => {
 
     const setManualReload = useSetAtom(manualReloadAtom);
 
-    const sliderRefCallback = (ref) => {
+    const sliderRefCallback = ref => {
         ref && setSliderRefMap(sliderRefMap.set(ref.getUUID(), ref)); // set returns 'this'
     };
 
@@ -247,20 +274,23 @@ export const UniformSliders = () => {
         on the nested data here anyway, to avoid re-rendering everything
         whenever one slider changes
      */
-    const deleteCallback = (uuid) => {
-        setSliderRefMap( sliderArrayRefs => {sliderArrayRefs.delete(uuid); return sliderArrayRefs} );
+    const deleteCallback = uuid => {
+        setSliderRefMap(sliderArrayRefs => {
+            sliderArrayRefs.delete(uuid);
+            return sliderArrayRefs;
+        });
         setSliderCount(sliderCount - 1);
         // recompile with new prelude
         setManualReload(true);
     };
 
-    const addCallback = (uuid) => {
-        const sliderRef : UniformSliderRef = {
+    const addCallback = uuid => {
+        const sliderRef: UniformSliderRef = {
             getVal: () => {
                 return 0;
             },
             getUniform: () => {
-                return "uniform_" + (sliderCount + 1);
+                return 'uniform_' + (sliderCount + 1);
             },
             getUUID: () => {
                 return uuid;
@@ -280,39 +310,64 @@ export const UniformSliders = () => {
         }
     });
 
-    const uniformTitle = (sliderCount > 0) ?
-        <span style={{color: theme.palette.dracula.foreground}}>{`Uniforms [${sliderCount}]`}</span>
-        :
-        <span style={{color: theme.status.disabled}}>Uniforms</span>;
+    const uniformTitle =
+        sliderCount > 0 ? (
+            <span
+                style={{ color: theme.palette.dracula.foreground }}
+            >{`Uniforms [${sliderCount}]`}</span>
+        ) : (
+            <span style={{ color: theme.status.disabled }}>Uniforms</span>
+        );
 
     return (
-        <Accordion sx={{color: theme.palette.dracula.foreground, backgroundColor: theme.palette.primary.darker}}>
+        <Accordion
+            sx={{
+                color: theme.palette.dracula.foreground,
+                backgroundColor: theme.palette.primary.darker
+            }}
+        >
             <AccordionSummary
-                sx={{fontSize: 14}}
-                expandIcon={<ExpandMoreIcon sx={{color: theme.palette.dracula.foreground}}/>}
+                sx={{ fontSize: 14 }}
+                expandIcon={<ExpandMoreIcon sx={{ color: theme.palette.dracula.foreground }} />}
                 aria-controls="uniform-accordion"
                 id="uniform-accordion"
-            >{uniformTitle}</AccordionSummary>
-            <AccordionDetails sx={{padding: "0px 2px 8px"}}>
+            >
+                {uniformTitle}
+            </AccordionSummary>
+            <AccordionDetails sx={{ padding: '0px 2px 8px' }}>
                 <Box sx={{ maxHeight: '30vh', overflow: 'auto' }}>
-                    <Stack spacing={2} direction="column" sx={{ mb: 1 }} alignItems="center" marginTop="32px">
+                    <Stack
+                        spacing={2}
+                        direction="column"
+                        sx={{ mb: 1 }}
+                        alignItems="center"
+                        marginTop="32px"
+                    >
                         {[...sliderRefMap.keys()].map((uuid, index) => (
-                            <UniformSlider key={uuid} uuid={uuid} index={index} sliderRefMap={sliderRefMap} setRefCallback={sliderRefCallback} deleteCallback={deleteCallback}/>
+                            <UniformSlider
+                                key={uuid}
+                                uuid={uuid}
+                                index={index}
+                                sliderRefMap={sliderRefMap}
+                                setRefCallback={sliderRefCallback}
+                                deleteCallback={deleteCallback}
+                            />
                         ))}
                     </Stack>
-                    {sliderCount < WGPU_CONTEXT_MAX_UNIFORMS ?
-                        <Button sx={{color: theme.palette.primary.light, padding: "0px"}}
-                                onClick={() => {
-                                    addCallback(UUID());
-                                }}>
-                            <AddIcon/>
+                    {sliderCount < WGPU_CONTEXT_MAX_UNIFORMS ? (
+                        <Button
+                            sx={{ color: theme.palette.primary.light, padding: '0px' }}
+                            onClick={() => {
+                                addCallback(UUID());
+                            }}
+                        >
+                            <AddIcon />
                         </Button>
-                    : null
-                    }
+                    ) : null}
                 </Box>
             </AccordionDetails>
         </Accordion>
     );
-}
+};
 
 export default UniformSliders;

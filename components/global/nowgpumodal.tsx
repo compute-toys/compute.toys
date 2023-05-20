@@ -1,10 +1,10 @@
-import {theme} from "theme/theme";
-import {Fragment, useEffect, useState} from "react";
-import Box from "@mui/material/Box";
-import {Modal, Stack, Typography} from "@mui/material";
-import Logo from "./logo";
-import {wgpuAvailabilityAtom} from "lib/atoms/atoms";
-import {useAtomValue} from "jotai";
+import { Modal, Stack, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import { useAtomValue } from 'jotai';
+import { wgpuAvailabilityAtom } from 'lib/atoms/atoms';
+import { Fragment, useEffect, useState } from 'react';
+import { theme } from 'theme/theme';
+import Logo from './logo';
 
 const modalStyle = {
     position: 'absolute',
@@ -15,7 +15,7 @@ const modalStyle = {
     bgcolor: 'background.paper',
     border: '2px solid #000',
     boxShadow: 24,
-    p: 4,
+    p: 4
 };
 
 export default function NoWgpuModal(props) {
@@ -28,19 +28,20 @@ export default function NoWgpuModal(props) {
         if (wgpuAvailability === 'unavailable') {
             handleOpen();
         }
-    }, [wgpuAvailability])
+    }, [wgpuAvailability]);
 
     return (
         <Fragment>
-            <Modal
-                open={open}
-                onClose={handleClose}
-            >
+            <Modal open={open} onClose={handleClose}>
                 <Box sx={modalStyle}>
                     <Stack color={theme.palette.primary.contrastText} spacing={2}>
                         <Typography>WebGPU support was not detected in your browser.</Typography>
-                        <Typography>For information on how to set up your browser to run WebGPU code,</Typography>
-                        <Typography>please see the instructions linked on the <Logo/> homepage.</Typography>
+                        <Typography>
+                            For information on how to set up your browser to run WebGPU code,
+                        </Typography>
+                        <Typography>
+                            please see the instructions linked on the <Logo /> homepage.
+                        </Typography>
                     </Stack>
                 </Box>
             </Modal>

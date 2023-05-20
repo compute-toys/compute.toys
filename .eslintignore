@@ -1,0 +1,3 @@
+build/
+lib/wgputoy
+types/supabase.ts

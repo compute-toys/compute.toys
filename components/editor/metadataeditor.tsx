@@ -1,5 +1,3 @@
-import {ChangeEvent, useEffect} from "react";
-import {CssTextField, theme} from "theme/theme";
 import {
     Button,
     FormControl,
@@ -10,39 +8,37 @@ import {
     Select,
     Stack,
     Typography
-} from "@mui/material";
-import {useAtom, useAtomValue} from "jotai";
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
     authorProfileAtom,
     descriptionAtom,
     shaderDataUrlThumbAtom,
+    shaderIDAtom,
     titleAtom,
     Visibility,
-    visibilityAtom,
-    shaderIDAtom,
-} from "lib/atoms/atoms";
-import {styled} from "@mui/material/styles";
-import {
-    shadowCanvasElAtom,
-    shadowCanvasToDataUrl
-} from "../global/shadowcanvas";
-import {canvasElAtom} from "../../lib/atoms/wgputoyatoms";
-import {useSetAtom} from "jotai";
-import useShaderSerDe, {UpsertResult} from "../../lib/db/serializeshader";
-import Avatar from "../global/avatar";
-import {useAuth} from "../../lib/db/authcontext";
-import {useRouter} from "next/router";
+    visibilityAtom
+} from 'lib/atoms/atoms';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { ChangeEvent, useEffect } from 'react';
+import { CssTextField, theme } from 'theme/theme';
+import { canvasElAtom } from '../../lib/atoms/wgputoyatoms';
+import { useAuth } from '../../lib/db/authcontext';
+import useShaderSerDe, { UpsertResult } from '../../lib/db/serializeshader';
+import Avatar from '../global/avatar';
+import { shadowCanvasElAtom, shadowCanvasToDataUrl } from '../global/shadowcanvas';
 
 const VisibilityInput = styled(InputBase)(({ theme }) => ({
     '& .MuiInputBase-input': {
         paddingTop: '14px',
-        paddingLeft: '14px',
+        paddingLeft: '14px'
     },
     '& .MuiSelect-icon': {
         color: theme.palette.dracula.foreground,
         marginTop: '5px'
-    },
+    }
 }));
 
 export const MetadataEditor = () => {
@@ -55,7 +51,7 @@ export const MetadataEditor = () => {
     const canvasEl = useAtomValue(canvasElAtom);
     const authorProfile = useAtomValue(authorProfileAtom);
     const [getFromHost, upsertToHost] = useShaderSerDe();
-    const {user} = useAuth();
+    const { user } = useAuth();
     const router = useRouter();
 
     //TODO: not the best place for this logic
@@ -69,7 +65,7 @@ export const MetadataEditor = () => {
         if (result.success && result.needsRedirect) {
             router.push(`/view/${result.id}`);
         }
-    }
+    };
 
     // disables frontend controls if not author (backend will reject changes otherwise)
     const userIsAuthor = () => {
@@ -80,7 +76,7 @@ export const MetadataEditor = () => {
             }
         }
         return false;
-    }
+    };
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -88,38 +84,48 @@ export const MetadataEditor = () => {
                 e.preventDefault();
                 upsertShader(false);
             }
-        }
+        };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, [upsertShader]);
 
     return (
-        <Grid container spacing={2} sx={{paddingX: "22px", paddingY: "10px"}}>
+        <Grid container spacing={2} sx={{ paddingX: '22px', paddingY: '10px' }}>
             <Grid item xs={8}>
-                {userIsAuthor() ?
+                {userIsAuthor() ? (
                     <CssTextField
                         fullWidth
                         id="metadata-title"
-                        aria-label={"Title input"}
+                        aria-label={'Title input'}
                         size="medium"
-                        label={"Title"}
+                        label={'Title'}
                         value={title}
-                        onChange={(event: ChangeEvent<HTMLInputElement>) => {setTitle(event.target.value)}}
-                        sx={{
-                            input: {color: theme.palette.dracula.cyan},
-                            label: {color: theme.palette.dracula.cyan},
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                            setTitle(event.target.value);
                         }}
-                        inputProps={{style: {fontSize: "1.25em", height: "1.0em", color: theme.palette.dracula.cyan}}}
+                        sx={{
+                            input: { color: theme.palette.dracula.cyan },
+                            label: { color: theme.palette.dracula.cyan }
+                        }}
+                        inputProps={{
+                            style: {
+                                fontSize: '1.25em',
+                                height: '1.0em',
+                                color: theme.palette.dracula.cyan
+                            }
+                        }}
                     />
-                :
-                    <Typography variant="h6" sx={{fontWeight: '400', color: theme.palette.dracula.cyan}}>
+                ) : (
+                    <Typography
+                        variant="h6"
+                        sx={{ fontWeight: '400', color: theme.palette.dracula.cyan }}
+                    >
                         {title}
                     </Typography>
-                }
-
+                )}
             </Grid>
             <Grid item xs={4}>
-                {userIsAuthor() ?
+                {userIsAuthor() ? (
                     <FormControl fullWidth>
                         <InputLabel id="visibility-select-input-label">Visibility</InputLabel>
                         <Select
@@ -127,72 +133,96 @@ export const MetadataEditor = () => {
                             id="metadata-visibility-select"
                             value={visibility}
                             label="Visibility"
-                            input={<VisibilityInput/>}
-                            onChange={(event: ChangeEvent<HTMLInputElement>) => {setVisibility(event.target.value as Visibility)}}
+                            input={<VisibilityInput />}
+                            onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                setVisibility(event.target.value as Visibility);
+                            }}
                         >
                             <MenuItem value={'private'}>private</MenuItem>
                             <MenuItem value={'unlisted'}>unlisted</MenuItem>
                             <MenuItem value={'public'}>public</MenuItem>
                         </Select>
                     </FormControl>
-                    : null }
+                ) : null}
             </Grid>
             <Grid item xs={12}>
-                {userIsAuthor() ?
+                {userIsAuthor() ? (
                     <CssTextField
                         multiline
                         fullWidth
                         id="metadata-description"
-                        aria-label={"Description input"}
+                        aria-label={'Description input'}
                         size="small"
-                        label={"Description"}
+                        label={'Description'}
                         value={description}
                         rows={3}
                         onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                            setDescription(event.target.value)
+                            setDescription(event.target.value);
                         }}
                         sx={{
-                            input: {color: theme.palette.dracula.orange},
-                            label: {color: theme.palette.dracula.orange}
+                            input: { color: theme.palette.dracula.orange },
+                            label: { color: theme.palette.dracula.orange }
                         }}
                     />
-                    :
-                    <Typography variant="body1" sx={{fontWeight: '300', color: theme.palette.dracula.orange}}>
+                ) : (
+                    <Typography
+                        variant="body1"
+                        sx={{ fontWeight: '300', color: theme.palette.dracula.orange }}
+                    >
                         {description}
                     </Typography>
-                }
+                )}
             </Grid>
             <Grid item xs={8} alignItems="center">
-                {authorProfile !== false ?
+                {authorProfile !== false ? (
                     <Stack direction="row" alignItems="center" justifyContent="left" spacing={1}>
-                        <Avatar url={authorProfile.avatar_url ?? null} size={24} displayOnNull={false}/>
+                        <Avatar
+                            url={authorProfile.avatar_url ?? null}
+                            size={24}
+                            displayOnNull={false}
+                        />
                         <Typography color={theme.palette.dracula.green}>
-                            {authorProfile.username ? <Link href={`/profile/${authorProfile.username}`}>{authorProfile.username}</Link> : null}
+                            {authorProfile.username ? (
+                                <Link href={`/profile/${authorProfile.username}`}>
+                                    {authorProfile.username}
+                                </Link>
+                            ) : null}
                         </Typography>
                     </Stack>
-                    : null
-                }
+                ) : null}
             </Grid>
             <Grid item xs={4} alignItems="center" textAlign="right">
-                {shaderID && user ?
-                    <Button sx={{padding: "1", color: theme.palette.dracula.green, border: `1px solid ${theme.palette.dracula.currentLine}`}}
-                            onClick={async () => {
-                                setTitle(`Fork of ${title}`.substring(0, 30));
-                                setDescription(`Forked from https://compute.toys/view/${shaderID}`);
-                                setVisibility('private');
-                                upsertShader(true);
-                            }}>
+                {shaderID && user ? (
+                    <Button
+                        sx={{
+                            padding: '1',
+                            color: theme.palette.dracula.green,
+                            border: `1px solid ${theme.palette.dracula.currentLine}`
+                        }}
+                        onClick={async () => {
+                            setTitle(`Fork of ${title}`.substring(0, 30));
+                            setDescription(`Forked from https://compute.toys/view/${shaderID}`);
+                            setVisibility('private');
+                            upsertShader(true);
+                        }}
+                    >
                         Fork
                     </Button>
-                    : null }
-                {userIsAuthor() ?
-                    <Button sx={{padding: "1", color: theme.palette.dracula.green, border: `1px solid ${theme.palette.dracula.currentLine}`}}
-                            onClick={async () => {
-                                upsertShader(false);
-                            }}>
+                ) : null}
+                {userIsAuthor() ? (
+                    <Button
+                        sx={{
+                            padding: '1',
+                            color: theme.palette.dracula.green,
+                            border: `1px solid ${theme.palette.dracula.currentLine}`
+                        }}
+                        onClick={async () => {
+                            upsertShader(false);
+                        }}
+                    >
                         Save
                     </Button>
-                    : null }
+                ) : null}
             </Grid>
         </Grid>
     );

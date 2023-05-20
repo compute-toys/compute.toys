@@ -1,7 +1,7 @@
 // https://www.misha.wtf/blog/nextjs-supabase-auth
-import {createContext, useContext, useEffect, useState} from 'react';
-import {supabase, SUPABASE_PROFILE_TABLE_NAME} from "lib/db/supabaseclient";
-import {AuthChangeEvent, Session, User} from "@supabase/gotrue-js";
+import { AuthChangeEvent, Session, User } from '@supabase/gotrue-js';
+import { supabase, SUPABASE_PROFILE_TABLE_NAME } from 'lib/db/supabaseclient';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 export const EVENTS = {
     SIGNED_IN: 'SIGNED_IN',
@@ -11,42 +11,47 @@ export const EVENTS = {
 };
 
 export interface ProfileData {
-    username: string | false,
-    avatar: string | false
+    username: string | false;
+    avatar: string | false;
 }
-
-
 
 // obviously redundant but typescript will treat reference to
 // VIEWS as a namespace here and fail to find it
 export type View = 'logged_in' | 'logged_out';
-export type EmailOTPType = "signup" | "recovery";
+export type EmailOTPType = 'signup' | 'recovery';
 
 export const VIEWS = {
     LOGGED_IN: 'logged_in' as View,
     LOGGED_OUT: 'logged_out' as View
 };
 
-export type AuthLogIn = (email: string, password: string) => Promise<{error: any}>;
-export type AuthLogOut = () => Promise<{error: any}>;
-export type AuthSignUp = (email: string, username: string, password: string) => Promise<{error: any}>;
-export type AuthConfirm = (email: string, token: string, type: EmailOTPType) => Promise<{error: any}>;
-export type AuthResetPassword = (email: string) => Promise<{error: any}>;
-export type AuthUpdatePassword = (password: string) => Promise<{error: any}>;
-
+export type AuthLogIn = (email: string, password: string) => Promise<{ error: any }>;
+export type AuthLogOut = () => Promise<{ error: any }>;
+export type AuthSignUp = (
+    email: string,
+    username: string,
+    password: string
+) => Promise<{ error: any }>;
+export type AuthConfirm = (
+    email: string,
+    token: string,
+    type: EmailOTPType
+) => Promise<{ error: any }>;
+export type AuthResetPassword = (email: string) => Promise<{ error: any }>;
+export type AuthUpdatePassword = (password: string) => Promise<{ error: any }>;
 
 // TODO: better error types
 export interface AuthContextInterface {
-    user: User | null,
-    view: View,
-    session: Session | null,
-    profile: ProfileData,
-    logIn: AuthLogIn,
-    logOut: AuthLogOut,
-    signUp: AuthSignUp,
-    confirm: AuthConfirm,
-    resetPassword: AuthResetPassword,
-    updatePassword: AuthUpdatePassword
+    user: User | null;
+    view: View;
+    session: Session | null;
+    profile: ProfileData;
+    logIn: AuthLogIn;
+    logOut: AuthLogOut;
+    signUp: AuthSignUp;
+    confirm: AuthConfirm;
+    resetPassword: AuthResetPassword;
+    updatePassword: AuthUpdatePassword;
 }
 
 export const AuthContext = createContext<AuthContextInterface>(undefined);
@@ -56,7 +61,7 @@ async function updateSupabaseCookie(event: AuthChangeEvent, session: Session | n
         method: 'POST',
         headers: new Headers({ 'Content-Type': 'application/json' }),
         credentials: 'same-origin',
-        body: JSON.stringify({ event, session }),
+        body: JSON.stringify({ event, session })
     });
 }
 
@@ -65,7 +70,7 @@ async function logInApi(username: string, password: string) {
         method: 'POST',
         headers: new Headers({ 'Content-Type': 'application/json' }),
         credentials: 'same-origin',
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username, password })
     });
 }
 
@@ -74,7 +79,7 @@ async function signUpApi(email: string, username: string, password: string) {
         method: 'POST',
         headers: new Headers({ 'Content-Type': 'application/json' }),
         credentials: 'same-origin',
-        body: JSON.stringify({ email, username, password }),
+        body: JSON.stringify({ email, username, password })
     });
 }
 
@@ -83,113 +88,131 @@ async function confirmApi(email: string, token: string, type: EmailOTPType) {
         method: 'POST',
         headers: new Headers({ 'Content-Type': 'application/json' }),
         credentials: 'same-origin',
-        body: JSON.stringify({ email, token, type }),
+        body: JSON.stringify({ email, token, type })
     });
 }
 
 //https://github.com/supabase/supabase/blob/master/examples/nextjs-ts-user-management/components/Account.tsx
-const uploadAvatar = async (file: File, user: User): Promise<{avatar, error}> => {
+const uploadAvatar = async (file: File, user: User): Promise<{ avatar; error }> => {
     let error = undefined;
     try {
-        if (file.size > (50 * 1024)) {
-            error = {message: 'Please select an image that is less than 50KB'};
-            return {avatar: undefined, error: error};
+        if (file.size > 50 * 1024) {
+            error = { message: 'Please select an image that is less than 50KB' };
+            return { avatar: undefined, error: error };
         }
 
-        const fileExt = file.name.split('.').pop()
-        const fileName = `${user.id}/avatar.${fileExt}`
-        const filePath = `${fileName}`
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}/avatar.${fileExt}`;
+        const filePath = `${fileName}`;
 
-        let { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
             .from('avatar')
-            .upload(filePath, file, {upsert: true})
+            .upload(filePath, file, { upsert: true });
 
         if (uploadError) {
-            error = {message: 'Error uploading image: ' + uploadError.message};
-            return {avatar: undefined, error: error};
+            error = { message: 'Error uploading image: ' + uploadError.message };
+            return { avatar: undefined, error: error };
         }
 
-        let { error: updateError } = await supabase.from('profile').upsert({
+        const { error: updateError } = await supabase.from('profile').upsert({
             id: user!.id,
-            avatar_url: filePath,
-        })
+            avatar_url: filePath
+        });
 
         if (updateError) {
-            error = {message: 'Error updating profile image after upload: ' + updateError.message};
-            return {avatar: undefined, error: error};
+            error = {
+                message: 'Error updating profile image after upload: ' + updateError.message
+            };
+            return { avatar: undefined, error: error };
         }
 
-        return {avatar: filePath, error: error};
+        return { avatar: filePath, error: error };
     } catch (error) {
-        return {avatar: undefined, error: error};
+        return { avatar: undefined, error: error };
     }
-}
+};
 
 const getProfileApi = async (user: User, view: string) => {
     if (user && view && view !== VIEWS.LOGGED_OUT) {
         return supabase
             .from(SUPABASE_PROFILE_TABLE_NAME)
-            .select(`username, avatar_url`)
+            .select('username, avatar_url')
             .eq('id', user.id)
             .single()
-            .then( ({data, error, status}) => {
+            .then(({ data, error, status }) => {
                 if ((error && status !== 406) || !data) {
-                    return {username: false, avatar: false};
+                    return { username: false, avatar: false };
                 } else {
-                    return {username: data.username, avatar: data.avatar_url};
+                    return { username: data.username, avatar: data.avatar_url };
                 }
             });
     } else {
-        return Promise.resolve({username: false, avatar: false});
+        return Promise.resolve({ username: false, avatar: false });
     }
-}
+};
 
 export const AuthProvider = ({ ...props }) => {
     const [session, setSession] = useState<Session | null>(null);
     const [user, setUser] = useState(null);
     const [view, setView] = useState<View>(VIEWS.LOGGED_OUT);
-    const [profile, setProfile] = useState<ProfileData>({username: false, avatar: false});
+    const [profile, setProfile] = useState<ProfileData>({
+        username: false,
+        avatar: false
+    });
 
     const logIn = async (email: string, password: string) => {
-        return await supabase.auth.signIn({email, password})
-            .then(({session, user, error}) => {
+        return await supabase.auth
+            .signIn({ email, password })
+            .then(({ session, user, error }) => {
                 if (error) {
-                    throw new Error(error.message)
+                    throw new Error(error.message);
                 } else {
                     return session;
                 }
             })
             .then(_session => {
                 setSession(_session);
-                return {error: undefined}
+                return { error: undefined };
             })
-            .catch((error) => {
-                return {error: error};
+            .catch(error => {
+                return { error: error };
             });
-    }
+    };
 
-    const signUp = async (email: string, username: string, password: string) : Promise<{ error }> => {
+    const signUp = async (
+        email: string,
+        username: string,
+        password: string
+    ): Promise<{ error }> => {
         return await signUpApi(email, username, password)
-            .then((res) => {
+            .then(res => {
                 if (!res.ok) {
-                    return res.json().then(res => {throw new Error(res.error)});
+                    return res.json().then(res => {
+                        throw new Error(res.error);
+                    });
                 } else {
                     return res.json();
                 }
             })
             .then(data => {
-                return { error: undefined};
+                return { error: undefined };
             })
-            .catch((err) => {
-                return {error: {message: err.message}}
+            .catch(err => {
+                return { error: { message: err.message } };
             });
-    }
+    };
 
-    const confirm = async (email: string, token: string, type: EmailOTPType) : Promise<{ error }> => {
+    const confirm = async (
+        email: string,
+        token: string,
+        type: EmailOTPType
+    ): Promise<{ error }> => {
         return await confirmApi(email, token, type)
-            .then((res) => {
+            .then(res => {
                 if (!res.ok) {
-                    return res.json().then(res => {throw new Error(res.error)});
+                    return res.json().then(res => {
+                        throw new Error(res.error);
+                    });
                 } else {
                     return res.json();
                 }
@@ -197,44 +220,42 @@ export const AuthProvider = ({ ...props }) => {
             .then(async data => {
                 // seems really backwards since we already have the session,
                 // but this seems to be the only documented way to do this
-                const {user, session, error} = await supabase.auth.signIn({
-                    refreshToken: data.session.refresh_token,
+                const { user, session, error } = await supabase.auth.signIn({
+                    refreshToken: data.session.refresh_token
                 });
 
                 if (error) {
                     throw new Error(error.message);
                 } else {
-                    return {error: undefined};
+                    return { error: undefined };
                 }
             })
-            .catch((err) => {
-                return {error: {message: err.message}}
+            .catch(err => {
+                return { error: { message: err.message } };
             });
-    }
+    };
 
-    const resetPassword = async (email: string) : Promise<{ error }> => {
-        return await supabase.auth.api
-            .resetPasswordForEmail(email)
-        .then(({data, error}) => {
+    const resetPassword = async (email: string): Promise<{ error }> => {
+        return await supabase.auth.api.resetPasswordForEmail(email).then(({ data, error }) => {
             if (error) {
-                return {error: error.message};
+                return { error: error.message };
             } else {
-                return {error: undefined};
+                return { error: undefined };
             }
         });
-    }
+    };
 
-    const updatePassword = async (password: string) : Promise<{ error }> => {
+    const updatePassword = async (password: string): Promise<{ error }> => {
         return await supabase.auth.api
-            .updateUser(session.access_token, { password : password })
-            .then(({data, error}) => {
+            .updateUser(session.access_token, { password: password })
+            .then(({ data, error }) => {
                 if (error) {
-                    return {error: error.message};
+                    return { error: error.message };
                 } else {
-                    return {error: undefined};
+                    return { error: undefined };
                 }
             });
-    }
+    };
 
     const logOut = () => supabase.auth.signOut();
 
@@ -254,11 +275,10 @@ export const AuthProvider = ({ ...props }) => {
         }
     }, [user]);
 
-
     useEffect(() => {
-        getProfileApi(user, view).then((res : ProfileData) => {
+        getProfileApi(user, view).then((res: ProfileData) => {
             setProfile(res);
-        })
+        });
     }, [user, view]);
 
     useEffect(() => {

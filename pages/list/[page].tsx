@@ -1,15 +1,15 @@
+import { Button, ImageListItemBar, Stack } from '@mui/material';
+import Box from '@mui/material/Box';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
-import {Fragment} from "react";
+import Avatar from 'components/global/avatar';
+import FakeLink from 'components/global/fakelink';
+import { supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
+import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Image from 'next/image';
-import {supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/db/supabaseclient";
-import {Item, theme} from 'theme/theme';
-import {getFullyQualifiedSupabaseBucketURL} from "lib/util/urlutils";
-import {Button, ImageListItemBar, Stack} from "@mui/material";
-import Avatar from "components/global/avatar";
-import Box from "@mui/material/Box";
-import Link from 'next/link'
-import FakeLink from "components/global/fakelink";
+import Link from 'next/link';
+import { Fragment } from 'react';
+import { Item, theme } from 'theme/theme';
 
 export const SHADERS_PER_PAGE = 12;
 export const SHADER_THUMB_SIZE_H = 256;
@@ -24,22 +24,20 @@ export const getPagination = (page: number, size: number) => {
 const getTotalCount = async () => {
     const { data, error, count } = await supabase
         .from('shader')
-        .select(`*`, {count: 'exact', head: true})
-        .eq('visibility', 'public')
+        .select('*', { count: 'exact', head: true })
+        .eq('visibility', 'public');
 
     return error ? 0 : count;
-}
+};
 
 export async function getServerSideProps(context) {
-    context.res.setHeader(
-        'Cache-Control',
-        'public, s-maxage=10, stale-while-revalidate=59'
-    )
+    context.res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
 
     const { from, to } = getPagination(context.params.page, SHADERS_PER_PAGE);
     const { data, count, error } = await supabase
         .from('shader')
-        .select(`
+        .select(
+            `
             id,
             name,
             profile:author (
@@ -47,8 +45,9 @@ export async function getServerSideProps(context) {
                 avatar_url
             ),
             thumb_url
-        `)
-        .order("created_at", {ascending: false})
+        `
+        )
+        .order('created_at', { ascending: false })
         .range(from, to)
         .eq('visibility', 'public');
 
@@ -60,24 +59,33 @@ export async function getServerSideProps(context) {
             pageCount: count,
             totalCount: totalCount,
             error: error,
-            page: context.params.page,
-        },
+            page: context.params.page
+        }
     };
 }
 
-const ShaderPicker = (props) => {
+const ShaderPicker = props => {
     return (
-        <Item elevation={12} sx={{
-            display: "inline-block"
-        }}>
-            <ImageList gap={10} sx={{ width: SHADER_THUMB_SIZE_H*4.1 }}
-                       cols={4} rowHeight={SHADER_THUMB_SIZE_V}
+        <Item
+            elevation={12}
+            sx={{
+                display: 'inline-block'
+            }}
+        >
+            <ImageList
+                gap={10}
+                sx={{ width: SHADER_THUMB_SIZE_H * 4.1 }}
+                cols={4}
+                rowHeight={SHADER_THUMB_SIZE_V}
             >
-                { props.shaders.map((shader, index) => (
+                {props.shaders.map((shader, index) => (
                     <ImageListItem key={shader.id}>
                         <Image
-                            style={{borderRadius: '4px'}}
-                            src={getFullyQualifiedSupabaseBucketURL(SUPABASE_SHADERTHUMB_BUCKET_NAME, shader.thumb_url)}
+                            style={{ borderRadius: '4px' }}
+                            src={getFullyQualifiedSupabaseBucketURL(
+                                SUPABASE_SHADERTHUMB_BUCKET_NAME,
+                                shader.thumb_url
+                            )}
                             alt={shader.name}
                             width={SHADER_THUMB_SIZE_H}
                             height={SHADER_THUMB_SIZE_V}
@@ -86,11 +94,11 @@ const ShaderPicker = (props) => {
                         <ImageListItemBar
                             title={<Link href={`/view/${shader.id}`}>{shader.name}</Link>}
                             subtitle={`by ${shader.profile.username}`}
-                            style={{borderRadius: '4px'}}
+                            style={{ borderRadius: '4px' }}
                             actionIcon={
                                 <FakeLink href={`/profile/${shader.profile.username}`}>
-                                    <Box sx={{margin: "10px"}}>
-                                        <Avatar url={shader.profile.avatar_url} size={25}/>
+                                    <Box sx={{ margin: '10px' }}>
+                                        <Avatar url={shader.profile.avatar_url} size={25} />
                                     </Box>
                                 </FakeLink>
                             }
@@ -100,26 +108,31 @@ const ShaderPicker = (props) => {
             </ImageList>
         </Item>
     );
-}
+};
 
-export const MAX_PAGE_BUTTONS = 5
+export const MAX_PAGE_BUTTONS = 5;
 
-const PageButton = (props) => {
-
+const PageButton = props => {
     return (
         <Link href={`/list/${props.index}`} passHref>
             <Button>
-                <span style={props.highlight ? {color: theme.palette.dracula.foreground} : {color: theme.palette.dracula.selection}}>
+                <span
+                    style={
+                        props.highlight
+                            ? { color: theme.palette.dracula.foreground }
+                            : { color: theme.palette.dracula.selection }
+                    }
+                >
                     {props.index.toString()}
                 </span>
             </Button>
         </Link>
     );
-}
+};
 
 const EllipsisButton = () => {
-    return <Button>{"..."}</Button>
-}
+    return <Button>{'...'}</Button>;
+};
 
 /*
     The cryptic math here handles the various cases for rendering
@@ -141,7 +154,7 @@ const EllipsisButton = () => {
     point, so we clamp the range here.
 
  */
-const PagePicker = (props) => {
+const PagePicker = props => {
     const pages = Math.floor((parseInt(props.totalCount) - 1) / SHADERS_PER_PAGE) + 1;
 
     const currentPage = props.page;
@@ -161,32 +174,41 @@ const PagePicker = (props) => {
     // trick to do python-style range() iterator
     return (
         <Stack direction="row" style={props.style}>
-            {[...Array(lowerPages).keys()].map((index) => {
+            {[...Array(lowerPages).keys()].map(index => {
                 const page = index + firstPage;
-                return <PageButton highlight={currentPage == page} key={page} index={page}/>
+                return <PageButton highlight={currentPage == page} key={page} index={page} />;
             })}
-            {showLast ?
+            {showLast ? (
                 <Fragment>
-                    {!hideEllipsis ? <EllipsisButton/> : null}
-                    <PageButton highlight={currentPage == lastPage} key={lastPage} index={lastPage}/>
-                </Fragment> : null
-            }
+                    {!hideEllipsis ? <EllipsisButton /> : null}
+                    <PageButton
+                        highlight={currentPage == lastPage}
+                        key={lastPage}
+                        index={lastPage}
+                    />
+                </Fragment>
+            ) : null}
         </Stack>
     );
-
-}
+};
 
 export default function ShaderList(props) {
     return (
         <Fragment>
-            <Box sx={{
-                display: "inline-block",
-                position: "relative",
-                left: "50%",
-                transform: "translate(-50%, 0)"}}
+            <Box
+                sx={{
+                    display: 'inline-block',
+                    position: 'relative',
+                    left: '50%',
+                    transform: 'translate(-50%, 0)'
+                }}
             >
-                <PagePicker page={props.page} totalCount={props.totalCount} style={{marginBottom: "10px"}}/>
-                <ShaderPicker page={props.page} shaders={props.shaders}/>
+                <PagePicker
+                    page={props.page}
+                    totalCount={props.totalCount}
+                    style={{ marginBottom: '10px' }}
+                />
+                <ShaderPicker page={props.page} shaders={props.shaders} />
             </Box>
         </Fragment>
     );

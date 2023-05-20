@@ -1,6 +1,6 @@
+import styled from '@emotion/styled';
 import Link from 'next/link';
-import styled from "@emotion/styled";
-import {MouseEventHandler, ReactNode} from "react";
+import { MouseEventHandler, ReactNode } from 'react';
 
 const StyledA = styled.a`
     position: absolute;
@@ -12,11 +12,12 @@ const StyledA = styled.a`
     opacity: 0;
     &:hover {
         cursor: pointer;
-    }`;
+    }
+`;
 
 const StyledDiv = styled.div`
     &:hover {
-      cursor: pointer;
+        cursor: pointer;
     }
     position: relative;
     display: inline-block;
@@ -25,32 +26,33 @@ const StyledDiv = styled.div`
 `;
 
 interface FakeLinkProps {
-    href?: string,
-    onClick?: MouseEventHandler,
-    children?: ReactNode,
-    textDecoration?: string,
-    color?: string
+    href?: string;
+    onClick?: MouseEventHandler;
+    children?: ReactNode;
+    textDecoration?: string;
+    color?: string;
 }
 
-
 export default function FakeLink(props: FakeLinkProps) {
-    const anchor = props.onClick ?
-        <StyledA onClick={props.onClick}/>
-        :
-        <StyledA/>;
+    const anchor = props.onClick ? <StyledA onClick={props.onClick} /> : <StyledA />;
 
-    return (
-            props.href ?
-                <Link href={props.href} passHref>
-                    <StyledDiv color={props.color ?? null} style={{textDecoration: props.textDecoration ?? null}}>
-                        {anchor}
-                        {props.children}
-                    </StyledDiv>
-                </Link>
-                :
-                <StyledDiv color={props.color ?? null} style={{textDecoration: props.textDecoration ?? null}}>
-                    {anchor}
-                    {props.children}
-                </StyledDiv>
+    return props.href ? (
+        <Link href={props.href} passHref>
+            <StyledDiv
+                color={props.color ?? null}
+                style={{ textDecoration: props.textDecoration ?? null }}
+            >
+                {anchor}
+                {props.children}
+            </StyledDiv>
+        </Link>
+    ) : (
+        <StyledDiv
+            color={props.color ?? null}
+            style={{ textDecoration: props.textDecoration ?? null }}
+        >
+            {anchor}
+            {props.children}
+        </StyledDiv>
     );
 }

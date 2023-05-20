@@ -1,17 +1,17 @@
-import {Button} from "@mui/material";
-import {useTheme} from "@mui/material/styles";
-import {AcUnit, LocalFireDepartment} from "@mui/icons-material";
-import {useAtom, useAtomValue} from "jotai";
-import {hotReloadAtom} from "lib/atoms/atoms";
+import { AcUnit, LocalFireDepartment } from '@mui/icons-material';
+import { Button } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { useAtom, useAtomValue } from 'jotai';
+import { hotReloadAtom } from 'lib/atoms/atoms';
 
 const HotColdIcon = () => {
     const hotReload = useAtomValue(hotReloadAtom);
     if (hotReload) {
-        return <LocalFireDepartment/>; // flame
+        return <LocalFireDepartment />; // flame
     } else {
-        return <AcUnit/>; // snowflake
+        return <AcUnit />; // snowflake
     }
-}
+};
 
 export const HotReloadToggle = () => {
     const [hotReload, setHotReload] = useAtom(hotReloadAtom);
@@ -23,11 +23,11 @@ export const HotReloadToggle = () => {
             onClick={() => {
                 setHotReload(!hotReload);
             }}
-            sx={hotReload ? {color: theme.status.danger} : {color: theme.palette.neutral.main}}
+            sx={hotReload ? { color: theme.status.danger } : { color: theme.palette.neutral.main }}
         >
-            <HotColdIcon/>
+            <HotColdIcon />
         </Button>
     );
-}
+};
 
 export default HotReloadToggle;

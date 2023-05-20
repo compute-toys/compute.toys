@@ -1,6 +1,6 @@
-import 'firacode'
-import '@fontsource/lobster'
-import FakeLink from "./fakelink";
+import '@fontsource/lobster';
+import 'firacode';
+import FakeLink from './fakelink';
 
 export default function Logo(props) {
     return (

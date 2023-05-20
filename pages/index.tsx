@@ -86,9 +86,9 @@ const ExplainerModal = forwardRef((props, ref) => {
                     {'Download, install, and open '}
                     <a href={'https://www.google.com/chrome/dev/'}>Chrome Dev</a>
                 </Typography>
-                <Typography
-                    color={getRainbowColor(0)}
-                >{`Enter about:flags into your search bar`}</Typography>
+                <Typography color={getRainbowColor(0)}>
+                    {'Enter about:flags into your search bar'}
+                </Typography>
                 <Box>
                     <Image
                         alt="Chrome search bar"
@@ -97,9 +97,9 @@ const ExplainerModal = forwardRef((props, ref) => {
                         src={'/instructions/chromebar.png'}
                     />
                 </Box>
-                <Typography
-                    color={getRainbowColor(1)}
-                >{`In the "Search flags" bar, enter "webgpu"`}</Typography>
+                <Typography color={getRainbowColor(1)}>
+                    {'In the "Search flags" bar, enter "webgpu"'}
+                </Typography>
                 <Box>
                     <Image
                         alt="Search flags bar"
@@ -108,7 +108,7 @@ const ExplainerModal = forwardRef((props, ref) => {
                         src={'/instructions/webgpu.png'}
                     />
                 </Box>
-                <Typography color={getRainbowColor(2)}>{`Enable "Unsafe WebGPU"`}</Typography>
+                <Typography color={getRainbowColor(2)}>{'Enable "Unsafe WebGPU"'}</Typography>
                 <Box>
                     <Image
                         alt="Enable unsafe WebGPU"
@@ -117,10 +117,10 @@ const ExplainerModal = forwardRef((props, ref) => {
                         src={'/instructions/unsafe.png'}
                     />
                 </Box>
-                <Typography
-                    color={getRainbowColor(3)}
-                >{`You may need to restart your browser`}</Typography>
-                <Typography color={getRainbowColor(4)}>{`You're done!`}</Typography>
+                <Typography color={getRainbowColor(3)}>
+                    {'You may need to restart your browser'}
+                </Typography>
+                <Typography color={getRainbowColor(4)}>{"You're done!"}</Typography>
             </Stack>
         </Box>
     );
