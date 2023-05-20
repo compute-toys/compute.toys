@@ -1,17 +1,15 @@
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TableSortLabel,
-    Toolbar,
-    Typography
-} from '@mui/material';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
-import { visuallyHidden } from '@mui/utils';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import visuallyHidden from '@mui/utils/visuallyHidden';
 import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { toUnixTime } from 'lib/util/dateutils';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
@@ -153,9 +151,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
     );
 }
 
-interface EnhancedTableToolbarProps {}
-
-const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
+const EnhancedTableToolbar = () => {
     return (
         <Toolbar
             sx={{

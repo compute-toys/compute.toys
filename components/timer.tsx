@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import { useAtomValue } from 'jotai';
 import { useTransientAtom } from 'jotai-game';
 import { isPlayingAtom, timerAtom } from 'lib/atoms/atoms';
@@ -8,7 +8,7 @@ import useAnimationFrame from 'use-animation-frame';
 
 export default function Timer() {
     const timer = useAtomValue(timerAtom);
-    const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
+    const [isPlaying] = useTransientAtom(isPlayingAtom);
     const frames = useRef(0);
     const secs = useRef(0);
     const [fps, setFps] = useState(0);
@@ -42,4 +42,5 @@ export default function Timer() {
             </Fragment>
         );
     }
+    return null;
 }

@@ -1,6 +1,7 @@
-import { darkScrollbar, TextField } from '@mui/material';
+import darkScrollbar from '@mui/material/darkScrollbar';
 import Paper from '@mui/material/Paper';
 import { createTheme, styled } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
 import 'firacode';
 import 'theme/themeModule';
 
@@ -62,7 +63,7 @@ export const theme = createTheme({
 
 // These MUST be declared outside component, or wrapped as a JSX.Element
 // Otherwise rerender is triggered every time.
-export const Item = styled(Paper)(({ theme }) => ({
+export const Item: typeof Paper = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.primary.darker,
     ...theme.typography.body2,
     padding: theme.spacing(1),
@@ -70,14 +71,14 @@ export const Item = styled(Paper)(({ theme }) => ({
     color: theme.palette.text.secondary
 }));
 
-export const Frame = styled(Paper)(({ theme }) => ({
+export const Frame: typeof Paper = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.primary.darker,
     justifyContent: 'center',
     display: 'inline-flex',
     borderRadius: '4px'
 }));
 
-export const CssTextField = styled(TextField)({
+export const CssTextField: typeof TextField = styled(TextField)({
     '& .MuiOutlinedInput-root': {
         '& fieldset': {
             borderColor: theme.palette.dracula.currentLine

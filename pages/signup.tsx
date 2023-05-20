@@ -1,5 +1,7 @@
-import { Button, Stack, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import { useAuth } from 'lib/db/authcontext';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -24,7 +26,7 @@ export const SignUp = () => {
     const [errorMessage, setErrorMessage] = useState(null);
 
     const style = {
-        position: 'absolute' as 'absolute',
+        position: 'absolute' as const,
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
@@ -127,7 +129,7 @@ export const SignUp = () => {
                                 onChange={e => {
                                     setEmailEditor(e.target.value);
                                 }}
-                                onBlur={e => {
+                                onBlur={() => {
                                     validateEmail();
                                 }}
                             />
@@ -144,7 +146,7 @@ export const SignUp = () => {
                                 size={'small'}
                                 value={usernameEditor || ''}
                                 onChange={e => setUsernameEditor(e.target.value)}
-                                onBlur={e => {
+                                onBlur={() => {
                                     validateUsername();
                                 }}
                             />
@@ -161,7 +163,7 @@ export const SignUp = () => {
                                 size={'small'}
                                 value={password1Editor || ''}
                                 onChange={e => setPassword1Editor(e.target.value)}
-                                onBlur={e => {
+                                onBlur={() => {
                                     validatePassword();
                                 }}
                                 type={'password'}
@@ -179,7 +181,7 @@ export const SignUp = () => {
                                 size={'small'}
                                 value={password2Editor || ''}
                                 onChange={e => setPassword2Editor(e.target.value)}
-                                onBlur={e => {
+                                onBlur={() => {
                                     validatePassword();
                                 }}
                                 type={'password'}

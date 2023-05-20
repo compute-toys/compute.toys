@@ -1,18 +1,15 @@
-import {NextApiRequest, NextApiResponse} from "next";
-import {supabasePrivileged} from "lib/db/supabaseprivilegedclient";
-import { supabase } from "lib/db/supabaseclient";
+import { supabase } from 'lib/db/supabaseclient';
+import { supabasePrivileged } from 'lib/db/supabaseprivilegedclient';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-    const {username, password} = req.body;
-    const {data} = await supabasePrivileged
-        .from("user")
-        .select()
-        .eq("username", username);
+    const { username, password } = req.body;
+    const { data } = await supabasePrivileged.from('user').select().eq('username', username);
 
     if (data.length > 0) {
-        const {session, error} = await supabase.auth.signIn({
+        const { session, error } = await supabase.auth.signIn({
             email: data[0].email,
-            password,
+            password
         });
         if (!error) {
             return res.status(200).json({
@@ -21,7 +18,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         }
     }
     return res.status(404).json({
-        message: "Invalid username or password",
+        message: 'Invalid username or password'
     });
 };
 

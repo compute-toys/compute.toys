@@ -81,7 +81,7 @@ const WgpuToyController = props => {
     const parentRef = useAtomValue<HTMLElement | null>(canvasParentElAtom);
 
     const [width, setWidth] = useTransientAtom(widthAtom);
-    const [height, setHeight] = useTransientAtom(heightAtom);
+    const [, setHeight] = useTransientAtom(heightAtom);
     const [scale, setScale] = useTransientAtom(scaleAtom);
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
@@ -90,8 +90,8 @@ const WgpuToyController = props => {
 
     const updateUniforms = useCallback(async () => {
         if (isSafeContext(wgputoy)) {
-            let names: string[] = [];
-            let values: number[] = [];
+            const names: string[] = [];
+            const values: number[] = [];
             [...sliderRefMap().keys()].map(uuid => {
                 names.push(sliderRefMap().get(uuid).getUniform());
                 values.push(sliderRefMap().get(uuid).getVal());
@@ -195,7 +195,7 @@ const WgpuToyController = props => {
 
     const handleSuccess = useCallback(entryPoints => {
         setEntryPoints(entryPoints);
-        setParseError(error => ({
+        setParseError(() => ({
             summary: '',
             position: { row: 0, col: 0 },
             success: true
@@ -204,7 +204,7 @@ const WgpuToyController = props => {
     }, []);
 
     const handleError = useCallback((summary: string, row: number, col: number) => {
-        setParseError(error => ({
+        setParseError(() => ({
             summary: summary,
             position: { row: Number(row), col: Number(col) },
             success: false
@@ -256,6 +256,7 @@ const WgpuToyController = props => {
             canvas.addEventListener('keydown', handleKeyDown);
             return () => canvas.removeEventListener('keydown', handleKeyDown);
         }
+        return null;
     }, []);
 
     useEffect(() => {
@@ -268,6 +269,7 @@ const WgpuToyController = props => {
             canvas.addEventListener('keyup', handleKeyUp);
             return () => canvas.removeEventListener('keyup', handleKeyUp);
         }
+        return null;
     }, []);
 
     useEffect(() => {
@@ -275,7 +277,7 @@ const WgpuToyController = props => {
             return;
         }
         function createMediaRecorder(canvas: HTMLCanvasElement) {
-            let options: any = {
+            const options: any = {
                 audioBitsPerSecond: 0,
                 videoBitsPerSecond: 8000000
             };
@@ -286,7 +288,7 @@ const WgpuToyController = props => {
                 'video/webm;codecs=vp8'
             ];
 
-            for (let type of types) {
+            for (const type of types) {
                 if (MediaRecorder.isTypeSupported(type)) {
                     options.mimeType = type;
                 }
@@ -306,10 +308,10 @@ const WgpuToyController = props => {
 
             mediaRecorder.onstop = function () {
                 setRecording(false);
-                let blob = new Blob(chunks, { type: 'video/mp4' });
+                const blob = new Blob(chunks, { type: 'video/mp4' });
                 chunks.length = 0;
                 const url = window.URL.createObjectURL(blob);
-                let a = document.createElement('a');
+                const a = document.createElement('a');
                 document.body.appendChild(a);
                 // @ts-ignore
                 a.style = 'display: none';
@@ -355,7 +357,7 @@ const WgpuToyController = props => {
                 }
             };
 
-            const handleMouseUp = (e: MouseEvent) => {
+            const handleMouseUp = () => {
                 if (isSafeContext(wgputoy)) {
                     wgputoy.set_mouse_click(false);
                     canvas.onmousemove = null;
@@ -433,7 +435,7 @@ const WgpuToyController = props => {
             } else {
                 dimensions = getDimensions(parentRef.offsetWidth * window.devicePixelRatio);
             }
-            let newScale = halfResolution ? 0.5 : 1;
+            const newScale = halfResolution ? 0.5 : 1;
             if (dimensions.x !== width() || newScale !== scale()) {
                 setWidth(dimensions.x);
                 setHeight(dimensions.y);

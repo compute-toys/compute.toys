@@ -1,13 +1,15 @@
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
     enabled: false
-})
+});
 
 function getImageConfig() {
     const config = { domains: ['dl.polyhaven.org'] };
     if (process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME) {
         config.domains.push(process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME);
     } else {
-        console.warn('NEXT_PUBLIC_SUPABASE_HOSTNAME is not set, images from supabase will not be loaded');
+        console.warn(
+            'NEXT_PUBLIC_SUPABASE_HOSTNAME is not set, images from supabase will not be loaded'
+        );
         config.unoptimized = true;
     }
     return config;
@@ -25,8 +27,8 @@ const nextConfig = {
             {
                 source: '/editor/:id',
                 destination: '/view/:id',
-                permanent: true,
-            },
+                permanent: true
+            }
         ];
     },
     webpack(config, { isServer, dev }) {
@@ -35,7 +37,7 @@ const nextConfig = {
             layers: true
         };
         if (isServer && !dev) {
-            config.output.webassemblyModuleFilename = "chunks/[id].wasm";
+            config.output.webassemblyModuleFilename = 'chunks/[id].wasm';
             config.plugins.push(new WasmChunksFixPlugin());
         }
         config.optimization.moduleIds = 'named';
@@ -45,18 +47,16 @@ const nextConfig = {
 
 class WasmChunksFixPlugin {
     apply(compiler) {
-        compiler.hooks.thisCompilation.tap("WasmChunksFixPlugin", (compilation) => {
-            compilation.hooks.processAssets.tap(
-                { name: "WasmChunksFixPlugin" },
-                (assets) =>
-                    Object.entries(assets).forEach(([pathname, source]) => {
-                        if (!pathname.match(/\.wasm$/)) return;
-                        compilation.deleteAsset(pathname);
+        compiler.hooks.thisCompilation.tap('WasmChunksFixPlugin', compilation => {
+            compilation.hooks.processAssets.tap({ name: 'WasmChunksFixPlugin' }, assets =>
+                Object.entries(assets).forEach(([pathname, source]) => {
+                    if (!pathname.match(/\.wasm$/)) return;
+                    compilation.deleteAsset(pathname);
 
-                        const name = pathname.split("/")[1];
-                        const info = compilation.assetsInfo.get(pathname);
-                        compilation.emitAsset(name, source, info);
-                    })
+                    const name = pathname.split('/')[1];
+                    const info = compilation.assetsInfo.get(pathname);
+                    compilation.emitAsset(name, source, info);
+                })
             );
         });
     }

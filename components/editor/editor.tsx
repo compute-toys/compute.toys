@@ -1,58 +1,58 @@
 // MUI sizing from refs:
 // https://github.com/mui/material-ui/issues/15662
 
-import Monaco from 'components/editor/monaco';
-import { WgpuToyWrapper } from "components/wgputoy";
-
-import { useCallback, useEffect } from 'react';
-
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-import {Button, useMediaQuery, useTheme} from "@mui/material";
-
-import PlayPauseButton from "components/buttons/playpausebutton"
-import ResetButton from "components/buttons/resetbutton";
-import HotReloadToggle from "components/buttons/hotreloadtoggle";
-import ReloadButton from "components/buttons/reloadbutton";
-import ScaleButton from 'components/buttons/scalebutton';
-import FullscreenButton from "../buttons/fullscreenbutton";
-
-import { Frame } from "theme/theme";
-
-import "firacode";
-
-import UniformSliders from "components/editor/uniformsliders";
-import TexturePicker from "components/editor/texturepicker";
-import EntryPointDisplay from "components/editor/entrypointdisplay";
-import { canvasParentElAtom } from "lib/atoms/wgputoyatoms";
-import { useSetAtom } from "jotai";
-import { MetadataEditor } from "components/editor/metadataeditor";
-import { manualReloadAtom, saveColorTransitionSignalAtom, vimAtom } from "lib/atoms/atoms";
-import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
-import Explainer from "./explainer";
-import ConfigurationPicker from "./configurationpicker";
-import dynamic from "next/dynamic";
-import { supabase } from "lib/db/supabaseclient";
-import VimButton from 'components/buttons/vimbutton';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import FullscreenButton from 'components/buttons/fullscreenbutton';
+import HotReloadToggle from 'components/buttons/hotreloadtoggle';
+import PlayPauseButton from 'components/buttons/playpausebutton';
 import RecordButton from 'components/buttons/recordbutton';
+import ReloadButton from 'components/buttons/reloadbutton';
+import ResetButton from 'components/buttons/resetbutton';
+import ScaleButton from 'components/buttons/scalebutton';
+import VimButton from 'components/buttons/vimbutton';
+import EntryPointDisplay from 'components/editor/entrypointdisplay';
+import { MetadataEditor } from 'components/editor/metadataeditor';
+import Monaco from 'components/editor/monaco';
+import TexturePicker from 'components/editor/texturepicker';
+import UniformSliders from 'components/editor/uniformsliders';
+import { WgpuToyWrapper } from 'components/wgputoy';
+import 'firacode';
+import { useSetAtom } from 'jotai';
+import { saveColorTransitionSignalAtom } from 'lib/atoms/atoms';
+import { canvasParentElAtom } from 'lib/atoms/wgputoyatoms';
+import { supabase } from 'lib/db/supabaseclient';
+import dynamic from 'next/dynamic';
+import { useCallback } from 'react';
+import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
+import { Frame } from 'theme/theme';
+import ConfigurationPicker from './configurationpicker';
+import Explainer from './explainer';
 
 export const Editor = () => {
     const setCanvasParentEl = useSetAtom(canvasParentElAtom);
-    const setManualReload = useSetAtom(manualReloadAtom);
 
-    const renderParentNodeRef = useCallback((parent) => {
+    const renderParentNodeRef = useCallback(parent => {
         if (parent) {
             setCanvasParentEl(parent);
         }
     }, []);
 
     const Timer = dynamic(() => import('components/timer'), { ssr: false });
-    const Resolution = dynamic(() => import('components/resolution'), { ssr: false });
+    const Resolution = dynamic(() => import('components/resolution'), {
+        ssr: false
+    });
 
     let metadataEditor = null;
     if (supabase) {
         metadataEditor = (
-            <ItemWithTransitionSignal sx={{ textAlign: "left", marginTop: "20px" }} transitionAtom={saveColorTransitionSignalAtom}>
+            <ItemWithTransitionSignal
+                sx={{ textAlign: 'left', marginTop: '20px' }}
+                transitionAtom={saveColorTransitionSignalAtom}
+            >
                 <MetadataEditor />
             </ItemWithTransitionSignal>
         );
@@ -63,7 +63,7 @@ export const Editor = () => {
             <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
                 <Frame elevation={12}>
                     <WgpuToyWrapper
-                        bindID={"editor-canvas"}
+                        bindID={'editor-canvas'}
                         style={{
                             display: 'inline-block',
                             borderRadius: '4px'
@@ -96,19 +96,20 @@ export const Editor = () => {
     const rightPanel = (
         <div>
             <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
-                <div className='vim-status'></div>
+                <div className="vim-status"></div>
                 <Monaco
                     editorOptions={{
                         stopRenderingLineAfter: 1000,
                         fontFamily: "'Fira Code', monospace",
                         'bracketPairColorization.enabled': true,
-                        mouseWheelZoom: true,
+                        mouseWheelZoom: true
                         //fontLigatures: true,
                     }}
                 />
-                <Box sx={{ paddingTop: "4px" }}>
-                    <Box sx={{display: "flex", justifyContent: "space-between"}}>
-                        <Button style={{pointerEvents: "none"}} /> {/* invisible button, used only for centering */}
+                <Box sx={{ paddingTop: '4px' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Button style={{ pointerEvents: 'none' }} />{' '}
+                        {/* invisible button, used only for centering */}
                         <div>
                             <ReloadButton />
                             <HotReloadToggle />
@@ -118,10 +119,22 @@ export const Editor = () => {
                     </Box>
                 </Box>
             </ItemWithTransitionSignal>
-            <Grid container spacing={2} sx={{flexWrap: useMediaQuery(theme.breakpoints.up('sm')) ? "nowrap" : "wrap"}}>
-                <Grid item><TexturePicker /></Grid>
-                <Grid item><ConfigurationPicker /></Grid>
-                <Grid item><EntryPointDisplay /></Grid>
+            <Grid
+                container
+                spacing={2}
+                sx={{
+                    flexWrap: useMediaQuery(theme.breakpoints.up('sm')) ? 'nowrap' : 'wrap'
+                }}
+            >
+                <Grid item>
+                    <TexturePicker />
+                </Grid>
+                <Grid item>
+                    <ConfigurationPicker />
+                </Grid>
+                <Grid item>
+                    <EntryPointDisplay />
+                </Grid>
             </Grid>
         </div>
     );
@@ -140,4 +153,4 @@ export const Editor = () => {
             </Box>
         </div>
     );
-}
+};

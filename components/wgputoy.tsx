@@ -1,4 +1,4 @@
-import { Skeleton } from '@mui/material';
+import Skeleton from '@mui/material/Skeleton';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { wgpuAvailabilityAtom } from 'lib/atoms/atoms';
 import { canvasElAtom, canvasParentElAtom } from 'lib/atoms/wgputoyatoms';

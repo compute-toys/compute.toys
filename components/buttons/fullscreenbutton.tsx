@@ -1,8 +1,8 @@
-import {Button} from "@mui/material";
-import {useTheme} from "@mui/material/styles";
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import {requestFullscreenAtom} from "lib/atoms/atoms";
-import {useSetAtom} from "jotai";
+import Button from '@mui/material/Button';
+import { useTheme } from '@mui/material/styles';
+import { useSetAtom } from 'jotai';
+import { requestFullscreenAtom } from 'lib/atoms/atoms';
 
 export const FullscreenButton = () => {
     const setRequestFullscreen = useSetAtom(requestFullscreenAtom);
@@ -14,11 +14,11 @@ export const FullscreenButton = () => {
             onClick={() => {
                 setRequestFullscreen(true);
             }}
-            sx={{color: theme.palette.dracula.cyan}}
+            sx={{ color: theme.palette.dracula.cyan }}
         >
-            <FullscreenIcon/>
+            <FullscreenIcon />
         </Button>
     );
-}
+};
 
 export default FullscreenButton;

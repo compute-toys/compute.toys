@@ -17,4 +17,5 @@ export default function Resolution() {
             </Fragment>
         );
     }
+    return null;
 }

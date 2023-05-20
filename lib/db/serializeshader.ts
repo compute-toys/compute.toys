@@ -1,37 +1,47 @@
-import {atom, Getter, useAtomValue} from "jotai";
+import { fromUniformActiveSettings, UniformSliderRef } from 'components/editor/uniformsliders';
+import { atom, Getter, useAtomValue, useSetAtom } from 'jotai';
+import { useResetAtom } from 'jotai/utils';
 import {
     authorProfileAtom,
     codeAtom,
-    descriptionAtom, entryPointsAtom, float32EnabledAtom,
-    loadedTexturesAtom, saveColorTransitionSignalAtom, shaderDataUrlThumbAtom, shaderIDAtom, sliderRefMapAtom,
+    descriptionAtom,
+    entryPointsAtom,
+    float32EnabledAtom,
+    loadedTexturesAtom,
+    saveColorTransitionSignalAtom,
+    shaderDataUrlThumbAtom,
+    shaderIDAtom,
+    sliderRefMapAtom,
     sliderSerDeNeedsUpdateAtom,
-    titleAtom, visibilityAtom
-} from "lib/atoms/atoms";
-import {supabase, SUPABASE_SHADER_TABLE_NAME, SUPABASE_SHADERTHUMB_BUCKET_NAME} from "lib/db/supabaseclient";
-import {definitions} from "types/supabase";
-import {useMemo, useRef} from "react";
-import {useAuth} from "lib/db/authcontext";
-import {fromUniformActiveSettings, UniformSliderRef} from "components/editor/uniformsliders";
-import {useResetAtom} from "jotai/utils";
-import {useSetAtom} from "jotai";
-import {theme} from "theme/theme";
-import { fixup_shader_code } from "lib/util/fixup";
+    titleAtom,
+    visibilityAtom
+} from 'lib/atoms/atoms';
+import { useAuth } from 'lib/db/authcontext';
+import {
+    supabase,
+    SUPABASE_SHADERTHUMB_BUCKET_NAME,
+    SUPABASE_SHADER_TABLE_NAME
+} from 'lib/db/supabaseclient';
+import { fixup_shader_code } from 'lib/util/fixup';
+import { useMemo, useRef } from 'react';
+import { theme } from 'theme/theme';
+import { definitions } from 'types/supabase';
 
 export interface UniformActiveSettings {
-    name: string,
-    value: number
+    name: string;
+    value: number;
 }
 
 export interface TextureActiveSettings {
-    img: string,
-    thumb?: string
+    img: string;
+    thumb?: string;
 }
 
 export interface ShaderActiveSettings {
-    code: string,
-    uniforms: Array<UniformActiveSettings>,
-    textures: Array<TextureActiveSettings>,
-    float32Enabled?: boolean
+    code: string;
+    uniforms: Array<UniformActiveSettings>;
+    textures: Array<TextureActiveSettings>;
+    float32Enabled?: boolean;
 }
 
 export interface UpsertResult {
@@ -41,27 +51,32 @@ export interface UpsertResult {
     message?: string;
 }
 
-const upsertResult = (id: number | null, needsRedirect: boolean, success: boolean, message?: string) : UpsertResult => {
+const upsertResult = (
+    id: number | null,
+    needsRedirect: boolean,
+    success: boolean,
+    message?: string
+): UpsertResult => {
     return {
         id: id,
         needsRedirect: needsRedirect,
         success: success,
         message: message ?? undefined
     };
-}
+};
 
 export type HOST_GET = (id: number) => Promise<void>;
 export type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
 
-const getSliderActiveSettings = (sliderRefMap: Map<string,UniformSliderRef>) => {
+const getSliderActiveSettings = (sliderRefMap: Map<string, UniformSliderRef>) => {
     // convert our map of references into a plain array of objects
-    return [...sliderRefMap.keys()].map((uuid) => {
+    return [...sliderRefMap.keys()].map(uuid => {
         return {
             name: sliderRefMap.get(uuid).getUniform(),
             value: sliderRefMap.get(uuid).getVal()
         } as UniformActiveSettings;
-    })
-}
+    });
+};
 
 // https://github.com/pmndrs/jotai/issues/1100
 // TODO: jotai has experimental features for dealing with this case, use them when they're less experimental
@@ -69,7 +84,7 @@ export const useAtomGetter = () => {
     const getter = useRef<Getter | null>(null);
     const derived = useMemo(
         () =>
-            atom((get) => {
+            atom(get => {
                 getter.current = get;
             }),
         []
@@ -79,17 +94,17 @@ export const useAtomGetter = () => {
 };
 
 export const useResetShaderData = () => {
-    const resetAuthorProfile                = useResetAtom(authorProfileAtom);
-    const resetShaderID                     = useResetAtom(shaderIDAtom);
-    const resetCode                         = useResetAtom(codeAtom);
-    const resetTitle                        = useResetAtom(titleAtom);
-    const resetDescription                  = useResetAtom(descriptionAtom);
-    const resetVisibility                   = useResetAtom(visibilityAtom);
-    const resetLoadedTextures               = useResetAtom(loadedTexturesAtom);
-    const resetEntryPoints                  = useResetAtom(entryPointsAtom);
-    const resetSliderSerDeNeedsUpdateAtom   = useResetAtom(sliderSerDeNeedsUpdateAtom);
-    const resetShaderDataUrlThumb           = useResetAtom(shaderDataUrlThumbAtom);
-    const resetFloat32Enabled               = useResetAtom(float32EnabledAtom);
+    const resetAuthorProfile = useResetAtom(authorProfileAtom);
+    const resetShaderID = useResetAtom(shaderIDAtom);
+    const resetCode = useResetAtom(codeAtom);
+    const resetTitle = useResetAtom(titleAtom);
+    const resetDescription = useResetAtom(descriptionAtom);
+    const resetVisibility = useResetAtom(visibilityAtom);
+    const resetLoadedTextures = useResetAtom(loadedTexturesAtom);
+    const resetEntryPoints = useResetAtom(entryPointsAtom);
+    const resetSliderSerDeNeedsUpdateAtom = useResetAtom(sliderSerDeNeedsUpdateAtom);
+    const resetShaderDataUrlThumb = useResetAtom(shaderDataUrlThumbAtom);
+    const resetFloat32Enabled = useResetAtom(float32EnabledAtom);
 
     const reset = () => {
         resetAuthorProfile();
@@ -103,16 +118,15 @@ export const useResetShaderData = () => {
         resetSliderSerDeNeedsUpdateAtom();
         resetShaderDataUrlThumb();
         resetFloat32Enabled();
-    }
+    };
 
     return reset;
-}
+};
 
 export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
-
     const atomGetter = useAtomGetter();
 
-    const {user} = useAuth();
+    const { user } = useAuth();
 
     /*
         We DO NOT want to use getters here, even though
@@ -136,9 +150,10 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
 
     const get = async (id: number) => {
         try {
-            let {data, error, status} = await supabase
-                .from<definitions["shader"]>(SUPABASE_SHADER_TABLE_NAME)
-                .select(`
+            const { data, error, status } = await supabase
+                .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
+                .select(
+                    `
                     name,
                     description,
                     visibility,
@@ -149,8 +164,9 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                         id
                     )
                         
-                `)
-                .eq("id", id)
+                `
+                )
+                .eq('id', id)
                 .single();
 
             if (error && status !== 406) {
@@ -173,7 +189,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                     uniforms: body.uniforms,
                     textures: body.textures,
                     float32Enabled: float32Enabled
-                }
+                };
 
                 setCode(shaderActiveSettings.code);
                 setLoadedTextures(shaderActiveSettings.textures);
@@ -183,7 +199,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                 setFloat32Enabled(float32Enabled);
                 // Typescript can't infer type of joined table
                 // @ts-ignore
-                setAuthorProfile(shader.profile)
+                setAuthorProfile(shader.profile);
             }
         } catch (error) {
             alert(error.message);
@@ -191,62 +207,66 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     };
 
     const uploadThumb = async (id: number, dataUrl: string) => {
-        const fileExt = "jpg";
+        const fileExt = 'jpg';
         const fileName = `${user!.id}/${id}.${fileExt}`;
 
         // convert to a format that the API likes by stripping the header
         // TODO: make this less brittle
         const buf = Buffer.from(dataUrl.replace('data:image/jpeg;base64,', ''), 'base64');
-        let { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
             .from(SUPABASE_SHADERTHUMB_BUCKET_NAME)
-            .upload(fileName, buf,
-                {contentType: 'image/jpeg', upsert: true});
+            .upload(fileName, buf, { contentType: 'image/jpeg', upsert: true });
 
         if (uploadError) {
-            throw uploadError
+            throw uploadError;
         }
 
-        let { error: updateError } = await supabase.from('shader').update({
-            thumb_url: fileName,
-        }).eq('id', id)
+        const { error: updateError } = await supabase
+            .from('shader')
+            .update({
+                thumb_url: fileName
+            })
+            .eq('id', id);
 
         if (updateError) {
-            throw updateError
+            throw updateError;
         }
-    }
+    };
 
     const create = async (dataUrl: string) => {
         try {
-            let {data, error, status} = await supabase
-                .from<definitions["shader"]>(SUPABASE_SHADER_TABLE_NAME)
-                .insert([{
-                    name: atomGetter(titleAtom),
-                    description: atomGetter(descriptionAtom),
-                    visibility: atomGetter(visibilityAtom),
-                    body: JSON.stringify({
-                        code: JSON.stringify(atomGetter(codeAtom)),
-                        uniforms: getSliderActiveSettings(atomGetter(sliderRefMapAtom)),
-                        textures: atomGetter(loadedTexturesAtom),
-                        float32Enabled: atomGetter(float32EnabledAtom)
-                    })
-                }]).single();
+            const { data, error, status } = await supabase
+                .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
+                .insert([
+                    {
+                        name: atomGetter(titleAtom),
+                        description: atomGetter(descriptionAtom),
+                        visibility: atomGetter(visibilityAtom),
+                        body: JSON.stringify({
+                            code: JSON.stringify(atomGetter(codeAtom)),
+                            uniforms: getSliderActiveSettings(atomGetter(sliderRefMapAtom)),
+                            textures: atomGetter(loadedTexturesAtom),
+                            float32Enabled: atomGetter(float32EnabledAtom)
+                        })
+                    }
+                ])
+                .single();
 
             if (error && status !== 406) {
                 throw error;
             }
 
             if (data) {
-                await uploadThumb(data["id"], dataUrl);
-                setSaveColorTransitionSignal(theme.palette.dracula.green)
-                return upsertResult(data["id"], true, true);
+                await uploadThumb(data['id'], dataUrl);
+                setSaveColorTransitionSignal(theme.palette.dracula.green);
+                return upsertResult(data['id'], true, true);
             } else {
-                setSaveColorTransitionSignal(theme.palette.dracula.red)
-                return upsertResult(null, false, false, "No data returned on creation");
+                setSaveColorTransitionSignal(theme.palette.dracula.red);
+                return upsertResult(null, false, false, 'No data returned on creation');
             }
-
         } catch (error) {
             alert(error.message);
-            setSaveColorTransitionSignal(theme.palette.dracula.red)
+            setSaveColorTransitionSignal(theme.palette.dracula.red);
             return upsertResult(null, false, false, error.message);
         }
     };
@@ -254,8 +274,8 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     const update = async (id: number, dataUrl: string) => {
         try {
             // TODO: let supabase know we don't need the record
-            let {data, error, status} = await supabase
-                .from<definitions["shader"]>(SUPABASE_SHADER_TABLE_NAME)
+            const { error, status } = await supabase
+                .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
                 .update({
                     name: atomGetter(titleAtom),
                     description: atomGetter(descriptionAtom),
@@ -275,11 +295,11 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
             }
 
             await uploadThumb(id, dataUrl);
-            setSaveColorTransitionSignal(theme.palette.dracula.green)
+            setSaveColorTransitionSignal(theme.palette.dracula.green);
             return upsertResult(id, false, true);
         } catch (error) {
             alert(error.message);
-            setSaveColorTransitionSignal(theme.palette.dracula.red)
+            setSaveColorTransitionSignal(theme.palette.dracula.red);
             return upsertResult(id, false, false, error.message);
         }
     };
@@ -290,7 +310,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
         } else {
             return create(dataUrl);
         }
-    }
+    };
 
     return [get, upsert];
 }

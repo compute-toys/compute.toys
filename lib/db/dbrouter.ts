@@ -1,10 +1,9 @@
-import {useRouter} from "next/router";
-import {authorProfileAtom, codeAtom, dbLoadedAtom, DEFAULT_SHADER, manualReloadAtom, shaderIDAtom} from "lib/atoms/atoms";
-import { isSafeContext, wgputoyAtom } from "lib/atoms/wgputoyatoms";
-import { useAtomValue } from "jotai";
-import {useSetAtom} from "jotai";
-import useShaderSerDe, {useResetShaderData} from "lib/db/serializeshader";
-import {useEffect} from "react";
+import { useAtomValue, useSetAtom } from 'jotai';
+import { dbLoadedAtom, manualReloadAtom, shaderIDAtom } from 'lib/atoms/atoms';
+import { isSafeContext, wgputoyAtom } from 'lib/atoms/wgputoyatoms';
+import useShaderSerDe, { useResetShaderData } from 'lib/db/serializeshader';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 
 function toNumber(str) {
     if (!Number.isNaN(Number(str))) {
@@ -21,7 +20,7 @@ export const useDBRouter = () => {
     const setDBLoaded = useSetAtom(dbLoadedAtom);
     const wgputoy = useAtomValue(wgputoyAtom);
 
-    const [get, upsert] = useShaderSerDe();
+    const [get] = useShaderSerDe();
 
     const router = useRouter();
     useEffect(() => {
@@ -47,20 +46,20 @@ export const useDBRouter = () => {
         }
     }, [router.isReady, router.query.id]);
     useEffect(() => {
-        const handleRouteChange = (url: string, { shallow }) => {
+        const handleRouteChange = (url: string) => {
             if (isSafeContext(wgputoy) && !['new', 'view', 'editor'].includes(url.split('/')[1])) {
-                console.log("Destroying WebGPU renderer");
+                console.log('Destroying WebGPU renderer');
                 wgputoy.free();
                 window['wgsl_error_handler'] = null;
             }
-        }
+        };
 
-        router.events.on('routeChangeStart', handleRouteChange)
+        router.events.on('routeChangeStart', handleRouteChange);
 
         // If the component is unmounted, unsubscribe
         // from the event with the `off` method:
         return () => {
-            router.events.off('routeChangeStart', handleRouteChange)
-        }
+            router.events.off('routeChangeStart', handleRouteChange);
+        };
     }, [wgputoy]);
-}
+};
