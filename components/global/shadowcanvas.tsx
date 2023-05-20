@@ -74,14 +74,8 @@ export const copyToShadowCanvas = async (
             img.onload = r;
             img.src = dataUrl;
         });
-        return new Promise(async r => {
-            await shadowCtx.drawImage(
-                img,
-                0,
-                0,
-                shadowCanvas.clientWidth,
-                shadowCanvas.clientHeight
-            );
+        return new Promise(r => {
+            shadowCtx.drawImage(img, 0, 0, shadowCanvas.clientWidth, shadowCanvas.clientHeight);
             r();
         });
     });

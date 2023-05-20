@@ -18,7 +18,7 @@ const modalStyle = {
     p: 4
 };
 
-export default function NoWgpuModal(props) {
+export default function NoWgpuModal() {
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);

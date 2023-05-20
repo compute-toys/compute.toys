@@ -23,7 +23,7 @@ interface LoginWindowProps {
     close: () => void;
 }
 
-export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
+export const LoginWindow = forwardRef((props: LoginWindowProps) => {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
@@ -97,7 +97,7 @@ export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
     };
 
     const onEnterKey = event => {
-        if (event.keyCode == 13) {
+        if (event.keyCode === 13) {
             // enter
             handleLogin();
         }
@@ -122,7 +122,7 @@ export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
             if (!awaitConfirm && !awaitNewPassword) {
                 return (
                     <Button
-                        onClick={e => {
+                        onClick={() => {
                             handleResetPassword();
                         }}
                         sx={
@@ -152,7 +152,7 @@ export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
                             }}
                         />
                         <Button
-                            onClick={e => {
+                            onClick={() => {
                                 handleConfirmOTP();
                             }}
                             sx={
@@ -169,7 +169,7 @@ export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
             } else if (awaitNewPassword) {
                 return (
                     <Button
-                        onClick={e => {
+                        onClick={() => {
                             handleUpdatePassword();
                         }}
                         sx={
@@ -251,7 +251,7 @@ export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
                     />
                 )}
                 {getContextDialog()}
-                {forgot ? null : <a onClick={e => handleForgot()}>Forgot your password?</a>}
+                {forgot ? null : <a onClick={() => handleForgot()}>Forgot your password?</a>}
                 {error ? (
                     <Item sx={{ color: theme.palette.dracula.red }}>
                         <Stack>
@@ -267,7 +267,7 @@ export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
 LoginWindow.displayName = 'LoginWindow';
 
 export default function LoginModal() {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0);
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
     const { view, profile, logIn, logOut, confirm, resetPassword, updatePassword } = useAuth();
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);

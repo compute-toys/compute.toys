@@ -81,7 +81,7 @@ const WgpuToyController = props => {
     const parentRef = useAtomValue<HTMLElement | null>(canvasParentElAtom);
 
     const [width, setWidth] = useTransientAtom(widthAtom);
-    const [height, setHeight] = useTransientAtom(heightAtom);
+    const [, setHeight] = useTransientAtom(heightAtom);
     const [scale, setScale] = useTransientAtom(scaleAtom);
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
@@ -195,7 +195,7 @@ const WgpuToyController = props => {
 
     const handleSuccess = useCallback(entryPoints => {
         setEntryPoints(entryPoints);
-        setParseError(error => ({
+        setParseError(() => ({
             summary: '',
             position: { row: 0, col: 0 },
             success: true
@@ -204,7 +204,7 @@ const WgpuToyController = props => {
     }, []);
 
     const handleError = useCallback((summary: string, row: number, col: number) => {
-        setParseError(error => ({
+        setParseError(() => ({
             summary: summary,
             position: { row: Number(row), col: Number(col) },
             success: false

@@ -176,13 +176,13 @@ const PagePicker = props => {
         <Stack direction="row" style={props.style}>
             {[...Array(lowerPages).keys()].map(index => {
                 const page = index + firstPage;
-                return <PageButton highlight={currentPage == page} key={page} index={page} />;
+                return <PageButton highlight={currentPage === page} key={page} index={page} />;
             })}
             {showLast ? (
                 <Fragment>
                     {!hideEllipsis ? <EllipsisButton /> : null}
                     <PageButton
-                        highlight={currentPage == lastPage}
+                        highlight={currentPage === lastPage}
                         key={lastPage}
                         index={lastPage}
                     />

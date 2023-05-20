@@ -28,7 +28,7 @@ import { MetadataEditor } from 'components/editor/metadataeditor';
 import TexturePicker from 'components/editor/texturepicker';
 import UniformSliders from 'components/editor/uniformsliders';
 import { useSetAtom } from 'jotai';
-import { manualReloadAtom, saveColorTransitionSignalAtom } from 'lib/atoms/atoms';
+import { saveColorTransitionSignalAtom } from 'lib/atoms/atoms';
 import { canvasParentElAtom } from 'lib/atoms/wgputoyatoms';
 import { supabase } from 'lib/db/supabaseclient';
 import dynamic from 'next/dynamic';
@@ -38,7 +38,6 @@ import Explainer from './explainer';
 
 export const Editor = () => {
     const setCanvasParentEl = useSetAtom(canvasParentElAtom);
-    const setManualReload = useSetAtom(manualReloadAtom);
 
     const renderParentNodeRef = useCallback(parent => {
         if (parent) {

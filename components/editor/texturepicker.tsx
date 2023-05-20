@@ -66,7 +66,7 @@ const DraggablePicker = props => {
                     cols={6}
                     rowHeight={size}
                 >
-                    {defaultTextures.map((item, index) => (
+                    {defaultTextures.map(item => (
                         <ImageListItem
                             key={item.img + props.channel}
                             onClick={() => {

@@ -72,7 +72,7 @@ export default function Profile(props) {
         try {
             setUploading(true);
 
-            if (!event.target.files || event.target.files.length == 0) {
+            if (!event.target.files || event.target.files.length === 0) {
                 setErrorMessage('You must select an image to upload.');
                 throw 'No file selected';
             }
@@ -138,7 +138,6 @@ export default function Profile(props) {
 
             setErrorMessage(null);
             setUnsavedChanges(false);
-        } catch (error) {
         } finally {
             setLoading(false);
         }

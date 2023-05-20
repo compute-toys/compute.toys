@@ -96,7 +96,7 @@ export const StyledTextField = styled(TextField)({
 const validate = (text: string, this_uuid: string, sliderRefMap: Map<string, UniformSliderRef>) => {
     const matched = text.match(/^[a-zA-Z][a-zA-Z0-9_]*$/);
     const nameValid = matched && matched.length === 1;
-    const foundDuplicate = [...sliderRefMap.keys()].find((uuid, index) => {
+    const foundDuplicate = [...sliderRefMap.keys()].find(uuid => {
         return this_uuid !== uuid && sliderRefMap.get(uuid).getUniform() === text;
     });
     return nameValid && !foundDuplicate;
@@ -116,7 +116,7 @@ const CustomTextField = forwardRef((props: any, inputRef: MutableRefObject<any>)
     }, [props.sliderUniform]);
 
     const onEnterKey = event => {
-        if (event.keyCode == 13) {
+        if (event.keyCode === 13) {
             // enter
             inputRef.current.blur();
         }

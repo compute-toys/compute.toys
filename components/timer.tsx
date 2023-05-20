@@ -8,7 +8,7 @@ import useAnimationFrame from 'use-animation-frame';
 
 export default function Timer() {
     const timer = useAtomValue(timerAtom);
-    const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
+    const [isPlaying] = useTransientAtom(isPlayingAtom);
     const frames = useRef(0);
     const secs = useRef(0);
     const [fps, setFps] = useState(0);

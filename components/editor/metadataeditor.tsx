@@ -50,7 +50,7 @@ export const MetadataEditor = () => {
     const shadowCanvasEl = useAtomValue(shadowCanvasElAtom);
     const canvasEl = useAtomValue(canvasElAtom);
     const authorProfile = useAtomValue(authorProfileAtom);
-    const [getFromHost, upsertToHost] = useShaderSerDe();
+    const [, upsertToHost] = useShaderSerDe();
     const { user } = useAuth();
     const router = useRouter();
 
