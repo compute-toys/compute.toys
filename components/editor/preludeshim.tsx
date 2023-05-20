@@ -7,7 +7,7 @@ import { Fragment, useEffect, useState } from 'react';
     data must be through dynamic imports (i.e. client-side only)
     Is there a less bogus way of doing this??
  */
-export default function PreludeShim(props) {
+export default function PreludeShim() {
     const wgpuToy = useAtomValue(wgputoyAtom);
     const [prelude, setPrelude] = useState('');
 

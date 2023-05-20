@@ -1,12 +1,3 @@
-import {
-    Palette,
-    PaletteColor,
-    PaletteColorOptions,
-    PaletteOptions,
-    SimplePaletteColorOptions,
-    Theme,
-    ThemeOptions
-} from '@mui/material/styles';
 import { CSSProperties } from 'react';
 
 declare module '@mui/material/styles' {

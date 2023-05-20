@@ -20,7 +20,7 @@ export const useDBRouter = () => {
     const setDBLoaded = useSetAtom(dbLoadedAtom);
     const wgputoy = useAtomValue(wgputoyAtom);
 
-    const [get, upsert] = useShaderSerDe();
+    const [get] = useShaderSerDe();
 
     const router = useRouter();
     useEffect(() => {
@@ -46,7 +46,7 @@ export const useDBRouter = () => {
         }
     }, [router.isReady, router.query.id]);
     useEffect(() => {
-        const handleRouteChange = (url: string, { shallow }) => {
+        const handleRouteChange = (url: string) => {
             if (isSafeContext(wgputoy) && !['new', 'view', 'editor'].includes(url.split('/')[1])) {
                 console.log('Destroying WebGPU renderer');
                 wgputoy.free();

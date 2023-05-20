@@ -24,7 +24,7 @@ const NewSubmissionBar = props => {
             cols={2}
             rowHeight={SHADER_THUMB_SIZE_V}
         >
-            {props.shaders.map((shader, index) => (
+            {props.shaders.map(shader => (
                 <ImageListItem key={shader.id}>
                     <Image
                         style={{ borderRadius: '4px' }}
@@ -78,7 +78,7 @@ const style = {
     color: theme.palette.dracula.foreground
 };
 
-const ExplainerModal = forwardRef((props, ref) => {
+const ExplainerModal = forwardRef(() => {
     return (
         <Box sx={modalStyle}>
             <Stack spacing={2}>
@@ -130,7 +130,6 @@ ExplainerModal.displayName = 'ExplainerModal';
 
 export default function Home(props) {
     const [open, setOpen] = useState(false);
-    const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     if (props.error) console.error(props.error);
@@ -232,7 +231,7 @@ export async function getServerSideProps(context) {
         };
     }
 
-    const { data, count, error } = await supabase
+    const { data, error } = await supabase
         .from('shader')
         .select(
             `

@@ -143,7 +143,7 @@ const Monaco = props => {
         <Editor
             height="calc(100vh - 270px)" // preference
             language="wgsl"
-            onChange={(value, _event) => {
+            onChange={value => {
                 setCode(value);
                 setCodeHasBeenModifiedAtLeastOnce(true);
             }}

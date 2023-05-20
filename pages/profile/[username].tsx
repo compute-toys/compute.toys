@@ -216,7 +216,7 @@ export default function Profile(props) {
                             />
                             {unsavedChanges ? (
                                 <Button
-                                    onClick={e => {
+                                    onClick={() => {
                                         saveChanges();
                                     }}
                                     sx={
@@ -252,11 +252,7 @@ export async function getServerSideProps(context) {
 
     const { username } = context.params;
 
-    const {
-        data: idData,
-        error: idError,
-        status: idStatus
-    } = await supabase
+    const { data: idData, error: idError } = await supabase
         .from<definitions['profile']>('profile')
         .select('*')
         .eq('username', username)

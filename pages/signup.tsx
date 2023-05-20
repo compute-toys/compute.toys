@@ -127,7 +127,7 @@ export const SignUp = () => {
                                 onChange={e => {
                                     setEmailEditor(e.target.value);
                                 }}
-                                onBlur={e => {
+                                onBlur={() => {
                                     validateEmail();
                                 }}
                             />
@@ -144,7 +144,7 @@ export const SignUp = () => {
                                 size={'small'}
                                 value={usernameEditor || ''}
                                 onChange={e => setUsernameEditor(e.target.value)}
-                                onBlur={e => {
+                                onBlur={() => {
                                     validateUsername();
                                 }}
                             />
@@ -161,7 +161,7 @@ export const SignUp = () => {
                                 size={'small'}
                                 value={password1Editor || ''}
                                 onChange={e => setPassword1Editor(e.target.value)}
-                                onBlur={e => {
+                                onBlur={() => {
                                     validatePassword();
                                 }}
                                 type={'password'}
@@ -179,7 +179,7 @@ export const SignUp = () => {
                                 size={'small'}
                                 value={password2Editor || ''}
                                 onChange={e => setPassword2Editor(e.target.value)}
-                                onBlur={e => {
+                                onBlur={() => {
                                     validatePassword();
                                 }}
                                 type={'password'}

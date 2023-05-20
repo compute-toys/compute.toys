@@ -65,6 +65,7 @@ async function updateSupabaseCookie(event: AuthChangeEvent, session: Session | n
     });
 }
 
+/*
 async function logInApi(username: string, password: string) {
     return await fetch('/api/login', {
         method: 'POST',
@@ -73,6 +74,7 @@ async function logInApi(username: string, password: string) {
         body: JSON.stringify({ username, password })
     });
 }
+*/
 
 async function signUpApi(email: string, username: string, password: string) {
     return await fetch('/api/signup', {
@@ -92,6 +94,7 @@ async function confirmApi(email: string, token: string, type: EmailOTPType) {
     });
 }
 
+/*
 //https://github.com/supabase/supabase/blob/master/examples/nextjs-ts-user-management/components/Account.tsx
 const uploadAvatar = async (file: File, user: User): Promise<{ avatar; error }> => {
     let error = undefined;
@@ -131,6 +134,7 @@ const uploadAvatar = async (file: File, user: User): Promise<{ avatar; error }> 
         return { avatar: undefined, error: error };
     }
 };
+*/
 
 const getProfileApi = async (user: User, view: string) => {
     if (user && view && view !== VIEWS.LOGGED_OUT) {
@@ -163,7 +167,7 @@ export const AuthProvider = ({ ...props }) => {
     const logIn = async (email: string, password: string) => {
         return await supabase.auth
             .signIn({ email, password })
-            .then(({ session, user, error }) => {
+            .then(({ session, error }) => {
                 if (error) {
                     throw new Error(error.message);
                 } else {
@@ -194,7 +198,7 @@ export const AuthProvider = ({ ...props }) => {
                     return res.json();
                 }
             })
-            .then(data => {
+            .then(() => {
                 return { error: undefined };
             })
             .catch(err => {
@@ -220,7 +224,7 @@ export const AuthProvider = ({ ...props }) => {
             .then(async data => {
                 // seems really backwards since we already have the session,
                 // but this seems to be the only documented way to do this
-                const { user, session, error } = await supabase.auth.signIn({
+                const { error } = await supabase.auth.signIn({
                     refreshToken: data.session.refresh_token
                 });
 
@@ -236,7 +240,7 @@ export const AuthProvider = ({ ...props }) => {
     };
 
     const resetPassword = async (email: string): Promise<{ error }> => {
-        return await supabase.auth.api.resetPasswordForEmail(email).then(({ data, error }) => {
+        return await supabase.auth.api.resetPasswordForEmail(email).then(({ error }) => {
             if (error) {
                 return { error: error.message };
             } else {
@@ -248,7 +252,7 @@ export const AuthProvider = ({ ...props }) => {
     const updatePassword = async (password: string): Promise<{ error }> => {
         return await supabase.auth.api
             .updateUser(session.access_token, { password: password })
-            .then(({ data, error }) => {
+            .then(({ error }) => {
                 if (error) {
                     return { error: error.message };
                 } else {

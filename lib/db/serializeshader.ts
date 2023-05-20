@@ -274,7 +274,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     const update = async (id: number, dataUrl: string) => {
         try {
             // TODO: let supabase know we don't need the record
-            const { data, error, status } = await supabase
+            const { error, status } = await supabase
                 .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
                 .update({
                     name: atomGetter(titleAtom),

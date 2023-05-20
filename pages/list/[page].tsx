@@ -22,7 +22,7 @@ export const getPagination = (page: number, size: number) => {
 };
 
 const getTotalCount = async () => {
-    const { data, error, count } = await supabase
+    const { error, count } = await supabase
         .from('shader')
         .select('*', { count: 'exact', head: true })
         .eq('visibility', 'public');
@@ -78,7 +78,7 @@ const ShaderPicker = props => {
                 cols={4}
                 rowHeight={SHADER_THUMB_SIZE_V}
             >
-                {props.shaders.map((shader, index) => (
+                {props.shaders.map(shader => (
                     <ImageListItem key={shader.id}>
                         <Image
                             style={{ borderRadius: '4px' }}
