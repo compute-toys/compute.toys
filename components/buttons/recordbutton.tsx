@@ -1,6 +1,7 @@
 import { RadioButtonChecked } from '@mui/icons-material';
-import { Button, SvgIcon } from '@mui/material';
+import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
+import SvgIcon from '@mui/material/SvgIcon';
 import { useAtom } from 'jotai';
 import { recordingAtom } from 'lib/atoms/atoms';
 

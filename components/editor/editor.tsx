@@ -1,38 +1,34 @@
 // MUI sizing from refs:
 // https://github.com/mui/material-ui/issues/15662
 
-import Monaco from 'components/editor/monaco';
-import { WgpuToyWrapper } from 'components/wgputoy';
-
-import { useCallback } from 'react';
-
-import { Button, useMediaQuery, useTheme } from '@mui/material';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
-
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import FullscreenButton from 'components/buttons/fullscreenbutton';
 import HotReloadToggle from 'components/buttons/hotreloadtoggle';
 import PlayPauseButton from 'components/buttons/playpausebutton';
+import RecordButton from 'components/buttons/recordbutton';
 import ReloadButton from 'components/buttons/reloadbutton';
 import ResetButton from 'components/buttons/resetbutton';
 import ScaleButton from 'components/buttons/scalebutton';
-import FullscreenButton from '../buttons/fullscreenbutton';
-
-import { Frame } from 'theme/theme';
-
-import 'firacode';
-
-import RecordButton from 'components/buttons/recordbutton';
 import VimButton from 'components/buttons/vimbutton';
 import EntryPointDisplay from 'components/editor/entrypointdisplay';
 import { MetadataEditor } from 'components/editor/metadataeditor';
+import Monaco from 'components/editor/monaco';
 import TexturePicker from 'components/editor/texturepicker';
 import UniformSliders from 'components/editor/uniformsliders';
+import { WgpuToyWrapper } from 'components/wgputoy';
+import 'firacode';
 import { useSetAtom } from 'jotai';
 import { saveColorTransitionSignalAtom } from 'lib/atoms/atoms';
 import { canvasParentElAtom } from 'lib/atoms/wgputoyatoms';
 import { supabase } from 'lib/db/supabaseclient';
 import dynamic from 'next/dynamic';
+import { useCallback } from 'react';
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
+import { Frame } from 'theme/theme';
 import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
 

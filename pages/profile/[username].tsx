@@ -1,5 +1,7 @@
-import { Button, Stack, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import UploadButton from 'components/buttons/uploadbutton';
 import Avatar from 'components/global/avatar';
 import { useAuth } from 'lib/db/authcontext';

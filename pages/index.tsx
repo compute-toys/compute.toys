@@ -1,9 +1,13 @@
 import '@fontsource/lobster';
-import { Alert, ImageListItemBar, Modal, Stack, Typography } from '@mui/material';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
+import ImageListItemBar from '@mui/material/ImageListItemBar';
+import Modal from '@mui/material/Modal';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import Avatar from 'components/global/avatar';
 import FakeLink from 'components/global/fakelink';
 import Logo from 'components/global/logo';

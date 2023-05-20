@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box';
 import { useAtomValue } from 'jotai';
 import { useTransientAtom } from 'jotai-game';
 import { isPlayingAtom, timerAtom } from 'lib/atoms/atoms';

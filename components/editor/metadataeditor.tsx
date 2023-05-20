@@ -1,15 +1,13 @@
-import {
-    Button,
-    FormControl,
-    Grid,
-    InputBase,
-    InputLabel,
-    MenuItem,
-    Select,
-    Stack,
-    Typography
-} from '@mui/material';
+import Button from '@mui/material/Button';
+import FormControl from '@mui/material/FormControl';
+import Grid from '@mui/material/Grid';
+import InputBase from '@mui/material/InputBase';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
+import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
+import Typography from '@mui/material/Typography';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
     authorProfileAtom,

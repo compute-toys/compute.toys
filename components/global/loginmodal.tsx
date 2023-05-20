@@ -1,6 +1,9 @@
-import { Button, Modal, Stack, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
+import Modal from '@mui/material/Modal';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import Avatar from 'components/global/avatar';
 import {
     AuthConfirm,

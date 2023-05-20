@@ -1,5 +1,5 @@
 import ReplayIcon from '@mui/icons-material/Replay';
-import { Button } from '@mui/material';
+import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import { useSetAtom } from 'jotai';
 import { resetAtom } from 'lib/atoms/atoms';

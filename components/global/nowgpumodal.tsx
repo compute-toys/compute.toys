@@ -1,5 +1,7 @@
-import { Modal, Stack, Typography } from '@mui/material';
 import Box from '@mui/material/Box';
+import Modal from '@mui/material/Modal';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import { useAtomValue } from 'jotai';
 import { wgpuAvailabilityAtom } from 'lib/atoms/atoms';
 import { Fragment, useEffect, useState } from 'react';

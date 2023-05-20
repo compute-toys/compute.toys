@@ -1,5 +1,5 @@
 import { Hd, Sd } from '@mui/icons-material';
-import { Button } from '@mui/material';
+import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import { useAtom, useAtomValue } from 'jotai';
 import { halfResolutionAtom } from 'lib/atoms/atoms';

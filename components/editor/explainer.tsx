@@ -1,6 +1,6 @@
 import { DisabledByDefaultSharp } from '@mui/icons-material';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
-import { Button } from '@mui/material';
+import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';

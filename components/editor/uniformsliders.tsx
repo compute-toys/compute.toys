@@ -1,17 +1,15 @@
 import AddIcon from '@mui/icons-material/Add';
 import ClearIcon from '@mui/icons-material/Clear';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
-    Button,
-    Slider,
-    Stack,
-    TextField
-} from '@mui/material';
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Slider from '@mui/material/Slider';
+import Stack from '@mui/material/Stack';
 import { styled, useTheme } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
 import { useAtom, useSetAtom } from 'jotai';
 import {
     manualReloadAtom,

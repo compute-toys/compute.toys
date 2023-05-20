@@ -1,7 +1,9 @@
-import { Button, ImageListItemBar, Stack } from '@mui/material';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
+import ImageListItemBar from '@mui/material/ImageListItemBar';
+import Stack from '@mui/material/Stack';
 import Avatar from 'components/global/avatar';
 import FakeLink from 'components/global/fakelink';
 import { supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';

@@ -1,6 +1,11 @@
 import LineStyleIcon from '@mui/icons-material/LineStyle';
-import { List, ListItem, ListItemIcon, ListItemText, ListSubheader, Switch } from '@mui/material';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import ListSubheader from '@mui/material/ListSubheader';
 import { useTheme } from '@mui/material/styles';
+import Switch from '@mui/material/Switch';
 import { useAtom } from 'jotai';
 import { float32EnabledAtom } from 'lib/atoms/atoms';
 import { Item } from '../../theme/theme';
