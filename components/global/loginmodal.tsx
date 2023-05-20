@@ -26,7 +26,7 @@ interface LoginWindowProps {
     close: () => void;
 }
 
-export const LoginWindow = forwardRef((props: LoginWindowProps) => {
+export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);

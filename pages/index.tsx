@@ -82,7 +82,7 @@ const style = {
     color: theme.palette.dracula.foreground
 };
 
-const ExplainerModal = forwardRef(() => {
+const ExplainerModal = forwardRef((props, ref) => {
     return (
         <Box sx={modalStyle}>
             <Stack spacing={2}>
