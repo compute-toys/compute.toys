@@ -71,7 +71,7 @@ export const fromUniformActiveSettings = (sliderSerDeArray: Array<UniformActiveS
 };
 
 // needs float: left to avoid drifting away from the absolute-positioned label
-export const StyledTextField = styled(TextField)({
+const StyledTextField = styled(TextField)({
     '& .MuiOutlinedInput-root': {
         '& fieldset': {
             borderColor: theme.palette.dracula.currentLine
