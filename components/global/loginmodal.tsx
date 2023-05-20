@@ -105,12 +105,12 @@ export const LoginWindow = forwardRef((props: LoginWindowProps) => {
 
     const getPrompt = () => {
         if (forgot) {
-            if (!awaitConfirm && !awaitNewPassword) {
-                return 'Enter your email to receive a recovery code';
-            } else if (awaitConfirm) {
+            if (awaitConfirm) {
                 return 'Enter your confirmation code';
             } else if (awaitNewPassword) {
                 return 'Enter your new password';
+            } else {
+                return 'Enter your email to receive a recovery code';
             }
         } else {
             return 'Enter email and password';
@@ -119,23 +119,7 @@ export const LoginWindow = forwardRef((props: LoginWindowProps) => {
 
     const getContextDialog = () => {
         if (forgot) {
-            if (!awaitConfirm && !awaitNewPassword) {
-                return (
-                    <Button
-                        onClick={() => {
-                            handleResetPassword();
-                        }}
-                        sx={
-                            loading
-                                ? { color: theme.status.disabled }
-                                : { color: theme.palette.dracula.orange }
-                        }
-                        disabled={loading || awaitConfirm}
-                    >
-                        <span>{loading ? 'Loading' : 'Request Code'}</span>
-                    </Button>
-                );
-            } else if (awaitConfirm) {
+            if (awaitConfirm) {
                 return (
                     <Fragment>
                         <CssTextField
@@ -180,6 +164,22 @@ export const LoginWindow = forwardRef((props: LoginWindowProps) => {
                         disabled={loading || awaitConfirm}
                     >
                         <span>{loading ? 'Loading' : 'Update Password'}</span>
+                    </Button>
+                );
+            } else {
+                return (
+                    <Button
+                        onClick={() => {
+                            handleResetPassword();
+                        }}
+                        sx={
+                            loading
+                                ? { color: theme.status.disabled }
+                                : { color: theme.palette.dracula.orange }
+                        }
+                        disabled={loading || awaitConfirm}
+                    >
+                        <span>{loading ? 'Loading' : 'Request Code'}</span>
                     </Button>
                 );
             }

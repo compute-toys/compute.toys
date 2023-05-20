@@ -34,6 +34,11 @@ async function loadShaders(username: string) {
                 shaders: data,
                 error: null
             };
+        } else {
+            return {
+                shaders: [],
+                error: 'no data'
+            };
         }
     } catch (error) {
         return {

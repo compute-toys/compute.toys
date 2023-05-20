@@ -85,7 +85,7 @@ const Monaco = props => {
                         const resp = await fetch(
                             `https://compute-toys.github.io/include/${name}.wgsl`
                         );
-                        if (resp.status !== 200) return;
+                        if (resp.status !== 200) return null;
                         const text = await resp.text();
                         return {
                             range: new monacoRef.current.Range(n, 1, n, model.getLineMaxColumn(n)),
@@ -95,6 +95,7 @@ const Monaco = props => {
                             ]
                         };
                     }
+                    return null;
                 }
             });
             defineMonacoTheme(monaco, 'global');

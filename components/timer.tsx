@@ -42,4 +42,5 @@ export default function Timer() {
             </Fragment>
         );
     }
+    return null;
 }

@@ -256,6 +256,7 @@ const WgpuToyController = props => {
             canvas.addEventListener('keydown', handleKeyDown);
             return () => canvas.removeEventListener('keydown', handleKeyDown);
         }
+        return null;
     }, []);
 
     useEffect(() => {
@@ -268,6 +269,7 @@ const WgpuToyController = props => {
             canvas.addEventListener('keyup', handleKeyUp);
             return () => canvas.removeEventListener('keyup', handleKeyUp);
         }
+        return null;
     }, []);
 
     useEffect(() => {
