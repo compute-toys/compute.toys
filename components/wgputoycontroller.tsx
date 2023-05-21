@@ -13,7 +13,6 @@ import {
     loadedTexturesAtom,
     manualReloadAtom,
     parseErrorAtom,
-    pauseTimeWhileStillRenderingAtom,
     playAtom,
     recordingAtom,
     requestFullscreenAtom,
@@ -48,9 +47,6 @@ const needsInitialResetAtom = atom<boolean>(false);
  */
 const WgpuToyController = props => {
     const [play, setPlay] = useAtom(playAtom);
-    const [pauseTimeWhileStillRendering, setPauseTimeWhileStillRendering] = useAtom(
-        pauseTimeWhileStillRenderingAtom
-    );
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
     const [recording, setRecording] = useAtom(recordingAtom);
@@ -161,7 +157,7 @@ const WgpuToyController = props => {
             } else {
                 liveReloadCallback();
             }
-            if (pauseTimeWhileStillRendering || (sliderUpdateSignal() && !isPlaying())) {
+            if (sliderUpdateSignal() && !isPlaying()) {
                 wgputoy.set_time_delta(e.delta);
                 wgputoy.render();
             } else if (isPlaying() || manualReload()) {
@@ -396,7 +392,6 @@ const WgpuToyController = props => {
     useEffect(() => {
         if (play && !isPlaying()) {
             playCallback();
-            setPauseTimeWhileStillRendering(false);
         } else if (!play && isPlaying()) {
             pauseCallback();
         }

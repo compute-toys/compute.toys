@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import ImageList from '@mui/material/ImageList';
-import ImageListItem from '@mui/material/ImageListItem';
+import ImageListItem, { imageListItemClasses } from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import Stack from '@mui/material/Stack';
 import Avatar from 'components/global/avatar';
@@ -74,11 +73,23 @@ const ShaderPicker = props => {
                 display: 'inline-block'
             }}
         >
-            <ImageList
-                gap={10}
-                sx={{ width: SHADER_THUMB_SIZE_H * 4.1 }}
-                cols={4}
-                rowHeight={SHADER_THUMB_SIZE_V}
+            <Box
+                sx={{
+                    display: 'grid',
+                    gridTemplateColumns: {
+                        xs: 'repeat(1, 1fr)',
+                        sm: 'repeat(2, 1fr)',
+                        md: 'repeat(3, 1fr)',
+                        lg: 'repeat(4, 1fr)'
+                    },
+                    gap: '10px',
+                    // standard variant from here:
+                    // https://github.com/mui-org/material-ui/blob/3e679ac9e368aeb170d564d206d59913ceca7062/packages/mui-material/src/ImageListItem/ImageListItem.js#L42-L43
+                    [`& .${imageListItemClasses.root}`]: {
+                        display: 'flex',
+                        flexDirection: 'column'
+                    }
+                }}
             >
                 {props.shaders.map(shader => (
                     <ImageListItem key={shader.id}>
@@ -107,7 +118,7 @@ const ShaderPicker = props => {
                         />
                     </ImageListItem>
                 ))}
-            </ImageList>
+            </Box>
         </Item>
     );
 };

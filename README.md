@@ -19,6 +19,12 @@ To install dependencies:
 
 To start the development server, run `yarn dev`, or use the debug configuration in VS Code.
 
+Some other useful commands are:
+
+- `yarn build` to check everything builds properly (the CI will check this for PRs)
+- `yarn lint` to only check for lint errors and warnings
+- `yarn fix` to automatically fix lint errors where possible
+
 **Note:** Currently you won't be able to run the full website without the database keys.
 As a workaround, delete the `pages` directory, and it will fallback to a standalone editor
 (similar to https://compute.toys/new without the account-based features).
