@@ -91,21 +91,21 @@ const DraggableExplainer = props => {
                     <br />
                     Mouse input can be accessed from the <HiLite>mouse</HiLite> struct:
                     <pre style={{ color: theme.palette.neutral.main }}>
-                        mouse.pos: uint2
+                        mouse.pos: vec2i
                         <br />
-                        mouse.click: int
+                        mouse.click: i32
                     </pre>
                     Timing information is in the <HiLite>time</HiLite> struct:
                     <pre style={{ color: theme.palette.neutral.main }}>
-                        time.frame: uint
+                        time.frame: u32
                         <br />
-                        time.elapsed: float
+                        time.elapsed: f32
                     </pre>
                     Custom uniforms are in the <HiLite>custom</HiLite> struct:
                     <pre style={{ color: theme.palette.neutral.main }}>
-                        custom.my_custom_uniform_0: float
+                        custom.my_custom_uniform_0: f32
                         <br />
-                        custom.my_custom_uniform_1: float
+                        custom.my_custom_uniform_1: f32
                     </pre>
                     Two selectable textures can be accessed from <HiLite>channel0</HiLite> and{' '}
                     <HiLite>channel1</HiLite>:
@@ -115,9 +115,9 @@ const DraggableExplainer = props => {
                         textureSampleLevel(channel1, bilinear, uv, pass, lod)
                     </pre>
                     Keyboard input can be accessed from the provided{' '}
-                    <HiLite>keyDown(keycode: uint)</HiLite> helper function:
+                    <HiLite>keyDown(keycode: u32)</HiLite> helper function:
                     <pre style={{ color: theme.palette.neutral.main }}>
-                        keyDown(32u) // returns true when the spacebar is pressed
+                        keyDown(u32) // returns true when the spacebar is pressed
                     </pre>
                     <h1>Outputs</h1>
                     For compute shader input and output <Logo /> provides:
@@ -139,7 +139,7 @@ const DraggableExplainer = props => {
                     helper function:
                     <br />
                     <pre style={{ color: theme.palette.neutral.main }}>
-                        passLoad(2, int2(1,1), 0)
+                        passLoad(2, vec2i(1,1), 0)
                     </pre>
                     <h1>Preprocessor</h1>
                     <Logo /> also provides an experimental WGSL preprocessor. It currently allows
