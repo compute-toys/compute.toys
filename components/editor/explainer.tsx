@@ -117,7 +117,7 @@ const DraggableExplainer = props => {
                     Keyboard input can be accessed from the provided{' '}
                     <HiLite>keyDown(keycode: u32)</HiLite> helper function:
                     <pre style={{ color: theme.palette.neutral.main }}>
-                        keyDown(u32) // returns true when the spacebar is pressed
+                        keyDown(32) // returns true when the spacebar is pressed
                     </pre>
                     <h1>Outputs</h1>
                     For compute shader input and output <Logo /> provides:
