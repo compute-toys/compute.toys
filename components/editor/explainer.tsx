@@ -194,19 +194,29 @@ const DraggableExplainer = props => {
                     </pre>
                     <h1>Examples</h1>
                     <div style={{ fontWeight: 'bold', fontSize: '0.8rem' }}>
-                        <Link href={'https://compute.toys/view/77'} target="_blank">Simple single pass shader</Link>
+                        <Link href={'https://compute.toys/view/77'} target="_blank">
+                            Simple single pass shader
+                        </Link>
                         <br />
                         <br />
-                        <Link href={'https://compute.toys/view/46'} target="_blank">Preprocessor #include</Link>
+                        <Link href={'https://compute.toys/view/46'} target="_blank">
+                            Preprocessor #include
+                        </Link>
                         <br />
                         <br />
-                        <Link href={'https://compute.toys/view/59'} target="_blank">Terminal overlay</Link>
+                        <Link href={'https://compute.toys/view/59'} target="_blank">
+                            Terminal overlay
+                        </Link>
                         <br />
                         <br />
-                        <Link href={'https://compute.toys/view/76'} target="_blank">Storage usage</Link>
+                        <Link href={'https://compute.toys/view/76'} target="_blank">
+                            Storage usage
+                        </Link>
                         <br />
                         <br />
-                        <Link href={'https://compute.toys/view/25'} target="_blank">Workgroup shared memory</Link>
+                        <Link href={'https://compute.toys/view/25'} target="_blank">
+                            Workgroup shared memory
+                        </Link>
                         <br />
                         <br />
                         <Link href={'https://compute.toys/view/48'} target="_blank">
@@ -219,7 +229,9 @@ const DraggableExplainer = props => {
                         </Link>
                         <br />
                         <br />
-                        <Link href={'https://compute.toys/view/17'} target="_blank">Assert</Link>
+                        <Link href={'https://compute.toys/view/17'} target="_blank">
+                            Assert
+                        </Link>
                         <br />
                         <br />
                     </div>
