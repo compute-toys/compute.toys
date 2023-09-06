@@ -20,7 +20,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "sourceMap": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "types": ["@webgpu/types"]
   },
   "include": [
     "next-env.d.ts",

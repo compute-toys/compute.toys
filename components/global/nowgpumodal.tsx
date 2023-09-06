@@ -3,7 +3,7 @@ import Modal from '@mui/material/Modal';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useAtomValue } from 'jotai';
-import { wgpuAvailabilityAtom } from 'lib/atoms/atoms';
+import { wgpuAvailabilityAtom } from 'lib/atoms/wgputoyatoms';
 import { Fragment, useEffect, useState } from 'react';
 import { theme } from 'theme/theme';
 import Logo from './logo';
