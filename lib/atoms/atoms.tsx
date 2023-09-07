@@ -41,12 +41,6 @@ export interface Texture {
     url?: string;
 }
 
-export type Visibility = 'private' | 'unlisted' | 'public';
-
-export type WgpuStatus = 'available' | 'unavailable' | 'unknown';
-
-export const wgpuAvailabilityAtom = atom<WgpuStatus>('unknown');
-
 export const playAtom = atom<boolean>(true);
 export const resetAtom = atom<boolean>(false);
 export const hotReloadAtom = atom<boolean>(false);
@@ -74,6 +68,8 @@ export const shaderIDAtom = atomWithReset<number | false>(false);
 export const codeAtom = atomWithReset<string>(DEFAULT_SHADER);
 export const titleAtom = atomWithReset<string>('New Shader');
 export const descriptionAtom = atomWithReset<string>('');
+
+export type Visibility = 'private' | 'unlisted' | 'public';
 export const visibilityAtom = atomWithReset<Visibility>('private');
 export const loadedTexturesAtom = atomWithReset<Texture[]>([
     { img: '/textures/blank.png' },

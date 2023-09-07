@@ -1,18 +1,20 @@
 import { useAtomValue } from 'jotai';
-import { isSafeContext, wgputoyAtom } from 'lib/atoms/wgputoyatoms';
+import { wgpuAvailabilityAtom, wgputoyAtom } from 'lib/atoms/wgputoyatoms';
 import { Fragment, useEffect, useState } from 'react';
 
 /*
     We need to put this in its own component because any access to wgpu
     data must be through dynamic imports (i.e. client-side only)
-    Is there a less bogus way of doing this??
  */
 export default function PreludeShim() {
-    const wgpuToy = useAtomValue(wgputoyAtom);
+    const wgpuAvailability = useAtomValue(wgpuAvailabilityAtom);
     const [prelude, setPrelude] = useState('');
 
+    const wgpuToy = useAtomValue(wgputoyAtom);
     useEffect(() => {
-        setPrelude(isSafeContext(wgpuToy) ? wgpuToy.prelude() : '');
+        if (wgpuAvailability === 'available' && wgpuToy) {
+            setPrelude(wgpuToy.prelude());
+        }
     }, [wgpuToy]);
 
     return <Fragment>{prelude}</Fragment>;
