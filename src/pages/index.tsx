@@ -2,7 +2,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import { Editor } from 'components/editor/editor';
 import FavIconHead from 'components/global/faviconhead';
-import NoWgpuModal from 'components/global/nowgpumodal';
 import { ShadowCanvas } from 'components/global/shadowcanvas';
 import { useSetAtom } from 'jotai';
 import { dbLoadedAtom } from 'lib/atoms/atoms';
@@ -18,7 +17,6 @@ export default function App() {
             <FavIconHead />
             <ShadowCanvas />
             <CssBaseline />
-            <NoWgpuModal />
             <Editor />
         </ThemeProvider>
     );

@@ -1,13 +1,18 @@
+import WarningIcon from '@mui/icons-material/Warning';
 import Skeleton from '@mui/material/Skeleton';
-import { useAtomValue, useSetAtom } from 'jotai';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { canvasElAtom, canvasParentElAtom, wgpuAvailabilityAtom } from 'lib/atoms/wgputoyatoms';
 import dynamic from 'next/dynamic';
 import { Fragment, useCallback, useState } from 'react';
+import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
+import Logo from './global/logo';
 
 export const WgpuToyWrapper = props => {
     const setCanvasEl = useSetAtom(canvasElAtom);
-    const setWgpuAvailability = useSetAtom(wgpuAvailabilityAtom);
+    const [wgpuAvailability, setWgpuAvailability] = useAtom(wgpuAvailabilityAtom);
     const [loaded, setLoaded] = useState(false);
     const canvasParentEl = useAtomValue(canvasParentElAtom);
 
@@ -56,8 +61,19 @@ export const WgpuToyWrapper = props => {
             />
             {loaded ? (
                 <Controller onLoad={onLoad} />
-            ) : (
+            ) : wgpuAvailability === 'unknown' ? (
                 <Skeleton variant="rectangular" width={dim.x} height={dim.y} />
+            ) : (
+                <Stack color={theme.palette.primary.contrastText} spacing={2} padding={4}>
+                    <Typography>
+                        <WarningIcon />
+                    </Typography>
+                    <Typography>WebGPU support was not detected in your browser.</Typography>
+                    <Typography>
+                        For information on how to set up your browser to run WebGPU code, please see
+                        the instructions linked on the <Logo /> homepage.
+                    </Typography>
+                </Stack>
             )}
         </Fragment>
     );
