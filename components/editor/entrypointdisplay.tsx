@@ -6,11 +6,28 @@ import TimelineItem from '@mui/lab/TimelineItem';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import Skeleton from '@mui/material/Skeleton';
 import { useAtomValue } from 'jotai';
-import { entryPointsAtom } from 'lib/atoms/atoms';
+import { codeAtom, entryPointsAtom, monacoEditorAtom } from 'lib/atoms/atoms';
 import { getRainbowColor, Item } from '../../theme/theme';
 
 export default function EntryPointDisplay() {
     const entryPoints = useAtomValue(entryPointsAtom);
+    const code = useAtomValue(codeAtom);
+    const monaco = useAtomValue(monacoEditorAtom);
+
+    function editorJumpToEntryPoint(entryPoint: string) {
+        const regex = new RegExp('fn\\s+' + entryPoint + '\\s*\\(');
+        const charid = code.search(regex);
+        let lineid = 0;
+        for (let i = 0; i < charid; i++) {
+            if (code[i] === '\n') {
+                lineid++;
+            }
+        }
+        if (monaco) {
+            monaco.revealLineNearTop(lineid, 0);
+        }
+    }
+
     return (
         <Item
             sx={{
@@ -31,7 +48,12 @@ export default function EntryPointDisplay() {
                             {index < entryPoints.length - 1 ? <TimelineConnector /> : null}
                         </TimelineSeparator>
                         <TimelineContent color={getRainbowColor(index)}>
-                            {entryPoint}
+                            <span
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => editorJumpToEntryPoint(entryPoint)}
+                            >
+                                {entryPoint}
+                            </span>
                         </TimelineContent>
                     </TimelineItem>
                 ))}
