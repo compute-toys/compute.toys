@@ -60,6 +60,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'enum',
         'handle',
         'mat',
+        'override',
         'premerge',
         'regardless',
         'typedef',
