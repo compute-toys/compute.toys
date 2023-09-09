@@ -6,6 +6,7 @@ import {
     dbLoadedAtom,
     isPlayingAtom,
     manualReloadAtom,
+    monacoEditorAtom,
     parseErrorAtom,
     playAtom,
     resetAtom,
@@ -28,7 +29,7 @@ const Monaco = props => {
     const setReset = useSetAtom(resetAtom);
     const vim = useAtomValue(vimAtom);
     const [vimContext, setVimContext] = useState(undefined);
-    const [editor, setEditor] = useState(undefined);
+    const [editor, setEditor] = useAtom(monacoEditorAtom);
 
     const monacoRef = useRef<Monaco | null>(null);
 

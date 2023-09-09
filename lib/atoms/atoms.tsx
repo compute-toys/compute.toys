@@ -1,6 +1,7 @@
 import { UniformSliderRef } from 'components/editor/uniformsliders';
 import { atom } from 'jotai';
 import { atomWithReset } from 'jotai/utils';
+import Monaco from 'monaco-editor';
 import { ParseError } from 'types/parseerror';
 
 export const DEFAULT_SHADER = `
@@ -63,9 +64,11 @@ export const scaleAtom = atom<number>(1);
 export const dbLoadedAtom = atom<boolean>(false);
 export const saveColorTransitionSignalAtom = atom<string | false>(false);
 
+export const codeAtom = atomWithReset<string>(DEFAULT_SHADER);
+export const monacoEditorAtom = atomWithReset<Monaco.editor.IStandaloneCodeEditor | false>(false);
+
 export const authorProfileAtom = atomWithReset<AuthorProfile | false>(false);
 export const shaderIDAtom = atomWithReset<number | false>(false);
-export const codeAtom = atomWithReset<string>(DEFAULT_SHADER);
 export const titleAtom = atomWithReset<string>('New Shader');
 export const descriptionAtom = atomWithReset<string>('');
 

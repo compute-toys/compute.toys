@@ -117,6 +117,7 @@ export default function TexturePicker() {
                     {loadedTextures.map((item, index) => (
                         <ImageListItem
                             key={item.img + index}
+                            style={{ cursor: 'pointer' }}
                             onClick={() => {
                                 setPickerChannel(index);
                                 setPickerHidden(!pickerHidden);
