@@ -52,7 +52,7 @@ export const MetadataEditor = () => {
     const { user } = useAuth();
     const router = useRouter();
 
-    //TODO: not the best place for this logic
+    //TODO: not the best place for this logic?
     const upsertShader = async (forceCreate: boolean) => {
         const dataUrl = await shadowCanvasToDataUrl(canvasEl, shadowCanvasEl);
 

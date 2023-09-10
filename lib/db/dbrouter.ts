@@ -1,5 +1,11 @@
 import { useAtomValue, useSetAtom } from 'jotai';
-import { dbLoadedAtom, manualReloadAtom, shaderIDAtom } from 'lib/atoms/atoms';
+import {
+    dbLoadedAtom,
+    descriptionAtom,
+    manualReloadAtom,
+    shaderIDAtom,
+    titleAtom
+} from 'lib/atoms/atoms';
 import { isSafeContext, wgputoyAtom } from 'lib/atoms/wgputoyatoms';
 import useShaderSerDe, { useResetShaderData } from 'lib/db/serializeshader';
 import { useRouter } from 'next/router';
@@ -16,6 +22,8 @@ function toNumber(str) {
 export const useDBRouter = () => {
     const reset = useResetShaderData();
     const setManualReload = useSetAtom(manualReloadAtom);
+    const setTitle = useSetAtom(titleAtom);
+    const setDescription = useSetAtom(descriptionAtom);
     const setShaderID = useSetAtom(shaderIDAtom);
     const setDBLoaded = useSetAtom(dbLoadedAtom);
     const wgputoy = useAtomValue(wgputoyAtom);
@@ -36,6 +44,8 @@ export const useDBRouter = () => {
                 });
             } else if (router.route === '/new') {
                 setShaderID(false);
+                setTitle('New Shader');
+                setDescription('');
                 setManualReload(true);
                 setDBLoaded(true);
             } else {
