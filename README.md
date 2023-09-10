@@ -25,6 +25,11 @@ Some other useful commands are:
 - `yarn lint` to only check for lint errors and warnings
 - `yarn fix` to automatically fix lint errors where possible
 
-**Note:** Currently you won't be able to run the full website without the database keys.
-As a workaround, delete the `pages` directory, and it will fallback to a standalone editor
-(similar to https://compute.toys/new without the account-based features).
+## Standalone Editor
+
+By default, the development environment will connect to the public API for the compute.toys website.
+If you'd prefer to develop just the editor component, without any of the account-based sharing features,
+delete the `pages` directory before starting the server.
+
+If you have any difficulties with Next.js switching between the two configurations,
+clear the cache by deleting the `.next` directory and try again.
