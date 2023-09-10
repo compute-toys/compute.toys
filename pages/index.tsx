@@ -193,20 +193,33 @@ export default function Home(props) {
                             <Typography variant={'h5'}>
                                 <Link href="/list/0">Browse</Link>
                             </Typography>
-                            <FakeLink
-                                textDecoration="underline"
-                                href="https://discord.gg/pNzH6gFQ2T"
-                            >
-                                <Stack direction="row" spacing={2} justifyContent={'center'}>
-                                    <Image
-                                        alt="Join us on Discord"
-                                        width="35"
-                                        height="27"
-                                        src="/discord-white.png"
-                                    />
-                                    <Typography variant={'h5'}>Join us on Discord</Typography>
-                                </Stack>
-                            </FakeLink>
+
+                            <Stack direction="row" spacing={2} justifyContent={'center'}>
+                                <Image
+                                    alt="Join us on Discord"
+                                    width="35"
+                                    height="27"
+                                    src="/discord-white.png"
+                                />
+                                <Typography variant={'h5'}>
+                                    <Link href="https://discord.gg/pNzH6gFQ2T">
+                                        Join us on Discord
+                                    </Link>
+                                </Typography>
+                            </Stack>
+                            <Stack direction="row" spacing={2} justifyContent={'center'}>
+                                <Image
+                                    alt="Code on GitHub"
+                                    width="28"
+                                    height="27"
+                                    src="/github-mark-white.png"
+                                />
+                                <Typography variant={'h5'}>
+                                    <Link href="https://github.com/compute-toys">
+                                        Code on GitHub
+                                    </Link>
+                                </Typography>
+                            </Stack>
                         </Stack>
                     </Grid>
                     <Grid item xs={7}>
