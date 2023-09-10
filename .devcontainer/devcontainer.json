@@ -31,5 +31,13 @@
 
 	"hostRequirements": {
 		"memory": "8gb"
+	},
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"esbenp.prettier-vscode"
+			]
+		}
 	}
 }
