@@ -13,6 +13,7 @@ import {
     shaderIDAtom,
     sliderRefMapAtom,
     sliderSerDeNeedsUpdateAtom,
+    thumbUrlAtom,
     titleAtom,
     visibilityAtom
 } from 'lib/atoms/atoms';
@@ -23,6 +24,7 @@ import {
     SUPABASE_SHADER_TABLE_NAME
 } from 'lib/db/supabaseclient';
 import { fixup_shader_code } from 'lib/util/fixup';
+import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import { useMemo, useRef } from 'react';
 import { theme } from 'theme/theme';
 import { definitions } from 'types/supabase';
@@ -99,6 +101,7 @@ export const useResetShaderData = () => {
     const resetCode = useResetAtom(codeAtom);
     const resetTitle = useResetAtom(titleAtom);
     const resetDescription = useResetAtom(descriptionAtom);
+    const resetThumbUrl = useResetAtom(thumbUrlAtom);
     const resetVisibility = useResetAtom(visibilityAtom);
     const resetLoadedTextures = useResetAtom(loadedTexturesAtom);
     const resetEntryPoints = useResetAtom(entryPointsAtom);
@@ -112,6 +115,7 @@ export const useResetShaderData = () => {
         resetCode();
         resetTitle();
         resetDescription();
+        resetThumbUrl();
         resetVisibility();
         resetLoadedTextures();
         resetEntryPoints();
@@ -143,6 +147,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     const setSliderRefMap = useSetAtom(sliderRefMapAtom);
     const setTitle = useSetAtom(titleAtom);
     const setDescription = useSetAtom(descriptionAtom);
+    const setThumbUrl = useSetAtom(thumbUrlAtom);
     const setVisibility = useSetAtom(visibilityAtom);
     const setAuthorProfile = useSetAtom(authorProfileAtom);
     const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
@@ -156,6 +161,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                     `
                     name,
                     description,
+                    thumb_url,
                     visibility,
                     body,
                     profile:author (
@@ -179,6 +185,12 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                 document.title = shader.name;
                 setTitle(shader.name);
                 setDescription(shader.description);
+                setThumbUrl(
+                    getFullyQualifiedSupabaseBucketURL(
+                        SUPABASE_SHADERTHUMB_BUCKET_NAME,
+                        shader.thumb_url
+                    )
+                );
                 setVisibility(shader.visibility);
 
                 const body = JSON.parse(shader.body);

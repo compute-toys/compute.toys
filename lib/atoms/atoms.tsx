@@ -69,8 +69,11 @@ export const monacoEditorAtom = atomWithReset<Monaco.editor.IStandaloneCodeEdito
 
 export const authorProfileAtom = atomWithReset<AuthorProfile | false>(false);
 export const shaderIDAtom = atomWithReset<number | false>(false);
-export const titleAtom = atomWithReset<string>('New Shader');
-export const descriptionAtom = atomWithReset<string>('');
+export const titleAtom = atomWithReset<string>('compute.toys');
+export const descriptionAtom = atomWithReset<string>('WGSL compute shader editor');
+export const thumbUrlAtom = atomWithReset<string>(
+    'https://compute.toys/android-chrome-512x512.png'
+);
 
 export type Visibility = 'private' | 'unlisted' | 'public';
 export const visibilityAtom = atomWithReset<Visibility>('private');
@@ -85,8 +88,6 @@ export const sliderRefMapAtom = atom<Map<string, UniformSliderRef>>(
 );
 export const sliderSerDeNeedsUpdateAtom = atomWithReset<boolean>(true);
 export const sliderUpdateSignalAtom = atom<boolean>(false);
-export const shaderDataUrlThumbAtom = atomWithReset<string>(
-    'https://compute.toys/android-chrome-192x192.png'
-);
+export const shaderDataUrlThumbAtom = atomWithReset<string>('');
 export const float32EnabledAtom = atomWithReset<boolean>(false);
 export const halfResolutionAtom = atomWithReset<boolean>(false);

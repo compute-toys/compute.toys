@@ -4,6 +4,7 @@ import {
     descriptionAtom,
     manualReloadAtom,
     shaderIDAtom,
+    thumbUrlAtom,
     titleAtom
 } from 'lib/atoms/atoms';
 import { isSafeContext, wgputoyAtom } from 'lib/atoms/wgputoyatoms';
@@ -22,9 +23,10 @@ function toNumber(str) {
 export const useDBRouter = () => {
     const reset = useResetShaderData();
     const setManualReload = useSetAtom(manualReloadAtom);
+    const setShaderID = useSetAtom(shaderIDAtom);
     const setTitle = useSetAtom(titleAtom);
     const setDescription = useSetAtom(descriptionAtom);
-    const setShaderID = useSetAtom(shaderIDAtom);
+    const setThumbUrl = useSetAtom(thumbUrlAtom);
     const setDBLoaded = useSetAtom(dbLoadedAtom);
     const wgputoy = useAtomValue(wgputoyAtom);
 
@@ -46,6 +48,7 @@ export const useDBRouter = () => {
                 setShaderID(false);
                 setTitle('New Shader');
                 setDescription('');
+                setThumbUrl('');
                 setManualReload(true);
                 setDBLoaded(true);
             } else {
