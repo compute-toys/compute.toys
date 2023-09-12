@@ -65,6 +65,7 @@ export const dbLoadedAtom = atom<boolean>(false);
 export const saveColorTransitionSignalAtom = atom<string | false>(false);
 
 export const codeAtom = atomWithReset<string>(DEFAULT_SHADER);
+export const codeNeedSaveAtom = atomWithReset<boolean>(false);
 export const monacoEditorAtom = atomWithReset<Monaco.editor.IStandaloneCodeEditor | false>(false);
 
 export const authorProfileAtom = atomWithReset<AuthorProfile | false>(false);

@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
     authorProfileAtom,
+    codeNeedSaveAtom,
     descriptionAtom,
     shaderDataUrlThumbAtom,
     shaderIDAtom,
@@ -40,6 +41,7 @@ const VisibilityInput = styled(InputBase)(({ theme }) => ({
 }));
 
 export const MetadataEditor = () => {
+    const setCodeNeedSave = useSetAtom(codeNeedSaveAtom);
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
     const [visibility, setVisibility] = useAtom(visibilityAtom);
@@ -60,8 +62,11 @@ export const MetadataEditor = () => {
         // we'll have to wait to roundtrip it, so pass it instead.
         setShaderDataUrlThumb(dataUrl);
         const result: UpsertResult = await upsertToHost(dataUrl, forceCreate);
-        if (result.success && result.needsRedirect) {
-            router.push(`/view/${result.id}`);
+        if (result.success) {
+            setCodeNeedSave(false);
+            if (result.needsRedirect) {
+                setTimeout(() => router.push(`/view/${result.id}`), 0);
+            }
         }
     };
 
