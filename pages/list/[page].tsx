@@ -168,7 +168,7 @@ const EllipsisButton = () => {
 
  */
 const PagePicker = props => {
-    const pages = Math.floor((parseInt(props.totalCount) - 1) / SHADERS_PER_PAGE) + 1;
+    const pages = Math.floor((parseInt(props.totalCount) - 1) / SHADERS_PER_PAGE);
 
     const currentPage = props.page;
 
