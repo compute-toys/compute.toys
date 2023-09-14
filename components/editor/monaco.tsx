@@ -121,16 +121,15 @@ const Monaco = props => {
             }
         };
 
-        // Prevent unsaved changes with route change, hack: https://github.com/vercel/next.js/discussions/32231#discussioncomment-1766710
+        // Prevent unsaved changes with route change
+        // next.js hack: https://github.com/vercel/next.js/discussions/32231#discussioncomment-1766710
         //@ts-ignore
         SingletonRouter.router.change = (...args) => {
-            if (codeNeedSave) {
-                if (confirm(message)) {
-                    //@ts-ignore
-                    return Router.prototype.change.apply(SingletonRouter.router, args);
-                } else {
-                    return new Promise(resolve => resolve(false));
-                }
+            if (codeNeedSave && !confirm(message)) {
+                return new Promise(resolve => resolve(false));
+            } else {
+                //@ts-ignore
+                return Router.prototype.change.apply(SingletonRouter.router, args);
             }
         };
 
