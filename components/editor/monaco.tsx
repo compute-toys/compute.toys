@@ -106,14 +106,18 @@ const Monaco = props => {
         }
     };
 
+    // code initialization without touching undo history
     useEffect(() => {
-        setCodeNeedSave(false);
-    }, [dbLoaded]);
+        if (editor && editor.getModel()) {
+            editor.getModel().setValue(code);
+            setCodeNeedSave(false);
+        }
+    }, [dbLoaded, editor]);
 
     useEffect(() => {
         const message = 'You have unsaved changes. Do you really want to leave?';
 
-        // Prevent unsaved changes with reload/undo
+        // unsaved changes with reload/undo
         const beforeunload = (e: Event) => {
             if (codeNeedSave) {
                 e.preventDefault();
@@ -121,7 +125,7 @@ const Monaco = props => {
             }
         };
 
-        // Prevent unsaved changes with route change
+        // unsaved changes with route change
         // next.js hack: https://github.com/vercel/next.js/discussions/32231#discussioncomment-1766710
         //@ts-ignore
         SingletonRouter.router.change = (...args) => {
@@ -197,7 +201,6 @@ const Monaco = props => {
             }}
             options={props.editorOptions}
             theme="global" // preference
-            value={code}
             width={undefined} // fit to bounding box
         />
     );
