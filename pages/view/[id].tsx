@@ -1,3 +1,4 @@
+import Skeleton from '@mui/material/Skeleton';
 import { Editor } from 'components/editor/editor';
 import { useDBRouter } from 'lib/db/dbrouter';
 import {
@@ -7,6 +8,7 @@ import {
 } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Head from 'next/head';
+import { Suspense } from 'react';
 import { definitions } from 'types/supabase';
 
 export async function getServerSideProps(context) {
@@ -60,7 +62,9 @@ export default function Index(props) {
                 <meta name="twitter:description" content={props.shader.description} />
                 <meta name="twitter:image" content={image} />
             </Head>
-            <Editor />
+            <Suspense fallback={<Skeleton />}>
+                <Editor />
+            </Suspense>
         </div>
     );
 }
