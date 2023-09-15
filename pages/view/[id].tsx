@@ -11,6 +11,7 @@ import Head from 'next/head';
 import { Suspense } from 'react';
 import { definitions } from 'types/supabase';
 
+/*
 export async function getServerSideProps(context) {
     const { data, error } = await supabase
         .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
@@ -40,6 +41,7 @@ export async function getServerSideProps(context) {
         }
     };
 }
+*/
 
 export default function Index(props) {
     let head = null;
