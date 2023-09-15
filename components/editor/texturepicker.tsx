@@ -129,7 +129,7 @@ export default function TexturePicker() {
                                 alt={'Channel ' + index + ' texture'}
                                 width={size}
                                 height={size}
-                                loading="lazy"
+                                priority={true}
                             />
                             <ImageListItemBar subtitle={'channel' + index} />
                         </ImageListItem>

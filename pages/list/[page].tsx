@@ -102,7 +102,7 @@ const ShaderPicker = props => {
                             alt={shader.name}
                             width={SHADER_THUMB_SIZE_H}
                             height={SHADER_THUMB_SIZE_V}
-                            loading="lazy"
+                            priority={true}
                         />
                         <ImageListItemBar
                             title={<Link href={`/view/${shader.id}`}>{shader.name}</Link>}
