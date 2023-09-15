@@ -2,14 +2,14 @@ import Skeleton from '@mui/material/Skeleton';
 import { Editor } from 'components/editor/editor';
 import { useDBRouter } from 'lib/db/dbrouter';
 import {
-    supabase,
-    SUPABASE_SHADERTHUMB_BUCKET_NAME,
-    SUPABASE_SHADER_TABLE_NAME
+    // supabase,
+    SUPABASE_SHADERTHUMB_BUCKET_NAME
+    // SUPABASE_SHADER_TABLE_NAME
 } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Head from 'next/head';
 import { Suspense } from 'react';
-import { definitions } from 'types/supabase';
+// import { definitions } from 'types/supabase';
 
 /*
 export async function getServerSideProps(context) {
@@ -27,7 +27,6 @@ export async function getServerSideProps(context) {
                 avatar_url,
                 id
             )
-                
         `
         )
         .eq('id', context.params.id)
