@@ -106,7 +106,14 @@ const ShaderPicker = props => {
                         />
                         <ImageListItemBar
                             title={<Link href={`/view/${shader.id}`}>{shader.name}</Link>}
-                            subtitle={`by ${shader.profile.username}`}
+                            subtitle={
+                                <div>
+                                    <span>by </span>
+                                    <FakeLink href={`/profile/${shader.profile.username}`}>
+                                        {shader.profile.username}
+                                    </FakeLink>
+                                </div>
+                            }
                             style={{ borderRadius: '4px' }}
                             actionIcon={
                                 <FakeLink href={`/profile/${shader.profile.username}`}>
