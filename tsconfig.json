@@ -21,7 +21,8 @@
     "isolatedModules": true,
     "sourceMap": true,
     "jsx": "preserve",
-    "types": ["@webgpu/types"]
+    "types": ["@webgpu/types"],
+    "noImplicitReturns": false
   },
   "include": [
     "next-env.d.ts",
