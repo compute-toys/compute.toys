@@ -1,4 +1,4 @@
-import { DisabledByDefaultSharp } from '@mui/icons-material';
+import DisabledByDefaultSharp from '@mui/icons-material/DisabledByDefaultSharp';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';

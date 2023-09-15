@@ -1,4 +1,4 @@
-import { RadioButtonChecked } from '@mui/icons-material';
+import RadioButtonChecked from '@mui/icons-material/RadioButtonChecked';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import SvgIcon from '@mui/material/SvgIcon';

@@ -1,4 +1,5 @@
-import { PlayArrowRounded, PlayDisabledRounded } from '@mui/icons-material';
+import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded';
+import PlayDisabledRounded from '@mui/icons-material/PlayDisabledRounded';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import { useAtomValue, useSetAtom } from 'jotai';

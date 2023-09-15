@@ -1,4 +1,4 @@
-import { DisabledByDefaultSharp } from '@mui/icons-material';
+import DisabledByDefaultSharp from '@mui/icons-material/DisabledByDefaultSharp';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
