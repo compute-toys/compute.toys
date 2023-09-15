@@ -42,13 +42,13 @@ export async function getServerSideProps(context) {
 }
 
 export default function Index(props) {
-    useDBRouter();
-    const image = getFullyQualifiedSupabaseBucketURL(
-        SUPABASE_SHADERTHUMB_BUCKET_NAME,
-        props.shader.thumb_url
-    );
-    return (
-        <div>
+    let head = null;
+    if (props && props.shader) {
+        const image = getFullyQualifiedSupabaseBucketURL(
+            SUPABASE_SHADERTHUMB_BUCKET_NAME,
+            props.shader.thumb_url
+        );
+        head = (
             <Head>
                 <title>{props.shader.name}</title>
                 <meta property="og:type" content="image" />
@@ -62,6 +62,12 @@ export default function Index(props) {
                 <meta name="twitter:description" content={props.shader.description} />
                 <meta name="twitter:image" content={image} />
             </Head>
+        );
+    }
+    useDBRouter();
+    return (
+        <div>
+            {head}
             <Suspense fallback={<Skeleton />}>
                 <Editor />
             </Suspense>
