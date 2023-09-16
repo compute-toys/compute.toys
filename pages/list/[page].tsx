@@ -95,7 +95,7 @@ const ShaderPicker = props => {
                     <ImageListItem key={shader.id}>
                         <Link passHref href={`/view/${shader.id}`}>
                             <Image
-                                style={{ borderRadius: '4px', cursor: "pointer" }}
+                                style={{ borderRadius: '4px', cursor: 'pointer' }}
                                 src={getFullyQualifiedSupabaseBucketURL(
                                     SUPABASE_SHADERTHUMB_BUCKET_NAME,
                                     shader.thumb_url
