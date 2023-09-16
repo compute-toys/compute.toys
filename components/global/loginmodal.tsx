@@ -212,7 +212,8 @@ const LoginWindow = (props: LoginWindowProps) => {
         <Item
             sx={{
                 display: 'inline-block',
-                transform: 'translate(calc(50vw - 50%), calc(50vh - 50%))'
+                transform: 'translate(calc(50vw - 50%), calc(50vh - 50%))',
+                padding: '2.0rem'
             }}
         >
             <Stack spacing={2}>
