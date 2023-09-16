@@ -1,15 +1,15 @@
 import Editor from 'components/editor/editor';
 import { useDBRouter } from 'lib/db/dbrouter';
 import {
-    // supabase,
-    SUPABASE_SHADERTHUMB_BUCKET_NAME
-    // SUPABASE_SHADER_TABLE_NAME
+    supabase,
+    SUPABASE_SHADERTHUMB_BUCKET_NAME,
+    SUPABASE_SHADER_TABLE_NAME
 } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
+// import dynamic from 'next/dynamic';
 import Head from 'next/head';
-// import { definitions } from 'types/supabase';
+import { definitions } from 'types/supabase';
 
-/*
 export async function getServerSideProps(context) {
     const { data, error } = await supabase
         .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
@@ -38,7 +38,6 @@ export async function getServerSideProps(context) {
         }
     };
 }
-*/
 
 export default function Index(props) {
     let head = null;
@@ -63,6 +62,8 @@ export default function Index(props) {
             </Head>
         );
     }
+
+    // const Editor = dynamic(() => import('components/editor/editor'), { ssr: false });
     useDBRouter();
     return (
         <div>

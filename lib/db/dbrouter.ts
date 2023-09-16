@@ -1,6 +1,5 @@
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useSetAtom } from 'jotai';
 import { dbLoadedAtom, manualReloadAtom, shaderIDAtom } from 'lib/atoms/atoms';
-import { isSafeContext, wgputoyAtom } from 'lib/atoms/wgputoyatoms';
 import useShaderSerDe, { useResetShaderData } from 'lib/db/serializeshader';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
@@ -18,7 +17,7 @@ export const useDBRouter = () => {
     const setManualReload = useSetAtom(manualReloadAtom);
     const setShaderID = useSetAtom(shaderIDAtom);
     const setDBLoaded = useSetAtom(dbLoadedAtom);
-    const wgputoy = useAtomValue(wgputoyAtom);
+    // const wgputoy = useAtomValue(wgputoyAtom);
 
     const [get] = useShaderSerDe();
 
@@ -45,6 +44,7 @@ export const useDBRouter = () => {
             }
         }
     }, [router.isReady, router.query.id]);
+    /*
     useEffect(() => {
         const handleRouteChange = (url: string) => {
             if (isSafeContext(wgputoy) && !['new', 'view', 'editor'].includes(url.split('/')[1])) {
@@ -62,4 +62,5 @@ export const useDBRouter = () => {
             router.events.off('routeChangeStart', handleRouteChange);
         };
     }, [wgputoy]);
+    */
 };
