@@ -11,6 +11,20 @@
       {
         "endOfLine": "auto"
       }
+    ],
+    "import/no-unused-modules": [
+      "error",
+      {
+        "missingExports": true,
+        "unusedExports": true,
+        "ignoreExports": [
+          "pages",
+          "src/pages",
+          "theme/themeModule.ts",
+          "next-env.d.ts",
+          "next.config.js"
+        ]
+      }
     ]
   }
 }

@@ -5,7 +5,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 import { useAtom } from 'jotai';
 import { recordingAtom } from 'lib/atoms/atoms';
 
-export const RecordButton = () => {
+export default function RecordButton() {
     const [recording, setRecording] = useAtom(recordingAtom);
 
     const theme = useTheme();
@@ -43,6 +43,4 @@ export const RecordButton = () => {
             )}
         </Button>
     );
-};
-
-export default RecordButton;
+}

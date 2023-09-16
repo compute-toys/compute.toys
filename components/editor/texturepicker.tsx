@@ -9,10 +9,6 @@ import { Fragment, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 import { Item } from 'theme/theme';
 
-export interface LoadedTextures {
-    [key: number]: string;
-}
-
 const DraggablePicker = props => {
     const setLoadedTextures = useSetAtom(loadedTexturesAtom);
 

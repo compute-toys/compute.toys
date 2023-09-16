@@ -24,7 +24,7 @@ export const canvasParentElAtom = atom<HTMLElement | null, HTMLElement | null, v
     (get, set, newValue) => set(canvasParentElBaseAtom, newValue ? newValue : false)
 );
 
-export type WgpuStatus = 'available' | 'unavailable' | 'unknown';
+type WgpuStatus = 'available' | 'unavailable' | 'unknown';
 export const wgpuAvailabilityAtom = atom<WgpuStatus>('unknown');
 
 export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async get => {

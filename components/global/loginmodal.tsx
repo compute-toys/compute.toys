@@ -14,7 +14,7 @@ import {
     VIEWS
 } from 'lib/db/authcontext';
 import Link from 'next/link';
-import { ChangeEvent, forwardRef, Fragment, useEffect, useReducer, useState } from 'react';
+import { ChangeEvent, Fragment, useEffect, useReducer, useState } from 'react';
 import { CssTextField, Item, theme } from 'theme/theme';
 import FakeLink from './fakelink';
 import Logo from './logo';
@@ -27,7 +27,7 @@ interface LoginWindowProps {
     close: () => void;
 }
 
-export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
+const LoginWindow = (props: LoginWindowProps) => {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
@@ -266,7 +266,7 @@ export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
             </Stack>
         </Item>
     );
-});
+};
 
 LoginWindow.displayName = 'LoginWindow';
 

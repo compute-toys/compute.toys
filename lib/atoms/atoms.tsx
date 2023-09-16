@@ -4,7 +4,7 @@ import { atomWithReset } from 'jotai/utils';
 import Monaco from 'monaco-editor';
 import { ParseError } from 'types/parseerror';
 
-export const DEFAULT_SHADER = `
+const DEFAULT_SHADER = `
 @compute @workgroup_size(16, 16)
 fn main_image(@builtin(global_invocation_id) id: vec3u) {
     // Viewport resolution (in pixels)
@@ -30,7 +30,7 @@ fn main_image(@builtin(global_invocation_id) id: vec3u) {
 }
 `;
 
-export interface AuthorProfile {
+interface AuthorProfile {
     username: string;
     avatar_url: string;
     id: string;

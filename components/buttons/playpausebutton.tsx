@@ -10,7 +10,7 @@ const PlayPauseIcon = () => {
     return play ? <PauseCircleIcon /> : <PlayCircleOutlineIcon />;
 };
 
-export const PlayPauseButton = () => {
+export default function PlayPauseButton() {
     const [play, setPlay] = useAtom(playAtom);
     const theme = useTheme();
 
@@ -29,6 +29,4 @@ export const PlayPauseButton = () => {
             <PlayPauseIcon />
         </Button>
     );
-};
-
-export default PlayPauseButton;
+}

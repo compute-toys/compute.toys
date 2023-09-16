@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import { useSetAtom } from 'jotai';
 import { requestFullscreenAtom } from 'lib/atoms/atoms';
 
-export const FullscreenButton = () => {
+export default function FullscreenButton() {
     const setRequestFullscreen = useSetAtom(requestFullscreenAtom);
 
     const theme = useTheme();
@@ -19,6 +19,4 @@ export const FullscreenButton = () => {
             <FullscreenIcon />
         </Button>
     );
-};
-
-export default FullscreenButton;
+}

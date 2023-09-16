@@ -30,7 +30,7 @@ import {
 import { getRainbowColor, theme } from 'theme/theme';
 import { v4 as UUID } from 'uuid';
 
-export const WGPU_CONTEXT_MAX_UNIFORMS = 32;
+const WGPU_CONTEXT_MAX_UNIFORMS = 32;
 
 export interface UniformSliderRef {
     getVal: () => number;
@@ -252,7 +252,7 @@ const UniformSlider = (props: UniformSliderProps) => {
     );
 };
 
-export const UniformSliders = () => {
+export default function UniformSliders() {
     const theme = useTheme();
 
     // keeps a count of sliders and also force an update when the count changes
@@ -366,6 +366,4 @@ export const UniformSliders = () => {
             </AccordionDetails>
         </Accordion>
     );
-};
-
-export default UniformSliders;
+}

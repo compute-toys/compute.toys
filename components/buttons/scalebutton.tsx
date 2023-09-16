@@ -10,7 +10,7 @@ const ScaleIcon = () => {
     return halfResolution ? <Sd /> : <Hd />;
 };
 
-export const ScaleButton = () => {
+export default function ScaleButton() {
     const [halfResolution, setHalfResolution] = useAtom(halfResolutionAtom);
     const theme = useTheme();
     return (
@@ -25,6 +25,4 @@ export const ScaleButton = () => {
             <ScaleIcon />
         </Button>
     );
-};
-
-export default ScaleButton;
+}

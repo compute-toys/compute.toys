@@ -14,7 +14,7 @@ const PlayIcon = () => {
     }
 };
 
-export const ReloadButton = () => {
+export default function ReloadButton() {
     const hotReload = useAtomValue(hotReloadAtom);
     const setManualReload = useSetAtom(manualReloadAtom);
 
@@ -35,6 +35,4 @@ export const ReloadButton = () => {
             <PlayIcon />
         </Button>
     );
-};
-
-export default ReloadButton;
+}

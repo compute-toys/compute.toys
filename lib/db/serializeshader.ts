@@ -31,7 +31,7 @@ export interface UniformActiveSettings {
     value: number;
 }
 
-export interface TextureActiveSettings {
+interface TextureActiveSettings {
     img: string;
     thumb?: string;
 }
@@ -64,8 +64,8 @@ const upsertResult = (
     };
 };
 
-export type HOST_GET = (id: number) => Promise<void>;
-export type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
+type HOST_GET = (id: number) => Promise<void>;
+type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
 
 const getSliderActiveSettings = (sliderRefMap: Map<string, UniformSliderRef>) => {
     // convert our map of references into a plain array of objects
@@ -79,7 +79,7 @@ const getSliderActiveSettings = (sliderRefMap: Map<string, UniformSliderRef>) =>
 
 // https://github.com/pmndrs/jotai/issues/1100
 // TODO: jotai has experimental features for dealing with this case, use them when they're less experimental
-export const useAtomGetter = () => {
+const useAtomGetter = () => {
     const getter = useRef<Getter | null>(null);
     const derived = useMemo(
         () =>

@@ -14,7 +14,7 @@ const HotColdIcon = () => {
     }
 };
 
-export const HotReloadToggle = () => {
+export default function HotReloadToggle() {
     const [hotReload, setHotReload] = useAtom(hotReloadAtom);
 
     const theme = useTheme();
@@ -29,6 +29,4 @@ export const HotReloadToggle = () => {
             <HotColdIcon />
         </Button>
     );
-};
-
-export default HotReloadToggle;
+}

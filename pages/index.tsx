@@ -5,7 +5,6 @@ import Grid from '@mui/material/Grid';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
-import Modal from '@mui/material/Modal';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Avatar from 'components/global/avatar';
@@ -16,8 +15,8 @@ import { supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclien
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Image from 'next/image';
 import Link from 'next/link';
-import { forwardRef, Fragment, useState } from 'react';
-import { getRainbowColor, Item, theme } from 'theme/theme';
+import { Fragment } from 'react';
+import { Item, theme } from 'theme/theme';
 import { SHADER_THUMB_SIZE_H, SHADER_THUMB_SIZE_V } from './list/[page]';
 
 const NewSubmissionBar = props => {
@@ -66,18 +65,6 @@ const NewSubmissionBar = props => {
     );
 };
 
-const modalStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 450,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4
-};
-
 const style = {
     marginLeft: 'auto',
     marginRight: 'auto',
@@ -89,72 +76,11 @@ const style = {
     color: theme.palette.dracula.foreground
 };
 
-const ExplainerModal = forwardRef((props, ref) => {
-    return (
-        <Box sx={modalStyle}>
-            <Stack spacing={2}>
-                <Typography color={getRainbowColor(6)}>
-                    {'Download, install, and open '}
-                    <a href={'https://www.google.com/chrome/dev/'}>Chrome Dev</a>
-                </Typography>
-                <Typography color={getRainbowColor(0)}>
-                    {'Enter about:flags into your search bar'}
-                </Typography>
-                <Box>
-                    <Image
-                        alt="Chrome search bar"
-                        width="281"
-                        height="77"
-                        src={'/instructions/chromebar.png'}
-                    />
-                </Box>
-                <Typography color={getRainbowColor(1)}>
-                    {'In the "Search flags" bar, enter "webgpu"'}
-                </Typography>
-                <Box>
-                    <Image
-                        alt="Search flags bar"
-                        width="450"
-                        height="58"
-                        src={'/instructions/webgpu.png'}
-                    />
-                </Box>
-                <Typography color={getRainbowColor(2)}>{'Enable "Unsafe WebGPU"'}</Typography>
-                <Box>
-                    <Image
-                        alt="Enable unsafe WebGPU"
-                        width="486"
-                        height="175"
-                        src={'/instructions/unsafe.png'}
-                    />
-                </Box>
-                <Typography color={getRainbowColor(3)}>
-                    {'You may need to restart your browser'}
-                </Typography>
-                <Typography color={getRainbowColor(4)}>{"You're done!"}</Typography>
-            </Stack>
-        </Box>
-    );
-});
-
-ExplainerModal.displayName = 'ExplainerModal';
-
 export default function Home(props) {
-    const [open, setOpen] = useState(false);
-    const handleClose = () => setOpen(false);
-
     if (props.error) console.error(props.error);
 
     return (
         <Fragment>
-            <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <ExplainerModal />
-            </Modal>
             <Alert variant={'outlined'} severity="warning" sx={{ marginTop: '1em' }}>
                 <Typography variant={'subtitle1'} color={theme.palette.neutral.contrastText}>
                     <Logo /> is an experimental editor for{' '}

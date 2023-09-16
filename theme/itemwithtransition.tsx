@@ -2,7 +2,7 @@ import { PaperProps } from '@mui/material/Paper';
 import { useAtom, WritableAtom } from 'jotai';
 import { Item, theme } from './theme';
 
-export interface ItemWithTransitionSignalProps extends PaperProps {
+interface ItemWithTransitionSignalProps extends PaperProps {
     transitionAtom: WritableAtom<string | false, string | false>;
 }
 
