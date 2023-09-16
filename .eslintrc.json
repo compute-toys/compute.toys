@@ -25,6 +25,12 @@
           "next.config.js"
         ]
       }
+    ],
+    "no-restricted-imports": [
+      "error",
+      // https://mui.com/material-ui/guides/minimizing-bundle-size/
+      "@mui/material",
+      "@mui/icons-material"
     ]
   }
 }
