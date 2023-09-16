@@ -285,10 +285,20 @@ export default function LoginModal() {
         forceUpdate();
     }, [view, profile.username, profile.avatar]);
 
+    // Log in link is wrapped in <a> just for styling.
     const logInOutButton =
         view === VIEWS.LOGGED_OUT ? (
             <Fragment>
-                <Button onClick={handleOpen}>Log In</Button>
+                <Button onClick={handleOpen}>
+                    <a
+                        href=""
+                        onClick={e => {
+                            e.preventDefault();
+                        }}
+                    >
+                        Log In
+                    </a>
+                </Button>
                 or
                 <Button>
                     <Link href={'/signup'}>Sign Up</Link>
