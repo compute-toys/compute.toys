@@ -1,4 +1,4 @@
-import { fromUniformActiveSettings, UniformSliderRef } from 'components/editor/uniformsliders';
+import { UniformSliderRef } from 'components/editor/uniformsliders';
 import { atom, Getter, useAtomValue, useSetAtom } from 'jotai';
 import { useResetAtom } from 'jotai/utils';
 import {
@@ -22,7 +22,6 @@ import {
     SUPABASE_SHADERTHUMB_BUCKET_NAME,
     SUPABASE_SHADER_TABLE_NAME
 } from 'lib/db/supabaseclient';
-import { fixup_shader_code } from 'lib/util/fixup';
 import { useMemo, useRef } from 'react';
 import { theme } from 'theme/theme';
 import { definitions } from 'types/supabase';
@@ -137,6 +136,9 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
         we need to serialize change. Instead, we use a hack
         to read the atoms imperatively when they are needed.
      */
+    const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
+
+    /*
     const setCode = useSetAtom(codeAtom);
     const setLoadedTextures = useSetAtom(loadedTexturesAtom);
     const setSliderSerDeNeedsUpdate = useSetAtom(sliderSerDeNeedsUpdateAtom);
@@ -145,9 +147,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     const setDescription = useSetAtom(descriptionAtom);
     const setVisibility = useSetAtom(visibilityAtom);
     const setAuthorProfile = useSetAtom(authorProfileAtom);
-    const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
     const setFloat32Enabled = useSetAtom(float32EnabledAtom);
-
     const get = async (id: number) => {
         try {
             const { data, error, status } = await supabase
@@ -163,7 +163,6 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                         avatar_url,
                         id
                     )
-                        
                 `
                 )
                 .eq('id', id)
@@ -205,6 +204,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
             alert(error.message);
         }
     };
+    */
 
     const uploadThumb = async (id: number, dataUrl: string) => {
         const fileExt = 'jpg';
@@ -312,5 +312,5 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
         }
     };
 
-    return [get, upsert];
+    return [undefined, upsert];
 }

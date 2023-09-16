@@ -49,7 +49,9 @@ function Comments() {
                 scriptElement.setAttribute('theme', 'dark-blue');
                 scriptElement.setAttribute('crossorigin', 'anonymous');
                 scriptElement.setAttribute('async', 'true');
-                element.replaceChildren(scriptElement);
+                const div = document.createElement('div');
+                div.appendChild(scriptElement);
+                element.replaceChildren(div);
             }}
         />
     );
