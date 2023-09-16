@@ -135,15 +135,17 @@ export const MAX_PAGE_BUTTONS = 5;
 const PageButton = props => {
     return (
         <Link href={`/list/${props.index}`} passHref>
-            <Button>
-                <span
-                    style={
-                        props.highlight
-                            ? { color: theme.palette.dracula.foreground }
-                            : { color: theme.palette.dracula.selection }
-                    }
-                >
-                    {props.index.toString()}
+            <Button
+                style={
+                    props.highlight
+                        ? {
+                              backgroundColor: theme.palette.dracula.selection
+                          }
+                        : {}
+                }
+            >
+                <span style={{ color: theme.palette.dracula.foreground }}>
+                    {props.index.toString()}{' '}
                 </span>
             </Button>
         </Link>
@@ -196,13 +198,15 @@ const PagePicker = props => {
         <Stack direction="row" style={props.style}>
             {[...Array(lowerPages).keys()].map(index => {
                 const page = index + firstPage;
-                return <PageButton highlight={currentPage === page} key={page} index={page} />;
+                return (
+                    <PageButton highlight={Number(currentPage) === page} key={page} index={page} />
+                );
             })}
             {showLast ? (
                 <Fragment>
                     {!hideEllipsis ? <EllipsisButton /> : null}
                     <PageButton
-                        highlight={currentPage === lastPage}
+                        highlight={Number(currentPage) === lastPage}
                         key={lastPage}
                         index={lastPage}
                     />
