@@ -55,7 +55,7 @@ function Comments() {
     );
 }
 
-export const Editor = () => {
+export default function Editor() {
     const setCanvasParentEl = useSetAtom(canvasParentElAtom);
     const shaderID = useAtomValue(shaderIDAtom);
 
@@ -178,4 +178,4 @@ export const Editor = () => {
             </Box>
         </div>
     );
-};
+}

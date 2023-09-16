@@ -16,6 +16,7 @@ import {
 import Link from 'next/link';
 import { ChangeEvent, forwardRef, Fragment, useEffect, useReducer, useState } from 'react';
 import { CssTextField, Item, theme } from 'theme/theme';
+import FakeLink from './fakelink';
 import Logo from './logo';
 
 interface LoginWindowProps {
@@ -309,7 +310,9 @@ export default function LoginModal() {
                         spacing={0}
                     >
                         <Typography variant="h6">
-                            <Logo />
+                            <FakeLink href="/">
+                                <Logo />
+                            </FakeLink>
                         </Typography>
                         <Stack
                             direction="row"

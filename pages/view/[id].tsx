@@ -1,5 +1,4 @@
-import Skeleton from '@mui/material/Skeleton';
-import { Editor } from 'components/editor/editor';
+import Editor from 'components/editor/editor';
 import { useDBRouter } from 'lib/db/dbrouter';
 import {
     // supabase,
@@ -8,7 +7,6 @@ import {
 } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Head from 'next/head';
-import { Suspense } from 'react';
 // import { definitions } from 'types/supabase';
 
 /*
@@ -69,9 +67,7 @@ export default function Index(props) {
     return (
         <div>
             {head}
-            <Suspense fallback={<Skeleton />}>
-                <Editor />
-            </Suspense>
+            <Editor />
         </div>
     );
 }
