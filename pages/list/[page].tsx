@@ -82,6 +82,7 @@ const ShaderPicker = props => {
                         sm: 'repeat(2, 1fr)',
                         md: 'repeat(3, 1fr)',
                         lg: 'repeat(4, 1fr)'
+                        // xl: 'repeat(6, 1fr)'
                     },
                     gap: '30px',
                     padding: '2em',
@@ -261,7 +262,7 @@ export default function ShaderList(props) {
                 <PagePicker
                     page={props.page}
                     totalCount={props.totalCount}
-                    style={{ marginBottom: '10px' }}
+                    style={{ marginBottom: '10px', overflowX: 'auto' }}
                 />
                 <ShaderPicker page={props.page} shaders={props.shaders} />
             </Box>
