@@ -10,6 +10,7 @@ import {
     monacoEditorAtom,
     parseErrorAtom,
     playAtom,
+    recordingAtom,
     resetAtom,
     vimAtom
 } from 'lib/atoms/atoms';
@@ -22,6 +23,7 @@ declare type Monaco = typeof import('monaco-editor');
 
 const Monaco = props => {
     const [code, setCode] = useAtom(codeAtom);
+    const [isRecording, setRecording] = useTransientAtom(recordingAtom);
     const codeNeedSave = useAtomValue(codeNeedSaveAtom);
     const setCodeNeedSave = useSetAtom(codeNeedSaveAtom);
     const parseError = useAtomValue(parseErrorAtom);
@@ -187,6 +189,13 @@ const Monaco = props => {
                     monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow,
                     () => {
                         setPlay(!isPlaying());
+                    }
+                );
+                // Record shortcut
+                _editor.addCommand(
+                    monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR,
+                    () => {
+                        setRecording(!isRecording());
                     }
                 );
                 // Rewind shortcut
