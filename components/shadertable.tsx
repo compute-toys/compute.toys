@@ -11,7 +11,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import visuallyHidden from '@mui/utils/visuallyHidden';
 import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
-import { toUnixTime } from 'lib/util/dateutils';
+import { toDateString, toUnixTime } from 'lib/util/dateutils';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -221,7 +221,9 @@ export const ShaderTable = props => {
                                                 <Link href={`/view/${row.id}`}>{row.name}</Link>
                                             </TableCell>
 
-                                            <TableCell align="left">{row.created_at}</TableCell>
+                                            <TableCell align="left">
+                                                {toDateString(row.created_at)}
+                                            </TableCell>
                                             <TableCell align="left">{row.visibility}</TableCell>
                                         </TableRow>
                                     );
