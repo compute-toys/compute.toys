@@ -71,6 +71,9 @@ const Monaco = props => {
                     }
                 ]);
             }
+            document.getElementById('editor-canvas').style.border = !parseError.success
+                ? '4px solid #ff6f59'
+                : '';
         }
     }, [parseError]);
 
