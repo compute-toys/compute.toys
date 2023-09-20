@@ -15,7 +15,7 @@ export default function RecordButton() {
             onClick={() => {
                 setRecording(!recording);
             }}
-            title={'Record video'}
+            title={'Record video <Ctrl + Alt + R>'}
             sx={{
                 color: recording ? theme.palette.primary.contrastText : theme.palette.primary.light
             }}
