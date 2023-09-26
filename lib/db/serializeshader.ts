@@ -64,9 +64,9 @@ const upsertResult = (
     };
 };
 
-export type HOST_GET = (id: number) => Promise<void>;
-export type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
-export type HOST_DELETE = (id: number) => Promise<boolean>;
+type HOST_GET = (id: number) => Promise<void>;
+type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
+type HOST_DELETE = (id: number) => Promise<boolean>;
 
 const getSliderActiveSettings = (sliderRefMap: Map<string, UniformSliderRef>) => {
     // convert our map of references into a plain array of objects
