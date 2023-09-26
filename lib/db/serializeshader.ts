@@ -64,8 +64,14 @@ const upsertResult = (
     };
 };
 
+<<<<<<< HEAD
 type HOST_GET = (id: number) => Promise<void>;
 type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
+=======
+export type HOST_GET = (id: number) => Promise<void>;
+export type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
+export type HOST_DELETE = (id: number) => Promise<boolean>;
+>>>>>>> f8df438 (add shader deletion)
 
 const getSliderActiveSettings = (sliderRefMap: Map<string, UniformSliderRef>) => {
     // convert our map of references into a plain array of objects
@@ -122,7 +128,7 @@ export const useResetShaderData = () => {
     return reset;
 };
 
-export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
+export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT, HOST_DELETE] {
     const atomGetter = useAtomGetter();
 
     const { user } = useAuth();
@@ -312,5 +318,22 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
         }
     };
 
-    return [undefined, upsert];
+    const del = async (id: number) => {
+        try {
+            const { error, status } = await supabase
+                .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
+                .delete()
+                .eq('id', id);
+            if (error && status !== 406) {
+                throw error;
+            } else {
+                return true;
+            }
+        } catch (error) {
+            alert(error.message);
+            return false;
+        }
+    };
+
+    return [undefined, upsert, del];
 }

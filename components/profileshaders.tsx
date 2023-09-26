@@ -1,3 +1,4 @@
+import { Button } from '@mui/material';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -10,6 +11,7 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import visuallyHidden from '@mui/utils/visuallyHidden';
+import useShaderSerDe from 'lib/db/serializeshader';
 import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { toDateString, toUnixTime } from 'lib/util/dateutils';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
@@ -62,38 +64,45 @@ interface HeadCell {
     disablePadding: boolean;
     id: keyof Data;
     label: string;
-    numeric: boolean;
+    align: 'left' | 'right' | 'inherit' | 'center' | 'justify';
     unsortable: boolean;
 }
 
 const headCells: readonly HeadCell[] = [
     {
         id: 'thumb_url',
-        numeric: false,
+        align: 'left',
         disablePadding: false,
         label: 'Preview',
         unsortable: true
     },
     {
         id: 'name',
-        numeric: false,
-        disablePadding: false,
+        align: 'left',
+        disablePadding: true,
         label: 'Name',
         unsortable: false
     },
     {
         id: 'created_at',
-        numeric: false,
+        align: 'left',
         disablePadding: false,
         label: 'Date',
         unsortable: false
     },
     {
         id: 'visibility',
-        numeric: false,
+        align: 'left',
         disablePadding: false,
         label: 'Visibility',
         unsortable: false
+    },
+    {
+        id: null, // null hided when editable
+        align: 'left',
+        disablePadding: false,
+        label: 'Actions',
+        unsortable: true
     }
 ];
 
@@ -101,10 +110,11 @@ interface EnhancedTableProps {
     onRequestSort: (event: MouseEvent<unknown>, property: keyof Data) => void;
     order: Order;
     orderBy: string;
+    editable: boolean;
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-    const { order, orderBy, onRequestSort } = props;
+    const { order, orderBy, onRequestSort, editable } = props;
     const createSortHandler = (property: keyof Data) => (event: MouseEvent<unknown>) => {
         onRequestSort(event, property);
     };
@@ -113,38 +123,40 @@ function EnhancedTableHead(props: EnhancedTableProps) {
         <TableHead>
             <TableRow>
                 {headCells.map(headCell =>
-                    headCell.unsortable ? (
-                        <TableCell
-                            key={headCell.id}
-                            align={headCell.numeric ? 'right' : 'left'}
-                            padding={headCell.disablePadding ? 'none' : 'normal'}
-                            sortDirection={false}
-                        >
-                            {headCell.label}
-                        </TableCell>
-                    ) : (
-                        <TableCell
-                            key={headCell.id}
-                            align={headCell.numeric ? 'right' : 'left'}
-                            padding={headCell.disablePadding ? 'none' : 'normal'}
-                            sortDirection={orderBy === headCell.id ? order : false}
-                        >
-                            <TableSortLabel
-                                active={orderBy === headCell.id}
-                                direction={orderBy === headCell.id ? order : 'asc'}
-                                onClick={createSortHandler(headCell.id)}
+                    editable || headCell.id ? (
+                        headCell.unsortable ? (
+                            <TableCell
+                                key={headCell.id}
+                                align={headCell.align}
+                                padding={headCell.disablePadding ? 'none' : 'normal'}
+                                sortDirection={false}
                             >
                                 {headCell.label}
-                                {orderBy === headCell.id ? (
-                                    <Box component="span" sx={visuallyHidden}>
-                                        {order === 'desc'
-                                            ? 'sorted descending'
-                                            : 'sorted ascending'}
-                                    </Box>
-                                ) : null}
-                            </TableSortLabel>
-                        </TableCell>
-                    )
+                            </TableCell>
+                        ) : (
+                            <TableCell
+                                key={headCell.id}
+                                align={headCell.align}
+                                padding={headCell.disablePadding ? 'none' : 'normal'}
+                                sortDirection={orderBy === headCell.id ? order : false}
+                            >
+                                <TableSortLabel
+                                    active={orderBy === headCell.id}
+                                    direction={orderBy === headCell.id ? order : 'asc'}
+                                    onClick={createSortHandler(headCell.id)}
+                                >
+                                    {headCell.label}
+                                    {orderBy === headCell.id ? (
+                                        <Box component="span" sx={visuallyHidden}>
+                                            {order === 'desc'
+                                                ? 'sorted descending'
+                                                : 'sorted ascending'}
+                                        </Box>
+                                    ) : null}
+                                </TableSortLabel>
+                            </TableCell>
+                        )
+                    ) : null
                 )}
             </TableRow>
         </TableHead>
@@ -172,7 +184,7 @@ const EnhancedTableToolbar = () => {
 const TABLE_PREVIEW_WIDTH = 48;
 const TABLE_PREVIEW_HEIGHT = 27;
 
-export const ShaderTable = props => {
+export const ProfileShaders = props => {
     const [order, setOrder] = useState<Order>('asc');
     const [orderBy, setOrderBy] = useState<keyof Data>('created_at');
 
@@ -180,6 +192,15 @@ export const ShaderTable = props => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
         setOrderBy(property);
+    };
+
+    const [, , deleteShader] = useShaderSerDe();
+    const [isRemoved, setIsRemoved] = useState({ index: null });
+    const handleDeleteShader = (row, index) => {
+        if (confirm('Are you sure you want to delete this shader?')) {
+            deleteShader(row.id);
+            setIsRemoved({ index });
+        }
     };
 
     return (
@@ -192,6 +213,7 @@ export const ShaderTable = props => {
                             order={order}
                             orderBy={orderBy}
                             onRequestSort={handleRequestSort}
+                            editable={props.editable}
                         />
                         <TableBody>
                             {props.rows
@@ -199,7 +221,7 @@ export const ShaderTable = props => {
                                 .sort(getComparator(order, orderBy))
                                 .map((row, index) => {
                                     const labelId = `enhanced-table-checkbox-${index}`;
-                                    return (
+                                    return !(isRemoved.index === index) ? (
                                         <TableRow hover tabIndex={-1} key={row.name}>
                                             <TableCell align="left">
                                                 <Image
@@ -220,13 +242,23 @@ export const ShaderTable = props => {
                                             >
                                                 <Link href={`/view/${row.id}`}>{row.name}</Link>
                                             </TableCell>
-
                                             <TableCell align="left">
                                                 {toDateString(row.created_at)}
                                             </TableCell>
                                             <TableCell align="left">{row.visibility}</TableCell>
+                                            {props.editable ? (
+                                                <TableCell align="left">
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleDeleteShader(row, index)
+                                                        }
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </TableCell>
+                                            ) : null}
                                         </TableRow>
-                                    );
+                                    ) : null;
                                 })}
                         </TableBody>
                     </Table>
