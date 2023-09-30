@@ -48,7 +48,6 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'if',
         //->let
         'loop',
-        'override',
         'requires',
         'return',
         //->struct
@@ -66,8 +65,6 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
     ],
 
     reservedKeywords: [
-        'const',
-        'const_assert',
         'vec',
         'mat',
 
@@ -218,7 +215,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'yield'
     ],
 
-    storageKeywords: ['var', 'let'],
+    storageKeywords: ['var', 'let', 'override', 'const', 'const_assert'],
 
     typedefKeywords: ['alias'],
 
@@ -548,8 +545,8 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
     ],
 
     escapes: /\\([nrt0"''\\]|x[0-9a-fA-F]{2}|u\{[0-9a-fA-F]{1,6}\})/,
-    delimiters: /[,]/,
-    symbols: /[!%&*+\-./:;<=>^|_~,]+/,
+    delimiters: /[,;:]/,
+    symbols: /[!%&*+\-/<=>^|_~,]+/,
 
     // TODO: check tokenizer according to spec
     tokenizer: {
@@ -583,7 +580,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
             // Overly complex...
             [/[@]compute/, 'attribute.stage.type'],
             [
-                /(@)([a-zA-Z][a-zA-Z0-9_]+)(\()((?:\d+[\d,\s]*)|(?:[a-zA-Z][a-zA-Z0-9_]+))(\))/,
+                /(@)([a-zA-Z][a-zA-Z0-9_]+)(\()((?:[a-zA-Z0-9_]+[a-zA-Z0-9_,\s]*)|(?:[a-zA-Z][a-zA-Z0-9_]+))(\))/,
                 {
                     cases: {
                         '$2==builtin': [
