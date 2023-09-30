@@ -23,14 +23,12 @@ import {
 } from 'lib/db/supabaseclient';
 import { fixup_shader_code } from 'lib/util/fixup';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
-import Error from 'next/error';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 import { definitions } from 'types/supabase';
 
-export async function getServerSideProps(context) {
-    const id = Number(context.params.id);
-    if (Number.isNaN(id)) return { props: { id: null, shader: null } };
-
+async function fetchShader(id: number) {
     const { data, error, status } = await supabase
         .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
         .select(
@@ -54,7 +52,35 @@ export async function getServerSideProps(context) {
         console.error(error.message);
     }
 
-    return { props: { id, shader: data } };
+    return data;
+}
+
+export async function getServerSideProps(context) {
+    const id = Number(context.params.id);
+    if (Number.isNaN(id)) return { notFound: true };
+    return { props: { id, shader: await fetchShader(id) } };
+}
+
+function buildHead(shader) {
+    const image = getFullyQualifiedSupabaseBucketURL(
+        SUPABASE_SHADERTHUMB_BUCKET_NAME,
+        shader.thumb_url
+    );
+    return (
+        <Head>
+            <title>{shader.name}</title>
+            <meta property="og:type" content="image" />
+            <meta property="og:site_name" content="@compute.toys" />
+            <meta property="og:title" content={shader.name} />
+            <meta property="og:description" content={shader.description} />
+            <meta property="og:image" content={image} />
+            <meta name="twitter:card" content="summary_large_image" />
+            <meta name="twitter:site:id" content="@compute_toys" />
+            <meta name="twitter:title" content={shader.name} />
+            <meta name="twitter:description" content={shader.description} />
+            <meta name="twitter:image" content={image} />
+        </Head>
+    );
 }
 
 export default function Index(props) {
@@ -73,59 +99,53 @@ export default function Index(props) {
     const setAuthorProfile = useSetAtom(authorProfileAtom);
     const setFloat32Enabled = useSetAtom(float32EnabledAtom);
 
-    if (!props.id || !props.shader) return <Error statusCode={404} />;
+    const router = useRouter();
 
-    const shader = props.shader;
-    const image = getFullyQualifiedSupabaseBucketURL(
-        SUPABASE_SHADERTHUMB_BUCKET_NAME,
-        shader.thumb_url
-    );
-    const head = (
-        <Head>
-            <title>{shader.name}</title>
-            <meta property="og:type" content="image" />
-            <meta property="og:site_name" content="@compute.toys" />
-            <meta property="og:title" content={shader.name} />
-            <meta property="og:description" content={shader.description} />
-            <meta property="og:image" content={image} />
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:site:id" content="@compute_toys" />
-            <meta name="twitter:title" content={shader.name} />
-            <meta name="twitter:description" content={shader.description} />
-            <meta name="twitter:image" content={image} />
-        </Head>
-    );
+    const loadShader = shader => {
+        if (!shader) router.push('/404');
 
-    setDBLoaded(false);
-    reset();
-    setTitle(shader.name);
-    setDescription(shader.description);
-    setVisibility(shader.visibility);
+        setDBLoaded(false);
+        reset();
+        setTitle(shader.name);
+        setDescription(shader.description);
+        setVisibility(shader.visibility);
 
-    const body = JSON.parse(shader.body);
-    const float32Enabled = 'float32Enabled' in body ? body.float32Enabled : false;
+        const body = JSON.parse(shader.body);
+        const float32Enabled = 'float32Enabled' in body ? body.float32Enabled : false;
 
-    const shaderActiveSettings: ShaderActiveSettings = {
-        code: fixup_shader_code(JSON.parse(body.code)),
-        uniforms: body.uniforms,
-        textures: body.textures,
-        float32Enabled: float32Enabled
+        const shaderActiveSettings: ShaderActiveSettings = {
+            code: fixup_shader_code(JSON.parse(body.code)),
+            uniforms: body.uniforms,
+            textures: body.textures,
+            float32Enabled: float32Enabled
+        };
+
+        setCode(shaderActiveSettings.code);
+        setLoadedTextures(shaderActiveSettings.textures);
+        setSliderRefMap(fromUniformActiveSettings(shaderActiveSettings.uniforms));
+        // need to inform the slider component of a change so it can get a count of all the enabled sliders
+        setSliderSerDeNeedsUpdate(true);
+        setFloat32Enabled(float32Enabled);
+        // @ts-ignore
+        setAuthorProfile(shader.profile);
+        setShaderID(props.id);
+        setManualReload(true);
+        setDBLoaded(true);
     };
 
-    setCode(shaderActiveSettings.code);
-    setLoadedTextures(shaderActiveSettings.textures);
-    setSliderRefMap(fromUniformActiveSettings(shaderActiveSettings.uniforms));
-    // need to inform the slider component of a change so it can get a count of all the enabled sliders
-    setSliderSerDeNeedsUpdate(true);
-    setFloat32Enabled(float32Enabled);
-    setAuthorProfile(shader.profile);
-    setShaderID(props.id);
-    setManualReload(true);
-    setDBLoaded(true);
+    useEffect(() => {
+        if (props.shader) {
+            // public/unlisted shaders are fetched server-side
+            loadShader(props.shader);
+        } else if (router.isReady) {
+            // private shaders need to be fetched client-side
+            fetchShader(props.id).then(loadShader);
+        }
+    }, [router.isReady]);
 
     return (
         <div>
-            {head}
+            {props.shader ? buildHead(props.shader) : null}
             <Editor />
         </div>
     );
