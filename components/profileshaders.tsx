@@ -197,7 +197,7 @@ export const ProfileShaders = props => {
     const [, , deleteShader] = useShaderSerDe();
     const [isRemoved, setIsRemoved] = useState({ index: null });
     const handleDeleteShader = (row, index) => {
-        if (confirm('Are you sure you want to delete this shader?')) {
+        if (confirm(`Are you sure you want to delete shader #${row.id} "${row.name}"?`)) {
             deleteShader(row.id);
             setIsRemoved({ index });
         }
