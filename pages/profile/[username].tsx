@@ -9,7 +9,7 @@ import { supabase, SUPABASE_SHADER_TABLE_NAME } from 'lib/db/supabaseclient';
 import { toDateString } from 'lib/util/dateutils';
 import { ChangeEvent, Fragment, useEffect, useState } from 'react';
 import { CssTextField, Item, theme } from 'theme/theme';
-import { ShaderTable } from '../../components/shadertable';
+import { ProfileShaders } from '../../components/profileshaders';
 import { definitions } from '../../types/supabase';
 
 const PROFILE_AVATAR_WIDTH = 96;
@@ -72,7 +72,7 @@ export default function Profile(props) {
             setShaders(res.shaders);
             setErrorMessage(res.error);
         });
-    }, [user]);
+    }, [user, props.profile.id]);
 
     //https://github.com/supabase/supabase/blob/master/examples/nextjs-ts-user-management/components/Account.tsx
     const uploadAvatar = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -244,7 +244,7 @@ export default function Profile(props) {
                     </Stack>
                 </Item>
             ) : null}
-            <ShaderTable rows={shaders} />
+            <ProfileShaders rows={shaders} editable={editable} />
         </Item>
     );
 }
