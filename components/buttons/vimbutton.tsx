@@ -4,7 +4,7 @@ import SvgIcon from '@mui/material/SvgIcon';
 import { useAtom } from 'jotai';
 import { vimAtom } from 'lib/atoms/atoms';
 
-export const VimButton = () => {
+export default function VimButton() {
     const [vim, setVim] = useAtom(vimAtom);
     const theme = useTheme();
 
@@ -24,6 +24,4 @@ export const VimButton = () => {
             </SvgIcon>
         </Button>
     );
-};
-
-export default VimButton;
+}

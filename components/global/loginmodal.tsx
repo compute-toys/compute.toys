@@ -14,8 +14,9 @@ import {
     VIEWS
 } from 'lib/db/authcontext';
 import Link from 'next/link';
-import { ChangeEvent, forwardRef, Fragment, useEffect, useReducer, useState } from 'react';
+import { ChangeEvent, Fragment, useEffect, useReducer, useState } from 'react';
 import { CssTextField, Item, theme } from 'theme/theme';
+import FakeLink from './fakelink';
 import Logo from './logo';
 
 interface LoginWindowProps {
@@ -26,7 +27,7 @@ interface LoginWindowProps {
     close: () => void;
 }
 
-export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
+const LoginWindow = (props: LoginWindowProps) => {
     const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState(null);
     const [password, setPassword] = useState(null);
@@ -211,7 +212,8 @@ export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
         <Item
             sx={{
                 display: 'inline-block',
-                transform: 'translate(calc(50vw - 50%), calc(50vh - 50%))'
+                transform: 'translate(calc(50vw - 50%), calc(50vh - 50%))',
+                padding: '2.0rem'
             }}
         >
             <Stack spacing={2}>
@@ -265,7 +267,7 @@ export const LoginWindow = forwardRef((props: LoginWindowProps, ref) => {
             </Stack>
         </Item>
     );
-});
+};
 
 LoginWindow.displayName = 'LoginWindow';
 
@@ -284,10 +286,20 @@ export default function LoginModal() {
         forceUpdate();
     }, [view, profile.username, profile.avatar]);
 
+    // Log in link is wrapped in <a> just for styling.
     const logInOutButton =
         view === VIEWS.LOGGED_OUT ? (
             <Fragment>
-                <Button onClick={handleOpen}>Log In</Button>
+                <Button onClick={handleOpen}>
+                    <a
+                        href=""
+                        onClick={e => {
+                            e.preventDefault();
+                        }}
+                    >
+                        Log In
+                    </a>
+                </Button>
                 or
                 <Button>
                     <Link href={'/signup'}>Sign Up</Link>
@@ -309,7 +321,9 @@ export default function LoginModal() {
                         spacing={0}
                     >
                         <Typography variant="h6">
-                            <Logo />
+                            <FakeLink href="/">
+                                <Logo />
+                            </FakeLink>
                         </Typography>
                         <Stack
                             direction="row"

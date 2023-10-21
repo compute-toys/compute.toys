@@ -1,4 +1,4 @@
-import { fromUniformActiveSettings, UniformSliderRef } from 'components/editor/uniformsliders';
+import { UniformSliderRef } from 'components/editor/uniformsliders';
 import { atom, Getter, useAtomValue, useSetAtom } from 'jotai';
 import { useResetAtom } from 'jotai/utils';
 import {
@@ -22,7 +22,6 @@ import {
     SUPABASE_SHADERTHUMB_BUCKET_NAME,
     SUPABASE_SHADER_TABLE_NAME
 } from 'lib/db/supabaseclient';
-import { fixup_shader_code } from 'lib/util/fixup';
 import { useMemo, useRef } from 'react';
 import { theme } from 'theme/theme';
 import { definitions } from 'types/supabase';
@@ -32,7 +31,7 @@ export interface UniformActiveSettings {
     value: number;
 }
 
-export interface TextureActiveSettings {
+interface TextureActiveSettings {
     img: string;
     thumb?: string;
 }
@@ -65,8 +64,9 @@ const upsertResult = (
     };
 };
 
-export type HOST_GET = (id: number) => Promise<void>;
-export type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
+type HOST_GET = (id: number) => Promise<void>;
+type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
+type HOST_DELETE = (id: number) => Promise<boolean>;
 
 const getSliderActiveSettings = (sliderRefMap: Map<string, UniformSliderRef>) => {
     // convert our map of references into a plain array of objects
@@ -80,7 +80,7 @@ const getSliderActiveSettings = (sliderRefMap: Map<string, UniformSliderRef>) =>
 
 // https://github.com/pmndrs/jotai/issues/1100
 // TODO: jotai has experimental features for dealing with this case, use them when they're less experimental
-export const useAtomGetter = () => {
+const useAtomGetter = () => {
     const getter = useRef<Getter | null>(null);
     const derived = useMemo(
         () =>
@@ -123,7 +123,7 @@ export const useResetShaderData = () => {
     return reset;
 };
 
-export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
+export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT, HOST_DELETE] {
     const atomGetter = useAtomGetter();
 
     const { user } = useAuth();
@@ -137,6 +137,9 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
         we need to serialize change. Instead, we use a hack
         to read the atoms imperatively when they are needed.
      */
+    const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
+
+    /*
     const setCode = useSetAtom(codeAtom);
     const setLoadedTextures = useSetAtom(loadedTexturesAtom);
     const setSliderSerDeNeedsUpdate = useSetAtom(sliderSerDeNeedsUpdateAtom);
@@ -145,9 +148,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
     const setDescription = useSetAtom(descriptionAtom);
     const setVisibility = useSetAtom(visibilityAtom);
     const setAuthorProfile = useSetAtom(authorProfileAtom);
-    const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
     const setFloat32Enabled = useSetAtom(float32EnabledAtom);
-
     const get = async (id: number) => {
         try {
             const { data, error, status } = await supabase
@@ -163,7 +164,6 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
                         avatar_url,
                         id
                     )
-                        
                 `
                 )
                 .eq('id', id)
@@ -205,6 +205,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
             alert(error.message);
         }
     };
+    */
 
     const uploadThumb = async (id: number, dataUrl: string) => {
         const fileExt = 'jpg';
@@ -312,5 +313,22 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT] {
         }
     };
 
-    return [get, upsert];
+    const del = async (id: number) => {
+        try {
+            const { error, status } = await supabase
+                .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
+                .delete()
+                .eq('id', id);
+            if (error && status !== 406) {
+                throw error;
+            } else {
+                return true;
+            }
+        } catch (error) {
+            alert(error.message);
+            return false;
+        }
+    };
+
+    return [undefined, upsert, del];
 }

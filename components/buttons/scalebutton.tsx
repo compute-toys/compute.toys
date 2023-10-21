@@ -1,4 +1,5 @@
-import { Hd, Sd } from '@mui/icons-material';
+import Hd from '@mui/icons-material/Hd';
+import Sd from '@mui/icons-material/Sd';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import { useAtom, useAtomValue } from 'jotai';
@@ -9,7 +10,7 @@ const ScaleIcon = () => {
     return halfResolution ? <Sd /> : <Hd />;
 };
 
-export const ScaleButton = () => {
+export default function ScaleButton() {
     const [halfResolution, setHalfResolution] = useAtom(halfResolutionAtom);
     const theme = useTheme();
     return (
@@ -24,6 +25,4 @@ export const ScaleButton = () => {
             <ScaleIcon />
         </Button>
     );
-};
-
-export default ScaleButton;
+}

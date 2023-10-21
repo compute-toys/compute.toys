@@ -1,6 +1,6 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
-import { Editor } from 'components/editor/editor';
+import Editor from 'components/editor/editor';
 import FavIconHead from 'components/global/faviconhead';
 import { ShadowCanvas } from 'components/global/shadowcanvas';
 import { useSetAtom } from 'jotai';

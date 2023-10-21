@@ -70,7 +70,8 @@ const ShaderPicker = props => {
         <Item
             elevation={12}
             sx={{
-                display: 'inline-block'
+                display: 'inline-block',
+                width: '100%'
             }}
         >
             <Box
@@ -81,8 +82,10 @@ const ShaderPicker = props => {
                         sm: 'repeat(2, 1fr)',
                         md: 'repeat(3, 1fr)',
                         lg: 'repeat(4, 1fr)'
+                        // xl: 'repeat(6, 1fr)'
                     },
-                    gap: '10px',
+                    gap: '30px',
+                    padding: '2em',
                     // standard variant from here:
                     // https://github.com/mui-org/material-ui/blob/3e679ac9e368aeb170d564d206d59913ceca7062/packages/mui-material/src/ImageListItem/ImageListItem.js#L42-L43
                     [`& .${imageListItemClasses.root}`]: {
@@ -92,22 +95,57 @@ const ShaderPicker = props => {
                 }}
             >
                 {props.shaders.map(shader => (
-                    <ImageListItem key={shader.id}>
-                        <Image
-                            style={{ borderRadius: '4px' }}
-                            src={getFullyQualifiedSupabaseBucketURL(
-                                SUPABASE_SHADERTHUMB_BUCKET_NAME,
-                                shader.thumb_url
-                            )}
-                            alt={shader.name}
-                            width={SHADER_THUMB_SIZE_H}
-                            height={SHADER_THUMB_SIZE_V}
-                            loading="lazy"
-                        />
+                    <ImageListItem key={shader.id} style={{ aspectRatio: '1/0.75' }}>
+                        <Link passHref href={`/view/${shader.id}`}>
+                            <Image
+                                style={{
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                                src={getFullyQualifiedSupabaseBucketURL(
+                                    SUPABASE_SHADERTHUMB_BUCKET_NAME,
+                                    shader.thumb_url
+                                )}
+                                alt={shader.name}
+                                width="100%"
+                                height="56.25%"
+                                layout="responsive"
+                                priority={true}
+                            />
+                        </Link>
                         <ImageListItemBar
-                            title={<Link href={`/view/${shader.id}`}>{shader.name}</Link>}
-                            subtitle={`by ${shader.profile.username}`}
-                            style={{ borderRadius: '4px' }}
+                            title={
+                                <span
+                                    style={{
+                                        marginLeft: '2px',
+                                        color: theme.palette.dracula.foreground
+                                    }}
+                                >
+                                    {shader.name}
+                                </span>
+                            }
+                            position="below"
+                            subtitle={
+                                <span
+                                    style={{
+                                        marginLeft: '2px',
+                                        color: theme.palette.dracula.foreground
+                                    }}
+                                >
+                                    <span>by </span>
+                                    <FakeLink href={`/profile/${shader.profile.username}`}>
+                                        <div
+                                            style={{
+                                                fontWeight: 'bold',
+                                                textDecoration: 'underline'
+                                            }}
+                                        >
+                                            {shader.profile.username}
+                                        </div>
+                                    </FakeLink>
+                                </span>
+                            }
+                            style={{ borderRadius: '4px', textAlign: 'left' }}
                             actionIcon={
                                 <FakeLink href={`/profile/${shader.profile.username}`}>
                                     <Box sx={{ margin: '10px' }}>
@@ -128,15 +166,17 @@ export const MAX_PAGE_BUTTONS = 5;
 const PageButton = props => {
     return (
         <Link href={`/list/${props.index}`} passHref>
-            <Button>
-                <span
-                    style={
-                        props.highlight
-                            ? { color: theme.palette.dracula.foreground }
-                            : { color: theme.palette.dracula.selection }
-                    }
-                >
-                    {props.index.toString()}
+            <Button
+                style={
+                    props.highlight
+                        ? {
+                              backgroundColor: theme.palette.dracula.selection
+                          }
+                        : {}
+                }
+            >
+                <span style={{ color: theme.palette.dracula.foreground }}>
+                    {props.index.toString()}{' '}
                 </span>
             </Button>
         </Link>
@@ -168,7 +208,7 @@ const EllipsisButton = () => {
 
  */
 const PagePicker = props => {
-    const pages = Math.floor((parseInt(props.totalCount) - 1) / SHADERS_PER_PAGE) + 1;
+    const pages = Math.floor((parseInt(props.totalCount) - 1) / SHADERS_PER_PAGE);
 
     const currentPage = props.page;
 
@@ -189,13 +229,15 @@ const PagePicker = props => {
         <Stack direction="row" style={props.style}>
             {[...Array(lowerPages).keys()].map(index => {
                 const page = index + firstPage;
-                return <PageButton highlight={currentPage === page} key={page} index={page} />;
+                return (
+                    <PageButton highlight={Number(currentPage) === page} key={page} index={page} />
+                );
             })}
             {showLast ? (
                 <Fragment>
                     {!hideEllipsis ? <EllipsisButton /> : null}
                     <PageButton
-                        highlight={currentPage === lastPage}
+                        highlight={Number(currentPage) === lastPage}
                         key={lastPage}
                         index={lastPage}
                     />
@@ -213,13 +255,14 @@ export default function ShaderList(props) {
                     display: 'inline-block',
                     position: 'relative',
                     left: '50%',
-                    transform: 'translate(-50%, 0)'
+                    transform: 'translate(-50%, 0)',
+                    width: '100%'
                 }}
             >
                 <PagePicker
                     page={props.page}
                     totalCount={props.totalCount}
-                    style={{ marginBottom: '10px' }}
+                    style={{ marginBottom: '10px', overflowX: 'auto' }}
                 />
                 <ShaderPicker page={props.page} shaders={props.shaders} />
             </Box>

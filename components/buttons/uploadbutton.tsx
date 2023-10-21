@@ -2,7 +2,7 @@ import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import Button from '@mui/material/Button';
 import { ChangeEventHandler } from 'react';
 
-export type UploadButtonProps = {
+type UploadButtonProps = {
     onUpload: ChangeEventHandler<HTMLInputElement>;
     sx?: any;
     iconSx?: any;

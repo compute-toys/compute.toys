@@ -3,22 +3,15 @@ import { AuthChangeEvent, Session, User } from '@supabase/gotrue-js';
 import { supabase, SUPABASE_PROFILE_TABLE_NAME } from 'lib/db/supabaseclient';
 import { createContext, useContext, useEffect, useState } from 'react';
 
-export const EVENTS = {
-    SIGNED_IN: 'SIGNED_IN',
-    SIGNED_OUT: 'SIGNED_OUT',
-    USER_UPDATED: 'USER_UPDATED',
-    TOKEN_REFRESHED: 'TOKEN_REFRESHED'
-};
-
-export interface ProfileData {
+interface ProfileData {
     username: string | false;
     avatar: string | false;
 }
 
 // obviously redundant but typescript will treat reference to
 // VIEWS as a namespace here and fail to find it
-export type View = 'logged_in' | 'logged_out';
-export type EmailOTPType = 'signup' | 'recovery';
+type View = 'logged_in' | 'logged_out';
+type EmailOTPType = 'signup' | 'recovery';
 
 export const VIEWS = {
     LOGGED_IN: 'logged_in' as View,
@@ -26,12 +19,8 @@ export const VIEWS = {
 };
 
 export type AuthLogIn = (email: string, password: string) => Promise<{ error: any }>;
-export type AuthLogOut = () => Promise<{ error: any }>;
-export type AuthSignUp = (
-    email: string,
-    username: string,
-    password: string
-) => Promise<{ error: any }>;
+type AuthLogOut = () => Promise<{ error: any }>;
+type AuthSignUp = (email: string, username: string, password: string) => Promise<{ error: any }>;
 export type AuthConfirm = (
     email: string,
     token: string,
@@ -41,7 +30,7 @@ export type AuthResetPassword = (email: string) => Promise<{ error: any }>;
 export type AuthUpdatePassword = (password: string) => Promise<{ error: any }>;
 
 // TODO: better error types
-export interface AuthContextInterface {
+interface AuthContextInterface {
     user: User | null;
     view: View;
     session: Session | null;
@@ -54,7 +43,7 @@ export interface AuthContextInterface {
     updatePassword: AuthUpdatePassword;
 }
 
-export const AuthContext = createContext<AuthContextInterface>(undefined);
+const AuthContext = createContext<AuthContextInterface>(undefined);
 
 async function updateSupabaseCookie(event: AuthChangeEvent, session: Session | null) {
     await fetch('/api/auth', {
@@ -64,17 +53,6 @@ async function updateSupabaseCookie(event: AuthChangeEvent, session: Session | n
         body: JSON.stringify({ event, session })
     });
 }
-
-/*
-async function logInApi(username: string, password: string) {
-    return await fetch('/api/login', {
-        method: 'POST',
-        headers: new Headers({ 'Content-Type': 'application/json' }),
-        credentials: 'same-origin',
-        body: JSON.stringify({ username, password })
-    });
-}
-*/
 
 async function signUpApi(email: string, username: string, password: string) {
     return await fetch('/api/signup', {

@@ -1,4 +1,4 @@
-import { DisabledByDefaultSharp } from '@mui/icons-material';
+import DisabledByDefaultSharp from '@mui/icons-material/DisabledByDefaultSharp';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
@@ -8,10 +8,6 @@ import Image from 'next/image';
 import { Fragment, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 import { Item } from 'theme/theme';
-
-export interface LoadedTextures {
-    [key: number]: string;
-}
 
 const DraggablePicker = props => {
     const setLoadedTextures = useSetAtom(loadedTexturesAtom);
@@ -129,7 +125,7 @@ export default function TexturePicker() {
                                 alt={'Channel ' + index + ' texture'}
                                 width={size}
                                 height={size}
-                                loading="lazy"
+                                priority={true}
                             />
                             <ImageListItemBar subtitle={'channel' + index} />
                         </ImageListItem>

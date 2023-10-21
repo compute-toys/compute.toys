@@ -4,7 +4,7 @@ import { atomWithReset } from 'jotai/utils';
 import Monaco from 'monaco-editor';
 import { ParseError } from 'types/parseerror';
 
-export const DEFAULT_SHADER = `
+const DEFAULT_SHADER = `
 @compute @workgroup_size(16, 16)
 fn main_image(@builtin(global_invocation_id) id: vec3u) {
     // Viewport resolution (in pixels)
@@ -30,7 +30,7 @@ fn main_image(@builtin(global_invocation_id) id: vec3u) {
 }
 `;
 
-export interface AuthorProfile {
+interface AuthorProfile {
     username: string;
     avatar_url: string;
     id: string;
@@ -65,6 +65,7 @@ export const dbLoadedAtom = atom<boolean>(false);
 export const saveColorTransitionSignalAtom = atom<string | false>(false);
 
 export const codeAtom = atomWithReset<string>(DEFAULT_SHADER);
+export const codeNeedSaveAtom = atomWithReset<boolean>(false);
 export const monacoEditorAtom = atomWithReset<Monaco.editor.IStandaloneCodeEditor | false>(false);
 
 export const authorProfileAtom = atomWithReset<AuthorProfile | false>(false);

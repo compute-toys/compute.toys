@@ -3,15 +3,18 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTransientAtom } from 'jotai-game';
 import {
     codeAtom,
+    codeNeedSaveAtom,
     dbLoadedAtom,
     isPlayingAtom,
     manualReloadAtom,
     monacoEditorAtom,
     parseErrorAtom,
     playAtom,
+    recordingAtom,
     resetAtom,
     vimAtom
 } from 'lib/atoms/atoms';
+import SingletonRouter, { Router } from 'next/router';
 import { wgslConfiguration, wgslLanguageDef } from 'public/grammars/wgsl';
 import { useEffect, useRef, useState } from 'react';
 import { defineMonacoTheme } from 'theme/monacotheme';
@@ -20,8 +23,10 @@ declare type Monaco = typeof import('monaco-editor');
 
 const Monaco = props => {
     const [code, setCode] = useAtom(codeAtom);
+    const [isRecording, setRecording] = useTransientAtom(recordingAtom);
+    const codeNeedSave = useAtomValue(codeNeedSaveAtom);
+    const setCodeNeedSave = useSetAtom(codeNeedSaveAtom);
     const parseError = useAtomValue(parseErrorAtom);
-    const [codeHasBeenModifiedAtLeastOnce, setCodeHasBeenModifiedAtLeastOnce] = useState(false);
     const dbLoaded = useAtomValue(dbLoadedAtom);
     const [isPlaying] = useTransientAtom(isPlayingAtom);
     const setPlay = useSetAtom(playAtom);
@@ -68,6 +73,9 @@ const Monaco = props => {
                     }
                 ]);
             }
+            document.getElementById('editor-canvas').style.border = !parseError.success
+                ? '4px solid #ff6f59'
+                : '';
         }
     }, [parseError]);
 
@@ -103,21 +111,44 @@ const Monaco = props => {
         }
     };
 
+    // code initialization without touching undo history
     useEffect(() => {
-        setCodeHasBeenModifiedAtLeastOnce(false);
-    }, [dbLoaded]);
+        if (editor && editor.getModel()) {
+            editor.getModel().setValue(code);
+            setCodeNeedSave(false);
+        }
+    }, [dbLoaded, editor]);
 
     useEffect(() => {
-        const alertOnAttemptedTabClose = e => {
-            if (codeHasBeenModifiedAtLeastOnce) {
+        const message = 'You have unsaved changes. Do you really want to leave?';
+
+        // unsaved changes with reload/undo
+        const beforeunload = (e: Event) => {
+            if (codeNeedSave) {
                 e.preventDefault();
+                return message;
             }
         };
-        window.addEventListener('beforeunload', alertOnAttemptedTabClose);
-        return () => {
-            window.removeEventListener('beforeunload', alertOnAttemptedTabClose);
+
+        // unsaved changes with route change
+        // next.js hack: https://github.com/vercel/next.js/discussions/32231#discussioncomment-1766710
+        //@ts-ignore
+        SingletonRouter.router.change = (...args) => {
+            if (codeNeedSave && !confirm(message)) {
+                return new Promise(resolve => resolve(false));
+            } else {
+                //@ts-ignore
+                return Router.prototype.change.apply(SingletonRouter.router, args);
+            }
         };
-    });
+
+        window.addEventListener('beforeunload', beforeunload);
+        return () => {
+            window.removeEventListener('beforeunload', beforeunload);
+            //@ts-ignore
+            delete SingletonRouter.router.change;
+        };
+    }, [codeNeedSave]);
 
     useEffect(() => {
         if (vim) {
@@ -146,7 +177,7 @@ const Monaco = props => {
             language="wgsl"
             onChange={value => {
                 setCode(value);
-                setCodeHasBeenModifiedAtLeastOnce(true);
+                setCodeNeedSave(true);
             }}
             beforeMount={editorWillMount}
             onMount={(_editor, monaco: Monaco) => {
@@ -163,6 +194,13 @@ const Monaco = props => {
                         setPlay(!isPlaying());
                     }
                 );
+                // Record shortcut
+                _editor.addCommand(
+                    monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR,
+                    () => {
+                        setRecording(!isRecording());
+                    }
+                );
                 // Rewind shortcut
                 _editor.addCommand(
                     monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow,
@@ -175,7 +213,6 @@ const Monaco = props => {
             }}
             options={props.editorOptions}
             theme="global" // preference
-            value={code}
             width={undefined} // fit to bounding box
         />
     );

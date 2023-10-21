@@ -1,4 +1,5 @@
-import { PlayArrowRounded, PlayDisabledRounded } from '@mui/icons-material';
+import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded';
+import PlayDisabledRounded from '@mui/icons-material/PlayDisabledRounded';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -13,7 +14,7 @@ const PlayIcon = () => {
     }
 };
 
-export const ReloadButton = () => {
+export default function ReloadButton() {
     const hotReload = useAtomValue(hotReloadAtom);
     const setManualReload = useSetAtom(manualReloadAtom);
 
@@ -34,6 +35,4 @@ export const ReloadButton = () => {
             <PlayIcon />
         </Button>
     );
-};
-
-export default ReloadButton;
+}

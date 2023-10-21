@@ -2,11 +2,11 @@ import { atom, useSetAtom } from 'jotai';
 import { useCallback } from 'react';
 import { getDimensions } from 'types/canvasdimensions';
 
-export const MAX_SHADOW_CANVAS_WIDTH = 700;
+const MAX_SHADOW_CANVAS_WIDTH = 700;
 // range from 0.0 to 1.0
-export const JPEG_IMAGE_QUALITY = 0.5;
+const JPEG_IMAGE_QUALITY = 0.5;
 
-export const safeShadowCanvasContext = (
+const safeShadowCanvasContext = (
     canvas: HTMLCanvasElement | false,
     shadowCanvas: HTMLCanvasElement | false,
     callback: (canvas: HTMLCanvasElement, shadowCanvas: HTMLCanvasElement) => Promise<void>
@@ -20,7 +20,7 @@ export const safeShadowCanvasContext = (
     }
 };
 
-export const safeShadowCanvasToDataContext = (
+const safeShadowCanvasToDataContext = (
     shadowCanvas: HTMLCanvasElement | false,
     callback: (shadowCanvas: HTMLCanvasElement) => Promise<string>
 ): Promise<string> => {
@@ -54,7 +54,7 @@ export const shadowCanvasElAtom = atom<HTMLCanvasElement | false>(false);
     been written! Presumably this is because we are grabbing the canvas
     immediately after it has been blanked before copy in that situation.
  */
-export const copyToShadowCanvas = async (
+const copyToShadowCanvas = async (
     canvasEl: HTMLCanvasElement | false,
     shadowCanvasEl: HTMLCanvasElement | false
 ) => {

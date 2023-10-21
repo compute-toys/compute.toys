@@ -1,3 +1,6 @@
+// This file was created for good syntax highlighting and later inspired by fb47a0f commit from
+// https://github.com/microsoft/monaco-editor/blob/main/src/basic-languages/wgsl/wgsl.ts
+
 import type { languages } from 'monaco-editor';
 
 export const wgslConfiguration: languages.LanguageConfiguration = {
@@ -25,57 +28,196 @@ export const wgslConfiguration: languages.LanguageConfiguration = {
 export const wgslLanguageDef = <languages.IMonarchLanguage>{
     tokenPostfix: '.wgsl',
     defaultToken: 'invalid',
+    unicode: true,
 
     keywords: [
-        'bitcast',
-        'block',
+        //->alias
         'break',
         'case',
+        //->const
+        //->const_assert
         'continue',
         'continuing',
         'default',
+        'diagnostic',
         'discard',
         'else',
-        'elseif',
         'enable',
-        'fallthrough',
+        //->fn
         'for',
         'if',
+        //->let
         'loop',
+        'requires',
+        'return',
+        //->struct
+        'switch',
+        //->var
+        'while',
+
         'private',
         'read',
         'read_write',
-        'return',
         'storage',
-        'switch',
         'uniform',
         'workgroup',
         'write'
     ],
 
     reservedKeywords: [
-        'asm',
-        'const',
-        'do',
-        'enum',
-        'handle',
-        'mat',
-        'override',
-        'premerge',
-        'regardless',
-        'typedef',
-        'unless',
-        'using',
         'vec',
-        'void',
-        'while'
+        'mat',
+
+        'NULL',
+        'Self',
+        'abstract',
+        'active',
+        'alignas',
+        'alignof',
+        'as',
+        'asm',
+        'asm_fragment',
+        'async',
+        'attribute',
+        'auto',
+        'await',
+        'become',
+        'binding_array',
+        'cast',
+        'catch',
+        'class',
+        'co_await',
+        'co_return',
+        'co_yield',
+        'coherent',
+        'column_major',
+        'common',
+        'compile',
+        'compile_fragment',
+        'concept',
+        'const_cast',
+        'consteval',
+        'constexpr',
+        'constinit',
+        'crate',
+        'debugger',
+        'decltype',
+        'delete',
+        'demote',
+        'demote_to_helper',
+        'do',
+        'dynamic_cast',
+        'enum',
+        'explicit',
+        'export',
+        'extends',
+        'extern',
+        'external',
+        'fallthrough',
+        'filter',
+        'final',
+        'finally',
+        'friend',
+        'from',
+        'fxgroup',
+        'get',
+        'goto',
+        'groupshared',
+        'highp',
+        'impl',
+        'implements',
+        'import',
+        'inline',
+        'instanceof',
+        'interface',
+        'layout',
+        'lowp',
+        'macro',
+        'macro_rules',
+        'match',
+        'mediump',
+        'meta',
+        'mod',
+        'module',
+        'move',
+        'mut',
+        'mutable',
+        'namespace',
+        'new',
+        'nil',
+        'noexcept',
+        'noinline',
+        'nointerpolation',
+        'noperspective',
+        'null',
+        'nullptr',
+        'of',
+        'operator',
+        'package',
+        'packoffset',
+        'partition',
+        'pass',
+        'patch',
+        'pixelfragment',
+        'precise',
+        'precision',
+        'premerge',
+        'priv',
+        'protected',
+        'pub',
+        'public',
+        'readonly',
+        'ref',
+        'regardless',
+        'register',
+        'reinterpret_cast',
+        'require',
+        'resource',
+        'restrict',
+        'self',
+        'set',
+        'shared',
+        'sizeof',
+        'smooth',
+        'snorm',
+        'static',
+        'static_assert',
+        'static_cast',
+        'std',
+        'subroutine',
+        'super',
+        'target',
+        'template',
+        'this',
+        'thread_local',
+        'throw',
+        'trait',
+        'try',
+        'type',
+        'typedef',
+        'typeid',
+        'typename',
+        'typeof',
+        'union',
+        'unless',
+        'unorm',
+        'unsafe',
+        'unsized',
+        'use',
+        'using',
+        'varying',
+        'virtual',
+        'volatile',
+        'wgsl',
+        'where',
+        'with',
+        'writeonly',
+        'yield'
     ],
 
-    storageKeywords: ['var', 'let'],
+    storageKeywords: ['var', 'let', 'override', 'const', 'const_assert'],
 
-    typedefKeywords: ['type', 'alias'],
-
-    enumKeywords: ['enum'],
+    typedefKeywords: ['alias'],
 
     structKeywords: ['struct'],
 
@@ -161,6 +303,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'any',
         'select',
 
+        'bitcast',
         'arrayLength',
 
         'abs',
@@ -185,6 +328,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'fma',
         'fract',
         'frexp',
+        'inverseBits',
         'inverseSqrt',
         'ldexp',
         'length',
@@ -200,7 +344,9 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'radians',
         'reflect',
         'refract',
+        'reverseBits',
         'round',
+        'saturate',
         'sign',
         'sin',
         'sinh',
@@ -247,6 +393,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'textureSampleCompareLevel',
         'textureSampleGrad',
         'textureSampleLevel',
+        'textureSampleBaseClampToEdge',
         'textureStore',
         'textureNumLayers',
         'textureNumLevels',
@@ -276,10 +423,11 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'unpack2x16float',
 
         'storageBarrier',
-        'workgroupBarrier'
+        'workgroupBarrier',
+        'workgroupUniformLoad'
     ],
 
-    addressSpaceKeywords: ['function', 'private', 'workgroup', 'uniform', 'storage', 'handle'],
+    addressSpaceKeywords: ['function', 'private', 'workgroup', 'uniform', 'storage'],
 
     memoryAccessModeKeywords: ['read', 'write', 'read_write'],
 
@@ -299,7 +447,8 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'rg32float',
         'rgba32uint',
         'rgba32sint',
-        'rgba32float'
+        'rgba32float',
+        'bgra8unorm'
     ],
 
     textureTypeKeywords: [
@@ -328,8 +477,6 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'binding',
         'workgroup_size',
         'block',
-        'stride',
-        'offset',
         'layout',
         'align',
         'id',
@@ -364,43 +511,44 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
     constants: ['true', 'false'],
 
     operators: [
-        '!',
-        '!=',
-        '%',
-        '%=',
         '&',
-        '&=',
         '&&',
-        '*',
-        '*=',
-        '+',
-        '+=',
-        '-',
-        '-=',
         '->',
         '/',
-        '/=',
-        ':',
-        ';',
-        '<',
-        '<=',
         '=',
         '==',
+        '!=',
         '>',
         '>=',
-        '^',
-        '^=',
+        '<',
+        '<=',
+        '%',
+        '-',
+        '--',
+        '+',
+        '++',
         '|',
+        '||',
+        '*',
+        '<<',
+        '>>',
+        '+=',
+        '-=',
+        '*=',
+        '/=',
+        '%=',
+        '&=',
         '|=',
-        '||'
+        '^=',
+        '>>=',
+        '<<='
     ],
 
     escapes: /\\([nrt0"''\\]|x[0-9a-fA-F]{2}|u\{[0-9a-fA-F]{1,6}\})/,
-    delimiters: /[,]/,
-    symbols: /[#!%&*+\-./:;<=>@^|_?]+/,
-    intSuffixes: /[iu]/,
-    floatSuffixes: /f/,
+    delimiters: /[,;:]/,
+    symbols: /[!%&*+\-/<=>^|_~,]+/,
 
+    // TODO: check tokenizer according to spec
     tokenizer: {
         root: [
             // Raw string literals
@@ -432,7 +580,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
             // Overly complex...
             [/[@]compute/, 'attribute.stage.type'],
             [
-                /(@)([a-zA-Z][a-zA-Z0-9_]+)(\()((?:\d+[\d,\s]*)|(?:[a-zA-Z][a-zA-Z0-9_]+))(\))/,
+                /(@)([a-zA-Z][a-zA-Z0-9_]+)(\()((?:[a-zA-Z0-9_]+[a-zA-Z0-9_,\s]*)|(?:[a-zA-Z][a-zA-Z0-9_]+))(\))/,
                 {
                     cases: {
                         '$2==builtin': [
@@ -529,18 +677,34 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         ],
 
         numbers: [
-            //Float (from WGSL spec)
-            [
-                /(((([0-9]*\.[0-9]+)|([0-9]+\.[0-9]*))([eE](\+|-)?[0-9]+)?)|([0-9]+[eE](\+|-)?[0-9]+))f?|0f|[1-9][0-9]*f/,
-                { token: 'number' }
-            ],
-            //Hex Float (from WGSL spec)
-            [
-                /0[xX]((([0-9a-fA-F]*\.[0-9a-fA-F]+|[0-9a-fA-F]+\.[0-9a-fA-F]*)([pP](\+|-)?[0-9]+f?)?)|([0-9a-fA-F]+[pP](\+|-)?[0-9]+f?))/,
-                { token: 'number' }
-            ],
-            //Hex/Decimal Integer (from WGSL spec)
-            [/(0[xX][0-9a-fA-F]+|0|[1-9][0-9]*)[iu]?/, { token: 'number' }]
+            // Decimal float literals
+            // https://www.w3.org/TR/WGSL/#syntax-decimal_float_literal
+            // 0, with type-specifying suffix.
+            [/0[fh]/, 'number.float'],
+            // Other decimal integer, with type-specifying suffix.
+            [/[1-9][0-9]*[fh]/, 'number.float'],
+            // Has decimal point, at least one digit after decimal.
+            [/[0-9]*\.[0-9]+([eE][+-]?[0-9]+)?[fh]?/, 'number.float'],
+            // Has decimal point, at least one digit before decimal.
+            [/[0-9]+\.[0-9]*([eE][+-]?[0-9]+)?[fh]?/, 'number.float'],
+            // Has at least one digit, and has an exponent.
+            [/[0-9]+[eE][+-]?[0-9]+[fh]?/, 'number.float'],
+
+            // Hex float literals
+            // https://www.w3.org/TR/WGSL/#syntax-hex_float_literal
+            [/0[xX][0-9a-fA-F]*\.[0-9a-fA-F]+(?:[pP][+-]?[0-9]+[fh]?)?/, 'number.hex'],
+            [/0[xX][0-9a-fA-F]+\.[0-9a-fA-F]*(?:[pP][+-]?[0-9]+[fh]?)?/, 'number.hex'],
+            [/0[xX][0-9a-fA-F]+[pP][+-]?[0-9]+[fh]?/, 'number.hex'],
+
+            // Hexadecimal integer literals
+            // https://www.w3.org/TR/WGSL/#syntax-hex_int_literal
+            [/0[xX][0-9a-fA-F]+[iu]?/, 'number.hex'],
+
+            // Decimal integer literals
+            // https://www.w3.org/TR/WGSL/#syntax-decimal_int_literal
+            // We need two rules here because 01 is not valid.
+            [/[1-9][0-9]*[iu]?/, 'number'],
+            [/0[iu]?/, 'number'] // Must match last
         ]
     }
 };

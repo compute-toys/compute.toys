@@ -1,4 +1,5 @@
-import { AcUnit, LocalFireDepartment } from '@mui/icons-material';
+import AcUnit from '@mui/icons-material/AcUnit';
+import LocalFireDepartment from '@mui/icons-material/LocalFireDepartment';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import { useAtom, useAtomValue } from 'jotai';
@@ -13,7 +14,7 @@ const HotColdIcon = () => {
     }
 };
 
-export const HotReloadToggle = () => {
+export default function HotReloadToggle() {
     const [hotReload, setHotReload] = useAtom(hotReloadAtom);
 
     const theme = useTheme();
@@ -28,6 +29,4 @@ export const HotReloadToggle = () => {
             <HotColdIcon />
         </Button>
     );
-};
-
-export default HotReloadToggle;
+}

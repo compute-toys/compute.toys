@@ -4,7 +4,7 @@ import { useTheme } from '@mui/material/styles';
 import { useSetAtom } from 'jotai';
 import { resetAtom } from 'lib/atoms/atoms';
 
-export const ResetButton = () => {
+export default function ResetButton() {
     const setReset = useSetAtom(resetAtom);
 
     const theme = useTheme();
@@ -17,6 +17,4 @@ export const ResetButton = () => {
             <ReplayIcon />
         </Button>
     );
-};
-
-export default ResetButton;
+}

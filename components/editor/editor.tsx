@@ -21,8 +21,8 @@ import TexturePicker from 'components/editor/texturepicker';
 import UniformSliders from 'components/editor/uniformsliders';
 import { WgpuToyWrapper } from 'components/wgputoy';
 import 'firacode';
-import { useSetAtom } from 'jotai';
-import { saveColorTransitionSignalAtom } from 'lib/atoms/atoms';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { saveColorTransitionSignalAtom, shaderIDAtom } from 'lib/atoms/atoms';
 import { canvasParentElAtom } from 'lib/atoms/wgputoyatoms';
 import { supabase } from 'lib/db/supabaseclient';
 import dynamic from 'next/dynamic';
@@ -32,8 +32,34 @@ import { Frame } from 'theme/theme';
 import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
 
-export const Editor = () => {
+// https://github.com/utterance/utterances/issues/161
+function Comments() {
+    return (
+        <section
+            style={{ width: '100%' }}
+            ref={element => {
+                if (!element) {
+                    return;
+                }
+
+                const scriptElement = document.createElement('script');
+                scriptElement.setAttribute('src', 'https://utteranc.es/client.js');
+                scriptElement.setAttribute('repo', 'compute-toys/comments');
+                scriptElement.setAttribute('issue-term', 'pathname');
+                scriptElement.setAttribute('theme', 'dark-blue');
+                scriptElement.setAttribute('crossorigin', 'anonymous');
+                scriptElement.setAttribute('async', 'true');
+                const div = document.createElement('div');
+                div.appendChild(scriptElement);
+                element.replaceChildren(div);
+            }}
+        />
+    );
+}
+
+export default function Editor() {
     const setCanvasParentEl = useSetAtom(canvasParentElAtom);
+    const shaderID = useAtomValue(shaderIDAtom);
 
     const renderParentNodeRef = useCallback(parent => {
         if (parent) {
@@ -88,6 +114,7 @@ export const Editor = () => {
                 <UniformSliders />
             </ItemWithTransitionSignal>
             {metadataEditor}
+            {shaderID ? <Comments /> : null}
         </div>
     );
 
@@ -153,4 +180,4 @@ export const Editor = () => {
             </Box>
         </div>
     );
-};
+}

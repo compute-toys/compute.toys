@@ -1,11 +1,11 @@
-import { RadioButtonChecked } from '@mui/icons-material';
+import RadioButtonChecked from '@mui/icons-material/RadioButtonChecked';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import SvgIcon from '@mui/material/SvgIcon';
 import { useAtom } from 'jotai';
 import { recordingAtom } from 'lib/atoms/atoms';
 
-export const RecordButton = () => {
+export default function RecordButton() {
     const [recording, setRecording] = useAtom(recordingAtom);
 
     const theme = useTheme();
@@ -15,7 +15,7 @@ export const RecordButton = () => {
             onClick={() => {
                 setRecording(!recording);
             }}
-            title={'Record video'}
+            title={'Record video <Ctrl + Alt + R>'}
             sx={{
                 color: recording ? theme.palette.primary.contrastText : theme.palette.primary.light
             }}
@@ -43,6 +43,4 @@ export const RecordButton = () => {
             )}
         </Button>
     );
-};
-
-export default RecordButton;
+}

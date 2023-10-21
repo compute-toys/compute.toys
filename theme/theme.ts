@@ -99,7 +99,7 @@ export const CssTextField: typeof TextField = styled(TextField)({
     }
 });
 
-export const rainbow = [
+const rainbow = [
     theme.palette.dracula.cyan,
     theme.palette.dracula.green,
     theme.palette.dracula.orange,
