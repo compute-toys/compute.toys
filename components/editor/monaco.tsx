@@ -117,7 +117,7 @@ const Monaco = props => {
             editor.getModel().setValue(code);
             setCodeNeedSave(false);
         }
-    }, [dbLoaded, editor]);
+    }, [dbLoaded, editor, code]);
 
     useEffect(() => {
         const message = 'You have unsaved changes. Do you really want to leave?';
