@@ -4,7 +4,6 @@ import ImageListItem, { imageListItemClasses } from '@mui/material/ImageListItem
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import Stack from '@mui/material/Stack';
 import Avatar from 'components/global/avatar';
-import FakeLink from 'components/global/fakelink';
 import { supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Image from 'next/image';
@@ -99,6 +98,8 @@ const ShaderPicker = props => {
                         <Link passHref href={`/view/${shader.id}`}>
                             <Image
                                 style={{
+                                    width: '100%',
+                                    height: 'auto',
                                     borderRadius: '4px',
                                     cursor: 'pointer'
                                 }}
@@ -107,9 +108,8 @@ const ShaderPicker = props => {
                                     shader.thumb_url
                                 )}
                                 alt={shader.name}
-                                width="100%"
-                                height="56.25%"
-                                layout="responsive"
+                                width={512}
+                                height={288}
                                 priority={true}
                             />
                         </Link>
@@ -133,25 +133,25 @@ const ShaderPicker = props => {
                                     }}
                                 >
                                     <span>by </span>
-                                    <FakeLink href={`/profile/${shader.profile.username}`}>
-                                        <div
+                                    <Link href={`/profile/${shader.profile.username}`}>
+                                        <span
                                             style={{
                                                 fontWeight: 'bold',
                                                 textDecoration: 'underline'
                                             }}
                                         >
                                             {shader.profile.username}
-                                        </div>
-                                    </FakeLink>
+                                        </span>
+                                    </Link>
                                 </span>
                             }
                             style={{ borderRadius: '4px', textAlign: 'left' }}
                             actionIcon={
-                                <FakeLink href={`/profile/${shader.profile.username}`}>
+                                <Link href={`/profile/${shader.profile.username}`}>
                                     <Box sx={{ margin: '10px' }}>
                                         <Avatar url={shader.profile.avatar_url} size={25} />
                                     </Box>
-                                </FakeLink>
+                                </Link>
                             }
                         />
                     </ImageListItem>
