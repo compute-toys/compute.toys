@@ -19,7 +19,7 @@
             "request": "launch",
             "command": "yarn dev",
             "serverReadyAction": {
-                "pattern": "started server on .+, url: (https?://.+)",
+                "pattern": "Local:\\s+(https?://.+)",
                 "uriFormat": "%s",
                 "action": "debugWithChrome",
             },
