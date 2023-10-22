@@ -4,6 +4,7 @@ import { useSetAtom } from 'jotai';
 import {
     authorProfileAtom,
     codeAtom,
+    codeNeedSaveAtom,
     dbLoadedAtom,
     descriptionAtom,
     float32EnabledAtom,
@@ -88,6 +89,7 @@ export default function Index(props) {
     const setManualReload = useSetAtom(manualReloadAtom);
     const setShaderID = useSetAtom(shaderIDAtom);
     const setDBLoaded = useSetAtom(dbLoadedAtom);
+    const setCodeNeedSave = useSetAtom(codeNeedSaveAtom);
 
     const setCode = useSetAtom(codeAtom);
     const setLoadedTextures = useSetAtom(loadedTexturesAtom);
@@ -131,6 +133,7 @@ export default function Index(props) {
         setShaderID(props.id);
         setManualReload(true);
         setDBLoaded(true);
+        setCodeNeedSave(false);
     };
 
     useEffect(() => {
