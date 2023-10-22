@@ -42,6 +42,8 @@ export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async get => {
     }
 });
 
+export const wgputoyPreludeAtom = atom<string>('');
+
 // type predicate
 export const isSafeContext = (context: WgpuToyRenderer | false): context is WgpuToyRenderer =>
     context !== false && context.ptr !== 0;
