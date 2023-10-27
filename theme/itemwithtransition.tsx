@@ -3,7 +3,7 @@ import { useAtom, WritableAtom } from 'jotai';
 import { Item, theme } from './theme';
 
 interface ItemWithTransitionSignalProps extends PaperProps {
-    transitionAtom: WritableAtom<string | false, string | false>;
+    transitionAtom: WritableAtom<string | false, [string | false], void>;
 }
 
 export const ItemWithTransitionSignal = (props: ItemWithTransitionSignalProps) => {

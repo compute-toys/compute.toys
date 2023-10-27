@@ -8,7 +8,6 @@ import ImageListItemBar from '@mui/material/ImageListItemBar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Avatar from 'components/global/avatar';
-import FakeLink from 'components/global/fakelink';
 import Logo from 'components/global/logo';
 import 'firacode';
 import { supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
@@ -45,18 +44,18 @@ const NewSubmissionBar = props => {
                         subtitle={
                             <div>
                                 <span>by </span>
-                                <FakeLink href={`/profile/${shader.profile.username}`}>
+                                <Link href={`/profile/${shader.profile.username}`}>
                                     {shader.profile.username}
-                                </FakeLink>
+                                </Link>
                             </div>
                         }
                         style={{ borderRadius: '4px' }}
                         actionIcon={
-                            <FakeLink href={`/profile/${shader.profile.username}`}>
+                            <Link href={`/profile/${shader.profile.username}`}>
                                 <Box sx={{ margin: '10px' }}>
                                     <Avatar url={shader.profile.avatar_url} size={25} />
                                 </Box>
-                            </FakeLink>
+                            </Link>
                         }
                     />
                 </ImageListItem>

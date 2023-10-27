@@ -16,7 +16,7 @@ export const canvasElAtom = atom<HTMLCanvasElement | false>(false);
 
 const canvasParentElBaseAtom = atom<HTMLElement | false>(false);
 
-export const canvasParentElAtom = atom<HTMLElement | null, HTMLElement | null, void>(
+export const canvasParentElAtom = atom<HTMLElement | null, [HTMLElement | null], void>(
     get => {
         const target = get(canvasParentElBaseAtom);
         return target ? target : null;
@@ -41,6 +41,8 @@ export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async get => {
         return false;
     }
 });
+
+export const wgputoyPreludeAtom = atom<string>('');
 
 // type predicate
 export const isSafeContext = (context: WgpuToyRenderer | false): context is WgpuToyRenderer =>

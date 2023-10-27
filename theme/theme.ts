@@ -54,7 +54,8 @@ export const theme = createTheme({
             styleOverrides: {
                 body: darkScrollbar(),
                 a: {
-                    color: '#f8f8f2'
+                    color: '#f8f8f2',
+                    textDecoration: 'none'
                 }
             }
         }
