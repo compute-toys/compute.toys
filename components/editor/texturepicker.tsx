@@ -104,6 +104,7 @@ export default function TexturePicker() {
                     sx={{
                         width: size * 2,
                         height: size,
+                        overflow: 'hidden',
                         marginTop: '0px',
                         marginBottom: '0px'
                     }}
