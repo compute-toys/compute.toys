@@ -19,7 +19,7 @@ export default function App() {
             <FavIconHead />
             <ShadowCanvas />
             <CssBaseline />
-            <Editor />
+            <Editor standalone />
         </ThemeProvider>
     );
 }
