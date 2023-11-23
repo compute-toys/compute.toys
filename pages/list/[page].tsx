@@ -161,8 +161,6 @@ const ShaderPicker = props => {
     );
 };
 
-export const MAX_PAGE_BUTTONS = 5;
-
 const PageButton = props => {
     return (
         <Link href={`/list/${props.index}`} passHref>
@@ -188,54 +186,61 @@ const EllipsisButton = () => {
 };
 
 /*
-    The cryptic math here handles the various cases for rendering
-    the page picker. For example on page 0 it may look like:
-    0   1   2   3   4   ...  12
+    Math here handles the various cases for paginator.
+    For example on page 4 it may look like:
+    0   ... 3  [4]  5   ...  20
 
-    On page 1 we want to show (at least) one previous page for
-    navigating back (i.e. it's the same as page 0:
-    0   1   2   3   4   ...  12
+    On page 20 we want to show first page for navigating back:
+    0   ...  18   19   [20]
 
-    On page 2 we move forward:
-    1   2   3   4   5   ...  12
+    On page 1 we move forward:
+    0   [1]   2   ...   20
 
-    In this example, page 8 is the first where we can display all
-    pages in the picker at once (we remove the ellipsis):
-    7   8   9   10  11  12
-
-    There's no sense in continuing to make the list smaller at this
-    point, so we clamp the range here.
+    Ellipsis [...] goes to the average between pages.
+    For example (2 [...] 20) -> [11].
 
  */
 const PagePicker = props => {
-    const pages = Math.floor((parseInt(props.totalCount) - 1) / SHADERS_PER_PAGE);
+    const deltaPage = 1;
+    const firstPage = 0;
+    const currentPage = parseInt(props.page);
+    const lastPage = Math.ceil(parseInt(props.totalCount) / SHADERS_PER_PAGE) - 1;
 
-    const currentPage = props.page;
-
-    const maxFirstPage = Math.max(0, pages - (MAX_PAGE_BUTTONS - 1));
-
-    const firstPage = Math.min(Math.max(0, currentPage - 1), maxFirstPage);
-
-    const lowerPages = Math.min(pages - firstPage, MAX_PAGE_BUTTONS);
-
-    const lastPage = pages;
-
-    const showLast = pages > lowerPages;
-
-    const hideEllipsis = maxFirstPage <= currentPage;
+    const showFirst = firstPage < currentPage - deltaPage;
+    const showLast = currentPage + deltaPage < lastPage;
+    const rightPage = Math.min(currentPage + deltaPage, lastPage);
+    const leftPage = Math.max(firstPage, currentPage - deltaPage);
+    const showFirstEllipsis = leftPage - firstPage > 1;
+    const showLastEllipsis = lastPage - rightPage > 1;
 
     // trick to do python-style range() iterator
     return (
         <Stack direction="row" style={props.style}>
-            {[...Array(lowerPages).keys()].map(index => {
-                const page = index + firstPage;
-                return (
-                    <PageButton highlight={Number(currentPage) === page} key={page} index={page} />
-                );
+            {showFirst ? (
+                <Fragment>
+                    <PageButton
+                        highlight={Number(currentPage) === firstPage}
+                        key={firstPage}
+                        index={firstPage}
+                    />
+                    {showFirstEllipsis ? (
+                        <Link href={`/list/${Math.round((firstPage + leftPage) / 2)}`}>
+                            <EllipsisButton />
+                        </Link>
+                    ) : null}
+                </Fragment>
+            ) : null}
+            {[...new Array(rightPage - leftPage + 1).keys()].map(i => {
+                const id = i + leftPage;
+                return <PageButton highlight={Number(currentPage) === id} key={id} index={id} />;
             })}
             {showLast ? (
                 <Fragment>
-                    {!hideEllipsis ? <EllipsisButton /> : null}
+                    {showLastEllipsis ? (
+                        <Link href={`/list/${Math.round((rightPage + lastPage) / 2)}`}>
+                            <EllipsisButton />
+                        </Link>
+                    ) : null}
                     <PageButton
                         highlight={Number(currentPage) === lastPage}
                         key={lastPage}
