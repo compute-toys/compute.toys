@@ -195,11 +195,10 @@ export const ProfileShaders = props => {
     };
 
     const [, , deleteShader] = useShaderSerDe();
-    const [isRemoved, setIsRemoved] = useState({ index: null });
-    const handleDeleteShader = (row, index) => {
-        if (confirm(`Are you sure you want to delete shader #${row.id} "${row.name}"?`)) {
-            deleteShader(row.id);
-            setIsRemoved({ index });
+    const handleDeleteShader = (id, name) => {
+        if (confirm(`Are you sure you want to delete shader #${id} "${name}"?`)) {
+            deleteShader(id);
+            document.getElementById(`row-id-${id}`).style.display = 'none';
         }
     };
 
@@ -219,10 +218,10 @@ export const ProfileShaders = props => {
                             {props.rows
                                 .slice()
                                 .sort(getComparator(order, orderBy))
-                                .map((row, index) => {
-                                    const labelId = `enhanced-table-checkbox-${index}`;
-                                    return !(isRemoved.index === index) ? (
-                                        <TableRow hover tabIndex={-1} key={row.name}>
+                                .map(row => {
+                                    const elementId = `row-id-${row.id}`;
+                                    return (
+                                        <TableRow hover tabIndex={-1} key={row.id} id={elementId}>
                                             <TableCell align="left">
                                                 <Image
                                                     height={TABLE_PREVIEW_HEIGHT}
@@ -232,11 +231,12 @@ export const ProfileShaders = props => {
                                                         row.thumb_url
                                                     )}
                                                     alt={row.name}
+                                                    priority={true}
                                                 />
                                             </TableCell>
                                             <TableCell
                                                 component="th"
-                                                id={labelId}
+                                                id={`row-name-${row.name}`}
                                                 scope="row"
                                                 padding="none"
                                             >
@@ -250,7 +250,7 @@ export const ProfileShaders = props => {
                                                 <TableCell align="left">
                                                     <Button
                                                         onClick={() =>
-                                                            handleDeleteShader(row, index)
+                                                            handleDeleteShader(row.id, row.name)
                                                         }
                                                     >
                                                         Delete
@@ -258,7 +258,7 @@ export const ProfileShaders = props => {
                                                 </TableCell>
                                             ) : null}
                                         </TableRow>
-                                    ) : null;
+                                    );
                                 })}
                         </TableBody>
                     </Table>
