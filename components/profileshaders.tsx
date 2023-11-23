@@ -218,7 +218,7 @@ export const ProfileShaders = props => {
                             {props.rows
                                 .slice()
                                 .sort(getComparator(order, orderBy))
-                                .map((row) => {
+                                .map(row => {
                                     const elementId = `row-id-${row.id}`;
                                     return (
                                         <TableRow hover tabIndex={-1} key={row.id} id={elementId}>
@@ -248,7 +248,11 @@ export const ProfileShaders = props => {
                                             <TableCell align="left">{row.visibility}</TableCell>
                                             {props.editable ? (
                                                 <TableCell align="left">
-                                                    <Button onClick={() => handleDeleteShader(row.id, row.name)}>
+                                                    <Button
+                                                        onClick={() =>
+                                                            handleDeleteShader(row.id, row.name)
+                                                        }
+                                                    >
                                                         Delete
                                                     </Button>
                                                 </TableCell>
