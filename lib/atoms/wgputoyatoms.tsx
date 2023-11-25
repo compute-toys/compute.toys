@@ -1,3 +1,4 @@
+'use client';
 import { atom } from 'jotai';
 import { WgpuToyRenderer } from 'lib/wgputoy';
 import { getDimensions } from '../../types/canvasdimensions';

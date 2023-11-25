@@ -1,3 +1,4 @@
+'use client';
 import LineStyleIcon from '@mui/icons-material/LineStyle';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';

@@ -1,3 +1,4 @@
+'use client';
 // MUI sizing from refs:
 // https://github.com/mui/material-ui/issues/15662
 

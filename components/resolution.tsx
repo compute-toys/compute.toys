@@ -1,3 +1,4 @@
+'use client';
 import { useAtomValue } from 'jotai';
 import { heightAtom, scaleAtom, widthAtom } from 'lib/atoms/atoms';
 import { Fragment } from 'react';

@@ -1,3 +1,4 @@
+'use client';
 import WarningIcon from '@mui/icons-material/Warning';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';

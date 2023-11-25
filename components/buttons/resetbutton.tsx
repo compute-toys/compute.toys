@@ -1,3 +1,4 @@
+'use client';
 import ReplayIcon from '@mui/icons-material/Replay';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';

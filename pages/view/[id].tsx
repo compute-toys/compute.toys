@@ -1,3 +1,4 @@
+'use client';
 import Editor from 'components/editor/editor';
 import { fromUniformActiveSettings } from 'components/editor/uniformsliders';
 import { useSetAtom } from 'jotai';

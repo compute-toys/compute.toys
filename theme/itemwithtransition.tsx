@@ -1,3 +1,4 @@
+'use client';
 import { PaperProps } from '@mui/material/Paper';
 import { useAtom, WritableAtom } from 'jotai';
 import { Item, theme } from './theme';

@@ -1,3 +1,4 @@
+'use client';
 import Editor from 'components/editor/editor';
 import { useSetAtom } from 'jotai';
 import { codeNeedSaveAtom, dbLoadedAtom, manualReloadAtom, shaderIDAtom } from 'lib/atoms/atoms';

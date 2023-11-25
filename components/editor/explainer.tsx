@@ -1,3 +1,4 @@
+'use client';
 import DisabledByDefaultSharp from '@mui/icons-material/DisabledByDefaultSharp';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import Button from '@mui/material/Button';

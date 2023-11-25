@@ -1,3 +1,4 @@
+'use client';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';

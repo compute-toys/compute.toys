@@ -1,3 +1,4 @@
+'use client';
 import Editor from '@monaco-editor/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTransientAtom } from 'jotai-game';

@@ -1,3 +1,4 @@
+'use client';
 import useResizeObserver from '@react-hook/resize-observer';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTransientAtom } from 'jotai-game';

@@ -1,3 +1,4 @@
+'use client';
 import { UniformSliderRef } from 'components/editor/uniformsliders';
 import { atom, Getter, useAtomValue, useSetAtom } from 'jotai';
 import { useResetAtom } from 'jotai/utils';
