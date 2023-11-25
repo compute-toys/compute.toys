@@ -83,33 +83,28 @@ const Monaco = props => {
     const editorWillMount = (monaco: Monaco) => {
         if (!monaco.languages.getLanguages().some(({ id }) => id === 'wgsl')) {
             monaco.languages.register({ id: 'wgsl' });
-            monaco.languages.setMonarchTokensProvider('wgsl', wgslLanguageDef);
-            monaco.languages.setLanguageConfiguration('wgsl', wgslConfiguration);
-            monaco.languages.registerHoverProvider('wgsl', {
-                async provideHover(model, position) {
-                    const n = position.lineNumber;
-                    const line = model.getLineContent(n).split(' ');
-                    if (line[0] === '#include') {
-                        let name = line[1].slice(1, -1);
-                        if (line[1].charAt(0) === '<') name = 'std/' + name;
-                        const resp = await fetch(
-                            `https://compute-toys.github.io/include/${name}.wgsl`
-                        );
-                        if (resp.status !== 200) return null;
-                        const text = await resp.text();
-                        return {
-                            range: new monacoRef.current.Range(n, 1, n, model.getLineMaxColumn(n)),
-                            contents: [
-                                { value: '**SOURCE**' },
-                                { value: '```wgsl\n' + text + '\n```' }
-                            ]
-                        };
-                    }
-                    return null;
-                }
-            });
-            defineMonacoTheme(monaco, 'global');
         }
+        monaco.languages.setMonarchTokensProvider('wgsl', wgslLanguageDef);
+        monaco.languages.setLanguageConfiguration('wgsl', wgslConfiguration);
+        monaco.languages.registerHoverProvider('wgsl', {
+            async provideHover(model, position) {
+                const n = position.lineNumber;
+                const line = model.getLineContent(n).split(' ');
+                if (line[0] === '#include') {
+                    let name = line[1].slice(1, -1);
+                    if (line[1].charAt(0) === '<') name = 'std/' + name;
+                    const resp = await fetch(`https://compute-toys.github.io/include/${name}.wgsl`);
+                    if (resp.status !== 200) return null;
+                    const text = await resp.text();
+                    return {
+                        range: new monacoRef.current.Range(n, 1, n, model.getLineMaxColumn(n)),
+                        contents: [{ value: '**SOURCE**' }, { value: '```wgsl\n' + text + '\n```' }]
+                    };
+                }
+                return null;
+            }
+        });
+        defineMonacoTheme(monaco, 'global');
     };
 
     useEffect(() => {
