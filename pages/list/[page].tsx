@@ -101,7 +101,8 @@ const ShaderPicker = props => {
                                     width: '100%',
                                     height: 'auto',
                                     borderRadius: '4px',
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    pointerEvents: 'none'
                                 }}
                                 src={getFullyQualifiedSupabaseBucketURL(
                                     SUPABASE_SHADERTHUMB_BUCKET_NAME,
