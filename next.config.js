@@ -31,6 +31,14 @@ const nextConfig = {
             }
         ];
     },
+    async rewrites() {
+        return [
+            {
+                source: '/',
+                destination: '/list/1'
+            }
+        ];
+    },
     webpack(config, { isServer, dev }) {
         config.experiments = {
             syncWebAssembly: true,

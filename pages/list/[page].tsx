@@ -1,8 +1,10 @@
 import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 import ImageListItem, { imageListItemClasses } from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import Pagination from '@mui/material/Pagination';
 import PaginationItem from '@mui/material/PaginationItem';
+import Banner from 'components/banner';
 import Avatar from 'components/global/avatar';
 import { supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
@@ -176,7 +178,9 @@ export default function ShaderList(props) {
                     width: '100%'
                 }}
             >
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <Banner />
+                <ShaderPicker page={props.page} shaders={props.shaders} />
+                <Container sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
                     <Pagination
                         count={props.numPages}
                         page={props.page}
@@ -189,8 +193,7 @@ export default function ShaderList(props) {
                             />
                         )}
                     />
-                </div>
-                <ShaderPicker page={props.page} shaders={props.shaders} />
+                </Container>
             </Box>
         </Fragment>
     );
