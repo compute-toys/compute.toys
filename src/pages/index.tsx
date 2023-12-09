@@ -1,3 +1,4 @@
+'use client';
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import Editor from 'components/editor/editor';
@@ -19,7 +20,7 @@ export default function App() {
             <FavIconHead />
             <ShadowCanvas />
             <CssBaseline />
-            <Editor />
+            <Editor standalone />
         </ThemeProvider>
     );
 }

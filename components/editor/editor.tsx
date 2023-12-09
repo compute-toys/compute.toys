@@ -1,3 +1,4 @@
+'use client';
 // MUI sizing from refs:
 // https://github.com/mui/material-ui/issues/15662
 
@@ -57,7 +58,7 @@ function Comments() {
     );
 }
 
-export default function Editor() {
+export default function Editor(props) {
     const setCanvasParentEl = useSetAtom(canvasParentElAtom);
     const shaderID = useAtomValue(shaderIDAtom);
 
@@ -73,7 +74,7 @@ export default function Editor() {
     });
 
     let metadataEditor = null;
-    if (supabase) {
+    if (supabase && !props.standalone) {
         metadataEditor = (
             <ItemWithTransitionSignal
                 sx={{ textAlign: 'left', marginTop: '20px' }}

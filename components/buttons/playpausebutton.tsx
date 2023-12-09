@@ -1,3 +1,4 @@
+'use client';
 import PauseCircleIcon from '@mui/icons-material/PauseCircle';
 import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import Button from '@mui/material/Button';

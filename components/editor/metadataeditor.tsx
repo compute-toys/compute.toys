@@ -1,3 +1,4 @@
+'use client';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
@@ -45,7 +46,7 @@ export const MetadataEditor = () => {
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
     const [visibility, setVisibility] = useAtom(visibilityAtom);
-    const shaderID = useAtomValue(shaderIDAtom);
+    const [shaderID, setShaderID] = useAtom(shaderIDAtom);
     const setShaderDataUrlThumb = useSetAtom(shaderDataUrlThumbAtom);
     const shadowCanvasEl = useAtomValue(shadowCanvasElAtom);
     const canvasEl = useAtomValue(canvasElAtom);
@@ -65,7 +66,10 @@ export const MetadataEditor = () => {
         if (result.success) {
             setCodeNeedSave(false);
             if (result.needsRedirect) {
-                setTimeout(() => router.push(`/view/${result.id}`), 0);
+                setTimeout(() => {
+                    setShaderID(result.id);
+                    router.push(`/view/${result.id}`);
+                }, 0);
             }
         }
     };

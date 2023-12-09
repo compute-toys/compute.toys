@@ -1,3 +1,4 @@
+'use client';
 import { atom, useSetAtom } from 'jotai';
 import { useCallback } from 'react';
 import { getDimensions } from 'types/canvasdimensions';

@@ -1,3 +1,4 @@
+'use client';
 import WarningIcon from '@mui/icons-material/Warning';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
@@ -5,7 +6,7 @@ import Typography from '@mui/material/Typography';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { canvasElAtom, canvasParentElAtom, wgpuAvailabilityAtom } from 'lib/atoms/wgputoyatoms';
 import dynamic from 'next/dynamic';
-import { Fragment, useCallback, useState } from 'react';
+import { Fragment, Suspense, useCallback, useState } from 'react';
 import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
 import Logo from './global/logo';
@@ -60,7 +61,11 @@ export const WgpuToyWrapper = props => {
                 tabIndex={1}
             />
             {loaded ? (
-                <Controller onLoad={onLoad} />
+                <Suspense
+                    fallback={<Skeleton variant="rectangular" width={dim.x} height={dim.y} />}
+                >
+                    <Controller onLoad={onLoad} />
+                </Suspense>
             ) : wgpuAvailability === 'unknown' ? (
                 <Skeleton variant="rectangular" width={dim.x} height={dim.y} />
             ) : (

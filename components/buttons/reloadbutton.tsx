@@ -1,3 +1,4 @@
+'use client';
 import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded';
 import PlayDisabledRounded from '@mui/icons-material/PlayDisabledRounded';
 import Button from '@mui/material/Button';

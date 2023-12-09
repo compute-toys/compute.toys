@@ -1,8 +1,10 @@
+'use client';
 import DisabledByDefaultSharp from '@mui/icons-material/DisabledByDefaultSharp';
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
-import dynamic from 'next/dynamic';
+import { useAtomValue } from 'jotai';
+import { wgputoyPreludeAtom } from 'lib/atoms/wgputoyatoms';
 import Link from 'next/link';
 import { Fragment, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
@@ -19,12 +21,11 @@ const EXPLAINER_INNER_HEIGHT = '570';
 
 const DraggableExplainer = props => {
     const theme = useTheme();
+    const prelude = useAtomValue(wgputoyPreludeAtom);
 
     // Draggable needs this so React doesn't complain
     // about violating strict mode DOM access rules
     const nodeRef = useRef(null);
-
-    const Prelude = dynamic(() => import('./preludeshim'), { ssr: false });
 
     return (
         <Draggable
@@ -244,9 +245,7 @@ const DraggableExplainer = props => {
                     <br />
                     <br />
                     Here are the current contents of this shader&apos;s prelude:
-                    <pre style={{ color: theme.palette.neutral.main }}>
-                        <Prelude />
-                    </pre>
+                    <pre style={{ color: theme.palette.neutral.main }}>{prelude}</pre>
                     <b>Note:</b> Matrix types in WGSL are stored in column-major order. This means a
                     matrix of type <HiLite>mat2x3&lt;f32&gt;</HiLite> (aka <HiLite>mat2x3f</HiLite>{' '}
                     or <HiLite>float2x3</HiLite>) is constructed from 2 column vectors of type{' '}

@@ -1,3 +1,4 @@
+'use client';
 import Hd from '@mui/icons-material/Hd';
 import Sd from '@mui/icons-material/Sd';
 import Button from '@mui/material/Button';

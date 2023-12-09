@@ -1,3 +1,4 @@
+'use client';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import SvgIcon from '@mui/material/SvgIcon';

@@ -1,3 +1,4 @@
+'use client';
 import AcUnit from '@mui/icons-material/AcUnit';
 import LocalFireDepartment from '@mui/icons-material/LocalFireDepartment';
 import Button from '@mui/material/Button';

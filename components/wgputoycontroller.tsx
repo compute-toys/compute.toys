@@ -1,3 +1,4 @@
+'use client';
 import useResizeObserver from '@react-hook/resize-observer';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTransientAtom } from 'jotai-game';
@@ -28,7 +29,8 @@ import {
     canvasElAtom,
     canvasParentElAtom,
     isSafeContext,
-    wgputoyAtom
+    wgputoyAtom,
+    wgputoyPreludeAtom
 } from 'lib/atoms/wgputoyatoms';
 import { useCallback, useEffect } from 'react';
 import { theme } from 'theme/theme';
@@ -73,6 +75,7 @@ const WgpuToyController = props => {
 
     const wgputoy = useAtomValue(wgputoyAtom);
     const canvas = useAtomValue(canvasElAtom);
+    const [, setPrelude] = useAtom(wgputoyPreludeAtom);
 
     const parentRef = useAtomValue<HTMLElement | null>(canvasParentElAtom);
 
@@ -105,6 +108,7 @@ const WgpuToyController = props => {
                 wgputoy.preprocess(codeHot()).then(s => {
                     if (s) {
                         wgputoy.compile(s);
+                        setPrelude(wgputoy.prelude());
                         wgputoy.render();
                     }
                 });
@@ -119,6 +123,7 @@ const WgpuToyController = props => {
                 wgputoy.preprocess(codeHot()).then(s => {
                     if (s) {
                         wgputoy.compile(s);
+                        setPrelude(wgputoy.prelude());
                         wgputoy.render();
                     }
                 });

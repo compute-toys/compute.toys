@@ -1,3 +1,4 @@
+'use client';
 import DisabledByDefaultSharp from '@mui/icons-material/DisabledByDefaultSharp';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
@@ -104,6 +105,7 @@ export default function TexturePicker() {
                     sx={{
                         width: size * 2,
                         height: size,
+                        overflow: 'hidden',
                         marginTop: '0px',
                         marginBottom: '0px'
                     }}

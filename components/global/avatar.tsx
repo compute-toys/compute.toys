@@ -38,6 +38,7 @@ export default function Avatar({
             style={{ borderRadius: '15px' }}
             width={size}
             height={size}
+            priority={true}
         />
     ) : displayNull ? (
         <AccountCircleIcon style={{ height: size, width: size }} />
