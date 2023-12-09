@@ -332,7 +332,7 @@ export default function LoginModal() {
                             spacing={2}
                         >
                             <Link href="/new">new</Link>
-                            <Link href="/list/0">browse</Link>
+                            <Link href="/list/1">browse</Link>
                         </Stack>
                     </Stack>
                 </Grid>

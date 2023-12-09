@@ -16,7 +16,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Fragment } from 'react';
 import { Item, theme } from 'theme/theme';
-import { SHADER_THUMB_SIZE_H, SHADER_THUMB_SIZE_V } from './list/[page]';
+
+const SHADER_THUMB_SIZE_H = 256;
+const SHADER_THUMB_SIZE_V = 144;
 
 const NewSubmissionBar = props => {
     return (
@@ -135,7 +137,7 @@ export default function Home(props) {
                                 <Link href="/new">New Shader</Link>
                             </Typography>
                             <Typography variant={'h5'}>
-                                <Link href="/list/0">Browse</Link>
+                                <Link href="/list/1">Browse</Link>
                             </Typography>
 
                             <Stack direction="row" spacing={2} justifyContent={'center'}>

@@ -1,8 +1,8 @@
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import ImageListItem, { imageListItemClasses } from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
-import Stack from '@mui/material/Stack';
+import Pagination from '@mui/material/Pagination';
+import PaginationItem from '@mui/material/PaginationItem';
 import Avatar from 'components/global/avatar';
 import { supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
@@ -11,12 +11,10 @@ import Link from 'next/link';
 import { Fragment } from 'react';
 import { Item, theme } from 'theme/theme';
 
-export const SHADERS_PER_PAGE = 12;
-export const SHADER_THUMB_SIZE_H = 256;
-export const SHADER_THUMB_SIZE_V = 144;
+const SHADERS_PER_PAGE = 12;
 
-export const getPagination = (page: number, size: number) => {
-    const from = page * size;
+const getPagination = (page: number, size: number) => {
+    const from = (page - 1) * size;
     const to = from + size - 1;
     return { from, to };
 };
@@ -52,19 +50,23 @@ export async function getServerSideProps(context) {
         .eq('visibility', 'public');
 
     const totalCount = await getTotalCount();
+    const numPages = Math.ceil(totalCount / SHADERS_PER_PAGE);
+    const page = Number(context.params.page);
+
+    if (page < 1 || page > numPages) return { notFound: true };
 
     return {
         props: {
             shaders: data ?? [],
-            pageCount: count,
-            totalCount: totalCount,
-            error: error,
-            page: context.params.page
+            totalCount,
+            numPages,
+            error,
+            page
         }
     };
 }
 
-const ShaderPicker = props => {
+function ShaderPicker(props) {
     return (
         <Item
             elevation={12}
@@ -160,93 +162,7 @@ const ShaderPicker = props => {
             </Box>
         </Item>
     );
-};
-
-export const MAX_PAGE_BUTTONS = 5;
-
-const PageButton = props => {
-    return (
-        <Link href={`/list/${props.index}`} passHref>
-            <Button
-                style={
-                    props.highlight
-                        ? {
-                              backgroundColor: theme.palette.dracula.selection
-                          }
-                        : {}
-                }
-            >
-                <span style={{ color: theme.palette.dracula.foreground }}>
-                    {props.index.toString()}{' '}
-                </span>
-            </Button>
-        </Link>
-    );
-};
-
-const EllipsisButton = () => {
-    return <Button>{'...'}</Button>;
-};
-
-/*
-    The cryptic math here handles the various cases for rendering
-    the page picker. For example on page 0 it may look like:
-    0   1   2   3   4   ...  12
-
-    On page 1 we want to show (at least) one previous page for
-    navigating back (i.e. it's the same as page 0:
-    0   1   2   3   4   ...  12
-
-    On page 2 we move forward:
-    1   2   3   4   5   ...  12
-
-    In this example, page 8 is the first where we can display all
-    pages in the picker at once (we remove the ellipsis):
-    7   8   9   10  11  12
-
-    There's no sense in continuing to make the list smaller at this
-    point, so we clamp the range here.
-
- */
-const PagePicker = props => {
-    const pages = Math.floor((parseInt(props.totalCount) - 1) / SHADERS_PER_PAGE);
-
-    const currentPage = props.page;
-
-    const maxFirstPage = Math.max(0, pages - (MAX_PAGE_BUTTONS - 1));
-
-    const firstPage = Math.min(Math.max(0, currentPage - 1), maxFirstPage);
-
-    const lowerPages = Math.min(pages - firstPage, MAX_PAGE_BUTTONS);
-
-    const lastPage = pages;
-
-    const showLast = pages > lowerPages;
-
-    const hideEllipsis = maxFirstPage <= currentPage;
-
-    // trick to do python-style range() iterator
-    return (
-        <Stack direction="row" style={props.style}>
-            {[...Array(lowerPages).keys()].map(index => {
-                const page = index + firstPage;
-                return (
-                    <PageButton highlight={Number(currentPage) === page} key={page} index={page} />
-                );
-            })}
-            {showLast ? (
-                <Fragment>
-                    {!hideEllipsis ? <EllipsisButton /> : null}
-                    <PageButton
-                        highlight={Number(currentPage) === lastPage}
-                        key={lastPage}
-                        index={lastPage}
-                    />
-                </Fragment>
-            ) : null}
-        </Stack>
-    );
-};
+}
 
 export default function ShaderList(props) {
     return (
@@ -260,11 +176,20 @@ export default function ShaderList(props) {
                     width: '100%'
                 }}
             >
-                <PagePicker
-                    page={props.page}
-                    totalCount={props.totalCount}
-                    style={{ marginBottom: '10px', overflowX: 'auto' }}
-                />
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <Pagination
+                        count={props.numPages}
+                        page={props.page}
+                        color="secondary"
+                        renderItem={item => (
+                            <PaginationItem
+                                component={Link}
+                                href={`/list/${item.page}`}
+                                {...item}
+                            />
+                        )}
+                    />
+                </div>
                 <ShaderPicker page={props.page} shaders={props.shaders} />
             </Box>
         </Fragment>
