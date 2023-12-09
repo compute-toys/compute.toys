@@ -1,3 +1,4 @@
+import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faDiscord, faGithub } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Container from '@mui/material/Container';
