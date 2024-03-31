@@ -30,6 +30,8 @@ import { definitions } from 'types/supabase';
 export interface UniformActiveSettings {
     name: string;
     value: number;
+    minRange: number;
+    maxRange: number;
 }
 
 interface TextureActiveSettings {
@@ -74,7 +76,9 @@ const getSliderActiveSettings = (sliderRefMap: Map<string, UniformSliderRef>) =>
     return [...sliderRefMap.keys()].map(uuid => {
         return {
             name: sliderRefMap.get(uuid).getUniform(),
-            value: sliderRefMap.get(uuid).getVal()
+            value: sliderRefMap.get(uuid).getVal(),
+            minRange: sliderRefMap.get(uuid).getMinRange(),
+            maxRange: sliderRefMap.get(uuid).getMaxRange()
         } as UniformActiveSettings;
     });
 };
