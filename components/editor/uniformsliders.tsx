@@ -230,6 +230,26 @@ const UniformSlider = (props: UniformSliderProps) => {
                 setSliderUniform={setSliderUniform}
                 sliderRefMap={props.sliderRefMap}
             />
+            <TextField
+                label="Min"
+                type="number"
+                value={sliderMinRange}
+                sx={{
+                    gridRow: '1',
+                    width: '80px',
+                    input: { color: getRainbowColor(props.index) },
+                    label: { color: getRainbowColor(props.index) }
+                }}
+                InputLabelProps={{
+                    shrink: true
+                }}
+                onChange={e => {
+                    const val = +e.target.value;
+                    if (val < sliderMaxRange) {
+                        setSliderMinRange(val);
+                    }
+                }}
+            />
             <Slider
                 aria-label={sliderUniform + ' slider'}
                 sx={{
@@ -251,29 +271,11 @@ const UniformSlider = (props: UniformSliderProps) => {
                 }}
             />
             <TextField
-                label="Min"
-                type="number"
-                value={sliderMinRange}
-                sx={{
-                    width: '80px',
-                    input: { color: getRainbowColor(props.index) },
-                    label: { color: getRainbowColor(props.index) }
-                }}
-                InputLabelProps={{
-                    shrink: true
-                }}
-                onChange={e => {
-                    const val = +e.target.value;
-                    if (val < sliderMaxRange) {
-                        setSliderMinRange(val);
-                    }
-                }}
-            />
-            <TextField
                 label="Max"
                 type="number"
                 value={sliderMaxRange}
                 sx={{
+                    gridRow: '1',
                     width: '80px',
                     input: { color: getRainbowColor(props.index) },
                     label: { color: getRainbowColor(props.index) }
