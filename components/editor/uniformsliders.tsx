@@ -176,10 +176,10 @@ const UniformSlider = (props: UniformSliderProps) => {
         initFromHost ? props.sliderRefMap.get(props.uuid).getUniform() : 'uniform_' + props.index
     );
     const [sliderMinRange, setSliderMinRange] = useState(
-        props.sliderRefMap.get(props.uuid).getMinRange() | 0
+        props.sliderRefMap.get(props.uuid).getMinRange() || 0
     );
     const [sliderMaxRange, setSliderMaxRange] = useState(
-        props.sliderRefMap.get(props.uuid).getMaxRange() | 1
+        props.sliderRefMap.get(props.uuid).getMaxRange() || 1
     );
 
     const setSliderUpdateSignal = useSetAtom(sliderUpdateSignalAtom);
