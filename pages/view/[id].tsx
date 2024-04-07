@@ -122,7 +122,6 @@ export default function Index(props) {
             textures: body.textures,
             float32Enabled: float32Enabled
         };
-
         setCode(shaderActiveSettings.code);
         setLoadedTextures(shaderActiveSettings.textures);
         setSliderRefMap(fromUniformActiveSettings(shaderActiveSettings.uniforms));

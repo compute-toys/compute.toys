@@ -37,6 +37,8 @@ export interface UniformSliderRef {
     getVal: () => number;
     getUniform: () => string;
     getUUID: () => string;
+    getMinRange: () => number;
+    getMaxRange: () => number;
 }
 
 interface UniformSliderProps {
@@ -61,6 +63,12 @@ export const fromUniformActiveSettings = (sliderSerDeArray: Array<UniformActiveS
             },
             getUUID: () => {
                 return uuid;
+            },
+            getMinRange: () => {
+                return slider.minRange;
+            },
+            getMaxRange: () => {
+                return slider.maxRange;
             }
         };
         sliderRefMap.set(uuid, sliderRef);
@@ -167,6 +175,13 @@ const UniformSlider = (props: UniformSliderProps) => {
     const [sliderUniform, setSliderUniform] = useState(
         initFromHost ? props.sliderRefMap.get(props.uuid).getUniform() : 'uniform_' + props.index
     );
+    const [sliderMinRange, setSliderMinRange] = useState(
+        props.sliderRefMap.get(props.uuid).getMinRange() || 0
+    );
+    const [sliderMaxRange, setSliderMaxRange] = useState(
+        props.sliderRefMap.get(props.uuid).getMaxRange() || 1
+    );
+
     const setSliderUpdateSignal = useSetAtom(sliderUpdateSignalAtom);
 
     let sliderRef: UniformSliderRef;
@@ -183,6 +198,12 @@ const UniformSlider = (props: UniformSliderProps) => {
             },
             getUUID: () => {
                 return props.uuid;
+            },
+            getMinRange: () => {
+                return sliderMinRange;
+            },
+            getMaxRange: () => {
+                return sliderMaxRange;
             }
         };
         props.setRefCallback(sliderRef);
@@ -209,6 +230,26 @@ const UniformSlider = (props: UniformSliderProps) => {
                 setSliderUniform={setSliderUniform}
                 sliderRefMap={props.sliderRefMap}
             />
+            <TextField
+                label="Min"
+                type="number"
+                value={sliderMinRange}
+                sx={{
+                    gridRow: '1',
+                    width: '80px',
+                    input: { color: getRainbowColor(props.index) },
+                    label: { color: getRainbowColor(props.index) }
+                }}
+                InputLabelProps={{
+                    shrink: true
+                }}
+                onChange={e => {
+                    const val = +e.target.value;
+                    if (val < sliderMaxRange) {
+                        setSliderMinRange(val);
+                    }
+                }}
+            />
             <Slider
                 aria-label={sliderUniform + ' slider'}
                 sx={{
@@ -216,19 +257,39 @@ const UniformSlider = (props: UniformSliderProps) => {
                     gridRow: '1',
                     gridColumn: 'span 7',
                     verticalAlign: 'middle',
-                    marginLeft: '1em',
                     color: getRainbowColor(props.index)
                 }}
                 defaultValue={0.0}
                 step={0.001}
-                min={0.0}
-                max={1.0}
+                min={sliderMinRange}
+                max={sliderMaxRange}
                 valueLabelDisplay="auto"
                 value={sliderVal}
                 onChange={(event: Event, newValue: number | number[]) => {
                     setSliderVal(newValue as number);
                 }}
             />
+            <TextField
+                label="Max"
+                type="number"
+                value={sliderMaxRange}
+                sx={{
+                    gridRow: '1',
+                    width: '80px',
+                    input: { color: getRainbowColor(props.index) },
+                    label: { color: getRainbowColor(props.index) }
+                }}
+                InputLabelProps={{
+                    shrink: true
+                }}
+                onChange={e => {
+                    const val = +e.target.value;
+                    if (val > sliderMinRange) {
+                        setSliderMaxRange(val);
+                    }
+                }}
+            />
+
             <Button
                 aria-label={'Delete ' + sliderUniform + ' slider'}
                 sx={{
@@ -293,6 +354,12 @@ export default function UniformSliders() {
             },
             getUUID: () => {
                 return uuid;
+            },
+            getMaxRange: () => {
+                return 1;
+            },
+            getMinRange: () => {
+                return 0;
             }
         };
         uuid && setSliderRefMap(sliderRefMap.set(uuid, sliderRef));
