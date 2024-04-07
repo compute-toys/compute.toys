@@ -257,7 +257,6 @@ const UniformSlider = (props: UniformSliderProps) => {
                     gridRow: '1',
                     gridColumn: 'span 7',
                     verticalAlign: 'middle',
-                    marginLeft: '1em',
                     color: getRainbowColor(props.index)
                 }}
                 defaultValue={0.0}
