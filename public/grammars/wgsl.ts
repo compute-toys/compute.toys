@@ -424,7 +424,31 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
 
         'storageBarrier',
         'workgroupBarrier',
-        'workgroupUniformLoad'
+        'workgroupUniformLoad',
+
+        'subgroupElect',
+        'subgroupAll',
+        'subgroupAny',
+        'subgroupBroadcast',
+        'subgroupBroadcastFirst',
+        'subgroupBallot',
+        'subgroupShuffle',
+        'subgroupShuffleXor',
+        'subgroupShuffleUp',
+        'subgroupShuffleDown',
+        'subgroupSum',
+        'subgroupExclusiveSum',
+        'subgroupProduct',
+        'subgroupExclusiveProduct',
+        'subgroupAnd',
+        'subgroupOr',
+        'subgroupXor',
+        'subgroupMin',
+        'subgroupMax',
+        'quadBroadcast',
+        'quadSwapX',
+        'quadSwapY',
+        'quadSwapDiagonal'
     ],
 
     addressSpaceKeywords: ['function', 'private', 'workgroup', 'uniform', 'storage'],
@@ -501,11 +525,13 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
     ],
 
     computeStageKeywords: [
+        'global_invocation_id',
         'local_invocation_id',
         'local_invocation_index',
-        'global_invocation_id',
         'workgroup_id',
-        'num_workgroups'
+        'num_workgroups',
+        'subgroup_invocation_id'
+        'subgroup_size'
     ],
 
     constants: ['true', 'false'],
