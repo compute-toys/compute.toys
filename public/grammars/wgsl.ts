@@ -530,7 +530,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'local_invocation_index',
         'workgroup_id',
         'num_workgroups',
-        'subgroup_invocation_id'
+        'subgroup_invocation_id',
         'subgroup_size'
     ],
 
