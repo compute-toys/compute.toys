@@ -6,7 +6,7 @@ import { getDimensions } from '../../types/canvasdimensions';
 // just to check if the object has already been freed (ptr=0)
 declare module 'lib/wgputoy' {
     interface WgpuToyRenderer {
-        ptr: number;
+        __wbg_ptr: number;
     }
 }
 
@@ -47,4 +47,4 @@ export const wgputoyPreludeAtom = atom<string>('');
 
 // type predicate
 export const isSafeContext = (context: WgpuToyRenderer | false): context is WgpuToyRenderer =>
-    context !== false && context.ptr !== 0;
+    context !== false && context.__wbg_ptr !== 0;
