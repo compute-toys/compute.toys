@@ -65,9 +65,6 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
     ],
 
     reservedKeywords: [
-        'vec',
-        'mat',
-
         'NULL',
         'Self',
         'abstract',
@@ -236,6 +233,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'float2',
         'float3',
         'float4',
+        
         'vec2f',
         'vec3f',
         'vec4f',
@@ -292,11 +290,12 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
     ],
 
     builtinFunctionKeywords: [
+        'bitcast',
+
         'all',
         'any',
         'select',
 
-        'bitcast',
         'arrayLength',
 
         'abs',
@@ -311,17 +310,29 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'clamp',
         'cos',
         'cosh',
+        'countLeadingZeros',
+        'countOneBits',
+        'countTrailingZeros',
         'cross',
         'degrees',
+        'determinant',
         'distance',
+        'dot',
+        'dot4U8Packed',
+        'dot4I8Packed',
         'exp',
         'exp2',
+        'extractBits', //(signed)
+        //extractBits (unsigned)
         'faceForward',
+        'firstLeadingBit', //(signed)
+        //firstLeadingBit (unsigned)
+        'firstTrailingBit',
         'floor',
         'fma',
         'fract',
         'frexp',
-        'inverseBits',
+        'insertBits',
         'inverseSqrt',
         'ldexp',
         'length',
@@ -348,23 +359,8 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'step',
         'tan',
         'tanh',
-        'trunc',
-
-        'countLeadingZeros',
-        'countOneBits',
-        'countTrailingZeros',
-        'firstLeadingBit',
-        'firstTrailingBit',
-        'extractBits',
-        'insertBits',
-        'reverseBits',
-        'shiftLeft',
-        'shiftRight',
-
-        'determinant',
         'transpose',
-
-        'dot',
+        'trunc',
 
         'dpdx',
         'dpdxCoarse',
@@ -413,6 +409,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'pack2x16snorm',
         'pack2x16unorm',
         'pack2x16float',
+        
         'unpack4x8snorm',
         'unpack4x8unorm',
         'unpack4xI8',
@@ -422,6 +419,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'unpack2x16float',
 
         'storageBarrier',
+        'textureBarrier',
         'workgroupBarrier',
         'workgroupUniformLoad',
 
