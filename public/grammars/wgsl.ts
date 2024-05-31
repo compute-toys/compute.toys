@@ -65,9 +65,6 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
     ],
 
     reservedKeywords: [
-        'vec',
-        'mat',
-
         'NULL',
         'Self',
         'abstract',
@@ -236,6 +233,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'float2',
         'float3',
         'float4',
+        
         'vec2f',
         'vec3f',
         'vec4f',
@@ -266,18 +264,11 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'mat2x4f',
         'mat2x3f',
         'mat2x2f',
-        'char',
         'bool',
-        'u8',
-        'u16',
         'u32',
-        'u64',
+        'f16',
         'f32',
-        'f64',
-        'i8',
-        'i16',
         'i32',
-        'i64',
         'function'
     ],
 
@@ -299,11 +290,12 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
     ],
 
     builtinFunctionKeywords: [
+        'bitcast',
+
         'all',
         'any',
         'select',
 
-        'bitcast',
         'arrayLength',
 
         'abs',
@@ -318,17 +310,29 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'clamp',
         'cos',
         'cosh',
+        'countLeadingZeros',
+        'countOneBits',
+        'countTrailingZeros',
         'cross',
         'degrees',
+        'determinant',
         'distance',
+        'dot',
+        'dot4U8Packed',
+        'dot4I8Packed',
         'exp',
         'exp2',
+        'extractBits', //(signed)
+        //extractBits (unsigned)
         'faceForward',
+        'firstLeadingBit', //(signed)
+        //firstLeadingBit (unsigned)
+        'firstTrailingBit',
         'floor',
         'fma',
         'fract',
         'frexp',
-        'inverseBits',
+        'insertBits',
         'inverseSqrt',
         'ldexp',
         'length',
@@ -355,23 +359,8 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'step',
         'tan',
         'tanh',
-        'trunc',
-
-        'countLeadingZeros',
-        'countOneBits',
-        'countTrailingZeros',
-        'firstLeadingBit',
-        'firstTrailingBit',
-        'extractBits',
-        'insertBits',
-        'reverseBits',
-        'shiftLeft',
-        'shiftRight',
-
-        'determinant',
         'transpose',
-
-        'dot',
+        'trunc',
 
         'dpdx',
         'dpdxCoarse',
@@ -387,6 +376,9 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'textureGather',
         'textureGatherCompare',
         'textureLoad',
+        'textureNumLayers',
+        'textureNumLevels',
+        'textureNumSamples',
         'textureSample',
         'textureSampleBias',
         'textureSampleCompare',
@@ -395,9 +387,6 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'textureSampleLevel',
         'textureSampleBaseClampToEdge',
         'textureStore',
-        'textureNumLayers',
-        'textureNumLevels',
-        'textureNumSamples',
 
         'atomicLoad',
         'atomicStore',
@@ -413,18 +402,50 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
 
         'pack4x8snorm',
         'pack4x8unorm',
+        'pack4xI8',
+        'pack4xU8',
+        'pack4xI8Clamp',
+        'pack4xU8Clamp',
         'pack2x16snorm',
         'pack2x16unorm',
         'pack2x16float',
+        
         'unpack4x8snorm',
         'unpack4x8unorm',
+        'unpack4xI8',
+        'unpack4xU8',
         'unpack2x16snorm',
         'unpack2x16unorm',
         'unpack2x16float',
 
         'storageBarrier',
+        'textureBarrier',
         'workgroupBarrier',
-        'workgroupUniformLoad'
+        'workgroupUniformLoad',
+
+        'subgroupElect',
+        'subgroupAll',
+        'subgroupAny',
+        'subgroupBroadcast',
+        'subgroupBroadcastFirst',
+        'subgroupBallot',
+        'subgroupShuffle',
+        'subgroupShuffleXor',
+        'subgroupShuffleUp',
+        'subgroupShuffleDown',
+        'subgroupSum',
+        'subgroupExclusiveSum',
+        'subgroupProduct',
+        'subgroupExclusiveProduct',
+        'subgroupAnd',
+        'subgroupOr',
+        'subgroupXor',
+        'subgroupMin',
+        'subgroupMax',
+        'quadBroadcast',
+        'quadSwapX',
+        'quadSwapY',
+        'quadSwapDiagonal'
     ],
 
     addressSpaceKeywords: ['function', 'private', 'workgroup', 'uniform', 'storage'],
@@ -501,11 +522,13 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
     ],
 
     computeStageKeywords: [
+        'global_invocation_id',
         'local_invocation_id',
         'local_invocation_index',
-        'global_invocation_id',
         'workgroup_id',
-        'num_workgroups'
+        'num_workgroups',
+        'subgroup_invocation_id',
+        'subgroup_size'
     ],
 
     constants: ['true', 'false'],
