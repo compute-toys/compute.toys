@@ -22,6 +22,9 @@ function getImageConfig() {
 const nextConfig = {
     reactStrictMode: true,
     images: getImageConfig(),
+    experimental: {
+        esmExternals: 'loose'
+    },
     async redirects() {
         return [
             {
@@ -41,7 +44,7 @@ const nextConfig = {
     },
     webpack(config, { isServer, dev }) {
         config.experiments = {
-            syncWebAssembly: true,
+            asyncWebAssembly: true,
             layers: true
         };
         if (isServer && !dev) {
