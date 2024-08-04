@@ -58,11 +58,7 @@ const DraggablePicker = props => {
                         color={'primary'}
                     />
                 </div>
-                <ImageList
-                    sx={{ width: size * 6, height: size * 4, overflow: 'hidden' }}
-                    cols={6}
-                    rowHeight={size}
-                >
+                <ImageList sx={{ overflow: 'hidden' }} cols={6} rowHeight={size}>
                     {defaultTextures.map(item => (
                         <ImageListItem
                             key={item.img + props.channel}
