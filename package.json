@@ -35,7 +35,7 @@
     "jotai": "^2.4.3",
     "jotai-game": "^0.1.0",
     "monaco-editor": "^0.33.0",
-    "next": "^14.0.0",
+    "next": "^14.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.5",
