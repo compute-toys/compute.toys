@@ -245,7 +245,11 @@ export const ProfileShaders = props => {
                                             <TableCell align="left">
                                                 {toDateString(row.created_at)}
                                             </TableCell>
-                                            <TableCell align="left">{row.visibility}</TableCell>
+                                            <TableCell align="left">
+                                                {row.visibility === 'unlisted'
+                                                    ? 'profile only'
+                                                    : row.visibility}
+                                            </TableCell>
                                             {props.editable ? (
                                                 <TableCell align="left">
                                                     <Button
