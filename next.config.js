@@ -3,9 +3,14 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 });
 
 function getImageConfig() {
-    const config = { domains: ['dl.polyhaven.org'] };
+    const config = {
+        remotePatterns: require('./config/allowedtexturesources.json').map(resource => ({
+            hostname: resource.domain
+        }))
+    };
+    console.log(config);
     if (process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME) {
-        config.domains.push(process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME);
+        config.remotePatterns.push({ hostname: process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME });
     } else {
         console.warn(
             'NEXT_PUBLIC_SUPABASE_HOSTNAME is not set, images from supabase will not be loaded'

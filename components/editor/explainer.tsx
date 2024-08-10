@@ -9,12 +9,8 @@ import Link from 'next/link';
 import { Fragment, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 import { Item } from 'theme/theme';
+import { HiLite } from '../global/hilite';
 import Logo from '../global/logo';
-
-const HiLite = props => {
-    const theme = useTheme();
-    return <span style={{ color: theme.palette.primary.contrastText }}>{props.children}</span>;
-};
 
 const EXPLAINER_HEIGHT = '600';
 const EXPLAINER_INNER_HEIGHT = '570';

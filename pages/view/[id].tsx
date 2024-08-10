@@ -6,6 +6,7 @@ import {
     authorProfileAtom,
     codeAtom,
     codeNeedSaveAtom,
+    customTexturesAtom,
     dbLoadedAtom,
     descriptionAtom,
     float32EnabledAtom,
@@ -14,6 +15,7 @@ import {
     shaderIDAtom,
     sliderRefMapAtom,
     sliderSerDeNeedsUpdateAtom,
+    Texture,
     titleAtom,
     visibilityAtom
 } from 'lib/atoms/atoms';
@@ -29,6 +31,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { definitions } from 'types/supabase';
+import { defaultTextures } from '../../lib/db/textureutils';
 
 async function fetchShader(id: number) {
     const { data, error, status } = await supabase
@@ -94,6 +97,7 @@ export default function Index(props) {
 
     const setCode = useSetAtom(codeAtom);
     const setLoadedTextures = useSetAtom(loadedTexturesAtom);
+    const setCustomTextures = useSetAtom(customTexturesAtom);
     const setSliderSerDeNeedsUpdate = useSetAtom(sliderSerDeNeedsUpdateAtom);
     const setSliderRefMap = useSetAtom(sliderRefMapAtom);
     const setTitle = useSetAtom(titleAtom);
@@ -124,6 +128,26 @@ export default function Index(props) {
         };
         setCode(shaderActiveSettings.code);
         setLoadedTextures(shaderActiveSettings.textures);
+        // see if the shaders requires any textures that aren't part of the default set
+        // if it does, check if that custom texture is already in the custom texture list
+        // and if it's not, add it to the list
+        setCustomTextures(existingCustomTextures => {
+            const newCustomTextures: Texture[] = [];
+            for (const requiredTexture of shaderActiveSettings.textures) {
+                const isDefault = defaultTextures.find(dt => dt.img === requiredTexture.img);
+
+                if (!isDefault) {
+                    const isNew = !existingCustomTextures.find(
+                        ect => ect.img === requiredTexture.img
+                    );
+                    if (isNew) {
+                        newCustomTextures.push({ img: requiredTexture.img });
+                    }
+                }
+            }
+
+            return [...existingCustomTextures, ...newCustomTextures];
+        });
         setSliderRefMap(fromUniformActiveSettings(shaderActiveSettings.uniforms));
         // need to inform the slider component of a change so it can get a count of all the enabled sliders
         setSliderSerDeNeedsUpdate(true);
