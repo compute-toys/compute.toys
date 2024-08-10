@@ -18,10 +18,14 @@ const GENERIC_LOAD_ERROR = 'Could not load image. Check that it is a valid';
  */
 const domainValidators = AllowedTextureResources.map(resource => {
     const trimmed = resource.domain.trim().toLowerCase();
+
+    // we're using the same domain list as the one that next.js uses. nextjs supports double wildcards,
+    // though that's too permissive
     if (trimmed.startsWith('**')) {
         throw new Error('** wildcard is not supported');
     }
 
+    // nextjs * matches a single subdomain segment, so reproducing that logic here
     if (trimmed.startsWith('*')) {
         const wildCardSplit = trimmed.split('*');
         if (wildCardSplit.length !== 2) {
