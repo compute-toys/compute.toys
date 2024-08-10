@@ -31,7 +31,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { definitions } from 'types/supabase';
-import { defaultTextures } from '../../lib/db/textureutils';
+import { defaultTextures } from '../../lib/util/textureutils';
 
 async function fetchShader(id: number) {
     const { data, error, status } = await supabase

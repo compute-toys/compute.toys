@@ -7,7 +7,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useState } from 'react';
 
 import { customTexturesAtom, loadedTexturesAtom } from '../../lib/atoms/atoms';
-import { getTextureFromProvidedUrl } from '../../lib/db/textureutils';
+import { getTextureFromProvidedUrl } from '../../lib/util/textureutils';
 import { CssTextField, Item, theme } from '../../theme/theme';
 import AllowedTextureSources from './allowedtexturesources';
 

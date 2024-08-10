@@ -13,7 +13,7 @@ import { Fragment, MouseEventHandler, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 
 import { Item, theme } from 'theme/theme';
-import { defaultTextures } from '../../lib/db/textureutils';
+import { defaultTextures } from '../../lib/util/textureutils';
 import AddTextureModal from '../global/pickfilemodal';
 
 const TextureThumbsList = ({
