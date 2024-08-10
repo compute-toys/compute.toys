@@ -12,16 +12,19 @@ import Image from 'next/image';
 import { Fragment, MouseEventHandler, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
 
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { Item, theme } from 'theme/theme';
 import { defaultTextures } from '../../lib/util/textureutils';
 import AddTextureModal from '../global/pickfilemodal';
 
 const TextureThumbsList = ({
+    cols,
     channel,
     textures,
     showAddButton,
     onAddButtonClick
 }: {
+    cols?: number;
     channel: number;
     textures: Texture[];
     showAddButton?: boolean;
@@ -31,7 +34,7 @@ const TextureThumbsList = ({
     const size = 128;
 
     return (
-        <ImageList sx={{ overflow: 'hidden' }} cols={6} rowHeight={size}>
+        <ImageList sx={{ overflow: 'hidden' }} cols={cols} rowHeight={size}>
             {textures.map(item => (
                 <ImageListItem
                     key={item.img + channel}
@@ -74,6 +77,10 @@ const DraggablePicker = props => {
     // about violating strict mode DOM access rules
     const nodeRef = useRef(null);
 
+    // media queries for texture picker size
+    const mediumView = useMediaQuery(theme.breakpoints.up('md'));
+    const largeView = useMediaQuery(theme.breakpoints.up('lg'));
+
     return (
         <Fragment>
             <Draggable
@@ -114,19 +121,32 @@ const DraggablePicker = props => {
                             color={'primary'}
                         />
                     </div>
-                    <TextureThumbsList
-                        channel={props.channel}
-                        textures={defaultTextures}
-                    ></TextureThumbsList>
-                    <Typography sx={{ color: theme.palette.dracula.orange }}>
-                        Custom textures
-                    </Typography>
-                    <TextureThumbsList
-                        channel={props.channel}
-                        textures={customTextures}
-                        showAddButton
-                        onAddButtonClick={() => setUploadModalOpen(true)}
-                    ></TextureThumbsList>
+                    <div
+                        style={{
+                            // just a little bit less than the full screen height, 100px here is somewhat arbitrary
+                            maxHeight: 'calc(100vh - 100px)',
+                            overflowY: 'auto',
+                            [theme.breakpoints.down('md')]: {
+                                backgroundColor: theme.palette.secondary.main
+                            }
+                        }}
+                    >
+                        <TextureThumbsList
+                            cols={largeView ? 8 : mediumView ? 6 : 3}
+                            channel={props.channel}
+                            textures={defaultTextures}
+                        ></TextureThumbsList>
+                        <Typography sx={{ color: theme.palette.dracula.orange }}>
+                            Custom textures
+                        </Typography>
+                        <TextureThumbsList
+                            cols={largeView ? 8 : mediumView ? 6 : 3}
+                            channel={props.channel}
+                            textures={customTextures}
+                            showAddButton
+                            onAddButtonClick={() => setUploadModalOpen(true)}
+                        ></TextureThumbsList>
+                    </div>
                 </Item>
             </Draggable>
             <AddTextureModal
