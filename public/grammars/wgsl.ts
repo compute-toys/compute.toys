@@ -233,7 +233,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'float2',
         'float3',
         'float4',
-        
+
         'vec2f',
         'vec3f',
         'vec4f',
@@ -409,7 +409,7 @@ export const wgslLanguageDef = <languages.IMonarchLanguage>{
         'pack2x16snorm',
         'pack2x16unorm',
         'pack2x16float',
-        
+
         'unpack4x8snorm',
         'unpack4x8unorm',
         'unpack4xI8',

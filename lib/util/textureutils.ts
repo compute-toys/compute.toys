@@ -79,7 +79,10 @@ const validateTextureUrl = (url: string): Promise<string> => {
 
                 fetched.arrayBuffer().then(imgBuffer => {
                     if (imgBuffer.byteLength > MAX_IMAGE_BYTE_SIZE) {
-                        throw `File too large. ${(MAX_IMAGE_BYTE_SIZE / 1000000).toFixed(2)} MB is the maximum allowed size`;
+                        throw (
+                            `File too large. ${(MAX_IMAGE_BYTE_SIZE / 1000000).toFixed(2)}` +
+                            'MB is the maximum allowed size'
+                        );
                     }
 
                     let img: HTMLImageElement = new Image();

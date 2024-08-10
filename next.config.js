@@ -8,7 +8,7 @@ function getImageConfig() {
             hostname: resource.domain
         }))
     };
-    console.log(config);
+
     if (process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME) {
         config.remotePatterns.push({ hostname: process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME });
     } else {
