@@ -2,8 +2,8 @@ import AllowedTextureResources from '../../config/allowedtexturesources.json';
 import { Texture } from '../atoms/atoms';
 
 const MAX_IMAGE_DIMENSION_PX = 8192;
-// 20mb
-const MAX_IMAGE_BYTE_SIZE = 20000000;
+// 30MB
+const MAX_IMAGE_BYTE_SIZE = 30000000;
 
 /**
  * Error message to display when an image can't be loaded, but we don't have enough
@@ -44,7 +44,7 @@ const domainValidators = AllowedTextureResources.map(resource => {
  * - Enforce the https protocol for compat
  * - Validate syntactical correctness
  * - Check that URL host is allowed
- * - Enforce 20MB maximum
+ * - Enforce max image size
  */
 const validateTextureUrl = (url: string): Promise<string> => {
     const trimmed = url.trim();
