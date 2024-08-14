@@ -169,6 +169,7 @@ const WgpuToyController = props => {
                 wgputoy.render();
             } else if (isPlaying() || manualReload()) {
                 let t = timer();
+                t += e.delta;
                 setTimer(t);
                 wgputoy.set_time_elapsed(t);
                 wgputoy.set_time_delta(e.delta);
