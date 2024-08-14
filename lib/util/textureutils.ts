@@ -129,6 +129,23 @@ const validateTextureUrl = (url: string): Promise<string> => {
  * Given a user-provided URL, return a formed Texture
  */
 export const getTextureFromProvidedUrl = async (url: string): Promise<Texture> => {
+    const match = url.match(/^https:\/\/polyhaven.com\/a\/([\w_]+)$/);
+    if (match) {
+        const name = match[1];
+        const response = await fetch(`https://api.polyhaven.com/files/${name}`);
+        const data = await response.json();
+        if (data.hdri) {
+            const img = data.hdri['2k']?.hdr?.url;
+            const thumb = data.tonemapped?.url;
+            return { img, thumb, url };
+        } else if (data.Diffuse) {
+            const mapType = Object.keys(data)[0];
+            const img = data[mapType]['1k']?.jpg?.url;
+            return { img, url };
+        } else {
+            throw new Error('Unrecognised Poly Haven API response');
+        }
+    }
     return {
         img: await validateTextureUrl(url)
     };
