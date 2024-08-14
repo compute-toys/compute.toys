@@ -284,16 +284,15 @@ const WgpuToyController = props => {
                 const day = String(now.getDate()).padStart(2, '0');
                 const month = String(now.getMonth() + 1).padStart(2, '0');
                 const year = String(now.getFullYear());
-                // .slice(-2)
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
 
-                return `${day}-${month}-${year} ${hours}h${minutes}m`;
+                return `${year}-${month}-${day} ${hours}h${minutes}m`;
             }
             // https://www.npmjs.com/package/sanitize-filename/v/1.4.3?activeTab=code
-            function sanitizeString(input: string, replacement: string = ''): string {
-                const illegalRe = /[\/\?<>\\:\*\|":]/g;
-                const controlRe = /[\x00-\x1f\x80-\x9f]/g;
+            function sanitizeString(input: string, replacement = ''): string {
+                const illegalRe = /[\/\?<>\\:\*\|":]/g; // eslint-disable-line
+                const controlRe = /[\x00-\x1f\x80-\x9f]/g; // eslint-disable-line
                 const reservedRe = /^\.+$/;
                 const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
 
