@@ -18,5 +18,10 @@
         "domain": "raw.githubusercontent.com",
         "displayName": "GitHub User Content",
         "referenceUrl": "https://github.com"
+    },
+    {
+        "domain": "upload.wikimedia.org",
+        "displayName": "Wikimedia Commons",
+        "referenceUrl": "https://commons.wikimedia.org/"
     }
 ]

@@ -163,10 +163,10 @@ export const defaultTextures: Texture[] = [
     polyhaven_hdri('spruit_sunrise'),
     polyhaven_hdri('vatican_road'),
     { img: '/textures/blank.png' },
-    { img: '/textures/london.jpg' }, // https://commons.wikimedia.org/wiki/File:Regent_Street_Clay_Gregory.jpg
+    { img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Regent_Street_Clay_Gregory.jpg/1920px-Regent_Street_Clay_Gregory.jpg' },
     { img: '/textures/anim0.png' },
     { img: '/textures/bayer0.png' },
-    { img: '/textures/font0.png' }, // https://github.com/otaviogood/shader_fontgen
+    { img: 'https://raw.githubusercontent.com/otaviogood/shader_fontgen/master/codepage12.png' },
     polyhaven_texture('rocks_ground_01', 'disp'),
     { img: '/textures/noise0.png' },
     { img: '/textures/noise1.png' },
