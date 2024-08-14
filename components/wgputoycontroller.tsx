@@ -23,8 +23,8 @@ import {
     sliderRefMapAtom,
     sliderUpdateSignalAtom,
     timerAtom,
-    widthAtom,
-    titleAtom
+    titleAtom,
+    widthAtom
 } from 'lib/atoms/atoms';
 import {
     canvasElAtom,
@@ -169,7 +169,6 @@ const WgpuToyController = props => {
                 wgputoy.render();
             } else if (isPlaying() || manualReload()) {
                 let t = timer();
-                t += e.delta;
                 setTimer(t);
                 wgputoy.set_time_elapsed(t);
                 wgputoy.set_time_delta(e.delta);
@@ -280,15 +279,14 @@ const WgpuToyController = props => {
         function createMediaRecorder(canvas: HTMLCanvasElement) {
             function getFormattedDateTime(): string {
                 const now = new Date();
-            
+
                 const day = String(now.getDate()).padStart(2, '0');
                 const month = String(now.getMonth() + 1).padStart(2, '0');
-                const year = String(now.getFullYear())
-                    // .slice(-2)
-                    ;
+                const year = String(now.getFullYear());
+                // .slice(-2)
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
-            
+
                 return `${day}-${month}-${year} ${hours}h${minutes}m`;
             }
             // https://www.npmjs.com/package/sanitize-filename/v/1.4.3?activeTab=code
@@ -297,24 +295,24 @@ const WgpuToyController = props => {
                 const controlRe = /[\x00-\x1f\x80-\x9f]/g;
                 const reservedRe = /^\.+$/;
                 const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
-            
+
                 // Truncate string by size in bytes
                 function truncate(str: string, maxByteSize: number): string {
                     const buffer = Buffer.alloc(maxByteSize);
-                    const written = buffer.write(str, "utf8");
-                    return buffer.toString("utf8", 0, written);
+                    const written = buffer.write(str, 'utf8');
+                    return buffer.toString('utf8', 0, written);
                 }
-            
+
                 // Sanitize the input string
                 let sanitized = input
                     .replace(illegalRe, replacement)
                     .replace(controlRe, replacement)
                     .replace(reservedRe, replacement)
                     .replace(windowsReservedRe, replacement);
-            
+
                 // Truncate to 255 bytes
                 sanitized = truncate(sanitized, 255);
-            
+
                 // Re-sanitize if replacement is not empty
                 if (replacement !== '') {
                     sanitized = sanitized
@@ -323,7 +321,7 @@ const WgpuToyController = props => {
                         .replace(reservedRe, '')
                         .replace(windowsReservedRe, '');
                 }
-            
+
                 return sanitized;
             }
             const options: any = {
@@ -365,7 +363,7 @@ const WgpuToyController = props => {
                 // @ts-ignore
                 a.style = 'display: none';
                 a.href = url;
-                const fileName = sanitizeString(title + ' - ' + getFormattedDateTime() +  '.webm');
+                const fileName = sanitizeString(title + ' - ' + getFormattedDateTime() + '.webm');
                 a.download = fileName;
                 a.click();
                 window.URL.revokeObjectURL(url);
