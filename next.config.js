@@ -1,3 +1,5 @@
+const CopyPlugin = require('copy-webpack-plugin');
+
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
     enabled: false
 });
@@ -53,29 +55,25 @@ const nextConfig = {
             layers: true
         };
         if (isServer && !dev) {
-            config.output.webassemblyModuleFilename = 'chunks/[id].wasm';
-            config.plugins.push(new WasmChunksFixPlugin());
+            const patterns = [];
+            const destinations = [
+                '../static/wasm/[name][ext]', // -> .next/static/wasm
+                './static/wasm/[name][ext]', // -> .next/server/static/wasm
+                '.' // -> .next/server/chunks (for some reason this is necessary)
+            ];
+            for (const dest of destinations) {
+                patterns.push({
+                    context: '.next/server/chunks',
+                    from: '.',
+                    to: dest,
+                    filter: resourcePath => resourcePath.endsWith('.wasm'),
+                    noErrorOnMissing: true
+                });
+            }
+            config.plugins.push(new CopyPlugin({ patterns }));
         }
-        config.optimization.moduleIds = 'named';
         return config;
     }
 };
-
-class WasmChunksFixPlugin {
-    apply(compiler) {
-        compiler.hooks.thisCompilation.tap('WasmChunksFixPlugin', compilation => {
-            compilation.hooks.processAssets.tap({ name: 'WasmChunksFixPlugin' }, assets =>
-                Object.entries(assets).forEach(([pathname, source]) => {
-                    if (!pathname.match(/\.wasm$/)) return;
-                    compilation.deleteAsset(pathname);
-
-                    const name = pathname.split('/')[1];
-                    const info = compilation.assetsInfo.get(pathname);
-                    compilation.emitAsset(name, source, info);
-                })
-            );
-        });
-    }
-}
 
 module.exports = withBundleAnalyzer(nextConfig);
