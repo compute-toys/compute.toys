@@ -1,0 +1,22 @@
+[
+    {
+        "domain": "dl.polyhaven.org",
+        "displayName": "Poly Haven",
+        "referenceUrl": "https://polyhaven.com/"
+    },
+    {
+        "domain": "i.imgur.com",
+        "displayName": "Imgur",
+        "referenceUrl": "https://imgur.com/"
+    },
+    {
+        "domain": "*.github.io",
+        "displayName": "GitHub Pages",
+        "referenceUrl": "https://pages.github.com/"
+    },
+    {
+        "domain": "raw.githubusercontent.com",
+        "displayName": "GitHub User Content",
+        "referenceUrl": "https://github.com"
+    }
+]
