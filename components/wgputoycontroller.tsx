@@ -5,6 +5,7 @@ import { useTransientAtom } from 'jotai-game';
 import {
     codeAtom,
     dbLoadedAtom,
+    embedModeAtom,
     entryPointsAtom,
     float32EnabledAtom,
     halfResolutionAtom,
@@ -86,6 +87,7 @@ const WgpuToyController = props => {
     const [scale, setScale] = useTransientAtom(scaleAtom);
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
+    const embedMode = useAtomValue(embedModeAtom);
     const float32Enabled = useAtomValue(float32EnabledAtom);
     const halfResolution = useAtomValue(halfResolutionAtom);
 
@@ -497,6 +499,16 @@ const WgpuToyController = props => {
                 canvas.height = dimensions.y;
                 canvas.style.width = `${dimensions.x / window.devicePixelRatio}px`;
                 canvas.style.height = `${dimensions.y / window.devicePixelRatio}px`;
+                if (embedMode) {
+                    canvas.style.width = '100vw';
+                    canvas.style.height = '100vh';
+                    canvas.style.zIndex = '9999';
+                    canvas.style.position = 'fixed';
+                    canvas.style.top = '0';
+                    canvas.style.left = '0';
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.display = 'block';
+                }
             }
         }
     };

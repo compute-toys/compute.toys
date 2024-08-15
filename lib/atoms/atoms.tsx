@@ -48,6 +48,7 @@ export const resetAtom = atom<boolean>(false);
 export const hotReloadAtom = atom<boolean>(false);
 export const manualReloadAtom = atom<boolean>(false);
 export const requestFullscreenAtom = atom<boolean>(false);
+export const embedModeAtom = atom<boolean>(false);
 export const parseErrorAtom = atom<ParseError>({
     summary: '',
     position: { row: 0, col: 0 },
