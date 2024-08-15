@@ -2,19 +2,17 @@
 import WarningIcon from '@mui/icons-material/Warning';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { canvasElAtom, canvasParentElAtom, wgpuAvailabilityAtom } from 'lib/atoms/wgputoyatoms';
+import { useAtom, useSetAtom } from 'jotai';
+import { canvasElAtom, wgpuAvailabilityAtom } from 'lib/atoms/wgputoyatoms';
 import dynamic from 'next/dynamic';
 import { Suspense, useCallback, useState } from 'react';
 import { theme } from 'theme/theme';
-import { getDimensions } from 'types/canvasdimensions';
 import Logo from './global/logo';
 
 export const WgpuToyWrapper = props => {
     const setCanvasEl = useSetAtom(canvasElAtom);
     const [wgpuAvailability, setWgpuAvailability] = useAtom(wgpuAvailabilityAtom);
     const [loaded, setLoaded] = useState(false);
-    const canvasParentEl = useAtomValue(canvasParentElAtom);
 
     const canvasRef = useCallback(async canvas => {
         // there may be a case where we don't have the canvas *yet*
@@ -44,8 +42,6 @@ export const WgpuToyWrapper = props => {
     const Controller = dynamic(() => import('./wgputoycontroller'), {
         ssr: false
     });
-
-    const dim = getDimensions(canvasParentEl ? canvasParentEl.offsetWidth : 256);
 
     return (
         <div style={props.style}>
