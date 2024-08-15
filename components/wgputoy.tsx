@@ -1,12 +1,11 @@
 'use client';
 import WarningIcon from '@mui/icons-material/Warning';
-import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { canvasElAtom, canvasParentElAtom, wgpuAvailabilityAtom } from 'lib/atoms/wgputoyatoms';
 import dynamic from 'next/dynamic';
-import { Fragment, Suspense, useCallback, useState } from 'react';
+import { Suspense, useCallback, useState } from 'react';
 import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
 import Logo from './global/logo';
@@ -49,7 +48,7 @@ export const WgpuToyWrapper = props => {
     const dim = getDimensions(canvasParentEl ? canvasParentEl.offsetWidth : 256);
 
     return (
-        <Fragment>
+        <div style={props.style}>
             <canvas
                 ref={canvasRef}
                 id={props.bindID}
@@ -61,14 +60,10 @@ export const WgpuToyWrapper = props => {
                 tabIndex={1}
             />
             {loaded ? (
-                <Suspense
-                    fallback={<Skeleton variant="rectangular" width={dim.x} height={dim.y} />}
-                >
-                    <Controller onLoad={onLoad} />
+                <Suspense>
+                    <Controller onLoad={onLoad} embed={props.embed} />
                 </Suspense>
-            ) : wgpuAvailability === 'unknown' ? (
-                <Skeleton variant="rectangular" width={dim.x} height={dim.y} />
-            ) : (
+            ) : wgpuAvailability === 'unknown' ? null : (
                 <Stack color={theme.palette.primary.contrastText} spacing={2} padding={4}>
                     <Typography>
                         <WarningIcon />
@@ -80,6 +75,6 @@ export const WgpuToyWrapper = props => {
                     </Typography>
                 </Stack>
             )}
-        </Fragment>
+        </div>
     );
 };

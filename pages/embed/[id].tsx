@@ -1,7 +1,5 @@
 'use client';
 import Editor from 'components/editor/editor';
-import { useSetAtom } from 'jotai';
-import { embedModeAtom } from 'lib/atoms/atoms';
 import { fetchShader, useShader } from 'lib/view';
 
 export async function getServerSideProps(context) {
@@ -12,14 +10,12 @@ export async function getServerSideProps(context) {
 
 export default function Index(props) {
     useShader(props);
-    const setEmbedMode = useSetAtom(embedModeAtom);
-    setEmbedMode(true);
     return (
         <div>
             <style>{`
-                body { display: none; }
+                body { overflow: hidden; }
             `}</style>
-            <Editor />
+            <Editor embed={true} />
         </div>
     );
 }
