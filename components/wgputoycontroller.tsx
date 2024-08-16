@@ -481,8 +481,13 @@ const WgpuToyController = props => {
                             (window.outerWidth / window.innerWidth) /
                             60
                     ) * 60;
+            } else if (props.embed) {
+                dimensions = getDimensions(window.innerWidth * window.devicePixelRatio);
             } else {
-                dimensions = getDimensions(parentRef.offsetWidth * window.devicePixelRatio);
+                const padding = 16;
+                dimensions = getDimensions(
+                    (parentRef.offsetWidth - padding) * window.devicePixelRatio
+                );
             }
             const newScale = halfResolution ? 0.5 : 1;
             if (dimensions.x !== width() || newScale !== scale()) {
@@ -497,7 +502,6 @@ const WgpuToyController = props => {
                 canvas.height = dimensions.y;
                 canvas.style.width = `${dimensions.x / window.devicePixelRatio}px`;
                 canvas.style.height = `${dimensions.y / window.devicePixelRatio}px`;
-                if (props.embed) canvas.style.width = canvas.style.height = '100%';
             }
         }
     };
