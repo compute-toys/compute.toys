@@ -4,6 +4,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
     enabled: false
 });
 
+/*
 function getImageConfig() {
     const config = {
         remotePatterns: require('./config/allowedtexturesources.json').map(resource => ({
@@ -21,6 +22,7 @@ function getImageConfig() {
     }
     return config;
 }
+*/
 
 // cleanup pending these issues:
 // https://github.com/vercel/next.js/issues/32612
@@ -28,7 +30,11 @@ function getImageConfig() {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    images: getImageConfig(),
+    // images: getImageConfig(),
+    images: {
+        loader: 'custom',
+        loaderFile: './lib/util/loader.ts'
+    },
     experimental: {
         esmExternals: 'loose'
     },
