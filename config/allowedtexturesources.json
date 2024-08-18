@@ -5,11 +5,6 @@
         "referenceUrl": "https://polyhaven.com/"
     },
     {
-        "domain": "i.imgur.com",
-        "displayName": "Imgur",
-        "referenceUrl": "https://imgur.com/"
-    },
-    {
         "domain": "*.github.io",
         "displayName": "GitHub Pages",
         "referenceUrl": "https://pages.github.com/"
