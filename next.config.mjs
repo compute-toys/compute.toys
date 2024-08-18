@@ -1,8 +1,5 @@
-const CopyPlugin = require('copy-webpack-plugin');
-
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-    enabled: false
-});
+import withBundleAnalyzer from '@next/bundle-analyzer';
+import CopyPlugin from 'copy-webpack-plugin';
 
 /*
 function getImageConfig() {
@@ -82,4 +79,4 @@ const nextConfig = {
     }
 };
 
-module.exports = withBundleAnalyzer(nextConfig);
+export default withBundleAnalyzer({ enabled: false })(nextConfig);
