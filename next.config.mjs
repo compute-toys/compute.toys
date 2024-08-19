@@ -1,3 +1,4 @@
+import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 import CopyPlugin from 'copy-webpack-plugin';
 
@@ -78,5 +79,9 @@ const nextConfig = {
         return config;
     }
 };
+
+if (process.env.NODE_ENV === 'development') {
+    await setupDevPlatform();
+}
 
 export default withBundleAnalyzer({ enabled: false })(nextConfig);
