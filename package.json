@@ -11,7 +11,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "gts lint",
-    "fix": "gts fix"
+    "fix": "gts fix",
+    "pages:setup": "curl https://sh.rustup.rs -sSf | sh -s -- -y && . $HOME/.cargo/env && curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh",
+    "pages:build": "npx @cloudflare/next-on-pages",
+    "pages:preview": "wrangler pages dev"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
