@@ -1,0 +1,22 @@
+[
+    {
+        "domain": "dl.polyhaven.org",
+        "displayName": "Poly Haven",
+        "referenceUrl": "https://polyhaven.com/"
+    },
+    {
+        "domain": "*.github.io",
+        "displayName": "GitHub Pages",
+        "referenceUrl": "https://pages.github.com/"
+    },
+    {
+        "domain": "raw.githubusercontent.com",
+        "displayName": "GitHub User Content",
+        "referenceUrl": "https://github.com"
+    },
+    {
+        "domain": "upload.wikimedia.org",
+        "displayName": "Wikimedia Commons",
+        "referenceUrl": "https://commons.wikimedia.org/"
+    }
+]

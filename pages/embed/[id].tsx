@@ -1,6 +1,6 @@
 'use client';
 import Editor from 'components/editor/editor';
-import { buildHead, fetchShader, useShader } from 'lib/view';
+import { fetchShader, useShader } from 'lib/view';
 
 export async function getServerSideProps(context) {
     const id = Number(context.params.id);
@@ -12,8 +12,10 @@ export default function Index(props) {
     useShader(props);
     return (
         <div>
-            {props.shader ? buildHead(props.shader) : null}
-            <Editor />
+            <style>{`
+                body { overflow: hidden; }
+            `}</style>
+            <Editor embed={true} />
         </div>
     );
 }

@@ -22,7 +22,7 @@
           "src/pages",
           "theme/themeModule.ts",
           "next-env.d.ts",
-          "next.config.js"
+          "next.config.mjs"
         ]
       }
     ],

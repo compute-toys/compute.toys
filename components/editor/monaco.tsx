@@ -5,7 +5,6 @@ import { useTransientAtom } from 'jotai-game';
 import {
     codeAtom,
     codeNeedSaveAtom,
-    dbLoadedAtom,
     isPlayingAtom,
     manualReloadAtom,
     monacoEditorAtom,
@@ -28,7 +27,6 @@ const Monaco = props => {
     const codeNeedSave = useAtomValue(codeNeedSaveAtom);
     const setCodeNeedSave = useSetAtom(codeNeedSaveAtom);
     const parseError = useAtomValue(parseErrorAtom);
-    const dbLoaded = useAtomValue(dbLoadedAtom);
     const [isPlaying] = useTransientAtom(isPlayingAtom);
     const setPlay = useSetAtom(playAtom);
     const setManualReload = useSetAtom(manualReloadAtom);

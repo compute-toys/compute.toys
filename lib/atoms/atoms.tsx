@@ -62,6 +62,8 @@ export const widthAtom = atom<number>(0);
 export const heightAtom = atom<number>(0);
 export const scaleAtom = atom<number>(1);
 
+export const customTexturesAtom = atom<Texture[]>([]);
+
 export const dbLoadedAtom = atom<boolean>(false);
 export const saveColorTransitionSignalAtom = atom<string | false>(false);
 

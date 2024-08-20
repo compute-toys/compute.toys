@@ -23,6 +23,7 @@ import {
     sliderRefMapAtom,
     sliderUpdateSignalAtom,
     timerAtom,
+    titleAtom,
     widthAtom
 } from 'lib/atoms/atoms';
 import {
@@ -52,6 +53,7 @@ const WgpuToyController = props => {
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
     const [recording, setRecording] = useAtom(recordingAtom);
+    const title = useAtomValue(titleAtom);
 
     // must be transient so we can access updated value in play loop
     const [sliderUpdateSignal, setSliderUpdateSignal] = useTransientAtom(sliderUpdateSignalAtom);
@@ -167,7 +169,9 @@ const WgpuToyController = props => {
                 wgputoy.render();
             } else if (isPlaying() || manualReload()) {
                 let t = timer();
-                t += e.delta;
+                if (!manualReload()) {
+                    t += e.delta;
+                }
                 setTimer(t);
                 wgputoy.set_time_elapsed(t);
                 wgputoy.set_time_delta(e.delta);
@@ -276,6 +280,52 @@ const WgpuToyController = props => {
             return;
         }
         function createMediaRecorder(canvas: HTMLCanvasElement) {
+            function getFormattedDateTime(): string {
+                const now = new Date();
+
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = String(now.getFullYear());
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+
+                return `${year}-${month}-${day} ${hours}h${minutes}m`;
+            }
+            // https://www.npmjs.com/package/sanitize-filename/v/1.4.3?activeTab=code
+            function sanitizeString(input: string, replacement = ''): string {
+                const illegalRe = /[\/\?<>\\:\*\|":]/g; // eslint-disable-line
+                const controlRe = /[\x00-\x1f\x80-\x9f]/g; // eslint-disable-line
+                const reservedRe = /^\.+$/;
+                const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
+
+                // Truncate string by size in bytes
+                function truncate(str: string, maxByteSize: number): string {
+                    const buffer = Buffer.alloc(maxByteSize);
+                    const written = buffer.write(str, 'utf8');
+                    return buffer.toString('utf8', 0, written);
+                }
+
+                // Sanitize the input string
+                let sanitized = input
+                    .replace(illegalRe, replacement)
+                    .replace(controlRe, replacement)
+                    .replace(reservedRe, replacement)
+                    .replace(windowsReservedRe, replacement);
+
+                // Truncate to 255 bytes
+                sanitized = truncate(sanitized, 255);
+
+                // Re-sanitize if replacement is not empty
+                if (replacement !== '') {
+                    sanitized = sanitized
+                        .replace(illegalRe, '')
+                        .replace(controlRe, '')
+                        .replace(reservedRe, '')
+                        .replace(windowsReservedRe, '');
+                }
+
+                return sanitized;
+            }
             const options: any = {
                 audioBitsPerSecond: 0,
                 videoBitsPerSecond: 8000000
@@ -307,7 +357,7 @@ const WgpuToyController = props => {
 
             mediaRecorder.onstop = function () {
                 setRecording(false);
-                const blob = new Blob(chunks, { type: 'video/mp4' });
+                const blob = new Blob(chunks, { type: 'video/webm' });
                 chunks.length = 0;
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -315,7 +365,8 @@ const WgpuToyController = props => {
                 // @ts-ignore
                 a.style = 'display: none';
                 a.href = url;
-                a.download = 'shader.mp4';
+                const fileName = sanitizeString(title + ' - ' + getFormattedDateTime() + '.webm');
+                a.download = fileName;
                 a.click();
                 window.URL.revokeObjectURL(url);
             };
@@ -340,7 +391,7 @@ const WgpuToyController = props => {
                 mediaRecorder.stop();
             }
         }
-    }, [recording]);
+    }, [recording, title]);
 
     useEffect(() => {
         if (canvas !== false) {
@@ -430,8 +481,13 @@ const WgpuToyController = props => {
                             (window.outerWidth / window.innerWidth) /
                             60
                     ) * 60;
+            } else if (props.embed) {
+                dimensions = getDimensions(window.innerWidth * window.devicePixelRatio);
             } else {
-                dimensions = getDimensions(parentRef.offsetWidth * window.devicePixelRatio);
+                const padding = 16;
+                dimensions = getDimensions(
+                    (parentRef.offsetWidth - padding) * window.devicePixelRatio
+                );
             }
             const newScale = halfResolution ? 0.5 : 1;
             if (dimensions.x !== width() || newScale !== scale()) {

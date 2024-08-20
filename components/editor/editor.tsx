@@ -85,6 +85,18 @@ export default function Editor(props) {
         );
     }
 
+    let embedStyle = {};
+    if (props.embed) {
+        embedStyle = {
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            zIndex: 9999
+        };
+    }
+
     const leftPanel = (
         <div ref={renderParentNodeRef}>
             <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
@@ -93,8 +105,11 @@ export default function Editor(props) {
                         bindID={'editor-canvas'}
                         style={{
                             display: 'inline-block',
-                            borderRadius: '4px'
+                            borderRadius: '4px',
+                            backgroundColor: 'black',
+                            ...embedStyle
                         }}
+                        embed={props.embed}
                     />
                 </Frame>
                 <Grid container>

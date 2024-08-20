@@ -1,92 +1,160 @@
 'use client';
+import AddIcon from '@mui/icons-material/Add';
 import DisabledByDefaultSharp from '@mui/icons-material/DisabledByDefaultSharp';
+import Button from '@mui/material/Button';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
+import Typography from '@mui/material/Typography';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { loadedTexturesAtom, Texture } from 'lib/atoms/atoms';
+import { customTexturesAtom, loadedTexturesAtom, Texture } from 'lib/atoms/atoms';
 import Image from 'next/image';
-import { Fragment, useRef, useState } from 'react';
+import { Fragment, MouseEventHandler, useRef, useState } from 'react';
 import Draggable from 'react-draggable';
-import { Item } from 'theme/theme';
+
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { Item, theme } from 'theme/theme';
+import { defaultTextures } from '../../lib/util/textureutils';
+import AddTextureModal from '../global/pickfilemodal';
+
+const TextureThumbsList = ({
+    cols,
+    channel,
+    textures,
+    showAddButton,
+    onAddButtonClick
+}: {
+    cols?: number;
+    channel: number;
+    textures: Texture[];
+    showAddButton?: boolean;
+    onAddButtonClick?: MouseEventHandler;
+}) => {
+    const setLoadedTextures = useSetAtom(loadedTexturesAtom);
+    const size = 128;
+
+    return (
+        <ImageList sx={{ overflow: 'hidden' }} cols={cols} rowHeight={size}>
+            {textures.map(item => (
+                <ImageListItem
+                    key={item.img + channel}
+                    onClick={() => {
+                        setLoadedTextures(prevLoadedTextures => {
+                            const newArr = [...prevLoadedTextures]; //shallow copy is fine for now
+                            newArr[channel] = item;
+                            return newArr; //returning a modified prevLoadedTextures will cause downstream effect checks to fail!
+                        });
+                    }}
+                >
+                    <Image
+                        style={{ borderRadius: '4px' }}
+                        src={item.thumb || item.img}
+                        alt={item.img}
+                        width={size}
+                        height={size}
+                        loading="lazy"
+                    />
+                </ImageListItem>
+            ))}
+            {showAddButton && (
+                <Button
+                    variant="outlined"
+                    style={{ width: size, height: size, display: 'flex' }}
+                    onClick={onAddButtonClick}
+                >
+                    <AddIcon style={{ transform: 'scale(1.75)' }}></AddIcon>
+                </Button>
+            )}
+        </ImageList>
+    );
+};
 
 const DraggablePicker = props => {
-    const setLoadedTextures = useSetAtom(loadedTexturesAtom);
-
-    const size = 128;
+    const [uploadModalOpen, setUploadModalOpen] = useState(false);
+    const customTextures = useAtomValue(customTexturesAtom);
 
     // Draggable needs this so React doesn't complain
     // about violating strict mode DOM access rules
     const nodeRef = useRef(null);
 
+    // media queries for texture picker size
+    const mediumView = useMediaQuery(theme.breakpoints.up('md'));
+    const largeView = useMediaQuery(theme.breakpoints.up('lg'));
+
     return (
-        <Draggable
-            handle=".picker-handle"
-            nodeRef={nodeRef}
-            bounds="body"
-            positionOffset={{ x: '0', y: '0' }}
-        >
-            <Item
-                ref={nodeRef}
-                elevation={12}
-                sx={
-                    props.hidden
-                        ? { display: 'none' }
-                        : {
-                              zIndex: '2',
-                              display: 'inline-block',
-                              position: 'fixed',
-                              left: '12%',
-                              top: '12%'
-                          }
-                }
+        <Fragment>
+            <Draggable
+                handle=".picker-handle"
+                nodeRef={nodeRef}
+                bounds="body"
+                positionOffset={{ x: '0', y: '0' }}
             >
-                <div
-                    className="picker-handle"
-                    style={{
-                        display: 'flex',
-                        justifyContent: 'end',
-                        backgroundImage:
-                            'repeating-linear-gradient(-45deg, rgba(255,255,255, 0.25), rgba(255,255,255, 0.25) 2px, transparent 1px, transparent 6px)',
-                        backgroundSize: '4px 4px'
-                    }}
+                <Item
+                    ref={nodeRef}
+                    elevation={12}
+                    sx={
+                        props.hidden
+                            ? { display: 'none' }
+                            : {
+                                  zIndex: '2',
+                                  display: 'inline-block',
+                                  position: 'fixed',
+                                  left: '12%',
+                                  top: '12%'
+                              }
+                    }
                 >
-                    {/* Annoying viewbox tweak to align with drag bar*/}
-                    <DisabledByDefaultSharp
-                        viewBox="1.5 1.5 19.5 19.5"
-                        onClick={() => props.setPickerHidden(true)}
-                        color={'primary'}
-                    />
-                </div>
-                <ImageList
-                    sx={{ width: size * 6, height: size * 4, overflow: 'hidden' }}
-                    cols={6}
-                    rowHeight={size}
-                >
-                    {defaultTextures.map(item => (
-                        <ImageListItem
-                            key={item.img + props.channel}
-                            onClick={() => {
-                                setLoadedTextures(prevLoadedTextures => {
-                                    const newArr = [...prevLoadedTextures]; //shallow copy is fine for now
-                                    newArr[props.channel] = item;
-                                    return newArr; //returning a modified prevLoadedTextures will cause downstream effect checks to fail!
-                                });
-                            }}
-                        >
-                            <Image
-                                style={{ borderRadius: '4px' }}
-                                src={item.thumb || item.img}
-                                alt={item.img}
-                                width={size}
-                                height={size}
-                                loading="lazy"
-                            />
-                        </ImageListItem>
-                    ))}
-                </ImageList>
-            </Item>
-        </Draggable>
+                    <div
+                        className="picker-handle"
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'end',
+                            backgroundImage:
+                                'repeating-linear-gradient(-45deg, rgba(255,255,255, 0.25), rgba(255,255,255, 0.25) 2px, transparent 1px, transparent 6px)',
+                            backgroundSize: '4px 4px'
+                        }}
+                    >
+                        {/* Annoying viewbox tweak to align with drag bar*/}
+                        <DisabledByDefaultSharp
+                            viewBox="1.5 1.5 19.5 19.5"
+                            onClick={() => props.setPickerHidden(true)}
+                            color={'primary'}
+                        />
+                    </div>
+                    <div
+                        style={{
+                            // just a little bit less than the full screen height, 100px here is somewhat arbitrary
+                            maxHeight: 'calc(100vh - 100px)',
+                            overflowY: 'auto',
+                            [theme.breakpoints.down('md')]: {
+                                backgroundColor: theme.palette.secondary.main
+                            }
+                        }}
+                    >
+                        <TextureThumbsList
+                            cols={largeView ? 8 : mediumView ? 6 : 3}
+                            channel={props.channel}
+                            textures={defaultTextures}
+                        ></TextureThumbsList>
+                        <Typography sx={{ color: theme.palette.dracula.orange }}>
+                            Custom textures
+                        </Typography>
+                        <TextureThumbsList
+                            cols={largeView ? 8 : mediumView ? 6 : 3}
+                            channel={props.channel}
+                            textures={customTextures}
+                            showAddButton
+                            onAddButtonClick={() => setUploadModalOpen(true)}
+                        ></TextureThumbsList>
+                    </div>
+                </Item>
+            </Draggable>
+            <AddTextureModal
+                open={uploadModalOpen}
+                channelIdx={props.channel}
+                setOpen={setUploadModalOpen}
+            ></AddTextureModal>
+        </Fragment>
     );
 };
 
@@ -142,44 +210,3 @@ export default function TexturePicker() {
         </Fragment>
     );
 }
-
-function polyhaven_texture(name, map = 'diff') {
-    return {
-        img: `https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/${name}/${name}_${map}_1k.jpg`,
-        url: `https://polyhaven.com/a/${name}`
-    };
-}
-
-function polyhaven_hdri(name) {
-    return {
-        img: `https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/${name}_2k.hdr`,
-        thumb: `https://dl.polyhaven.org/file/ph-assets/HDRIs/extra/Tonemapped%20JPG/${name}.jpg`,
-        url: `https://polyhaven.com/a/${name}`
-    };
-}
-
-const defaultTextures: Texture[] = [
-    polyhaven_texture('stone_brick_wall_001'),
-    polyhaven_texture('wood_table_001'),
-    polyhaven_texture('rusty_metal_02'),
-    polyhaven_texture('rock_pitted_mossy'),
-    polyhaven_texture('aerial_rocks_02'),
-    polyhaven_texture('book_pattern', 'col2'),
-    polyhaven_hdri('autumn_crossing'),
-    polyhaven_hdri('dikhololo_night'),
-    polyhaven_hdri('leadenhall_market'),
-    polyhaven_hdri('music_hall_01'),
-    polyhaven_hdri('spruit_sunrise'),
-    polyhaven_hdri('vatican_road'),
-    { img: '/textures/blank.png' },
-    { img: '/textures/london.jpg' }, // https://commons.wikimedia.org/wiki/File:Regent_Street_Clay_Gregory.jpg
-    { img: '/textures/anim0.png' },
-    { img: '/textures/bayer0.png' },
-    { img: '/textures/font0.png' }, // https://github.com/otaviogood/shader_fontgen
-    polyhaven_texture('rocks_ground_01', 'disp'),
-    { img: '/textures/noise0.png' },
-    { img: '/textures/noise1.png' },
-    { img: '/textures/noise2.png' },
-    { img: '/textures/noise3.png' },
-    { img: '/textures/noise4.png' }
-];

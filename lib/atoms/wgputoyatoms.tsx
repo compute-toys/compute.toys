@@ -1,6 +1,6 @@
 'use client';
 import { atom } from 'jotai';
-import { WgpuToyRenderer } from 'lib/wgputoy';
+import { create_renderer, WgpuToyRenderer } from 'lib/wgputoy';
 import { getDimensions } from '../../types/canvasdimensions';
 
 // just to check if the object has already been freed (ptr=0)
@@ -29,14 +29,9 @@ type WgpuStatus = 'available' | 'unavailable' | 'unknown';
 export const wgpuAvailabilityAtom = atom<WgpuStatus>('unknown');
 
 export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async get => {
-    // https://github.com/webpack/webpack/issues/11347
-    const wasm = await import('lib/wgputoy/wgputoy_bg.wasm');
-    const { __wbg_set_wasm, create_renderer } = await import('lib/wgputoy/wgputoy_bg.js');
     if (!isSSR && get(canvasElAtom) !== false && get(canvasParentElAtom)) {
         const parentEl = get(canvasParentElAtom);
         const dim = getDimensions(parentEl.offsetWidth * window.devicePixelRatio);
-        console.log('Initialising WebGPU renderer');
-        __wbg_set_wasm(wasm);
         return create_renderer(dim.x, dim.y, (get(canvasElAtom) as HTMLCanvasElement).id);
     } else {
         return false;

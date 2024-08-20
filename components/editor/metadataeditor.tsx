@@ -146,7 +146,7 @@ export const MetadataEditor = () => {
                             }}
                         >
                             <MenuItem value={'private'}>private</MenuItem>
-                            <MenuItem value={'unlisted'}>unlisted</MenuItem>
+                            <MenuItem value={'unlisted'}>profile only</MenuItem>
                             <MenuItem value={'public'}>public</MenuItem>
                         </Select>
                     </FormControl>
