@@ -1,6 +1,5 @@
 import DisabledByDefaultSharp from '@mui/icons-material/DisabledByDefaultSharp';
-import { Theme } from '@mui/material';
-import { SxProps } from '@mui/material/styles';
+import { SxProps, Theme } from '@mui/material/styles';
 import { Dispatch, Fragment, ReactNode, SetStateAction, useId, useRef } from 'react';
 import Draggable from 'react-draggable';
 import { Item } from '../../theme/theme';
@@ -12,7 +11,6 @@ interface DraggableWindowProps {
     sx?: SxProps<Theme>;
 }
 
-// TODO: on Explainer, set an EXPLAINER_HEIGHT
 export default function DraggableWindow({ children, hidden, setHidden, sx }: DraggableWindowProps) {
     // Draggable needs this so React doesn't complain
     // about violating strict mode DOM access rules
@@ -41,7 +39,7 @@ export default function DraggableWindow({ children, hidden, setHidden, sx }: Dra
                                   display: 'inline-block',
                                   position: 'fixed',
                                   left: '12%',
-                                  top: '12%',
+                                  top: '12%'
                               },
                         ...(Array.isArray(sx) ? sx : [sx])
                     ]}
