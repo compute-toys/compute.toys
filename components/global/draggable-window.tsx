@@ -8,6 +8,9 @@ interface DraggableWindowProps {
     children: ReactNode;
     hidden: boolean;
     setHidden: Dispatch<SetStateAction<boolean>>;
+    /**
+     * Optional styles to be applied to the <Item> content container
+     */
     sx?: SxProps<Theme>;
 }
 
@@ -44,19 +47,20 @@ export default function DraggableWindow({ children, hidden, setHidden, sx }: Dra
                         ...(Array.isArray(sx) ? sx : [sx])
                     ]}
                 >
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'end',
-                            backgroundImage:
-                                'repeating-linear-gradient(-45deg, rgba(255,255,255, 0.25), rgba(255,255,255, 0.25) 2px, transparent 1px, transparent 6px)',
-                            backgroundSize: '4px 4px'
-                        }}
-                    >
+                    <div style={{ display: 'flex', gap: '2px' }}>
+                        <div
+                            id={handleId}
+                            style={{
+                                flex: 1,
+                                backgroundImage:
+                                    'repeating-linear-gradient(-45deg, rgba(255,255,255, 0.25), rgba(255,255,255, 0.25) 2px, transparent 1px, transparent 6px)',
+                                backgroundSize: '4px 4px'
+                            }}
+                        ></div>
                         {/* Annoying viewbox tweak to align with drag bar*/}
-                        <div style={{ width: '100%' }} id={handleId}></div>
                         <DisabledByDefaultSharp
-                            viewBox="1.5 1.5 19.5 19.5"
+                            role="button"
+                            viewBox="1.5 1.5 19.5 20"
                             onClick={() => setHidden(true)}
                             sx={{ cursor: 'pointer', color: 'rgba(150,150,150,1)' }}
                         />
