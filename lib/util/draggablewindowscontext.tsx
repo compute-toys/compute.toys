@@ -54,7 +54,7 @@ export const WindowManagementProvider = ({ ...props }) => {
 export const useWindowManagement = () => {
     const context = useContext(WindowManagementContext);
     if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
+        throw new Error('useWindowManagement must be used within an WindowManagementProvider');
     }
     return context;
 };
