@@ -12,6 +12,8 @@ import { CssTextField, Item, theme } from 'theme/theme';
 import { ProfileShaders } from '../../components/profileshaders';
 import { definitions } from '../../types/supabase';
 
+export const runtime = 'experimental-edge';
+
 const PROFILE_AVATAR_WIDTH = 96;
 
 async function loadShaders(username: string) {
