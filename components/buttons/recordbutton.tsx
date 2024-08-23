@@ -18,13 +18,13 @@ export default function RecordButton() {
             }}
             title={'Record video <Ctrl + Alt + R>'}
             sx={{
-                color: recording ? theme.palette.primary.contrastText : theme.palette.primary.light
+                fill: recording ? theme.palette.primary.contrastText : theme.palette.primary.light
             }}
         >
             {recording ? (
                 <RadioButtonChecked />
             ) : (
-                <SvgIcon style={{ transform: 'scale(0.9)' }}>
+                <SvgIcon sx={{ transform: 'scale(0.9)' }}>
                     <svg
                         id="Layer_1"
                         data-name="Layer 1"
