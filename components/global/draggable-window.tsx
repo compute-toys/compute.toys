@@ -13,6 +13,7 @@ import {
 } from 'react';
 import Draggable from 'react-draggable';
 import { v4 as UUID } from 'uuid';
+import { cssEscape } from '../../lib/polyfills/cssescape';
 import { useWindowManagement } from '../../lib/util/draggablewindowscontext';
 import { Item } from '../../theme/theme';
 
@@ -44,7 +45,7 @@ export default function DraggableWindow({ children, hidden, setHidden, sx }: Dra
     // used for handle grab ID
     const handleId = useId();
     // useIds IDs include colons, which need escaping to be used with selectors
-    const handleSelector = `#${CSS.escape(handleId)}`;
+    const handleSelector = `#${cssEscape(handleId)}`;
 
     const { clear, add, moveToTop, uuidOrder } = useWindowManagement();
 
