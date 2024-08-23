@@ -1,7 +1,18 @@
 import DisabledByDefaultSharp from '@mui/icons-material/DisabledByDefaultSharp';
 import { SxProps, Theme } from '@mui/material/styles';
-import { Dispatch, Fragment, ReactNode, SetStateAction, useId, useRef } from 'react';
+import {
+    Dispatch,
+    Fragment,
+    ReactNode,
+    SetStateAction,
+    useEffect,
+    useId,
+    useRef,
+    useState
+} from 'react';
 import Draggable from 'react-draggable';
+import { v4 as UUID } from 'uuid';
+import { useWindowManagement } from '../../lib/util/draggablewindowscontext';
 import { Item } from '../../theme/theme';
 
 interface DraggableWindowProps {
@@ -14,18 +25,57 @@ interface DraggableWindowProps {
     sx?: SxProps<Theme>;
 }
 
+// the z-index at which windows should start at,
+// so the window at the back will have a z-index of 2,
+// the window in front of it 3, etc.
+const BASE_Z_INDEX = 2;
+
 export default function DraggableWindow({ children, hidden, setHidden, sx }: DraggableWindowProps) {
+    const [zIndex, setZIndex] = useState(BASE_Z_INDEX);
+
+    // unique ID used for z-index placement relative to other windows
+    const [uuid] = useState(UUID());
+
     // Draggable needs this so React doesn't complain
     // about violating strict mode DOM access rules
     const nodeRef = useRef(null);
 
+    // used for handle grab ID
     const handleId = useId();
     // useIds IDs include colons, which need escaping to be used with selectors
     const handleSelector = `#${CSS.escape(handleId)}`;
 
+    const { clear, add, moveToTop, uuidOrder } = useWindowManagement();
+
+    // set initial uuid, clear when done
+    useEffect(() => {
+        add(uuid);
+
+        return () => {
+            clear(uuid);
+        };
+    }, []);
+
+    // if uuid order change happens, change the zIndex
+    // using JSON.stringify for useEffect on array, I suppose
+    // it's not too bad of a pattern
+    useEffect(() => {
+        const idx = uuidOrder.indexOf(uuid);
+        if (idx < 0) return;
+        setZIndex(BASE_Z_INDEX + uuidOrder.length - 1 - idx);
+    }, [JSON.stringify(uuidOrder)]);
+
+    // move to top upon being unhidden
+    useEffect(() => {
+        if (!hidden) {
+            moveToTop(uuid);
+        }
+    }, [hidden]);
+
     return (
         <Fragment>
             <Draggable
+                onMouseDown={() => moveToTop(uuid)}
                 handle={handleSelector}
                 nodeRef={nodeRef}
                 bounds="body"
@@ -38,7 +88,7 @@ export default function DraggableWindow({ children, hidden, setHidden, sx }: Dra
                         hidden
                             ? { display: 'none' }
                             : {
-                                  zIndex: '2',
+                                  zIndex: zIndex,
                                   display: 'inline-block',
                                   position: 'fixed',
                                   left: '12%',
@@ -47,6 +97,7 @@ export default function DraggableWindow({ children, hidden, setHidden, sx }: Dra
                         ...(Array.isArray(sx) ? sx : [sx])
                     ]}
                 >
+                    {zIndex}
                     <div style={{ display: 'flex', gap: '2px' }}>
                         <div
                             id={handleId}
