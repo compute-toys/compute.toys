@@ -97,7 +97,6 @@ export default function DraggableWindow({ children, hidden, setHidden, sx }: Dra
                         ...(Array.isArray(sx) ? sx : [sx])
                     ]}
                 >
-                    {zIndex}
                     <div style={{ display: 'flex', gap: '2px' }}>
                         <div
                             id={handleId}
