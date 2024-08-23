@@ -1,4 +1,5 @@
 import DisabledByDefaultSharp from '@mui/icons-material/DisabledByDefaultSharp';
+import Box from '@mui/material/Box';
 import { SxProps, Theme } from '@mui/material/styles';
 import {
     Dispatch,
@@ -93,8 +94,7 @@ export default function DraggableWindow({ children, hidden, setHidden, sx }: Dra
                                   position: 'fixed',
                                   left: '12%',
                                   top: '12%'
-                              },
-                        ...(Array.isArray(sx) ? sx : [sx])
+                              }
                     ]}
                 >
                     <div style={{ display: 'flex', gap: '2px' }}>
@@ -110,12 +110,12 @@ export default function DraggableWindow({ children, hidden, setHidden, sx }: Dra
                         {/* Annoying viewbox tweak to align with drag bar*/}
                         <DisabledByDefaultSharp
                             role="button"
-                            viewBox="1.5 1.5 19.5 20"
+                            viewBox="1 1.5 19.5 20"
                             onClick={() => setHidden(true)}
                             sx={{ cursor: 'pointer', color: 'rgba(150,150,150,1)' }}
                         />
                     </div>
-                    {children}
+                    <Box sx={sx}>{children}</Box>
                 </Item>
             </Draggable>
         </Fragment>

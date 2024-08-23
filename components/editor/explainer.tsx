@@ -211,7 +211,11 @@ export default function Explainer() {
             >
                 <QuestionMarkIcon />
             </Button>
-            <DraggableWindow hidden={explainerHidden} setHidden={setExplainerHidden}>
+            <DraggableWindow
+                hidden={explainerHidden}
+                setHidden={setExplainerHidden}
+                sx={{ paddingTop: '8px' }}
+            >
                 <ExplainerBody />
             </DraggableWindow>
         </Fragment>
