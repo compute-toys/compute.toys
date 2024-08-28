@@ -1,11 +1,11 @@
 import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 import CopyPlugin from 'copy-webpack-plugin';
+import allowedtexturesources from './config/allowedtexturesources.json' with { type: 'json' };
 
-/*
 function getImageConfig() {
     const config = {
-        remotePatterns: require('./config/allowedtexturesources.json').map(resource => ({
+        remotePatterns: allowedtexturesources.map(resource => ({
             hostname: resource.domain
         }))
     };
@@ -20,7 +20,6 @@ function getImageConfig() {
     }
     return config;
 }
-*/
 
 // cleanup pending these issues:
 // https://github.com/vercel/next.js/issues/32612
@@ -28,11 +27,13 @@ function getImageConfig() {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    // images: getImageConfig(),
-    images: {
-        loader: 'custom',
-        loaderFile: './lib/util/loader.ts'
-    },
+    images:
+        process.env.NODE_ENV === 'development'
+            ? getImageConfig()
+            : {
+                  loader: 'custom',
+                  loaderFile: './lib/util/loader.ts'
+              },
     experimental: {
         esmExternals: 'loose'
     },
