@@ -12,7 +12,7 @@ import { CssTextField, Item, theme } from 'theme/theme';
 import { ProfileShaders } from '../../components/profileshaders';
 import { definitions } from '../../types/supabase';
 
-export const runtime = 'experimental-edge';
+export const runtime = process.env.NODE_ENV === 'development' ? 'nodejs' : 'experimental-edge';
 
 const PROFILE_AVATAR_WIDTH = 96;
 
