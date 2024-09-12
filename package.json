@@ -46,7 +46,7 @@
     "react-draggable": "^4.4.5",
     "sharp": "^0.32.6",
     "use-animation-frame": "^0.1.4",
-    "uuid": "^8.3.2"
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.13.2",
