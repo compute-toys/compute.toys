@@ -1,5 +1,5 @@
 // https://www.misha.wtf/blog/nextjs-supabase-auth
-import { AuthChangeEvent, Session, User } from '@supabase/gotrue-js';
+import { AuthChangeEvent, EmailOtpType, Session, User } from '@supabase/supabase-js';
 import { supabase, SUPABASE_PROFILE_TABLE_NAME } from 'lib/db/supabaseclient';
 import { createContext, useContext, useEffect, useState } from 'react';
 
@@ -11,7 +11,6 @@ interface ProfileData {
 // obviously redundant but typescript will treat reference to
 // VIEWS as a namespace here and fail to find it
 type View = 'logged_in' | 'logged_out';
-type EmailOTPType = 'signup' | 'recovery';
 
 export const VIEWS = {
     LOGGED_IN: 'logged_in' as View,
@@ -24,7 +23,7 @@ type AuthSignUp = (email: string, username: string, password: string) => Promise
 export type AuthConfirm = (
     email: string,
     token: string,
-    type: EmailOTPType
+    type: EmailOtpType
 ) => Promise<{ error: any }>;
 export type AuthResetPassword = (email: string) => Promise<{ error: any }>;
 export type AuthUpdatePassword = (password: string) => Promise<{ error: any }>;
@@ -63,7 +62,7 @@ async function signUpApi(email: string, username: string, password: string) {
     });
 }
 
-async function confirmApi(email: string, token: string, type: EmailOTPType) {
+async function confirmApi(email: string, token: string, type: EmailOtpType) {
     return await fetch('/api/confirm', {
         method: 'POST',
         headers: new Headers({ 'Content-Type': 'application/json' }),
@@ -144,8 +143,8 @@ export const AuthProvider = ({ ...props }) => {
 
     const logIn = async (email: string, password: string) => {
         return await supabase.auth
-            .signIn({ email, password })
-            .then(({ session, error }) => {
+            .signInWithPassword({ email, password })
+            .then(({ data: { session }, error }) => {
                 if (error) {
                     throw new Error(error.message);
                 } else {
@@ -187,7 +186,7 @@ export const AuthProvider = ({ ...props }) => {
     const confirm = async (
         email: string,
         token: string,
-        type: EmailOTPType
+        type: EmailOtpType
     ): Promise<{ error }> => {
         return await confirmApi(email, token, type)
             .then(res => {
@@ -202,8 +201,8 @@ export const AuthProvider = ({ ...props }) => {
             .then(async data => {
                 // seems really backwards since we already have the session,
                 // but this seems to be the only documented way to do this
-                const { error } = await supabase.auth.signIn({
-                    refreshToken: data.session.refresh_token
+                const { error } = await supabase.auth.refreshSession({
+                    refresh_token: data.session.refresh_token
                 });
 
                 if (error) {
@@ -218,7 +217,7 @@ export const AuthProvider = ({ ...props }) => {
     };
 
     const resetPassword = async (email: string): Promise<{ error }> => {
-        return await supabase.auth.api.resetPasswordForEmail(email).then(({ error }) => {
+        return await supabase.auth.resetPasswordForEmail(email).then(({ error }) => {
             if (error) {
                 return { error: error.message };
             } else {
@@ -228,15 +227,13 @@ export const AuthProvider = ({ ...props }) => {
     };
 
     const updatePassword = async (password: string): Promise<{ error }> => {
-        return await supabase.auth.api
-            .updateUser(session.access_token, { password: password })
-            .then(({ error }) => {
-                if (error) {
-                    return { error: error.message };
-                } else {
-                    return { error: undefined };
-                }
-            });
+        return await supabase.auth.updateUser({ password: password }).then(({ error }) => {
+            if (error) {
+                return { error: error.message };
+            } else {
+                return { error: undefined };
+            }
+        });
     };
 
     const logOut = () => supabase.auth.signOut();
@@ -264,16 +261,23 @@ export const AuthProvider = ({ ...props }) => {
     }, [user, view]);
 
     useEffect(() => {
-        setSession(supabase.auth.session());
+        (async () => {
+            const {
+                data: { session }
+            } = await supabase.auth.getSession();
+            setSession(session);
 
-        const { data: authListener } = supabase.auth.onAuthStateChange((event, _session) => {
-            setSession(_session);
-            updateSupabaseCookie(event, _session);
-        });
+            const {
+                data: { subscription: authListener }
+            } = supabase.auth.onAuthStateChange((event, _session) => {
+                setSession(_session);
+                updateSupabaseCookie(event, _session);
+            });
 
-        return () => {
-            authListener?.unsubscribe();
-        };
+            return () => {
+                authListener?.unsubscribe();
+            };
+        })();
     });
 
     return (

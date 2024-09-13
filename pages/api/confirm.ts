@@ -6,7 +6,10 @@ export const runtime = 'edge';
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { email, token, type } = req.body;
 
-    const { user, session, error } = await supabase.auth.verifyOTP({
+    const {
+        data: { user, session },
+        error
+    } = await supabase.auth.verifyOtp({
         email: email,
         token: token,
         type: type
