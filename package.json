@@ -33,7 +33,7 @@
     "@octokit/rest": "^18.12.0",
     "@react-hook/resize-observer": "^1.2.5",
     "@supabase/gotrue-js": "^1.22.13",
-    "@supabase/supabase-js": "^1.35.2",
+    "@supabase/supabase-js": "^2.45.4",
     "base64-arraybuffer": "^1.0.2",
     "copy-webpack-plugin": "^12.0.2",
     "firacode": "^6.2.0",
