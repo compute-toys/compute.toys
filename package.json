@@ -63,7 +63,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
     "gts": "^5.3.1",
-    "prettier": "^2.8.8",
+    "prettier": "^3.3.3",
     "prettier-plugin-organize-imports": "^3.2.2",
     "shx": "^0.3.4",
     "supabase": "^1.191.3",
