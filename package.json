@@ -42,7 +42,7 @@
     "monaco-editor": "^0.33.0",
     "next": "^14.2.5",
     "react": "^18.3.1",
-    "react-dom": "^18.2.0",
+    "react-dom": "^18.3.1",
     "react-draggable": "^4.4.5",
     "sharp": "^0.33.5",
     "use-animation-frame": "^0.1.4",
