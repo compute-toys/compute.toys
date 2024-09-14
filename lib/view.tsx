@@ -6,7 +6,6 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { definitions } from 'types/supabase';
 import {
     authorProfileAtom,
     codeAtom,
@@ -31,7 +30,7 @@ import { defaultTextures } from './util/textureutils';
 
 export async function fetchShader(id: number) {
     const { data, error, status } = await supabase
-        .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
+        .from(SUPABASE_SHADER_TABLE_NAME)
         .select(
             `
             name,

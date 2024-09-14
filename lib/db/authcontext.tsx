@@ -113,7 +113,7 @@ const uploadAvatar = async (file: File, user: User): Promise<{ avatar; error }> 
 };
 */
 
-const getProfileApi = async (user: User, view: string) => {
+const getProfileApi = async (user: User, view: string): Promise<ProfileData> => {
     if (user && view && view !== VIEWS.LOGGED_OUT) {
         return supabase
             .from(SUPABASE_PROFILE_TABLE_NAME)

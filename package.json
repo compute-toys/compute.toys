@@ -14,7 +14,8 @@
     "fix": "gts fix",
     "pages:setup": "curl https://sh.rustup.rs -sSf | sh -s -- -y && . $HOME/.cargo/env && curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && npx @cloudflare/next-on-pages",
     "pages:build": "npx @cloudflare/next-on-pages",
-    "pages:preview": "wrangler pages dev"
+    "pages:preview": "wrangler pages dev",
+    "supabase:types": ". ./.env && supabase gen types typescript --project-id $NEXT_PUBLIC_SUPABASE_PROJECT_ID > types/database.types.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",

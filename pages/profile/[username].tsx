@@ -10,7 +10,6 @@ import { toDateString } from 'lib/util/dateutils';
 import { ChangeEvent, Fragment, useEffect, useState } from 'react';
 import { CssTextField, Item, theme } from 'theme/theme';
 import { ProfileShaders } from '../../components/profileshaders';
-import { definitions } from '../../types/supabase';
 
 export const runtime = 'experimental-edge';
 
@@ -19,14 +18,13 @@ const PROFILE_AVATAR_WIDTH = 96;
 async function loadShaders(username: string) {
     try {
         const { data, error, status } = await supabase
-            .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
+            .from(SUPABASE_SHADER_TABLE_NAME)
             .select(
                 `
                     *,
                     profile:author!inner(username)  
                 `
             )
-            // @ts-ignore
             .eq('profile.username', username);
 
         if (error && status !== 406) {
@@ -136,9 +134,7 @@ export default function Profile(props) {
                 about: aboutEditor
             };
 
-            const { error } = await supabase.from('profile').upsert(updates, {
-                returning: 'minimal' // Don't return the value after inserting
-            });
+            const { error } = await supabase.from('profile').upsert(updates);
 
             if (error) {
                 setErrorMessage('Error updating username: ' + error.message);
@@ -257,7 +253,7 @@ export async function getServerSideProps(context) {
     const { username } = context.params;
 
     const { data: idData, error: idError } = await supabase
-        .from<definitions['profile']>('profile')
+        .from('profile')
         .select('*')
         .eq('username', username)
         .single();
