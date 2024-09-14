@@ -25,7 +25,6 @@ import {
 } from 'lib/db/supabaseclient';
 import { useMemo, useRef } from 'react';
 import { theme } from 'theme/theme';
-import { definitions } from 'types/supabase';
 
 export interface UniformActiveSettings {
     name: string;
@@ -242,9 +241,10 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT, HOST_DELETE] {
     const create = async (dataUrl: string) => {
         try {
             const { data, error, status } = await supabase
-                .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
+                .from(SUPABASE_SHADER_TABLE_NAME)
                 .insert([
                     {
+                        author: null, // automatically set by postgres trigger
                         name: atomGetter(titleAtom),
                         description: atomGetter(descriptionAtom),
                         visibility: atomGetter(visibilityAtom),
@@ -281,7 +281,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT, HOST_DELETE] {
         try {
             // TODO: let supabase know we don't need the record
             const { error, status } = await supabase
-                .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
+                .from(SUPABASE_SHADER_TABLE_NAME)
                 .update({
                     name: atomGetter(titleAtom),
                     description: atomGetter(descriptionAtom),
@@ -321,7 +321,7 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT, HOST_DELETE] {
     const del = async (id: number) => {
         try {
             const { error, status } = await supabase
-                .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
+                .from(SUPABASE_SHADER_TABLE_NAME)
                 .delete()
                 .eq('id', id);
             if (error && status !== 406) {

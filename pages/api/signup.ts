@@ -6,17 +6,18 @@ export const runtime = 'edge';
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { email, username, password } = req.body;
 
-    const { user, error } = await supabase.auth.signUp(
-        {
-            email: email,
-            password: password
-        },
-        {
+    const {
+        data: { user },
+        error
+    } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
             data: {
                 username: username
             }
         }
-    );
+    });
 
     if (!error) {
         return res.status(200).json({
