@@ -33,7 +33,7 @@
     "@supabase/supabase-js": "^1.35.2",
     "firacode": "^6.2.0",
     "jotai": "^2.4.3",
-    "jotai-game": "^0.1.0",
+    "jotai-game": "^0.2.0",
     "monaco-editor": "^0.33.0",
     "next": "^14.2.5",
     "react": "^18.3.1",
