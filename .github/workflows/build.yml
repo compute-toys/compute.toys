@@ -30,4 +30,5 @@ jobs:
           node-version: node
           cache: 'yarn'
       - run: yarn
+      - run: yarn lint
       - run: yarn build
