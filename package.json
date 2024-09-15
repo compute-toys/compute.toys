@@ -1,7 +1,7 @@
 {
   "private": true,
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=20.0.0"
   },
   "packageManager": "yarn@1.22.22",
   "scripts": {
@@ -10,8 +10,8 @@
     "prebuild": "wasm-pack build --release wgpu-compute-toy --out-dir ../lib/wgputoy",
     "build": "next build",
     "start": "next start",
-    "lint": "gts lint",
-    "fix": "gts fix",
+    "lint": "next lint",
+    "fix": "next lint --fix",
     "pages:setup": "curl https://sh.rustup.rs -sSf | sh -s -- -y && . $HOME/.cargo/env && curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && npx @cloudflare/next-on-pages",
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:preview": "wrangler pages dev"
@@ -52,17 +52,15 @@
     "@cloudflare/next-on-pages": "^1.13.2",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.5",
-    "@typescript-eslint/eslint-plugin": "^8.5.0",
-    "@typescript-eslint/parser": "^8.5.0",
     "@webgpu/types": "^0.1.45",
     "depcheck": "^1.4.7",
-    "eslint": "^9.10.0",
+    "eslint": "^8.56.0",
     "eslint-config-next": "^14.2.11",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.30.0",
     "eslint-plugin-n": "^17.10.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.2.1",
-    "gts": "^5.3.1",
     "prettier": "^3.3.3",
     "prettier-plugin-organize-imports": "^4.0.0",
     "shx": "^0.3.4",
