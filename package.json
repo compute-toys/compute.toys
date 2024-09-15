@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.11.0",
+    "@emotion/styled": "^11.13.0",
     "@fontsource/lobster": "^4.5.8",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/free-brands-svg-icons": "^6.6.0",
