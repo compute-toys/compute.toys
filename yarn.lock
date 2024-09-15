@@ -4319,10 +4319,10 @@ jackspeak@^3.1.2:
   optionalDependencies:
     "@pkgjs/parseargs" "^0.11.0"
 
-jotai-game@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/jotai-game/-/jotai-game-0.1.0.tgz#cd7d9f0c0715ce526373395f5f50ddee28718717"
-  integrity sha512-Ey5tFXgmjc3dfW4xqxZa4k9xFTr2zMAiQXHW0PfyKGRi1tQzJTBoy70RMKNKJRj86G6Hf4oLZHkJbLdeHtXzFQ==
+jotai-game@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/jotai-game/-/jotai-game-0.2.0.tgz#8b76a3e545f7c9e5e2d5706e5b4d8360d0822a63"
+  integrity sha512-6roqUBXaqAacbcQg4tRpptQU/hMsq3hrGfowqCMhaxmsSG3Kn4CK2ScUYffVClixQT7jtnOkhl9Qiwh8vu+ZSQ==
 
 jotai@^2.4.3:
   version "2.5.1"
