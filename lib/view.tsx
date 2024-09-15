@@ -142,7 +142,6 @@ export function useShader(props) {
         // need to inform the slider component of a change so it can get a count of all the enabled sliders
         setSliderSerDeNeedsUpdate(true);
         setFloat32Enabled(float32Enabled);
-        // @ts-ignore
         setAuthorProfile(shader.profile);
         setShaderID(props.id);
         setManualReload(true);

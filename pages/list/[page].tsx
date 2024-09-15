@@ -36,7 +36,7 @@ export async function getServerSideProps(context) {
     context.res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
 
     const { from, to } = getPagination(context.params.page, SHADERS_PER_PAGE);
-    const { data, count, error } = await supabase
+    const { data, error } = await supabase
         .from('shader')
         .select(
             `
