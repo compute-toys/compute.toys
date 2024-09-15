@@ -13,3 +13,11 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+    groups:
+      typescript:
+        patterns:
+          - "@typescript-eslint/*"
+          - "eslint*"
+          - "gts"
+          - "prettier*"
+          - "typescript"
