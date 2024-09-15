@@ -17,7 +17,7 @@
     "pages:preview": "wrangler pages dev"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.1",
+    "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.11.0",
     "@fontsource/lobster": "^4.5.8",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
