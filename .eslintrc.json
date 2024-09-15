@@ -6,6 +6,7 @@
     "prettier"
   ],
   "plugins": [
+    "import",
     "n",
     "prettier"
   ],

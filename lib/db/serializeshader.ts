@@ -20,8 +20,8 @@ import {
 import { useAuth } from 'lib/db/authcontext';
 import {
     supabase,
-    SUPABASE_SHADERTHUMB_BUCKET_NAME,
-    SUPABASE_SHADER_TABLE_NAME
+    SUPABASE_SHADER_TABLE_NAME,
+    SUPABASE_SHADERTHUMB_BUCKET_NAME
 } from 'lib/db/supabaseclient';
 import { useMemo, useRef } from 'react';
 import { theme } from 'theme/theme';
