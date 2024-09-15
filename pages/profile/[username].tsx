@@ -19,14 +19,13 @@ const PROFILE_AVATAR_WIDTH = 96;
 async function loadShaders(username: string) {
     try {
         const { data, error, status } = await supabase
-            .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
+            .from(SUPABASE_SHADER_TABLE_NAME)
             .select(
                 `
                     *,
                     profile:author!inner(username)  
                 `
             )
-            // @ts-ignore
             .eq('profile.username', username);
 
         if (error && status !== 406) {
