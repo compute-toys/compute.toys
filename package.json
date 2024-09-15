@@ -40,7 +40,7 @@
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.5",
     "sharp": "^0.33.5",
-    "use-animation-frame": "^0.1.4",
+    "use-animation-frame": "^0.2.1",
     "uuid": "^10.0.0"
   },
   "devDependencies": {

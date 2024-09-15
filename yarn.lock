@@ -6309,10 +6309,10 @@ uri-js@^4.2.2:
   dependencies:
     punycode "^2.1.0"
 
-use-animation-frame@^0.1.4:
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/use-animation-frame/-/use-animation-frame-0.1.5.tgz#29613ba47c20b112367e9a231e264182cbb317dc"
-  integrity sha512-oANuaUtRxwA9OKvSY+Sp9aVnLtrZjHknFklPc7jIZw9qWIto9lth1OYl0JqwtBofQXc1b3PNFDfmn/hBj4NzKw==
+use-animation-frame@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/use-animation-frame/-/use-animation-frame-0.2.1.tgz#032353fa62b54b5646e9e80d48ab182d42cfc4ec"
+  integrity sha512-jxNPYVWqAXspUWYi9HGmsJSk2t53PvfJcozWK3SWCTKgoK96UB3sl7OHhX1AaDsWsxX3HJzDyCa6LWX/eh4NQQ==
 
 utf-8-validate@^5.0.2:
   version "5.0.10"
