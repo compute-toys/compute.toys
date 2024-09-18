@@ -13,11 +13,20 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: 'eslint'
+        update-types: ['version-update:semver-major'] # Ignore major version updates for eslint
     groups:
+      nextjs:
+        patterns:
+          - "@next/*"
+          - "next"
+          - "eslint-config-next"
       typescript:
         patterns:
           - "@typescript-eslint/*"
-          - "eslint*"
-          - "gts"
+          - "eslint"
+          - "eslint-config-prettier"
+          - "eslint-plugin-*"
           - "prettier*"
           - "typescript"
