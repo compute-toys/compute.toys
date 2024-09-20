@@ -1543,10 +1543,10 @@
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.3.8.tgz#f044942142e1d3a395f24132e6203a784838542d"
   integrity sha512-8PGwybFwM4x8pcfgqEQFy70NaQxASvOC5DJwLQfpArw1UDfUXrJkdxD3BhVTMS+0Lef/TU7YO0Jvr0jJY8T+mw==
 
-"@webgpu/types@^0.1.45":
-  version "0.1.45"
-  resolved "https://registry.yarnpkg.com/@webgpu/types/-/types-0.1.45.tgz#a31146be1e36b2c9826c048b3cfafe519cc21945"
-  integrity sha512-0TBBF/mhakJoK0qUWCZugBnh23x+VwmYA5RLmtNQwvZt1pQ4P2fzIvQUiSe6jxzkBi4GF8R4BejJjro0ZSoSXQ==
+"@webgpu/types@^0.1.46":
+  version "0.1.46"
+  resolved "https://registry.yarnpkg.com/@webgpu/types/-/types-0.1.46.tgz#707d56d318e663b165a1133c5a86cfcc11afe59e"
+  integrity sha512-2iogO6Zh0pTbKLGZuuGWEmJpF/fTABGs7G9wXxpn7s24XSJchSUIiMqIJHURi5zsMZRRTuXrV/3GLOkmOFjq5w==
 
 abbrev@1:
   version "1.1.1"
