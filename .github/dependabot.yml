@@ -28,6 +28,8 @@ updates:
       typescript:
         patterns:
           - "@typescript-eslint/*"
+          - "@types/*"
+          - "@webgpu/types"
           - "eslint"
           - "eslint-config-prettier"
           - "eslint-plugin-*"
