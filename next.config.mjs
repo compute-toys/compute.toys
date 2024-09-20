@@ -26,7 +26,10 @@ function getImageConfig() {
 // https://github.com/vercel/next.js/issues/34940
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    reactStrictMode: true,
+    reactStrictMode:
+        process.env.NODE_ENV === 'development'
+            ? true
+            : false,
     images:
         process.env.NODE_ENV === 'development'
             ? getImageConfig()
