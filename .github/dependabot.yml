@@ -19,9 +19,12 @@ updates:
     groups:
       nextjs:
         patterns:
+          - "@cloudflare/next-on-pages"
           - "@next/*"
-          - "next"
           - "eslint-config-next"
+          - "next"
+          - "vercel"
+          - "wrangler"
       typescript:
         patterns:
           - "@typescript-eslint/*"
