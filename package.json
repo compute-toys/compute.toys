@@ -14,7 +14,7 @@
     "fix": "next lint --fix",
     "pages:setup": "curl https://sh.rustup.rs -sSf | sh -s -- -y && . $HOME/.cargo/env && curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && npx @cloudflare/next-on-pages",
     "pages:build": "npx @cloudflare/next-on-pages",
-    "pages:preview": "wrangler pages dev"
+    "pages:preview": "npx wrangler pages dev"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
@@ -61,7 +61,6 @@
     "prettier-plugin-organize-imports": "^4.0.0",
     "supabase": "^1.191.3",
     "typescript": "^5.6.2",
-    "vercel": "^37.4.2",
-    "wrangler": "^3.78.4"
+    "vercel": "^37.4.2"
   }
 }
