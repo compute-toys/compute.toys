@@ -119,7 +119,7 @@ export default function Profile(props) {
 
             setAvatar(filePath);
             setErrorMessage(null);
-        } catch (error) {
+        } catch {
             setAvatar(null);
         } finally {
             setUploading(false);
