@@ -12,7 +12,7 @@ updates:
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
-      interval: "daily"
+      interval: "weekly"
     ignore:
       - dependency-name: 'eslint'
         update-types: ['version-update:semver-major'] # Ignore major version updates for eslint
