@@ -61,7 +61,7 @@
     "prettier-plugin-organize-imports": "^4.1.0",
     "supabase": "^1.191.3",
     "typescript": "^5.6.2",
-    "vercel": "^37.5.3",
-    "wrangler": "^3.78.7"
+    "vercel": "^37.5.4",
+    "wrangler": "^3.78.8"
   }
 }
