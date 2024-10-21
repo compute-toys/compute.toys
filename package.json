@@ -27,7 +27,7 @@
     "@mui/icons-material": "^5.16.7",
     "@mui/lab": "^5.0.0-alpha.173",
     "@mui/material": "^5.16.7",
-    "@mui/utils": "^6.1.1",
+    "@mui/utils": "^6.1.4",
     "@react-hook/resize-observer": "^2.0.2",
     "@supabase/gotrue-js": "^1.22.13",
     "@supabase/supabase-js": "^1.35.2",
