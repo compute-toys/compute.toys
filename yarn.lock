@@ -4284,10 +4284,10 @@ jotai-game@^0.2.0:
   resolved "https://registry.yarnpkg.com/jotai-game/-/jotai-game-0.2.0.tgz#8b76a3e545f7c9e5e2d5706e5b4d8360d0822a63"
   integrity sha512-6roqUBXaqAacbcQg4tRpptQU/hMsq3hrGfowqCMhaxmsSG3Kn4CK2ScUYffVClixQT7jtnOkhl9Qiwh8vu+ZSQ==
 
-jotai@^2.9.3:
-  version "2.9.3"
-  resolved "https://registry.yarnpkg.com/jotai/-/jotai-2.9.3.tgz#abcae49a737cd50e3144a6c9eb39840db077c727"
-  integrity sha512-IqMWKoXuEzWSShjd9UhalNsRGbdju5G2FrqNLQJT+Ih6p41VNYe2sav5hnwQx4HJr25jq9wRqvGSWGviGG6Gjw==
+jotai@^2.10.1:
+  version "2.10.1"
+  resolved "https://registry.yarnpkg.com/jotai/-/jotai-2.10.1.tgz#8d5598d06fa295110de0914f10bd1d10ea229723"
+  integrity sha512-4FycO+BOTl2auLyF2Chvi6KTDqdsdDDtpaL/WHQMs8f3KS1E3loiUShQzAzFA/sMU5cJ0hz/RT1xum9YbG/zaA==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
