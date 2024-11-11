@@ -35,7 +35,7 @@
     "jotai": "^2.9.3",
     "jotai-game": "^0.2.0",
     "monaco-editor": "^0.52.0",
-    "next": "^14.2.13",
+    "next": "^15.0.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.5",
@@ -44,15 +44,15 @@
     "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.3",
-    "@next/bundle-analyzer": "^14.2.13",
+    "@cloudflare/next-on-pages": "^1.13.5",
+    "@next/bundle-analyzer": "^15.0.3",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.8",
     "@webgpu/types": "^0.1.46",
     "copy-webpack-plugin": "^12.0.2",
     "depcheck": "^1.4.7",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^14.2.13",
+    "eslint-config-next": "^15.0.3",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.30.0",
     "eslint-plugin-n": "^17.10.3",
@@ -61,7 +61,7 @@
     "prettier-plugin-organize-imports": "^4.1.0",
     "supabase": "^1.191.3",
     "typescript": "^5.6.2",
-    "vercel": "^37.5.3",
-    "wrangler": "^3.78.7"
+    "vercel": "^37.14.0",
+    "wrangler": "^3.86.0"
   }
 }
