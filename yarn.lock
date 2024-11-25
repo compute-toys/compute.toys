@@ -1054,12 +1054,26 @@
   dependencies:
     cross-fetch "^3.1.5"
 
-"@supabase/gotrue-js@^1.22.13", "@supabase/gotrue-js@^1.22.21":
+"@supabase/gotrue-js@^1.22.21":
   version "1.24.0"
   resolved "https://registry.yarnpkg.com/@supabase/gotrue-js/-/gotrue-js-1.24.0.tgz#0afbb158071a8dd5e78cf386a068c71c9f534425"
   integrity sha512-6PVv7mHCFOxLm6TSBfR7hsq/y3CMKpvzePVR+ZWtlFBTjJ2J87g2OYE9bgC61P5TNeZopUXKw93H92yz0MTALw==
   dependencies:
     cross-fetch "^3.0.6"
+
+"@supabase/gotrue-js@^2.66.0":
+  version "2.66.0"
+  resolved "https://registry.yarnpkg.com/@supabase/gotrue-js/-/gotrue-js-2.66.0.tgz#ba7c429813e3ff2b6eda2058110c0a73c1105b75"
+  integrity sha512-qehIHeZzBIXDvXQpQwNqU9rhEB3j56t/XfR6XNSCixVKBzEoZVoWeHkZSXSOVqO9tiKbov0iCmRS4/CN87guug==
+  dependencies:
+    "@supabase/node-fetch" "^2.6.14"
+
+"@supabase/node-fetch@^2.6.14":
+  version "2.6.15"
+  resolved "https://registry.yarnpkg.com/@supabase/node-fetch/-/node-fetch-2.6.15.tgz#731271430e276983191930816303c44159e7226c"
+  integrity sha512-1ibVeYUacxWYi9i0cf5efil6adJ9WRyZBLivgjs+AUpewx1F3xPi7gLgaASI2SmIQxPoCEjAsLAzKPgMJVgOUQ==
+  dependencies:
+    whatwg-url "^5.0.0"
 
 "@supabase/postgrest-js@^0.37.4":
   version "0.37.4"
