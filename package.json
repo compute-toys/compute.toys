@@ -30,7 +30,7 @@
     "@mui/utils": "^6.1.7",
     "@react-hook/resize-observer": "^2.0.2",
     "@supabase/gotrue-js": "^1.22.13",
-    "@supabase/supabase-js": "^1.35.2",
+    "@supabase/supabase-js": "^2.47.8",
     "firacode": "^6.2.0",
     "jotai": "^2.10.3",
     "jotai-game": "^0.2.0",
