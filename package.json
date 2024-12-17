@@ -34,7 +34,7 @@
     "firacode": "^6.2.0",
     "jotai": "^2.10.3",
     "jotai-game": "^0.2.0",
-    "monaco-editor": "^0.52.0",
+    "monaco-editor": "^0.52.2",
     "next": "^15.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
