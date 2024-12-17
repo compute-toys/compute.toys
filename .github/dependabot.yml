@@ -35,3 +35,6 @@ updates:
           - "eslint-plugin-*"
           - "prettier*"
           - "typescript"
+      fontawesome:
+        patterns:
+          - "@fortawesome/*"
