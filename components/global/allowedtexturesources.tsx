@@ -22,6 +22,8 @@ export default function AllowedTextureSources() {
                         secondaryAction={
                             <IconButton
                                 role="link"
+                                target="_blank"
+                                href={resource.referenceUrl}
                                 aria-label={`Open URL for ${resource.displayName}`}
                                 sx={{
                                     minWidth: '1em',

@@ -64,7 +64,7 @@ export const theme = createTheme({
 
 // These MUST be declared outside component, or wrapped as a JSX.Element
 // Otherwise rerender is triggered every time.
-export const Item: typeof Paper = styled(Paper)(({ theme }) => ({
+export const Item = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.primary.darker,
     ...theme.typography.body2,
     padding: theme.spacing(1),
@@ -72,14 +72,14 @@ export const Item: typeof Paper = styled(Paper)(({ theme }) => ({
     color: theme.palette.text.secondary
 }));
 
-export const Frame: typeof Paper = styled(Paper)(({ theme }) => ({
+export const Frame = styled(Paper)(({ theme }) => ({
     backgroundColor: theme.palette.primary.darker,
     justifyContent: 'center',
     display: 'inline-flex',
     borderRadius: '4px'
 }));
 
-export const CssTextField: typeof TextField = styled(TextField)({
+export const CssTextField = styled(TextField)({
     '& .MuiOutlinedInput-root': {
         '& fieldset': {
             borderColor: theme.palette.dracula.currentLine

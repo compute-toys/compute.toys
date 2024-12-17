@@ -325,7 +325,7 @@ export default function UniformSliders() {
     const setManualReload = useSetAtom(manualReloadAtom);
 
     const sliderRefCallback = ref => {
-        ref && setSliderRefMap(sliderRefMap.set(ref.getUUID(), ref)); // set returns 'this'
+        if (ref) setSliderRefMap(sliderRefMap.set(ref.getUUID(), ref)); // set returns 'this'
     };
 
     /*
@@ -362,7 +362,7 @@ export default function UniformSliders() {
                 return 0;
             }
         };
-        uuid && setSliderRefMap(sliderRefMap.set(uuid, sliderRef));
+        if (uuid) setSliderRefMap(sliderRefMap.set(uuid, sliderRef));
         setSliderCount(sliderCount + 1);
         // recompile with new prelude
         setManualReload(true);

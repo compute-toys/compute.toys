@@ -9,3 +9,32 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
+  - package-ecosystem: "npm" # See documentation for possible values
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: 'eslint'
+        update-types: ['version-update:semver-major'] # Ignore major version updates for eslint
+    groups:
+      nextjs:
+        patterns:
+          - "@cloudflare/next-on-pages"
+          - "@next/*"
+          - "eslint-config-next"
+          - "next"
+          - "vercel"
+          - "wrangler"
+      typescript:
+        patterns:
+          - "@typescript-eslint/*"
+          - "@types/*"
+          - "@webgpu/types"
+          - "eslint"
+          - "eslint-config-prettier"
+          - "eslint-plugin-*"
+          - "prettier*"
+          - "typescript"
+      fontawesome:
+        patterns:
+          - "@fortawesome/*"

@@ -25,6 +25,17 @@ Some other useful commands are:
 - `yarn lint` to only check for lint errors and warnings
 - `yarn fix` to automatically fix lint errors where possible
 
+## Local Database
+
+Run `npx supabase start` to start a local instance of the compute.toys database.
+Copy the "anon key" from the output and set it as `NEXT_PUBLIC_SUPABASE_PUBLIC_API_KEY` in the `.env` file.
+You'll also need to set `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321`
+
+If you're using codespaces, you can instead set the URL to the forwarded port, it'll need to have public visibility.
+You should also set `api_url` in `supabase/config.toml` to the same address.
+
+A local test user is available to login with username `user@example.com` and password `pass`
+
 ## Standalone Editor
 
 By default, the development environment will connect to the public API for the compute.toys website.

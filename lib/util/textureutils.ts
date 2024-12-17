@@ -60,7 +60,7 @@ const validateTextureUrl = (url: string): Promise<string> => {
         let urlObj: URL;
         try {
             urlObj = new URL(withHttps);
-        } catch (e) {
+        } catch {
             throw 'Invalid URL';
         }
 

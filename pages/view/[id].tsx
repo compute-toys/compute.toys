@@ -1,6 +1,7 @@
 'use client';
-import Editor from 'components/editor/editor';
-import { buildHead, fetchShader, useShader } from 'lib/view';
+import { buildHead, DynamicEditor, fetchShader, useShader } from 'lib/view';
+
+export const runtime = 'experimental-edge';
 
 export async function getServerSideProps(context) {
     const id = Number(context.params.id);
@@ -13,7 +14,7 @@ export default function Index(props) {
     return (
         <div>
             {props.shader ? buildHead(props.shader) : null}
-            <Editor />
+            <DynamicEditor />
         </div>
     );
 }

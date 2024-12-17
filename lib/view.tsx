@@ -2,6 +2,7 @@ import { fromUniformActiveSettings } from 'components/editor/uniformsliders';
 import { useSetAtom } from 'jotai';
 import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
+import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
@@ -141,7 +142,6 @@ export function useShader(props) {
         // need to inform the slider component of a change so it can get a count of all the enabled sliders
         setSliderSerDeNeedsUpdate(true);
         setFloat32Enabled(float32Enabled);
-        // @ts-ignore
         setAuthorProfile(shader.profile);
         setShaderID(props.id);
         setManualReload(true);
@@ -159,3 +159,5 @@ export function useShader(props) {
         }
     }, [router.isReady]);
 }
+
+export const DynamicEditor = dynamic(() => import('components/editor/editor'), { ssr: false });

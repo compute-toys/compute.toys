@@ -20,8 +20,8 @@ import {
 import { useAuth } from 'lib/db/authcontext';
 import {
     supabase,
-    SUPABASE_SHADERTHUMB_BUCKET_NAME,
-    SUPABASE_SHADER_TABLE_NAME
+    SUPABASE_SHADER_TABLE_NAME,
+    SUPABASE_SHADERTHUMB_BUCKET_NAME
 } from 'lib/db/supabaseclient';
 import { useMemo, useRef } from 'react';
 import { theme } from 'theme/theme';
@@ -143,74 +143,6 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT, HOST_DELETE] {
         to read the atoms imperatively when they are needed.
      */
     const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
-
-    /*
-    const setCode = useSetAtom(codeAtom);
-    const setLoadedTextures = useSetAtom(loadedTexturesAtom);
-    const setSliderSerDeNeedsUpdate = useSetAtom(sliderSerDeNeedsUpdateAtom);
-    const setSliderRefMap = useSetAtom(sliderRefMapAtom);
-    const setTitle = useSetAtom(titleAtom);
-    const setDescription = useSetAtom(descriptionAtom);
-    const setVisibility = useSetAtom(visibilityAtom);
-    const setAuthorProfile = useSetAtom(authorProfileAtom);
-    const setFloat32Enabled = useSetAtom(float32EnabledAtom);
-    const get = async (id: number) => {
-        try {
-            const { data, error, status } = await supabase
-                .from<definitions['shader']>(SUPABASE_SHADER_TABLE_NAME)
-                .select(
-                    `
-                    name,
-                    description,
-                    visibility,
-                    body,
-                    profile:author (
-                        username,
-                        avatar_url,
-                        id
-                    )
-                `
-                )
-                .eq('id', id)
-                .single();
-
-            if (error && status !== 406) {
-                throw error;
-            }
-
-            if (data) {
-                const shader = data;
-                // set page title
-                document.title = shader.name;
-                setTitle(shader.name);
-                setDescription(shader.description);
-                setVisibility(shader.visibility);
-
-                const body = JSON.parse(shader.body);
-                const float32Enabled = 'float32Enabled' in body ? body.float32Enabled : false;
-
-                const shaderActiveSettings: ShaderActiveSettings = {
-                    code: fixup_shader_code(JSON.parse(body.code)),
-                    uniforms: body.uniforms,
-                    textures: body.textures,
-                    float32Enabled: float32Enabled
-                };
-
-                setCode(shaderActiveSettings.code);
-                setLoadedTextures(shaderActiveSettings.textures);
-                setSliderRefMap(fromUniformActiveSettings(shaderActiveSettings.uniforms));
-                // need to inform the slider component of a change so it can get a count of all the enabled sliders
-                setSliderSerDeNeedsUpdate(true);
-                setFloat32Enabled(float32Enabled);
-                // Typescript can't infer type of joined table
-                // @ts-ignore
-                setAuthorProfile(shader.profile);
-            }
-        } catch (error) {
-            alert(error.message);
-        }
-    };
-    */
 
     const uploadThumb = async (id: number, dataUrl: string) => {
         const fileExt = 'jpg';
