@@ -118,12 +118,12 @@ const Monaco = props => {
 
         // unsaved changes with route change
         // next.js hack: https://github.com/vercel/next.js/discussions/32231#discussioncomment-1766710
-        //@ts-ignore
+        // @ts-expect-error change is private
         SingletonRouter.router.change = (...args) => {
             if (codeNeedSave && !confirm(message)) {
                 return new Promise(resolve => resolve(false));
             } else {
-                //@ts-ignore
+                // @ts-expect-error change is private
                 return Router.prototype.change.apply(SingletonRouter.router, args);
             }
         };
@@ -131,20 +131,20 @@ const Monaco = props => {
         window.addEventListener('beforeunload', beforeunload);
         return () => {
             window.removeEventListener('beforeunload', beforeunload);
-            //@ts-ignore
+            // @ts-expect-error change is private
             delete SingletonRouter.router.change;
         };
     }, [codeNeedSave]);
 
     useEffect(() => {
         if (vim) {
-            // @ts-ignore
+            // @ts-expect-error Property 'config' does not exist on type 'NodeRequire'
             window.require.config({
                 paths: {
                     'monaco-vim': 'https://unpkg.com/monaco-vim/dist/monaco-vim'
                 }
             });
-            // @ts-ignore
+            // @ts-expect-error Expected 1 arguments, but got 2
             window.require(['monaco-vim'], MonacoVim => {
                 const statusNode = document.querySelector('.vim-status');
                 setVimContext(MonacoVim.initVimMode(editor, statusNode));

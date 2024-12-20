@@ -38,6 +38,12 @@ import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
 import useAnimationFrame from 'use-animation-frame';
 
+declare global {
+    interface Window {
+        mediaRecorder: MediaRecorder;
+    }
+}
+
 const needsInitialResetAtom = atom<boolean>(false);
 
 /*
@@ -362,8 +368,7 @@ const WgpuToyController = props => {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 document.body.appendChild(a);
-                // @ts-ignore
-                a.style = 'display: none';
+                a.style.display = 'none';
                 a.href = url;
                 const fileName = sanitizeString(title + ' - ' + getFormattedDateTime() + '.webm');
                 a.download = fileName;
@@ -371,12 +376,10 @@ const WgpuToyController = props => {
                 window.URL.revokeObjectURL(url);
             };
 
-            // @ts-ignore
             window.mediaRecorder = mediaRecorder;
             return mediaRecorder;
         }
 
-        // @ts-ignore
         let mediaRecorder: MediaRecorder = window.mediaRecorder;
         if (recording) {
             if (!mediaRecorder) {

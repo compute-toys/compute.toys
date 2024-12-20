@@ -1,20 +1,19 @@
 'use client';
 import AddIcon from '@mui/icons-material/Add';
-import DisabledByDefaultSharp from '@mui/icons-material/DisabledByDefaultSharp';
 import Button from '@mui/material/Button';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { customTexturesAtom, loadedTexturesAtom, Texture } from 'lib/atoms/atoms';
 import Image from 'next/image';
-import { Fragment, MouseEventHandler, useRef, useState } from 'react';
-import Draggable from 'react-draggable';
-
-import useMediaQuery from '@mui/material/useMediaQuery';
+import { Dispatch, Fragment, MouseEventHandler, SetStateAction, useState } from 'react';
 import { Item, theme } from 'theme/theme';
+
 import { defaultTextures } from '../../lib/util/textureutils';
+import DraggableWindow from '../global/draggable-window';
 import AddTextureModal from '../global/pickfilemodal';
 
 const TextureThumbsList = ({
@@ -69,13 +68,15 @@ const TextureThumbsList = ({
     );
 };
 
-const DraggablePicker = props => {
+interface DraggablePickerProps {
+    channel: number;
+    setPickerHidden: Dispatch<SetStateAction<boolean>>;
+    hidden: boolean;
+}
+
+const DraggablePicker = (props: DraggablePickerProps) => {
     const [uploadModalOpen, setUploadModalOpen] = useState(false);
     const customTextures = useAtomValue(customTexturesAtom);
-
-    // Draggable needs this so React doesn't complain
-    // about violating strict mode DOM access rules
-    const nodeRef = useRef(null);
 
     // media queries for texture picker size
     const mediumView = useMediaQuery(theme.breakpoints.up('md'));
@@ -83,72 +84,34 @@ const DraggablePicker = props => {
 
     return (
         <Fragment>
-            <Draggable
-                handle=".picker-handle"
-                nodeRef={nodeRef}
-                bounds="body"
-                positionOffset={{ x: '0', y: '0' }}
-            >
-                <Item
-                    ref={nodeRef}
-                    elevation={12}
-                    sx={
-                        props.hidden
-                            ? { display: 'none' }
-                            : {
-                                  zIndex: '2',
-                                  display: 'inline-block',
-                                  position: 'fixed',
-                                  left: '12%',
-                                  top: '12%'
-                              }
-                    }
+            <DraggableWindow setHidden={props.setPickerHidden} hidden={props.hidden}>
+                <div
+                    style={{
+                        // just a little bit less than the full screen height, 100px here is somewhat arbitrary
+                        maxHeight: 'calc(100vh - 100px)',
+                        overflowY: 'auto',
+                        [theme.breakpoints.down('md')]: {
+                            backgroundColor: theme.palette.secondary.main
+                        }
+                    }}
                 >
-                    <div
-                        className="picker-handle"
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'end',
-                            backgroundImage:
-                                'repeating-linear-gradient(-45deg, rgba(255,255,255, 0.25), rgba(255,255,255, 0.25) 2px, transparent 1px, transparent 6px)',
-                            backgroundSize: '4px 4px'
-                        }}
-                    >
-                        {/* Annoying viewbox tweak to align with drag bar*/}
-                        <DisabledByDefaultSharp
-                            viewBox="1.5 1.5 19.5 19.5"
-                            onClick={() => props.setPickerHidden(true)}
-                            color={'primary'}
-                        />
-                    </div>
-                    <div
-                        style={{
-                            // just a little bit less than the full screen height, 100px here is somewhat arbitrary
-                            maxHeight: 'calc(100vh - 100px)',
-                            overflowY: 'auto',
-                            [theme.breakpoints.down('md')]: {
-                                backgroundColor: theme.palette.secondary.main
-                            }
-                        }}
-                    >
-                        <TextureThumbsList
-                            cols={largeView ? 8 : mediumView ? 6 : 3}
-                            channel={props.channel}
-                            textures={defaultTextures}
-                        ></TextureThumbsList>
-                        <Typography sx={{ color: theme.palette.dracula.orange }}>
-                            Custom textures
-                        </Typography>
-                        <TextureThumbsList
-                            cols={largeView ? 8 : mediumView ? 6 : 3}
-                            channel={props.channel}
-                            textures={customTextures}
-                            showAddButton
-                            onAddButtonClick={() => setUploadModalOpen(true)}
-                        ></TextureThumbsList>
-                    </div>
-                </Item>
-            </Draggable>
+                    <TextureThumbsList
+                        cols={largeView ? 8 : mediumView ? 6 : 3}
+                        channel={props.channel}
+                        textures={defaultTextures}
+                    ></TextureThumbsList>
+                    <Typography sx={{ color: theme.palette.dracula.orange }}>
+                        Custom textures
+                    </Typography>
+                    <TextureThumbsList
+                        cols={largeView ? 8 : mediumView ? 6 : 3}
+                        channel={props.channel}
+                        textures={customTextures}
+                        showAddButton
+                        onAddButtonClick={() => setUploadModalOpen(true)}
+                    ></TextureThumbsList>
+                </div>
+            </DraggableWindow>
             <AddTextureModal
                 open={uploadModalOpen}
                 channelIdx={props.channel}

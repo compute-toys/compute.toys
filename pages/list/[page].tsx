@@ -13,6 +13,8 @@ import Link from 'next/link';
 import { Fragment } from 'react';
 import { Item, theme } from 'theme/theme';
 
+export const runtime = 'experimental-edge';
+
 const SHADERS_PER_PAGE = 12;
 
 const getPagination = (page: number, size: number) => {
@@ -34,7 +36,7 @@ export async function getServerSideProps(context) {
     context.res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
 
     const { from, to } = getPagination(context.params.page, SHADERS_PER_PAGE);
-    const { data, count, error } = await supabase
+    const { data, error } = await supabase
         .from('shader')
         .select(
             `

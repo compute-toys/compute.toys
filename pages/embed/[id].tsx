@@ -1,6 +1,7 @@
 'use client';
-import Editor from 'components/editor/editor';
-import { fetchShader, useShader } from 'lib/view';
+import { DynamicEditor, fetchShader, useShader } from 'lib/view';
+
+export const runtime = 'experimental-edge';
 
 export async function getServerSideProps(context) {
     const id = Number(context.params.id);
@@ -15,7 +16,7 @@ export default function Index(props) {
             <style>{`
                 body { overflow: hidden; }
             `}</style>
-            <Editor embed={true} />
+            <DynamicEditor embed={true} />
         </div>
     );
 }
