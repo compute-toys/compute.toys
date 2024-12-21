@@ -4,7 +4,6 @@ import ImageListItem, { imageListItemClasses } from '@mui/material/ImageListItem
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import Pagination from '@mui/material/Pagination';
 import PaginationItem from '@mui/material/PaginationItem';
-import Banner from 'components/banner';
 import Avatar from 'components/global/avatar';
 import { supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
@@ -180,7 +179,6 @@ export default function ShaderList(props) {
                     width: '100%'
                 }}
             >
-                <Banner />
                 <ShaderPicker page={props.page} shaders={props.shaders} />
                 <Container sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
                     <Pagination
