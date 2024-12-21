@@ -5,14 +5,12 @@
   },
   "packageManager": "yarn@1.22.22",
   "scripts": {
-    "predev": "wasm-pack build --dev wgpu-compute-toy --out-dir ../lib/wgputoy",
     "dev": "next dev",
-    "prebuild": "wasm-pack build --release wgpu-compute-toy --out-dir ../lib/wgputoy",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "fix": "next lint --fix",
-    "pages:setup": "curl https://sh.rustup.rs -sSf | sh -s -- -y && . $HOME/.cargo/env && curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && npx @cloudflare/next-on-pages",
+    "pages:setup": "npx @cloudflare/next-on-pages",
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:preview": "wrangler pages dev"
   },

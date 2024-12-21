@@ -104,7 +104,7 @@ const WgpuToyController = props => {
                 values.push(sliderRefMap().get(uuid).getVal());
             }, this);
             if (names.length > 0) {
-                await wgputoy.set_custom_floats(names, Float32Array.from(values));
+                await wgputoy.setCustomFloats(names, Float32Array.from(values));
             }
             setSliderUpdateSignal(false);
         }
@@ -116,7 +116,7 @@ const WgpuToyController = props => {
                 wgputoy.preprocess(codeHot()).then(s => {
                     if (s) {
                         wgputoy.compile(s);
-                        setPrelude(wgputoy.prelude());
+                        setPrelude(wgputoy.getPrelude());
                         wgputoy.render();
                     }
                 });
@@ -131,7 +131,7 @@ const WgpuToyController = props => {
                 wgputoy.preprocess(codeHot()).then(s => {
                     if (s) {
                         wgputoy.compile(s);
-                        setPrelude(wgputoy.prelude());
+                        setPrelude(wgputoy.getPrelude());
                         wgputoy.render();
                     }
                 });
@@ -171,7 +171,7 @@ const WgpuToyController = props => {
                 liveReloadCallback();
             }
             if (sliderUpdateSignal() && !isPlaying()) {
-                wgputoy.set_time_delta(e.delta);
+                wgputoy.setTimeDelta(e.delta);
                 wgputoy.render();
             } else if (isPlaying() || manualReload()) {
                 let t = timer();
@@ -179,8 +179,8 @@ const WgpuToyController = props => {
                     t += e.delta;
                 }
                 setTimer(t);
-                wgputoy.set_time_elapsed(t);
-                wgputoy.set_time_delta(e.delta);
+                wgputoy.setTimeElapsed(t);
+                wgputoy.setTimeDelta(e.delta);
                 wgputoy.render();
             }
         }
@@ -235,9 +235,9 @@ const WgpuToyController = props => {
                 .then(b => b.arrayBuffer())
                 .then(data => {
                     if (uri.match(/\.hdr/i)) {
-                        wgputoy.load_channel_hdr(index, new Uint8Array(data));
+                        wgputoy.loadChannelHDR(index, new Uint8Array(data));
                     } else {
-                        wgputoy.load_channel(index, new Uint8Array(data));
+                        wgputoy.loadChannel(index, new Uint8Array(data));
                     }
                 })
                 .catch(error => console.error(error));
@@ -258,7 +258,7 @@ const WgpuToyController = props => {
     useEffect(() => {
         const handleKeyDown = e => {
             if (isSafeContext(wgputoy)) {
-                if (typeof e.keyCode === 'number') wgputoy.set_keydown(e.keyCode, true);
+                if (typeof e.keyCode === 'number') wgputoy.setKeydown(e.keyCode, true);
             }
         };
         if (canvas) {
@@ -271,7 +271,7 @@ const WgpuToyController = props => {
     useEffect(() => {
         const handleKeyUp = e => {
             if (isSafeContext(wgputoy)) {
-                if (typeof e.keyCode === 'number') wgputoy.set_keydown(e.keyCode, false);
+                if (typeof e.keyCode === 'number') wgputoy.setKeydown(e.keyCode, false);
             }
         };
         if (canvas) {
@@ -400,7 +400,7 @@ const WgpuToyController = props => {
         if (canvas !== false) {
             const handleMouseMove = (e: MouseEvent) => {
                 if (isSafeContext(wgputoy)) {
-                    wgputoy.set_mouse_pos(
+                    wgputoy.setMousePos(
                         e.offsetX / canvas.clientWidth,
                         e.offsetY / canvas.clientHeight
                     );
@@ -412,14 +412,14 @@ const WgpuToyController = props => {
 
             const handleMouseUp = () => {
                 if (isSafeContext(wgputoy)) {
-                    wgputoy.set_mouse_click(false);
+                    wgputoy.setMouseClick(false);
                     canvas.onmousemove = null;
                 }
             };
 
             const handleMouseDown = (e: MouseEvent) => {
                 if (isSafeContext(wgputoy)) {
-                    wgputoy.set_mouse_click(true);
+                    wgputoy.setMouseClick(true);
                     handleMouseMove(e);
                     canvas.onmousemove = handleMouseMove;
                 }
@@ -433,7 +433,7 @@ const WgpuToyController = props => {
 
     useEffect(() => {
         if (isSafeContext(wgputoy)) {
-            wgputoy.on_success(handleSuccess);
+            wgputoy.onSuccess(handleSuccess);
         }
     }, []);
 
@@ -537,7 +537,7 @@ const WgpuToyController = props => {
 
     useEffect(() => {
         if (isSafeContext(wgputoy)) {
-            wgputoy.set_pass_f32(float32Enabled);
+            wgputoy.setPassF32(float32Enabled);
             if (dbLoaded()) {
                 awaitableReloadCallback().then(() => {
                     resetCallback();
