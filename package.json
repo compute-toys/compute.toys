@@ -14,7 +14,9 @@
     "fix": "next lint --fix",
     "pages:setup": "curl https://sh.rustup.rs -sSf | sh -s -- -y && . $HOME/.cargo/env && curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && npx @cloudflare/next-on-pages",
     "pages:build": "npx @cloudflare/next-on-pages",
-    "pages:preview": "wrangler pages dev"
+    "pages:preview": "wrangler pages dev",
+    "e2e": "start-server-and-test start http://localhost:3000 \"cypress open --e2e\"",
+    "e2e:headless": "start-server-and-test start http://localhost:3000 \"percy exec -- cypress run --e2e\""
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -62,6 +64,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "prettier": "^3.4.2",
     "prettier-plugin-organize-imports": "^4.1.0",
+    "start-server-and-test": "^2.0.9",
     "supabase": "^1.219.2",
     "typescript": "^5.7.2",
     "vercel": "^39.2.2",
