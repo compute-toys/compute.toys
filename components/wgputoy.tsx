@@ -7,7 +7,6 @@ import { canvasElAtom, wgpuAvailabilityAtom } from 'lib/atoms/wgputoyatoms';
 import dynamic from 'next/dynamic';
 import { Suspense, useCallback, useState } from 'react';
 import { theme } from 'theme/theme';
-import Logo from './global/logo';
 
 export const WgpuToyWrapper = props => {
     const setCanvasEl = useSetAtom(canvasElAtom);
@@ -68,8 +67,13 @@ export const WgpuToyWrapper = props => {
                     </Typography>
                     <Typography>WebGPU support was not detected in your browser.</Typography>
                     <Typography>
-                        For information on how to set up your browser to run WebGPU code, please see
-                        the instructions linked on the <Logo /> homepage.
+                        <a
+                            href="https://github.com/gpuweb/gpuweb/wiki/Implementation-Status"
+                            style={{ textDecoration: 'underline' }}
+                        >
+                            Click here
+                        </a>{' '}
+                        for further information about supported browsers.
                     </Typography>
                 </Stack>
             )}
