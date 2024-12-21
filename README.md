@@ -44,3 +44,7 @@ delete the `pages` directory before starting the server.
 
 If you have any difficulties with Next.js switching between the two configurations,
 clear the cache by deleting the `.next` directory and try again.
+
+---
+
+This project is tested with BrowserStack
