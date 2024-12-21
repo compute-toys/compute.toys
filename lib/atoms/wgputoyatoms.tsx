@@ -1,6 +1,6 @@
 'use client';
 import { atom } from 'jotai';
-import { create_renderer, WgpuToyRenderer } from 'lib/wgputoy';
+import { createRenderer, WgpuToyRenderer } from 'lib/wgputoy';
 import { getDimensions } from '../../types/canvasdimensions';
 
 // just to check if the object has already been freed (ptr=0)
@@ -32,7 +32,20 @@ export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async get => {
     if (!isSSR && get(canvasElAtom) !== false && get(canvasParentElAtom)) {
         const parentEl = get(canvasParentElAtom);
         const dim = getDimensions(parentEl.offsetWidth * window.devicePixelRatio);
-        return create_renderer(dim.x, dim.y, (get(canvasElAtom) as HTMLCanvasElement).id);
+        // return createRenderer(dim.x, dim.y, (get(canvasElAtom) as HTMLCanvasElement).id);
+        const renderer = await createRenderer({
+            width: dim.x,
+            height: dim.y,
+            canvasId: (get(canvasElAtom) as HTMLCanvasElement).id,
+            devicePixelRatio: window.devicePixelRatio,
+            onUnsupported: () => {
+                console.error('WebGPU is not supported in this browser');
+            },
+            onError: error => {
+                console.error('Failed to initialize renderer:', error);
+            }
+        });
+        return renderer;
     } else {
         return false;
     }
