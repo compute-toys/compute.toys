@@ -5,5 +5,7 @@ describe('Navigation', () => {
         cy.url().should('include', '/new');
         cy.get('h6').contains('New Shader');
         cy.get('span').contains('FPS');
+        cy.wait(1000);
+        cy.percySnapshot();
     });
 });
