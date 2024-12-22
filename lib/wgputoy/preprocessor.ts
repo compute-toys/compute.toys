@@ -6,8 +6,6 @@ import { fetchInclude, parseUint32, WGSLError } from './utils';
 
 // Regular expressions for preprocessing
 const RE_COMMENT = /(\/\/.*|\/\*[\s\S]*?\*\/)/g;
-const RE_QUOTES = /"((?:[^\\"]|\\.)*)"/g;
-const RE_CHEVRONS = /<(.*)>/;
 const RE_WORD = /[a-zA-Z_][a-zA-Z0-9_]*/g;
 
 const STRING_MAX_LEN = 20;
@@ -130,7 +128,7 @@ export class Preprocessor {
         // Handle string literals if enabled
         if (this.specialStrings) {
             let error: WGSLError | null = null;
-            line = line.replace(RE_QUOTES, match => {
+            line = line.replace(/"((?:[^\\"]|\\.)*)"/g, match => {
                 try {
                     const unescaped = JSON.parse(match) as string;
                     const chars = Array.from(unescaped).map(c => c.charCodeAt(0));
@@ -173,17 +171,17 @@ export class Preprocessor {
             throw new WGSLError('Invalid #include syntax', lineNum);
         }
 
-        const nameMatcher = tokens[1].match(RE_QUOTES) || tokens[1].match(RE_CHEVRONS);
+        const nameMatcher = tokens[1].match(/"(.*)"/) || tokens[1].match(/<(.*)>/);
         if (!nameMatcher) {
             throw new WGSLError('Path must be enclosed in quotes or chevrons', lineNum);
         }
 
         const name = nameMatcher[1];
-        if (RE_CHEVRONS.test(tokens[1]) && name === 'string') {
+        if (/<.*>/.test(tokens[1]) && name === 'string') {
             this.specialStrings = true;
         }
 
-        const includePath = RE_CHEVRONS.test(tokens[1]) ? `std/${name}` : name;
+        const includePath = /<.*>/.test(tokens[1]) ? `std/${name}` : name;
         const includeContent = await fetchInclude(includePath);
 
         if (!includeContent) {

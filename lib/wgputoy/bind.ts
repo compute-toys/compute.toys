@@ -93,7 +93,12 @@ class BufferBinding<H> implements Binding {
     // bind: (buffer: GPUBuffer) => GPUBufferBinding;
     decl: string;
 
-    constructor(params) {
+    constructor(params: {
+        host: H;
+        device: GPUBuffer;
+        layout: GPUBufferBindingLayout;
+        decl: string;
+    }) {
         this.host = params.host;
         this.device = params.device;
         this.layout = params.layout;
@@ -124,7 +129,12 @@ class TextureBinding implements Binding {
     layout: GPUTextureBindingLayout;
     decl: string;
 
-    constructor(params) {
+    constructor(params: {
+        device: GPUTexture;
+        view: GPUTextureView;
+        layout: GPUTextureBindingLayout;
+        decl: string;
+    }) {
         this.device = params.device;
         this.view = params.view;
         this.layout = params.layout;
@@ -383,7 +393,7 @@ export class Bindings {
                 size: USER_DATA_BYTES,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
             }),
-            layout: { ...storageBuffer, buffer: { type: 'read-only-storage' } },
+            layout: { ...storageBuffer, type: 'read-only-storage' },
             // bind: (buffer) => ({ offset: 0, size: USER_DATA_BYTES }),
             decl: 'var<storage,read> data: Data'
         });
@@ -454,7 +464,7 @@ export class Bindings {
                 dimension: '2d-array'
             }),
             layout: {
-                sampleType: 'float',
+                sampleType: passF32 ? 'unfilterable-float' : 'float',
                 viewDimension: '2d-array',
                 multisampled: false
             },
