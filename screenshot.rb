@@ -50,28 +50,16 @@ def save_locally(screenshot, image_data)
   puts "- #{comment_file}"
 end
 
-def post_to_github(screenshot, image_data)
+def post_to_github(screenshot)
   repo = ENV['GITHUB_REPOSITORY']
   pr_number = ENV['GITHUB_PR_NUMBER']
-
-  # Generate filename
-  timestamp = Time.now.strftime("%Y%m%d_%H%M%S")
-  filename = "screenshot_#{timestamp}.png"
-
-  # Create comment with attachment
   api_url = "https://api.github.com/repos/#{repo}/issues/#{pr_number}/comments"
-  comment = generate_comment(screenshot, filename)
+  comment = generate_comment(screenshot, screenshot[:image_url])
 
   puts "Posting to GitHub PR..."
   response = RestClient.post(api_url,
     {
-      body: comment,
-      attachments: [
-        {
-          name: filename,
-          content: Base64.encode64(image_data)
-        }
-      ]
+      body: comment
     }.to_json,
     {
       'Authorization' => "token #{ENV['GITHUB_TOKEN']}",
@@ -137,11 +125,10 @@ begin
 
     puts "Downloading from: #{image_url}"
     image_data = URI.open(image_url).read
+    save_locally(screenshot, image_data)
 
     if ENV['GITHUB_TOKEN']
-      post_to_github(screenshot, image_data)
-    else
-      save_locally(screenshot, image_data)
+      post_to_github(screenshot)
     end
   end
 

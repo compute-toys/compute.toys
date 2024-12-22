@@ -47,3 +47,8 @@ jobs:
         GITHUB_REPOSITORY: ${{ github.repository }}
         GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
       run: ruby ./screenshot.rb
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: my-artifact
+        path: screenshots/
