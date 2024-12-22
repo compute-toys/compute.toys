@@ -85,7 +85,7 @@ export class Blitter {
         // Create shader module
         const shaderModule = device.createShaderModule({
             label: 'Blit Shader',
-            code: BLIT_SHADER,
+            code: BLIT_SHADER
         });
 
         // Create bind group layout
@@ -98,7 +98,7 @@ export class Blitter {
                     texture: {
                         sampleType: 'float',
                         viewDimension: '2d',
-                        multisampled: false,
+                        multisampled: false
                     }
                 },
                 {
@@ -120,7 +120,7 @@ export class Blitter {
         // Create sampler
         const sampler = device.createSampler({
             minFilter: filter,
-            magFilter: filter,
+            magFilter: filter
         });
 
         // Create bind group
@@ -146,14 +146,16 @@ export class Blitter {
             layout: pipelineLayout,
             vertex: {
                 module: shaderModule,
-                entryPoint: 'vs_main',
+                entryPoint: 'vs_main'
             },
             fragment: {
                 module: shaderModule,
                 entryPoint: fragmentEntry,
-                targets: [{
-                    format: destFormat
-                }]
+                targets: [
+                    {
+                        format: destFormat
+                    }
+                ]
             },
             primitive: {
                 topology: 'triangle-list'
@@ -170,8 +172,11 @@ export class Blitter {
             if (destFormat === 'bgra8unorm' || destFormat === 'rgba8unorm') {
                 return 'fs_main_linear_to_srgb';
             }
-            if (destFormat === 'bgra8unorm-srgb' || destFormat === 'rgba8unorm-srgb' ||
-                destFormat === 'rgba16float') {
+            if (
+                destFormat === 'bgra8unorm-srgb' ||
+                destFormat === 'rgba8unorm-srgb' ||
+                destFormat === 'rgba16float'
+            ) {
                 return 'fs_main';
             }
         }
@@ -186,12 +191,14 @@ export class Blitter {
      */
     blit(encoder: GPUCommandEncoder, view: GPUTextureView) {
         const renderPass = encoder.beginRenderPass({
-            colorAttachments: [{
-                view: view,
-                clearValue: { r: 0, g: 1, b: 0, a: 1 },
-                loadOp: 'clear',
-                storeOp: 'store'
-            }]
+            colorAttachments: [
+                {
+                    view: view,
+                    clearValue: { r: 0, g: 1, b: 0, a: 1 },
+                    loadOp: 'clear',
+                    storeOp: 'store'
+                }
+            ]
         });
 
         renderPass.setPipeline(this.renderPipeline);

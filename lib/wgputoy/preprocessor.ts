@@ -1,8 +1,8 @@
 /**
  * WGSL shader preprocessor implementation
  */
-import { fetchInclude, parseUint32, WGSLError } from './utils';
 import { NUM_ASSERT_COUNTERS } from './bind';
+import { fetchInclude, parseUint32, WGSLError } from './utils';
 
 // Regular expressions for preprocessing
 const RE_COMMENT = /(\/\/.*|\/\*[\s\S]*?\*\/)/g;
@@ -23,7 +23,7 @@ export class SourceMap {
     dispatchOnce = new Map<string, boolean>();
     dispatchCount = new Map<string, number>();
     assertMap: number[] = [];
-    userData = new Map<string, Uint32Array>([["_dummy", new Uint32Array([0])]]);
+    userData = new Map<string, Uint32Array>([['_dummy', new Uint32Array([0])]]);
 
     /**
      * Add a line to the source map
@@ -64,7 +64,7 @@ export class Preprocessor {
      * Substitute defines in source text
      */
     private substDefines(source: string): string {
-        return source.replace(RE_WORD, (match) => {
+        return source.replace(RE_WORD, match => {
             return this.defines.get(match) ?? match;
         });
     }
@@ -130,7 +130,7 @@ export class Preprocessor {
         // Handle string literals if enabled
         if (this.specialStrings) {
             let error: WGSLError | null = null;
-            line = line.replace(RE_QUOTES, (match, str) => {
+            line = line.replace(RE_QUOTES, match => {
                 try {
                     const unescaped = JSON.parse(match) as string;
                     const chars = Array.from(unescaped).map(c => c.charCodeAt(0));
@@ -148,9 +148,11 @@ export class Preprocessor {
                         chars.push(0);
                     }
 
-                    return `String(${chars.length}, array<u32,${STRING_MAX_LEN}>(${chars.map(c => `0x${c.toString(16).padStart(4, '0')}`).join(', ')
-                        }))`;
+                    return `String(${chars.length}, array<u32,${STRING_MAX_LEN}>(${chars
+                        .map(c => `0x${c.toString(16).padStart(4, '0')}`)
+                        .join(', ')}))`;
                 } catch (e) {
+                    console.error(e);
                     return match;
                 }
             });
@@ -251,10 +253,7 @@ export class Preprocessor {
      */
     private handleStorage(tokens: string[], lineNum: number): void {
         if (this.storageCount >= 2) {
-            throw new WGSLError(
-                'Only two storage buffers are currently supported',
-                lineNum
-            );
+            throw new WGSLError('Only two storage buffers are currently supported', lineNum);
         }
 
         const [, name, ...types] = tokens;
@@ -278,10 +277,7 @@ export class Preprocessor {
         }
 
         const predicate = tokens.slice(1).join(' ');
-        this.source.pushLine(
-            `assert(${this.assertCount}, ${predicate});`,
-            lineNum
-        );
+        this.source.pushLine(`assert(${this.assertCount}, ${predicate});`, lineNum);
         this.source.assertMap.push(lineNum);
         this.assertCount++;
     }
@@ -296,9 +292,7 @@ export class Preprocessor {
 
         const name = tokens[1];
         const dataStr = tokens.slice(3).join('');
-        const data = new Uint32Array(
-            dataStr.split(',').map(s => parseUint32(s, lineNum))
-        );
+        const data = new Uint32Array(dataStr.split(',').map(s => parseUint32(s, lineNum)));
 
         const existing = this.source.userData.get(name);
         if (existing) {

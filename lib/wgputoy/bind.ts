@@ -1,22 +1,81 @@
-import { WgpuContext } from "./context";
+import { WgpuContext } from './context';
 
 // Constants
 const NUM_KEYCODES = 256;
 const MAX_CUSTOM_PARAMS = 32;
 export const NUM_ASSERT_COUNTERS = 10;
 const USER_DATA_BYTES = 4096;
-export const OFFSET_ALIGNMENT = 256;
+// export const OFFSET_ALIGNMENT = 256;
 
 // Core data structures
-export interface Time {
+class Time {
     frame: number;
     elapsed: number;
     delta: number;
+
+    constructor(frame: number = 0, elapsed: number = 0, delta: number = 0) {
+        this.frame = frame;
+        this.elapsed = elapsed;
+        this.delta = delta;
+    }
+
+    static fromBuffer(buffer: Uint8Array): Time {
+        if (buffer.length < 12) {
+            throw new Error('Buffer too small');
+        }
+
+        const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+        const frame = view.getUint32(0, true); // true for little-endian
+        const elapsed = view.getFloat32(4, true);
+        const delta = view.getFloat32(8, true);
+
+        return new Time(frame, elapsed, delta);
+    }
+
+    toBuffer(): Uint8Array {
+        const buffer = new Uint8Array(12);
+        const view = new DataView(buffer.buffer);
+
+        view.setUint32(0, this.frame, true); // true for little-endian
+        view.setFloat32(4, this.elapsed, true);
+        view.setFloat32(8, this.delta, true);
+
+        return buffer;
+    }
 }
 
-export interface Mouse {
+class Mouse {
     pos: [number, number];
     click: number;
+
+    constructor(x: number, y: number, click: number) {
+        this.pos = [x, y];
+        this.click = click;
+    }
+
+    static fromBuffer(buffer: Uint8Array): Mouse {
+        if (buffer.length < 12) {
+            throw new Error('Buffer too small');
+        }
+
+        const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+        const x = view.getInt32(0, true);
+        const y = view.getInt32(4, true);
+        const click = view.getInt32(8, true);
+
+        return new Mouse(x, y, click);
+    }
+
+    toBuffer(): Uint8Array {
+        const buffer = new Uint8Array(12);
+        const view = new DataView(buffer.buffer);
+
+        view.setInt32(0, this.pos[0], true);
+        view.setInt32(4, this.pos[1], true);
+        view.setInt32(8, this.click, true);
+
+        return buffer;
+    }
 }
 
 interface Binding {
@@ -67,7 +126,7 @@ class BufferBinding<H> implements Binding {
         if (data.length > 0) {
             queue.writeBuffer(this.device, 0, data);
         } else {
-            console.warn("no data to stage");
+            console.warn('no data to stage');
         }
     }
 }
@@ -212,7 +271,7 @@ export class Bindings {
             type: 'storage'
         };
 
-        const passFormat = passF32 ? "rgba32float" : "rgba16float";
+        const passFormat = passF32 ? 'rgba32float' : 'rgba16float';
 
         const blank: GPUTextureDescriptor = {
             size: {
@@ -224,7 +283,7 @@ export class Bindings {
             usage: GPUTextureUsage.TEXTURE_BINDING,
             dimension: '2d',
             mipLevelCount: 1,
-            sampleCount: 1,
+            sampleCount: 1
         };
 
         const channelLayout: GPUTextureBindingLayout = {
@@ -250,7 +309,7 @@ export class Bindings {
             usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
             dimension: '2d',
             mipLevelCount: 1,
-            sampleCount: 1,
+            sampleCount: 1
         });
 
         const texRead = wgpu.device.createTexture({
@@ -263,7 +322,7 @@ export class Bindings {
             usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.TEXTURE_BINDING,
             dimension: '2d',
             mipLevelCount: 1,
-            sampleCount: 1,
+            sampleCount: 1
         });
 
         const texWrite = wgpu.device.createTexture({
@@ -276,7 +335,7 @@ export class Bindings {
             usage: GPUTextureUsage.COPY_SRC | GPUTextureUsage.STORAGE_BINDING,
             dimension: '2d',
             mipLevelCount: 1,
-            sampleCount: 1,
+            sampleCount: 1
         });
 
         const channel0 = wgpu.device.createTexture(blank);
@@ -284,28 +343,28 @@ export class Bindings {
 
         // Initialize time binding
         this.time = new BufferBinding<Time>({
-            host: { frame: 0, elapsed: 0, delta: 0 },
-            serialize: (h: Time) => new Uint8Array(new Float32Array([h.frame, h.elapsed, h.delta]).buffer),
+            host: new Time(),
+            serialize: (h: Time) => h.toBuffer(),
             device: wgpu.device.createBuffer({
-                size: 16,  // Aligned to 16 bytes
+                size: 16, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
             layout: uniformBuffer,
             // bind: (buffer) => ({ offset: 0, size: 12 }),
-            decl: "var<uniform> time: Time"
+            decl: 'var<uniform> time: Time'
         });
 
         // Initialize mouse binding
         this.mouse = new BufferBinding<Mouse>({
-            host: { pos: [width / 2, height / 2], click: 0 },
-            serialize: (h: Mouse) => new Uint8Array(new Int32Array([...h.pos, h.click]).buffer),
+            host: new Mouse(width / 2, height / 2, 0),
+            serialize: (h: Mouse) => h.toBuffer(),
             device: wgpu.device.createBuffer({
-                size: 16,  // Aligned to 16 bytes
+                size: 16, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
             layout: uniformBuffer,
             // bind: (buffer) => ({ offset: 0, size: 12 }),
-            decl: "var<uniform> mouse: Mouse"
+            decl: 'var<uniform> mouse: Mouse'
         });
 
         // Initialize keyboard binding
@@ -313,31 +372,31 @@ export class Bindings {
             host: new BitArray(NUM_KEYCODES),
             serialize: (h: BitArray) => h.bytes,
             device: wgpu.device.createBuffer({
-                size: 32,  // Aligned to 16 bytes
+                size: 32, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
             layout: uniformBuffer,
             // bind: (buffer) => ({ offset: 0, size: NUM_KEYCODES / 8 }),
-            decl: "var<uniform> _keyboard: array<vec4<u32>,2>"
+            decl: 'var<uniform> _keyboard: array<vec4<u32>,2>'
         });
 
         // Initialize custom binding
         this.custom = new BufferBinding<[string[], Float32Array]>({
-            host: [["_dummy"], new Float32Array([0])],
-            serialize: ([_, values]) => new Uint8Array(values.buffer),
+            host: [['_dummy'], new Float32Array([0])],
+            serialize: ([, values]) => new Uint8Array(values.buffer),
             device: wgpu.device.createBuffer({
                 size: MAX_CUSTOM_PARAMS * 4,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
             layout: uniformBuffer,
             // bind: (buffer) => ({ offset: 0, size: MAX_CUSTOM_PARAMS * 4 }),
-            decl: "var<uniform> custom: Custom"
+            decl: 'var<uniform> custom: Custom'
         });
 
         // Initialize user data binding
         this.userData = new BufferBinding<Map<string, Uint32Array>>({
-            host: new Map([["_dummy", new Uint32Array([0])]]),
-            serialize: (data) => {
+            host: new Map([['_dummy', new Uint32Array([0])]]),
+            serialize: data => {
                 const buffer = new ArrayBuffer(USER_DATA_BYTES);
                 let offset = 0;
                 for (const array of data.values()) {
@@ -352,11 +411,11 @@ export class Bindings {
             }),
             layout: { ...storageBuffer, buffer: { type: 'read-only-storage' } },
             // bind: (buffer) => ({ offset: 0, size: USER_DATA_BYTES }),
-            decl: "var<storage,read> data: Data"
+            decl: 'var<storage,read> data: Data'
         });
 
         // Initialize storage buffers
-        const storageSize = 128 * 1024 * 1024;  // 128MB
+        const storageSize = 128 * 1024 * 1024; // 128MB
         this.storage1 = new BufferBinding<void>({
             host: undefined,
             serialize: () => new Uint8Array(0),
@@ -366,7 +425,7 @@ export class Bindings {
             }),
             layout: storageBuffer,
             // bind: (buffer) => ({ offset: 0, size: storageSize }),
-            decl: ""
+            decl: ''
         });
 
         this.storage2 = new BufferBinding<void>({
@@ -378,7 +437,7 @@ export class Bindings {
             }),
             layout: storageBuffer,
             // bind: (buffer) => ({ offset: 0, size: storageSize }),
-            decl: ""
+            decl: ''
         });
 
         // Initialize debug buffer
@@ -386,12 +445,12 @@ export class Bindings {
             host: undefined,
             serialize: () => new Uint8Array(0),
             device: wgpu.device.createBuffer({
-                size: 16 * NUM_ASSERT_COUNTERS,  // Aligned to 16 bytes
+                size: 16 * NUM_ASSERT_COUNTERS, // Aligned to 16 bytes
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
             }),
             layout: storageBuffer,
             // bind: (buffer) => ({ offset: 0, size: 4 * NUM_ASSERT_COUNTERS }),
-            decl: "var<storage,read_write> _assert_counts: array<atomic<u32>>"
+            decl: 'var<storage,read_write> _assert_counts: array<atomic<u32>>'
         });
 
         // Initialize dispatch info buffer
@@ -416,7 +475,7 @@ export class Bindings {
                 format: 'rgba16float',
                 viewDimension: '2d'
             },
-            decl: "var screen: texture_storage_2d<rgba16float,write>"
+            decl: 'var screen: texture_storage_2d<rgba16float,write>'
         });
 
         this.texRead = new TextureBinding({
@@ -429,7 +488,7 @@ export class Bindings {
                 viewDimension: '2d-array',
                 multisampled: false
             },
-            decl: "var pass_in: texture_2d_array<f32>"
+            decl: 'var pass_in: texture_2d_array<f32>'
         });
 
         this.texWrite = new StorageTextureBinding({
@@ -450,13 +509,13 @@ export class Bindings {
                 device: channel0,
                 view: channel0.createView(),
                 layout: channelLayout,
-                decl: "var channel0: texture_2d<f32>"
+                decl: 'var channel0: texture_2d<f32>'
             }),
             new TextureBinding({
                 device: channel1,
                 view: channel1.createView(),
                 layout: channelLayout,
-                decl: "var channel1: texture_2d<f32>"
+                decl: 'var channel1: texture_2d<f32>'
             })
         ];
 
@@ -466,7 +525,7 @@ export class Bindings {
                 type: 'non-filtering'
             },
             bind: wgpu.device.createSampler(),
-            decl: "var nearest: sampler"
+            decl: 'var nearest: sampler'
         });
 
         this.bilinear = new SamplerBinding({
@@ -477,7 +536,7 @@ export class Bindings {
                 magFilter: 'linear',
                 minFilter: 'linear'
             }),
-            decl: "var bilinear: sampler"
+            decl: 'var bilinear: sampler'
         });
 
         this.trilinear = new SamplerBinding({
@@ -489,7 +548,7 @@ export class Bindings {
                 minFilter: 'linear',
                 mipmapFilter: 'linear'
             }),
-            decl: "var trilinear: sampler"
+            decl: 'var trilinear: sampler'
         });
 
         this.nearestRepeat = new SamplerBinding({
@@ -497,7 +556,7 @@ export class Bindings {
                 type: 'non-filtering'
             },
             bind: wgpu.device.createSampler(repeat),
-            decl: "var nearest_repeat: sampler"
+            decl: 'var nearest_repeat: sampler'
         });
 
         this.bilinearRepeat = new SamplerBinding({
@@ -509,7 +568,7 @@ export class Bindings {
                 magFilter: 'linear',
                 minFilter: 'linear'
             }),
-            decl: "var bilinear_repeat: sampler"
+            decl: 'var bilinear_repeat: sampler'
         });
 
         this.trilinearRepeat = new SamplerBinding({
@@ -522,7 +581,7 @@ export class Bindings {
                 minFilter: 'linear',
                 mipmapFilter: 'linear'
             }),
-            decl: "var trilinear_repeat: sampler"
+            decl: 'var trilinear_repeat: sampler'
         });
     }
 
@@ -546,15 +605,13 @@ export class Bindings {
             this.trilinear,
             this.nearestRepeat,
             this.bilinearRepeat,
-            this.trilinearRepeat,
+            this.trilinearRepeat
         ];
     }
 
     createBindGroupLayout(device: GPUDevice): GPUBindGroupLayout {
         return device.createBindGroupLayout({
-            entries: this.getAllBindings().map((binding, index) =>
-                binding.getLayoutEntry(index)
-            )
+            entries: this.getAllBindings().map((binding, index) => binding.getLayoutEntry(index))
         });
     }
 
@@ -616,7 +673,7 @@ class BitArray {
         const byteIndex = Math.floor(index / 8);
         const bitIndex = index % 8;
         if (value) {
-            this.bits[byteIndex] |= (1 << bitIndex);
+            this.bits[byteIndex] |= 1 << bitIndex;
         } else {
             this.bits[byteIndex] &= ~(1 << bitIndex);
         }

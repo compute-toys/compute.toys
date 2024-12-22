@@ -54,7 +54,7 @@ export class WgpuContext {
         console.info('Adapter limits:', adapter.limits);
 
         const device = await adapter.requestDevice({
-            label: 'Compute Toy GPU Device',
+            label: 'Compute Toy GPU Device'
             // requiredFeatures: [...adapter.features],
         });
 
@@ -67,7 +67,7 @@ export class WgpuContext {
             alphaMode: 'opaque',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
             viewFormats: [
-                presentationFormat,
+                presentationFormat
                 // Add SRGB/non-SRGB variants as needed
                 // presentationFormat === 'bgra8unorm' ? 'bgra8unorm-srgb' : 'bgra8unorm',
                 // presentationFormat === 'rgba8unorm' ? 'rgba8unorm-srgb' : 'rgba8unorm'
@@ -76,14 +76,7 @@ export class WgpuContext {
 
         context.configure(config);
 
-        return new WgpuContext(
-            device,
-            device.queue,
-            context,
-            config,
-            width,
-            height
-        );
+        return new WgpuContext(device, device.queue, context, config, width, height);
     }
 
     /**
@@ -114,18 +107,18 @@ export class WgpuContext {
         this.height = height;
     }
 
-    /**
-     * Clean up resources
-     */
-    destroy() {
-        this.device.destroy();
-    }
+    // /**
+    //  * Clean up resources
+    //  */
+    // destroy() {
+    //     this.device.destroy();
+    // }
 }
 
-// Error type for WebGPU context errors
-export class WgpuContextError extends Error {
-    constructor(message: string) {
-        super(message);
-        this.name = 'WgpuContextError';
-    }
-}
+// // Error type for WebGPU context errors
+// export class WgpuContextError extends Error {
+//     constructor(message: string) {
+//         super(message);
+//         this.name = 'WgpuContextError';
+//     }
+// }

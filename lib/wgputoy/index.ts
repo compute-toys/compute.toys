@@ -3,11 +3,11 @@
  * TypeScript port of the Rust compute-toys project
  */
 
-import { WgpuContext } from './context';
 import { Bindings } from './bind';
+import { Blitter, ColorSpace } from './blit';
+import { WgpuContext } from './context';
 import { Preprocessor, SourceMap } from './preprocessor';
 import { WGSLError, countNewlines } from './utils';
-import { Blitter, ColorSpace } from './blit';
 
 // Regular expression for parsing compute shader entry points
 const RE_ENTRY_POINT = /@compute[^@]*?@workgroup_size\((.*?)\)[^@]*?fn\s+(\w+)/g;
@@ -59,12 +59,7 @@ export class WgpuToyRenderer {
         this.passF32 = false;
 
         // Initialize bindings
-        this.bindings = new Bindings(
-            this.wgpu,
-            this.screenWidth,
-            this.screenHeight,
-            this.passF32
-        );
+        this.bindings = new Bindings(this.wgpu, this.screenWidth, this.screenHeight, this.passF32);
 
         // Set up pipeline and bind group layouts
         this.computeBindGroupLayout = this.bindings.createBindGroupLayout(wgpu.device);
@@ -92,11 +87,7 @@ export class WgpuToyRenderer {
     /**
      * Factory method to create a new renderer
      */
-    static async create(
-        width: number,
-        height: number,
-        canvasId: string
-    ): Promise<WgpuToyRenderer> {
+    static async create(width: number, height: number, canvasId: string): Promise<WgpuToyRenderer> {
         const wgpu = await WgpuContext.init(width, height, canvasId);
         return new WgpuToyRenderer(wgpu);
     }
@@ -266,14 +257,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         while ((match = RE_ENTRY_POINT.exec(entryPointCode)) !== null) {
             const [, sizeStr, name] = match;
             const sizes = sizeStr.split(',').map(s => parseInt(s.trim(), 10));
-            entryPoints.push([
-                name,
-                [
-                    sizes[0] || 1,
-                    sizes[1] || 1,
-                    sizes[2] || 1
-                ]
-            ]);
+            entryPoints.push([name, [sizes[0] || 1, sizes[1] || 1, sizes[2] || 1]]);
         }
 
         // Notify success callback
@@ -338,7 +322,8 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
                 );
 
                 if (this.bindings.time.host.frame > 0) {
-                    const mean = (performance.now() - this.lastStats) / WgpuToyRenderer.STATS_PERIOD;
+                    const mean =
+                        (performance.now() - this.lastStats) / WgpuToyRenderer.STATS_PERIOD;
                     this.lastStats = performance.now();
                     console.log(`${(1000 / mean).toFixed(1)} fps (${mean.toFixed(1)} ms)`);
                 }
@@ -353,7 +338,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             }
 
             // Dispatch compute passes
-            let dispatchCounter = 0;
+            // let dispatchCounter = 0;
             for (const pipeline of this.computePipelines) {
                 if (!pipeline.dispatchOnce || this.bindings.time.host.frame === 0) {
                     for (let i = 0; i < pipeline.dispatchCount; i++) {
@@ -373,7 +358,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
                         // );
 
                         pass.setPipeline(pipeline.pipeline);
-                        pass.setBindGroup(0, this.computeBindGroup);//, [dispatchCounter * 256]);
+                        pass.setBindGroup(0, this.computeBindGroup); //, [dispatchCounter * 256]);
                         pass.dispatchWorkgroups(...workgroupCount);
                         pass.end();
 
@@ -388,7 +373,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
                             }
                         );
 
-                        dispatchCounter++;
+                        // dispatchCounter++;
                     }
                 }
             }
@@ -400,10 +385,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             this.wgpu.queue.submit([encoder.finish()]);
 
             // Update frame counter
-            const time = this.bindings.time.host;
-            time.frame++;
-            this.bindings.time.host = time;
-
+            this.bindings.time.host.frame += 1;
         } catch (error) {
             console.error(error);
         }
@@ -420,15 +402,11 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      * Update time information
      */
     setTimeElapsed(time: number): void {
-        const currentTime = this.bindings.time.host;
-        currentTime.elapsed = time;
-        this.bindings.time.host = currentTime;
+        this.bindings.time.host.elapsed = time;
     }
 
     setTimeDelta(delta: number): void {
-        const currentTime = this.bindings.time.host;
-        currentTime.delta = delta;
-        this.bindings.time.host = currentTime;
+        this.bindings.time.host.delta = delta;
     }
 
     /**
@@ -437,10 +415,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     setMousePos(x: number, y: number): void {
         const mouse = this.bindings.mouse.host;
         if (mouse.click === 1) {
-            mouse.pos = [
-                Math.floor(x * this.screenWidth),
-                Math.floor(y * this.screenHeight)
-            ];
+            mouse.pos = [Math.floor(x * this.screenWidth), Math.floor(y * this.screenHeight)];
             this.bindings.mouse.host = mouse;
         }
     }
@@ -460,7 +435,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const bitIndex = keycode % 8;
 
         if (keydown) {
-            keys[byteIndex] |= (1 << bitIndex);
+            keys[byteIndex] |= 1 << bitIndex;
         } else {
             keys[byteIndex] &= ~(1 << bitIndex);
         }
@@ -472,10 +447,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      * Set custom float parameters
      */
     setCustomFloats(names: string[], values: Float32Array): void {
-        this.bindings.custom.host = [
-            names,
-            new Float32Array(values)
-        ];
+        this.bindings.custom.host = [names, new Float32Array(values)];
     }
 
     /**
@@ -522,14 +494,8 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Recreate pipeline and binding group layouts
         const layout = this.bindings.createBindGroupLayout(this.wgpu.device);
-        this.computePipelineLayout = this.bindings.createPipelineLayout(
-            this.wgpu.device,
-            layout
-        );
-        this.computeBindGroup = this.bindings.createBindGroup(
-            this.wgpu.device,
-            layout
-        );
+        this.computePipelineLayout = this.bindings.createPipelineLayout(this.wgpu.device, layout);
+        this.computeBindGroup = this.bindings.createBindGroup(this.wgpu.device, layout);
         this.computeBindGroupLayout = layout;
 
         // Recreate screen blitter
@@ -561,7 +527,8 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
                     depthOrArrayLayers: 1
                 },
                 format: 'rgba8unorm-srgb',
-                usage: GPUTextureUsage.TEXTURE_BINDING |
+                usage:
+                    GPUTextureUsage.TEXTURE_BINDING |
                     GPUTextureUsage.COPY_DST |
                     GPUTextureUsage.RENDER_ATTACHMENT
             });
@@ -587,7 +554,6 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             );
 
             console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
-
         } catch (error) {
             console.error(`Error loading channel ${index}:`, error);
         }
@@ -598,15 +564,16 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      */
     async loadChannelHDR(index: number, data: Uint8Array): Promise<void> {
         // TODO: Implement HDR loading
+        console.log('HDR loading not implemented', index, data);
     }
 
-    /**
-     * Clean up resources
-     */
-    destroy(): void {
-        // this.bindings.destroy();
-        this.wgpu.device.destroy();
-    }
+    // /**
+    //  * Clean up resources
+    //  */
+    // destroy(): void {
+    //     // this.bindings.destroy();
+    //     this.wgpu.device.destroy();
+    // }
 }
 
 /**
@@ -617,75 +584,74 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 /**
  * Configuration options for renderer creation
  */
-export interface RendererOptions {
-  /** Width of the rendering surface in pixels */
-  width: number;
-  /** Height of the rendering surface in pixels */
-  height: number;
-  /** ID of the canvas element */
-  canvasId: string;
-  /** Optional pixel ratio for high DPI displays */
-  devicePixelRatio?: number;
-  /** Optional callback when WebGPU is not supported */
-  onUnsupported?: () => void;
-  /** Optional callback for initialization errors */
-  onError?: (error: Error) => void;
+interface RendererOptions {
+    /** Width of the rendering surface in pixels */
+    width: number;
+    /** Height of the rendering surface in pixels */
+    height: number;
+    /** ID of the canvas element */
+    canvasId: string;
+    /** Optional pixel ratio for high DPI displays */
+    devicePixelRatio?: number;
+    /** Optional callback when WebGPU is not supported */
+    onUnsupported?: () => void;
+    /** Optional callback for initialization errors */
+    onError?: (error: Error) => void;
 }
 
 /**
  * Creates a new WgpuToyRenderer instance
  */
 export async function createRenderer(options: RendererOptions): Promise<WgpuToyRenderer | null> {
-  try {
-    // Check if WebGPU is supported
-    if (!navigator.gpu) {
-      options.onUnsupported?.();
-      return null;
-    }
-
-    // Get the canvas element
-    const canvas = document.getElementById(options.canvasId) as HTMLCanvasElement;
-    if (!canvas) {
-      throw new Error(`Canvas element with id '${options.canvasId}' not found`);
-    }
-
-    // Set up canvas size with device pixel ratio
-    const dpr = options.devicePixelRatio ?? window.devicePixelRatio ?? 1;
-    canvas.width = options.width * dpr;
-    canvas.height = options.height * dpr;
-    canvas.style.width = `${options.width}px`;
-    canvas.style.height = `${options.height}px`;
-
-    // Create the renderer
-    const renderer = await WgpuToyRenderer.create(
-      canvas.width,
-      canvas.height,
-      options.canvasId
-    );
-
-    // Set up resize observer
-    const resizeObserver = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        if (entry.target === canvas) {
-          const width = entry.contentRect.width;
-          const height = entry.contentRect.height;
-          renderer.resize(width, height, dpr);
+    try {
+        // Check if WebGPU is supported
+        if (!navigator.gpu) {
+            options.onUnsupported?.();
+            return null;
         }
-      }
-    });
-    resizeObserver.observe(canvas);
 
-    // Set up device lost handler
-    // navigator.gpu.addEventListener('devicelost', (event) => {
-    //   console.error('WebGPU device was lost:', event);
-    //   options.onError?.(new Error('WebGPU device was lost'));
-    // });
+        // Get the canvas element
+        const canvas = document.getElementById(options.canvasId) as HTMLCanvasElement;
+        if (!canvas) {
+            throw new Error(`Canvas element with id '${options.canvasId}' not found`);
+        }
 
-    return renderer;
+        // Set up canvas size with device pixel ratio
+        const dpr = options.devicePixelRatio ?? window.devicePixelRatio ?? 1;
+        canvas.width = options.width * dpr;
+        canvas.height = options.height * dpr;
+        canvas.style.width = `${options.width}px`;
+        canvas.style.height = `${options.height}px`;
 
-  } catch (error) {
-    console.error('Error creating renderer:', error);
-    options.onError?.(error instanceof Error ? error : new Error(String(error)));
-    return null;
-  }
+        // Create the renderer
+        const renderer = await WgpuToyRenderer.create(
+            canvas.width,
+            canvas.height,
+            options.canvasId
+        );
+
+        // Set up resize observer
+        const resizeObserver = new ResizeObserver(entries => {
+            for (const entry of entries) {
+                if (entry.target === canvas) {
+                    const width = entry.contentRect.width;
+                    const height = entry.contentRect.height;
+                    renderer.resize(width, height, dpr);
+                }
+            }
+        });
+        resizeObserver.observe(canvas);
+
+        // Set up device lost handler
+        // navigator.gpu.addEventListener('devicelost', (event) => {
+        //   console.error('WebGPU device was lost:', event);
+        //   options.onError?.(new Error('WebGPU device was lost'));
+        // });
+
+        return renderer;
+    } catch (error) {
+        console.error('Error creating renderer:', error);
+        options.onError?.(error instanceof Error ? error : new Error(String(error)));
+        return null;
+    }
 }
