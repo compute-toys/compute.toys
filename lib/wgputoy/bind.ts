@@ -5,7 +5,7 @@ const NUM_KEYCODES = 256;
 const MAX_CUSTOM_PARAMS = 32;
 export const NUM_ASSERT_COUNTERS = 10;
 const USER_DATA_BYTES = 4096;
-// export const OFFSET_ALIGNMENT = 256;
+const OFFSET_ALIGNMENT = 256;
 
 // Core data structures
 class Time {
@@ -90,19 +90,20 @@ class BufferBinding<H> implements Binding {
     host: H;
     device: GPUBuffer;
     layout: GPUBufferBindingLayout;
-    // bind: (buffer: GPUBuffer) => GPUBufferBinding;
+    bindingSize?: GPUSize64;
     decl: string;
 
     constructor(params: {
         host: H;
         device: GPUBuffer;
         layout: GPUBufferBindingLayout;
+        bindingSize?: GPUSize64;
         decl: string;
     }) {
         this.host = params.host;
         this.device = params.device;
         this.layout = params.layout;
-        // this.bind = params.bind;
+        this.bindingSize = params.bindingSize;
         this.decl = params.decl;
     }
 
@@ -114,8 +115,8 @@ class BufferBinding<H> implements Binding {
         };
     }
 
-    binding(): GPUBindingResource {
-        return { buffer: this.device };
+    binding(): GPUBufferBinding {
+        return { buffer: this.device, offset: 0, size: this.bindingSize };
     }
 
     toWGSL(): string {
@@ -149,7 +150,7 @@ class TextureBinding implements Binding {
         };
     }
 
-    binding(): GPUBindingResource {
+    binding(): GPUTextureView {
         return this.view;
     }
 
@@ -173,7 +174,12 @@ class StorageTextureBinding implements Binding {
     layout: GPUStorageTextureBindingLayout;
     decl: string;
 
-    constructor(params) {
+    constructor(params: {
+        device: GPUTexture;
+        view: GPUTextureView;
+        layout: GPUStorageTextureBindingLayout;
+        decl: string;
+    }) {
         this.device = params.device;
         this.view = params.view;
         this.layout = params.layout;
@@ -188,7 +194,7 @@ class StorageTextureBinding implements Binding {
         };
     }
 
-    binding(): GPUBindingResource {
+    binding(): GPUTextureView {
         return this.view;
     }
 
@@ -211,7 +217,7 @@ class SamplerBinding implements Binding {
     bind: GPUSampler;
     decl: string;
 
-    constructor(params) {
+    constructor(params: { layout: GPUSamplerBindingLayout; bind: GPUSampler; decl: string }) {
         this.layout = params.layout;
         this.bind = params.bind;
         this.decl = params.decl;
@@ -225,7 +231,7 @@ class SamplerBinding implements Binding {
         };
     }
 
-    binding(): GPUBindingResource {
+    binding(): GPUSampler {
         return this.bind;
     }
 
@@ -245,7 +251,7 @@ export class Bindings {
     storage1: BufferBinding<void>;
     storage2: BufferBinding<void>;
     debugBuffer: BufferBinding<void>;
-    // dispatchInfo: BufferBinding<void>;
+    dispatchInfo: BufferBinding<void>;
 
     texScreen: StorageTextureBinding;
     texRead: TextureBinding;
@@ -346,7 +352,6 @@ export class Bindings {
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
             layout: uniformBuffer,
-            // bind: (buffer) => ({ offset: 0, size: 12 }),
             decl: 'var<uniform> time: Time'
         });
 
@@ -358,7 +363,6 @@ export class Bindings {
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
             layout: uniformBuffer,
-            // bind: (buffer) => ({ offset: 0, size: 12 }),
             decl: 'var<uniform> mouse: Mouse'
         });
 
@@ -370,7 +374,6 @@ export class Bindings {
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
             layout: uniformBuffer,
-            // bind: (buffer) => ({ offset: 0, size: NUM_KEYCODES / 8 }),
             decl: 'var<uniform> _keyboard: array<vec4<u32>,2>'
         });
 
@@ -382,7 +385,6 @@ export class Bindings {
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
             layout: uniformBuffer,
-            // bind: (buffer) => ({ offset: 0, size: MAX_CUSTOM_PARAMS * 4 }),
             decl: 'var<uniform> custom: Custom'
         });
 
@@ -394,7 +396,6 @@ export class Bindings {
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
             }),
             layout: { ...storageBuffer, type: 'read-only-storage' },
-            // bind: (buffer) => ({ offset: 0, size: USER_DATA_BYTES }),
             decl: 'var<storage,read> data: Data'
         });
 
@@ -407,7 +408,6 @@ export class Bindings {
                 usage: GPUBufferUsage.STORAGE
             }),
             layout: storageBuffer,
-            // bind: (buffer) => ({ offset: 0, size: storageSize }),
             decl: ''
         });
 
@@ -418,7 +418,6 @@ export class Bindings {
                 usage: GPUBufferUsage.STORAGE
             }),
             layout: storageBuffer,
-            // bind: (buffer) => ({ offset: 0, size: storageSize }),
             decl: ''
         });
 
@@ -430,21 +429,20 @@ export class Bindings {
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
             }),
             layout: storageBuffer,
-            // bind: (buffer) => ({ offset: 0, size: 4 * NUM_ASSERT_COUNTERS }),
             decl: 'var<storage,read_write> _assert_counts: array<atomic<u32>>'
         });
 
         // Initialize dispatch info buffer
-        // this.dispatchInfo = new BufferBinding<void>({
-        //     host: undefined,
-        //     device: wgpu.device.createBuffer({
-        //         size: 256 * OFFSET_ALIGNMENT,
-        //         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        //     }),
-        //     layout: { ...uniformBuffer, buffer: { hasDynamicOffset: true, type: 'uniform' } },
-        //     // bind: (buffer) => ({ offset: 0, size: 4 }),
-        //     decl: "var<uniform> dispatch: DispatchInfo"
-        // });
+        this.dispatchInfo = new BufferBinding<void>({
+            host: undefined,
+            device: wgpu.device.createBuffer({
+                size: 256 * OFFSET_ALIGNMENT,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            }),
+            layout: { ...uniformBuffer, hasDynamicOffset: true, type: 'uniform' },
+            bindingSize: 4,
+            decl: 'var<uniform> dispatch: DispatchInfo'
+        });
 
         // Initialize texture bindings
         this.texScreen = new StorageTextureBinding({
@@ -575,7 +573,7 @@ export class Bindings {
             this.custom,
             this.userData,
             this.debugBuffer,
-            // this.dispatchInfo,
+            this.dispatchInfo,
             this.texScreen,
             this.texRead,
             this.texWrite,

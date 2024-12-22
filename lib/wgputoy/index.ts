@@ -7,7 +7,7 @@ import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
 import { WgpuContext } from './context';
 import { Preprocessor, SourceMap } from './preprocessor';
-import { WGSLError, countNewlines } from './utils';
+import { countNewlines } from './utils';
 
 // Regular expression for parsing compute shader entry points
 const RE_ENTRY_POINT = /@compute[^@]*?@workgroup_size\((.*?)\)[^@]*?fn\s+(\w+)/g;
@@ -248,8 +248,6 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const compilationInfo = await shaderModule.getCompilationInfo();
         for (const message of compilationInfo.messages) {
             let row = message.lineNum;
-            let col = message.linePos;
-            let summary = message.message;
             if (row >= preludeLines) {
                 row -= preludeLines;
             }
@@ -257,7 +255,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
                 row = source.map[row];
             }
             if (message.type === 'error') {
-                this.onErrorCb?.(summary, row, col);
+                this.onErrorCb?.(message.message, row, message.linePos);
             } else if (message.type === 'warning') {
                 console.warn(message.message);
             } else {
@@ -331,7 +329,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             }
 
             // Dispatch compute passes
-            // let dispatchCounter = 0;
+            let dispatchCounter = 0;
             for (const pipeline of this.computePipelines) {
                 if (!pipeline.dispatchOnce || this.bindings.time.host.frame === 0) {
                     for (let i = 0; i < pipeline.dispatchCount; i++) {
@@ -344,14 +342,14 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
                         ];
 
                         // Update dispatch info
-                        // this.wgpu.queue.writeBuffer(
-                        //     this.bindings.dispatchInfo.buffer(),
-                        //     dispatchCounter * 256,
-                        //     new Uint32Array([i])
-                        // );
+                        this.wgpu.queue.writeBuffer(
+                            this.bindings.dispatchInfo.device,
+                            dispatchCounter * 256,
+                            new Uint32Array([i])
+                        );
 
                         pass.setPipeline(pipeline.pipeline);
-                        pass.setBindGroup(0, this.computeBindGroup); //, [dispatchCounter * 256]);
+                        pass.setBindGroup(0, this.computeBindGroup, [dispatchCounter * 256]);
                         pass.dispatchWorkgroups(...workgroupCount);
                         pass.end();
 
@@ -366,7 +364,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
                             }
                         );
 
-                        // dispatchCounter++;
+                        dispatchCounter++;
                     }
                 }
             }
