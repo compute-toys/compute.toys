@@ -1,0 +1,54 @@
+name: CloudFlare Pages
+on:
+#   push:
+#     branches: [master]
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Allow GITHUB_TOKEN to write deployments for my action (https://docs.github.com/en/actions/security-guides/automatic-token-authentication)
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: write
+    steps:
+    - uses: actions/checkout@v3
+    - run: echo Deploying ${{ github.event.pull_request.head.sha }}
+    - name: Await CF Pages
+      id: cf-pages
+      uses: WalshyDev/cf-pages-await@v1
+      with:
+        apiToken: ${{ secrets.CF_API_TOKEN }}
+        accountId: ${{ secrets.CF_ACCOUNT_ID }}
+        project: 'compute-toys'
+        githubToken: ${{ secrets.GITHUB_TOKEN }}
+        commitHash: ${{ github.event.pull_request.head.sha }}
+    - run: echo Deployed ${{ steps.cf-pages.outputs.url }}
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+
+    - name: Install dependencies
+      run: |
+        gem install browserstack-screenshot
+        gem install rest-client
+
+    - name: Take screenshot
+      env:
+        BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+        BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        URL: ${{ steps.cf-pages.outputs.url }}/new
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: ruby ./screenshot.rb
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: my-artifact
+        path: screenshots/
