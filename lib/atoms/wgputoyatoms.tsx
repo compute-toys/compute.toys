@@ -1,14 +1,7 @@
 'use client';
 import { atom } from 'jotai';
-import { createRenderer, WgpuToyRenderer } from 'lib/wgputoy';
+import { WgpuToyRenderer } from 'lib/wgputoy';
 import { getDimensions } from '../../types/canvasdimensions';
-
-// just to check if the object has already been freed (ptr=0)
-declare module 'lib/wgputoy' {
-    interface WgpuToyRenderer {
-        __wbg_ptr: number;
-    }
-}
 
 const isSSR = typeof window === 'undefined';
 
@@ -29,30 +22,17 @@ type WgpuStatus = 'available' | 'unavailable' | 'unknown';
 export const wgpuAvailabilityAtom = atom<WgpuStatus>('unknown');
 
 export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async get => {
-    if (!isSSR && get(canvasElAtom) !== false && get(canvasParentElAtom)) {
-        const parentEl = get(canvasParentElAtom);
-        const dim = getDimensions(parentEl.offsetWidth * window.devicePixelRatio);
-        // return createRenderer(dim.x, dim.y, (get(canvasElAtom) as HTMLCanvasElement).id);
-        const renderer = await createRenderer({
-            width: dim.x,
-            height: dim.y,
-            canvasId: (get(canvasElAtom) as HTMLCanvasElement).id,
-            devicePixelRatio: window.devicePixelRatio,
-            onUnsupported: () => {
-                console.error('WebGPU is not supported in this browser');
-            },
-            onError: error => {
-                console.error('Failed to initialize renderer:', error);
-            }
-        });
-        return renderer;
-    } else {
-        return false;
-    }
+    if (isSSR) return false;
+    const canvas = get(canvasElAtom);
+    if (!canvas) return false;
+    const parentEl = get(canvasParentElAtom);
+    if (!parentEl) return false;
+    const dim = getDimensions(parentEl.offsetWidth * window.devicePixelRatio);
+    return WgpuToyRenderer.create(dim.x, dim.y, canvas);
 });
 
 export const wgputoyPreludeAtom = atom<string>('');
 
 // type predicate
 export const isSafeContext = (context: WgpuToyRenderer | false): context is WgpuToyRenderer =>
-    context !== false && context.__wbg_ptr !== 0;
+    context !== false;

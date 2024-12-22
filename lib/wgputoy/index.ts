@@ -87,8 +87,12 @@ export class WgpuToyRenderer {
     /**
      * Factory method to create a new renderer
      */
-    static async create(width: number, height: number, canvasId: string): Promise<WgpuToyRenderer> {
-        const wgpu = await WgpuContext.init(width, height, canvasId);
+    static async create(
+        width: number,
+        height: number,
+        canvas: HTMLCanvasElement
+    ): Promise<WgpuToyRenderer> {
+        const wgpu = await WgpuContext.init(width, height, canvas);
         return new WgpuToyRenderer(wgpu);
     }
 
@@ -316,7 +320,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             // Clear debug buffer periodically
             if (this.bindings.time.host.frame % WgpuToyRenderer.STATS_PERIOD === 0) {
                 this.wgpu.queue.writeBuffer(
-                    this.bindings.debugBuffer.buffer(),
+                    this.bindings.debugBuffer.device,
                     0,
                     new Uint32Array(40) // NUM_ASSERT_COUNTERS * 4
                 );
@@ -430,17 +434,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      * Update keyboard state
      */
     setKeydown(keycode: number, keydown: boolean): void {
-        const keys = this.bindings.keys.host;
-        const byteIndex = Math.floor(keycode / 8);
-        const bitIndex = keycode % 8;
-
-        if (keydown) {
-            keys[byteIndex] |= 1 << bitIndex;
-        } else {
-            keys[byteIndex] &= ~(1 << bitIndex);
-        }
-
-        this.bindings.keys.host = keys;
+        this.bindings.keys.host.set(keycode, keydown);
     }
 
     /**
@@ -487,6 +481,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         // Copy over dynamic state
         newBindings.custom = this.bindings.custom;
         newBindings.userData = this.bindings.userData;
+        newBindings.channels = this.bindings.channels;
 
         // Clean up old bindings
         // this.bindings.destroy();
@@ -565,93 +560,5 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     async loadChannelHDR(index: number, data: Uint8Array): Promise<void> {
         // TODO: Implement HDR loading
         console.log('HDR loading not implemented', index, data);
-    }
-
-    // /**
-    //  * Clean up resources
-    //  */
-    // destroy(): void {
-    //     // this.bindings.destroy();
-    //     this.wgpu.device.destroy();
-    // }
-}
-
-/**
- * Factory function to create a WgpuToyRenderer instance
- */
-// import { WgpuToyRenderer } from './lib';
-
-/**
- * Configuration options for renderer creation
- */
-interface RendererOptions {
-    /** Width of the rendering surface in pixels */
-    width: number;
-    /** Height of the rendering surface in pixels */
-    height: number;
-    /** ID of the canvas element */
-    canvasId: string;
-    /** Optional pixel ratio for high DPI displays */
-    devicePixelRatio?: number;
-    /** Optional callback when WebGPU is not supported */
-    onUnsupported?: () => void;
-    /** Optional callback for initialization errors */
-    onError?: (error: Error) => void;
-}
-
-/**
- * Creates a new WgpuToyRenderer instance
- */
-export async function createRenderer(options: RendererOptions): Promise<WgpuToyRenderer | null> {
-    try {
-        // Check if WebGPU is supported
-        if (!navigator.gpu) {
-            options.onUnsupported?.();
-            return null;
-        }
-
-        // Get the canvas element
-        const canvas = document.getElementById(options.canvasId) as HTMLCanvasElement;
-        if (!canvas) {
-            throw new Error(`Canvas element with id '${options.canvasId}' not found`);
-        }
-
-        // Set up canvas size with device pixel ratio
-        const dpr = options.devicePixelRatio ?? window.devicePixelRatio ?? 1;
-        canvas.width = options.width * dpr;
-        canvas.height = options.height * dpr;
-        canvas.style.width = `${options.width}px`;
-        canvas.style.height = `${options.height}px`;
-
-        // Create the renderer
-        const renderer = await WgpuToyRenderer.create(
-            canvas.width,
-            canvas.height,
-            options.canvasId
-        );
-
-        // Set up resize observer
-        const resizeObserver = new ResizeObserver(entries => {
-            for (const entry of entries) {
-                if (entry.target === canvas) {
-                    const width = entry.contentRect.width;
-                    const height = entry.contentRect.height;
-                    renderer.resize(width, height, dpr);
-                }
-            }
-        });
-        resizeObserver.observe(canvas);
-
-        // Set up device lost handler
-        // navigator.gpu.addEventListener('devicelost', (event) => {
-        //   console.error('WebGPU device was lost:', event);
-        //   options.onError?.(new Error('WebGPU device was lost'));
-        // });
-
-        return renderer;
-    } catch (error) {
-        console.error('Error creating renderer:', error);
-        options.onError?.(error instanceof Error ? error : new Error(String(error)));
-        return null;
     }
 }

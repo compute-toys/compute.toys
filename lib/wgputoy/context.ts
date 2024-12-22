@@ -29,13 +29,11 @@ export class WgpuContext {
     /**
      * Initialize WebGPU context for a canvas element
      */
-    static async init(width: number, height: number, canvasId: string): Promise<WgpuContext> {
-        // Get the canvas and WebGPU context
-        const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-        if (!canvas) {
-            throw new Error(`Cannot find canvas element with id ${canvasId}`);
-        }
-
+    static async init(
+        width: number,
+        height: number,
+        canvas: HTMLCanvasElement
+    ): Promise<WgpuContext> {
         const context = canvas.getContext('webgpu');
         if (!context) {
             throw new Error('WebGPU not supported');

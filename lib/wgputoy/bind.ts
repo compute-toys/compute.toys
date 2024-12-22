@@ -19,19 +19,6 @@ class Time {
         this.delta = delta;
     }
 
-    static fromBuffer(buffer: Uint8Array): Time {
-        if (buffer.length < 12) {
-            throw new Error('Buffer too small');
-        }
-
-        const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-        const frame = view.getUint32(0, true); // true for little-endian
-        const elapsed = view.getFloat32(4, true);
-        const delta = view.getFloat32(8, true);
-
-        return new Time(frame, elapsed, delta);
-    }
-
     toBuffer(): Uint8Array {
         const buffer = new Uint8Array(12);
         const view = new DataView(buffer.buffer);
@@ -53,19 +40,6 @@ class Mouse {
         this.click = click;
     }
 
-    static fromBuffer(buffer: Uint8Array): Mouse {
-        if (buffer.length < 12) {
-            throw new Error('Buffer too small');
-        }
-
-        const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
-        const x = view.getInt32(0, true);
-        const y = view.getInt32(4, true);
-        const click = view.getInt32(8, true);
-
-        return new Mouse(x, y, click);
-    }
-
     toBuffer(): Uint8Array {
         const buffer = new Uint8Array(12);
         const view = new DataView(buffer.buffer);
@@ -78,6 +52,34 @@ class Mouse {
     }
 }
 
+class BitArray {
+    private bits: Uint8Array;
+
+    constructor(size: number) {
+        this.bits = new Uint8Array(Math.ceil(size / 8));
+    }
+
+    toBuffer(): Uint8Array {
+        return this.bits;
+    }
+
+    get(index: number): boolean {
+        const byteIndex = Math.floor(index / 8);
+        const bitIndex = index % 8;
+        return (this.bits[byteIndex] & (1 << bitIndex)) !== 0;
+    }
+
+    set(index: number, value: boolean): void {
+        const byteIndex = Math.floor(index / 8);
+        const bitIndex = index % 8;
+        if (value) {
+            this.bits[byteIndex] |= 1 << bitIndex;
+        } else {
+            this.bits[byteIndex] &= ~(1 << bitIndex);
+        }
+    }
+}
+
 interface Binding {
     getLayoutEntry(binding: number): GPUBindGroupLayoutEntry;
     binding(): GPUBindingResource;
@@ -86,7 +88,6 @@ interface Binding {
 
 class BufferBinding<H> implements Binding {
     host: H;
-    serialize: (h: H) => Uint8Array;
     device: GPUBuffer;
     layout: GPUBufferBindingLayout;
     // bind: (buffer: GPUBuffer) => GPUBufferBinding;
@@ -94,7 +95,6 @@ class BufferBinding<H> implements Binding {
 
     constructor(params) {
         this.host = params.host;
-        this.serialize = params.serialize;
         this.device = params.device;
         this.layout = params.layout;
         // this.bind = params.bind;
@@ -115,19 +115,6 @@ class BufferBinding<H> implements Binding {
 
     toWGSL(): string {
         return this.decl;
-    }
-
-    buffer(): GPUBuffer {
-        return this.device;
-    }
-
-    stage(queue: GPUQueue): void {
-        const data = this.serialize(this.host);
-        if (data.length > 0) {
-            queue.writeBuffer(this.device, 0, data);
-        } else {
-            console.warn('no data to stage');
-        }
     }
 }
 
@@ -344,7 +331,6 @@ export class Bindings {
         // Initialize time binding
         this.time = new BufferBinding<Time>({
             host: new Time(),
-            serialize: (h: Time) => h.toBuffer(),
             device: wgpu.device.createBuffer({
                 size: 16, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
@@ -357,7 +343,6 @@ export class Bindings {
         // Initialize mouse binding
         this.mouse = new BufferBinding<Mouse>({
             host: new Mouse(width / 2, height / 2, 0),
-            serialize: (h: Mouse) => h.toBuffer(),
             device: wgpu.device.createBuffer({
                 size: 16, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
@@ -370,7 +355,6 @@ export class Bindings {
         // Initialize keyboard binding
         this.keys = new BufferBinding<BitArray>({
             host: new BitArray(NUM_KEYCODES),
-            serialize: (h: BitArray) => h.bytes,
             device: wgpu.device.createBuffer({
                 size: 32, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
@@ -383,7 +367,6 @@ export class Bindings {
         // Initialize custom binding
         this.custom = new BufferBinding<[string[], Float32Array]>({
             host: [['_dummy'], new Float32Array([0])],
-            serialize: ([, values]) => new Uint8Array(values.buffer),
             device: wgpu.device.createBuffer({
                 size: MAX_CUSTOM_PARAMS * 4,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
@@ -396,15 +379,6 @@ export class Bindings {
         // Initialize user data binding
         this.userData = new BufferBinding<Map<string, Uint32Array>>({
             host: new Map([['_dummy', new Uint32Array([0])]]),
-            serialize: data => {
-                const buffer = new ArrayBuffer(USER_DATA_BYTES);
-                let offset = 0;
-                for (const array of data.values()) {
-                    new Uint32Array(buffer, offset).set(array);
-                    offset += array.length * 4;
-                }
-                return new Uint8Array(buffer);
-            },
             device: wgpu.device.createBuffer({
                 size: USER_DATA_BYTES,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
@@ -418,7 +392,6 @@ export class Bindings {
         const storageSize = 128 * 1024 * 1024; // 128MB
         this.storage1 = new BufferBinding<void>({
             host: undefined,
-            serialize: () => new Uint8Array(0),
             device: wgpu.device.createBuffer({
                 size: storageSize,
                 usage: GPUBufferUsage.STORAGE
@@ -430,7 +403,6 @@ export class Bindings {
 
         this.storage2 = new BufferBinding<void>({
             host: undefined,
-            serialize: () => new Uint8Array(0),
             device: wgpu.device.createBuffer({
                 size: storageSize,
                 usage: GPUBufferUsage.STORAGE
@@ -443,7 +415,6 @@ export class Bindings {
         // Initialize debug buffer
         this.debugBuffer = new BufferBinding<void>({
             host: undefined,
-            serialize: () => new Uint8Array(0),
             device: wgpu.device.createBuffer({
                 size: 16 * NUM_ASSERT_COUNTERS, // Aligned to 16 bytes
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
@@ -456,7 +427,6 @@ export class Bindings {
         // Initialize dispatch info buffer
         // this.dispatchInfo = new BufferBinding<void>({
         //     host: undefined,
-        //     serialize: () => new Uint8Array(0),
         //     device: wgpu.device.createBuffer({
         //         size: 256 * OFFSET_ALIGNMENT,
         //         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
@@ -643,39 +613,10 @@ export class Bindings {
     }
 
     stage(queue: GPUQueue): void {
-        this.custom.stage(queue);
-        this.userData.stage(queue);
-        this.time.stage(queue);
-        this.mouse.stage(queue);
-        this.keys.stage(queue);
-    }
-}
-
-// Helper class for managing bit arrays (equivalent to Rust's BitVec)
-class BitArray {
-    private bits: Uint8Array;
-
-    constructor(size: number) {
-        this.bits = new Uint8Array(Math.ceil(size / 8));
-    }
-
-    get bytes(): Uint8Array {
-        return this.bits;
-    }
-
-    get(index: number): boolean {
-        const byteIndex = Math.floor(index / 8);
-        const bitIndex = index % 8;
-        return (this.bits[byteIndex] & (1 << bitIndex)) !== 0;
-    }
-
-    set(index: number, value: boolean): void {
-        const byteIndex = Math.floor(index / 8);
-        const bitIndex = index % 8;
-        if (value) {
-            this.bits[byteIndex] |= 1 << bitIndex;
-        } else {
-            this.bits[byteIndex] &= ~(1 << bitIndex);
-        }
+        queue.writeBuffer(this.custom.device, 0, this.custom.host[1].buffer);
+        // queue.writeBuffer(this.userData.device, 0, this.userData.host.toBuffer());
+        queue.writeBuffer(this.time.device, 0, this.time.host.toBuffer());
+        queue.writeBuffer(this.mouse.device, 0, this.mouse.host.toBuffer());
+        queue.writeBuffer(this.keys.device, 0, this.keys.host.toBuffer());
     }
 }
