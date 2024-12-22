@@ -38,11 +38,12 @@ export class WgpuToyRenderer {
     private computeBindGroup: GPUBindGroup;
     private computeBindGroupLayout: GPUBindGroupLayout;
     private onSuccessCb?: (entryPoints: string[]) => void;
+    private onErrorCb?: (summary: string, row: number, col: number) => void;
     private passF32: boolean;
     private screenBlitter: Blitter;
-    private querySet?: GPUQuerySet;
+    // private querySet?: GPUQuerySet;
     private lastStats: number = performance.now();
-    private source: SourceMap;
+    // private source: SourceMap;
 
     static readonly STATS_PERIOD = 100;
     static readonly ASSERTS_SIZE = 40; // NUM_ASSERT_COUNTERS * 4
@@ -81,7 +82,7 @@ export class WgpuToyRenderer {
             'nearest'
         );
 
-        this.source = new SourceMap();
+        // this.source = new SourceMap();
     }
 
     /**
@@ -221,36 +222,6 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const start = performance.now();
         const prelude = source.extensions + this.getPrelude();
         const preludeLines = countNewlines(prelude);
-
-        // Set up error handling
-        this.wgpu.device.onuncapturederror = (ev: GPUUncapturedErrorEvent): void => {
-            const error = ev.error;
-            const message = error.message;
-
-            // Extract line and column from error message
-            const match = message.match(/:(\d+):(\d+)\s*(.*)/);
-            if (match) {
-                const [, rawLine, column, summary] = match;
-                let line = parseInt(rawLine, 10);
-
-                // Adjust line number for prelude
-                if (line >= preludeLines) {
-                    line -= preludeLines;
-                }
-
-                // Map to original source line
-                if (line < source.map.length) {
-                    line = source.map[line];
-                }
-
-                const error = new WGSLError(summary, line, parseInt(column, 10));
-                console.error(error.toString());
-                WgpuToyRenderer.shaderError = true;
-            } else {
-                console.error(message);
-            }
-        };
-
         const wgsl = prelude + source.source;
 
         // Parse entry points
@@ -268,13 +239,31 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const entryPointNames = entryPoints.map(([name]) => name);
         this.onSuccessCb?.(entryPointNames);
 
-        console.log(wgsl);
-
         // Create shader module
         const shaderModule = this.wgpu.device.createShaderModule({
             label: 'Compute shader',
             code: wgsl
         });
+
+        const compilationInfo = await shaderModule.getCompilationInfo();
+        for (const message of compilationInfo.messages) {
+            let row = message.lineNum;
+            let col = message.linePos;
+            let summary = message.message;
+            if (row >= preludeLines) {
+                row -= preludeLines;
+            }
+            if (row < source.map.length) {
+                row = source.map[row];
+            }
+            if (message.type === 'error') {
+                this.onErrorCb?.(summary, row, col);
+            } else if (message.type === 'warning') {
+                console.warn(message.message);
+            } else {
+                console.log(message.message);
+            }
+        }
 
         // Create compute pipelines
         if (this.lastComputePipelines) {
@@ -302,7 +291,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         this.bindings.userData.host = source.userData;
 
         console.log(`Shader compiled in ${(performance.now() - start).toFixed(2)}ms`);
-        this.source = source;
+        // this.source = source;
     }
 
     /**
@@ -400,6 +389,10 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      */
     onSuccess(callback: (entryPoints: string[]) => void): void {
         this.onSuccessCb = callback;
+    }
+
+    onError(callback: (summary: string, row: number, col: number) => void): void {
+        this.onErrorCb = callback;
     }
 
     /**

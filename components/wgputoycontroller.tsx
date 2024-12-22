@@ -221,7 +221,7 @@ const WgpuToyController = props => {
         if (!hotReloadHot()) setSaveColorTransitionSignal(theme.palette.dracula.orange);
     }, []);
 
-    if (window) window['wgsl_error_handler'] = handleError;
+    // if (window) window['wgsl_error_handler'] = handleError;
 
     const loadTexture = useCallback((index: number, uri: string) => {
         if (isSafeContext(wgputoy)) {
@@ -434,6 +434,7 @@ const WgpuToyController = props => {
     useEffect(() => {
         if (isSafeContext(wgputoy)) {
             wgputoy.onSuccess(handleSuccess);
+            wgputoy.onError(handleError);
         }
     }, []);
 
