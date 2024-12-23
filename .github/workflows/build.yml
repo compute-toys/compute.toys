@@ -27,7 +27,8 @@ jobs:
       - run: cargo install wasm-pack
       - uses: actions/setup-node@v4
         with:
-          node-version: node
+          node-version-file: .node-version
           cache: 'yarn'
       - run: yarn
+      - run: yarn lint
       - run: yarn build
