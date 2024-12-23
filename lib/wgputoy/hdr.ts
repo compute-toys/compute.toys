@@ -7,7 +7,6 @@ export function loadHDR(data: Uint8Array): {
 } {
     let header = '';
     let pos = 0;
-    let format: string;
 
     // Read header
     while (!header.match(/\n\n[^\n]+\n/g)) {
@@ -15,7 +14,7 @@ export function loadHDR(data: Uint8Array): {
     }
 
     // Check format
-    format = header.match(/FORMAT=(.*)$/m)![1];
+    const format = header.match(/FORMAT=(.*)$/m)![1];
     if (format !== '32-bit_rle_rgbe') {
         console.warn('unknown format : ' + format);
     }
@@ -34,14 +33,14 @@ export function loadHDR(data: Uint8Array): {
         const rgbe = data.slice(pos, (pos += 4));
         const scanline: number[] = [];
 
-        if (rgbe[0] != 2 || rgbe[1] != 2 || rgbe[2] & 0x80) {
+        if (rgbe[0] !== 2 || rgbe[1] !== 2 || rgbe[2] & 0x80) {
             let len = width;
             let rs = 0;
             pos -= 4;
 
             while (len > 0) {
                 img.set(data.slice(pos, (pos += 4)), ipos);
-                if (img[ipos] == 1 && img[ipos + 1] == 1 && img[ipos + 2] == 1) {
+                if (img[ipos] === 1 && img[ipos + 1] === 1 && img[ipos + 2] === 1) {
                     let i = img[ipos + 3] << rs;
                     while (i > 0) {
                         img.set(img.slice(ipos - 4, ipos), ipos);
@@ -57,7 +56,7 @@ export function loadHDR(data: Uint8Array): {
                 }
             }
         } else {
-            if ((rgbe[2] << 8) + rgbe[3] != width) {
+            if ((rgbe[2] << 8) + rgbe[3] !== width) {
                 console.warn('HDR line mismatch ..');
             }
 
