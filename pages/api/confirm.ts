@@ -1,7 +1,7 @@
 import { supabase } from 'lib/db/supabaseclient';
 import { NextApiRequest, NextApiResponse } from 'next';
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { email, token, type } = req.body;
