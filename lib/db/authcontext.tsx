@@ -1,3 +1,4 @@
+'use client';
 // https://www.misha.wtf/blog/nextjs-supabase-auth
 import { AuthChangeEvent, EmailOtpType, Session, User } from '@supabase/supabase-js';
 import { supabase, SUPABASE_PROFILE_TABLE_NAME } from 'lib/db/supabaseclient';

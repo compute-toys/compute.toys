@@ -1,3 +1,4 @@
+'use client';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
@@ -9,7 +10,7 @@ import { supabase, SUPABASE_SHADER_TABLE_NAME } from 'lib/db/supabaseclient';
 import { toDateString } from 'lib/util/dateutils';
 import { ChangeEvent, Fragment, useEffect, useState } from 'react';
 import { CssTextField, Item, theme } from 'theme/theme';
-import { ProfileShaders } from '../../components/profileshaders';
+import { ProfileShaders } from 'components/profileshaders';
 
 export const runtime = 'experimental-edge';
 
@@ -245,29 +246,4 @@ export default function Profile(props) {
             <ProfileShaders rows={shaders} editable={editable} />
         </Item>
     );
-}
-
-export async function getServerSideProps(context) {
-    context.res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
-
-    const { username } = context.params;
-
-    const { data: idData, error: idError } = await supabase
-        .from('profile')
-        .select('*')
-        .eq('username', username)
-        .single();
-
-    if (idError) {
-        context.res.statusCode = 404;
-        return {
-            notFound: true
-        };
-    }
-
-    return {
-        props: {
-            profile: idData
-        }
-    };
 }

@@ -1,74 +1,17 @@
+'use client';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import ImageListItem, { imageListItemClasses } from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import Pagination from '@mui/material/Pagination';
 import PaginationItem from '@mui/material/PaginationItem';
-import Banner from 'components/banner';
 import Avatar from 'components/global/avatar';
-import { supabase, SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
+import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Fragment } from 'react';
 import { Item, theme } from 'theme/theme';
-
-export const runtime = 'experimental-edge';
-
-const SHADERS_PER_PAGE = 12;
-
-const getPagination = (page: number, size: number) => {
-    const from = (page - 1) * size;
-    const to = from + size - 1;
-    return { from, to };
-};
-
-const getTotalCount = async () => {
-    const { error, count } = await supabase
-        .from('shader')
-        .select('*', { count: 'exact', head: true })
-        .eq('visibility', 'public');
-
-    return error ? 0 : count;
-};
-
-export async function getServerSideProps(context) {
-    context.res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
-
-    const { from, to } = getPagination(context.params.page, SHADERS_PER_PAGE);
-    const { data, error } = await supabase
-        .from('shader')
-        .select(
-            `
-            id,
-            name,
-            profile:author (
-                username,
-                avatar_url
-            ),
-            thumb_url
-        `
-        )
-        .order('created_at', { ascending: false })
-        .range(from, to)
-        .eq('visibility', 'public');
-
-    const totalCount = await getTotalCount();
-    const numPages = Math.ceil(totalCount / SHADERS_PER_PAGE);
-    const page = Number(context.params.page);
-
-    if (page < 1 || page > numPages) return { notFound: true };
-
-    return {
-        props: {
-            shaders: data ?? [],
-            totalCount,
-            numPages,
-            error,
-            page
-        }
-    };
-}
 
 function ShaderPicker(props) {
     return (
@@ -180,7 +123,6 @@ export default function ShaderList(props) {
                     width: '100%'
                 }}
             >
-                <Banner />
                 <ShaderPicker page={props.page} shaders={props.shaders} />
                 <Container sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
                     <Pagination

@@ -21,7 +21,6 @@ import {
     visibilityAtom
 } from 'lib/atoms/atoms';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { ChangeEvent, useEffect } from 'react';
 import { CssTextField, theme } from 'theme/theme';
 import { canvasElAtom } from '../../lib/atoms/wgputoyatoms';
@@ -53,7 +52,7 @@ export const MetadataEditor = () => {
     const authorProfile = useAtomValue(authorProfileAtom);
     const [, upsertToHost] = useShaderSerDe();
     const { user } = useAuth();
-    const router = useRouter();
+    // const router = useRouter();
 
     //TODO: not the best place for this logic
     const upsertShader = async (forceCreate: boolean) => {
@@ -68,7 +67,7 @@ export const MetadataEditor = () => {
             if (result.needsRedirect) {
                 setTimeout(() => {
                     setShaderID(result.id);
-                    router.push(`/view/${result.id}`);
+                    // router.push(`/view/${result.id}`);
                 }, 0);
             }
         }

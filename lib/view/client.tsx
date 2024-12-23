@@ -1,10 +1,7 @@
+'use client';
 import { fromUniformActiveSettings } from 'components/editor/uniformsliders';
 import { useSetAtom } from 'jotai';
-import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
-import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import dynamic from 'next/dynamic';
-import Head from 'next/head';
-import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import {
     authorProfileAtom,
@@ -22,60 +19,10 @@ import {
     Texture,
     titleAtom,
     visibilityAtom
-} from './atoms/atoms';
-import { ShaderActiveSettings, useResetShaderData } from './db/serializeshader';
-import { supabase, SUPABASE_SHADER_TABLE_NAME } from './db/supabaseclient';
-import { fixup_shader_code } from './util/fixup';
-import { defaultTextures } from './util/textureutils';
-
-export async function fetchShader(id: number) {
-    const { data, error, status } = await supabase
-        .from(SUPABASE_SHADER_TABLE_NAME)
-        .select(
-            `
-            name,
-            description,
-            thumb_url,
-            visibility,
-            body,
-            profile:author (
-                username,
-                avatar_url,
-                id
-            )
-        `
-        )
-        .eq('id', id)
-        .single();
-
-    if (error && status !== 406) {
-        console.error(error.message);
-    }
-
-    return data;
-}
-
-export function buildHead(shader) {
-    const image = getFullyQualifiedSupabaseBucketURL(
-        SUPABASE_SHADERTHUMB_BUCKET_NAME,
-        shader.thumb_url
-    );
-    return (
-        <Head>
-            <title>{shader.name}</title>
-            <meta property="og:type" content="image" />
-            <meta property="og:site_name" content="@compute.toys" />
-            <meta property="og:title" content={shader.name} />
-            <meta property="og:description" content={shader.description} />
-            <meta property="og:image" content={image} />
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:site:id" content="@compute_toys" />
-            <meta name="twitter:title" content={shader.name} />
-            <meta name="twitter:description" content={shader.description} />
-            <meta name="twitter:image" content={image} />
-        </Head>
-    );
-}
+} from 'lib/atoms/atoms';
+import { ShaderActiveSettings, useResetShaderData } from 'lib/db/serializeshader';
+import { fixup_shader_code } from 'lib/util/fixup';
+import { defaultTextures } from 'lib/util/textureutils';
 
 export function useShader(props) {
     const reset = useResetShaderData();
@@ -95,10 +42,10 @@ export function useShader(props) {
     const setAuthorProfile = useSetAtom(authorProfileAtom);
     const setFloat32Enabled = useSetAtom(float32EnabledAtom);
 
-    const router = useRouter();
+    // const router = useRouter();
 
     const loadShader = shader => {
-        if (!shader) router.push('/404');
+        // if (!shader) router.push('/404');
 
         setDBLoaded(false);
         reset();
@@ -148,15 +95,21 @@ export function useShader(props) {
         setCodeNeedSave(false);
     };
 
-    useEffect(() => {
-        if (props.shader) {
-            // public/unlisted shaders are fetched server-side
-            loadShader(props.shader);
-        } else if (router.isReady) {
-            // private shaders need to be fetched client-side
-            fetchShader(props.id).then(loadShader);
-        }
-    }, [router.isReady]);
+    useEffect(
+        () => {
+            if (props.shader) {
+                // public/unlisted shaders are fetched server-side
+                loadShader(props.shader);
+            }
+            // else if (router.isReady) {
+            //     // private shaders need to be fetched client-side
+            //     fetchShader(props.id).then(loadShader);
+            // }
+        },
+        [
+            // router.isReady
+        ]
+    );
 }
 
-export const DynamicEditor = dynamic(() => import('components/editor/editor'), { ssr: false });
+export const DynamicEditor = dynamic(() => import('components/editor/editor'));

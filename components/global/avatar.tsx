@@ -1,3 +1,4 @@
+'use client';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { SUPABASE_AVATAR_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
