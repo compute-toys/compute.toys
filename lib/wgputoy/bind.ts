@@ -3,8 +3,8 @@ import { WgpuContext } from './context';
 // Constants
 const NUM_KEYCODES = 256;
 const MAX_CUSTOM_PARAMS = 32;
-export const NUM_ASSERT_COUNTERS = 10;
-const USER_DATA_BYTES = 4096;
+// export const NUM_ASSERT_COUNTERS = 10;
+// const USER_DATA_BYTES = 4096;
 const OFFSET_ALIGNMENT = 256;
 
 // Core data structures
@@ -246,11 +246,11 @@ export class Bindings {
     mouse: BufferBinding<Mouse>;
     keys: BufferBinding<BitArray>;
     custom: BufferBinding<[string[], Float32Array]>;
-    userData: BufferBinding<Map<string, Uint32Array>>;
+    // userData: BufferBinding<Map<string, Uint32Array>>;
 
     storage1: BufferBinding<void>;
     storage2: BufferBinding<void>;
-    debugBuffer: BufferBinding<void>;
+    // debugBuffer: BufferBinding<void>;
     dispatchInfo: BufferBinding<void>;
 
     texScreen: StorageTextureBinding;
@@ -389,15 +389,15 @@ export class Bindings {
         });
 
         // Initialize user data binding
-        this.userData = new BufferBinding<Map<string, Uint32Array>>({
-            host: new Map([['_dummy', new Uint32Array([0])]]),
-            device: wgpu.device.createBuffer({
-                size: USER_DATA_BYTES,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-            }),
-            layout: { ...storageBuffer, type: 'read-only-storage' },
-            decl: 'var<storage,read> data: Data'
-        });
+        // this.userData = new BufferBinding<Map<string, Uint32Array>>({
+        //     host: new Map([['_dummy', new Uint32Array([0])]]),
+        //     device: wgpu.device.createBuffer({
+        //         size: USER_DATA_BYTES,
+        //         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+        //     }),
+        //     layout: { ...storageBuffer, type: 'read-only-storage' },
+        //     decl: 'var<storage,read> data: Data'
+        // });
 
         // Initialize storage buffers
         const storageSize = 128 * 1024 * 1024; // 128MB
@@ -422,15 +422,15 @@ export class Bindings {
         });
 
         // Initialize debug buffer
-        this.debugBuffer = new BufferBinding<void>({
-            host: undefined,
-            device: wgpu.device.createBuffer({
-                size: 16 * NUM_ASSERT_COUNTERS, // Aligned to 16 bytes
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
-            }),
-            layout: storageBuffer,
-            decl: 'var<storage,read_write> _assert_counts: array<atomic<u32>>'
-        });
+        // this.debugBuffer = new BufferBinding<void>({
+        //     host: undefined,
+        //     device: wgpu.device.createBuffer({
+        //         size: 16 * NUM_ASSERT_COUNTERS, // Aligned to 16 bytes
+        //         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
+        //     }),
+        //     layout: storageBuffer,
+        //     decl: 'var<storage,read_write> _assert_counts: array<atomic<u32>>'
+        // });
 
         // Initialize dispatch info buffer
         this.dispatchInfo = new BufferBinding<void>({
@@ -571,8 +571,8 @@ export class Bindings {
             this.mouse,
             this.keys,
             this.custom,
-            this.userData,
-            this.debugBuffer,
+            // this.userData,
+            // this.debugBuffer,
             this.dispatchInfo,
             this.texScreen,
             this.texRead,

@@ -46,8 +46,8 @@ export class WgpuToyRenderer {
     private lastStats: number = performance.now();
     // private source: SourceMap;
 
-    static readonly STATS_PERIOD = 100;
-    static readonly ASSERTS_SIZE = 40; // NUM_ASSERT_COUNTERS * 4
+    // static readonly STATS_PERIOD = 100;
+    // static readonly ASSERTS_SIZE = 40; // NUM_ASSERT_COUNTERS * 4
 
     private static shaderError = false;
 
@@ -148,11 +148,11 @@ struct DispatchInfo { id: uint }
         prelude += '};\n';
 
         // Add user data struct
-        prelude += 'struct Data {\n';
-        for (const [key, value] of this.bindings.userData.host) {
-            prelude += `    ${key}: array<u32,${value.length}>,\n`;
-        }
-        prelude += '};\n';
+        // prelude += 'struct Data {\n';
+        // for (const [key, value] of this.bindings.userData.host) {
+        //     prelude += `    ${key}: array<u32,${value.length}>,\n`;
+        // }
+        // prelude += '};\n';
 
         // Add bindings
         prelude += this.bindings.toWGSL();
@@ -165,7 +165,7 @@ fn keyDown(keycode: uint) -> bool {
 
 fn assert(index: int, success: bool) {
     if (!success) {
-        atomicAdd(&_assert_counts[index], 1u);
+        // atomicAdd(&_assert_counts[index], 1u);
     }
 }
 
@@ -287,7 +287,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         }));
 
         // Update bindings
-        this.bindings.userData.host = source.userData;
+        // this.bindings.userData.host = source.userData;
 
         console.log(`Shader compiled in ${(performance.now() - start).toFixed(2)}ms`);
         // this.source = source;
@@ -306,20 +306,20 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             this.bindings.stage(this.wgpu.queue);
 
             // Clear debug buffer periodically
-            if (this.bindings.time.host.frame % WgpuToyRenderer.STATS_PERIOD === 0) {
-                this.wgpu.queue.writeBuffer(
-                    this.bindings.debugBuffer.device,
-                    0,
-                    new Uint32Array(40) // NUM_ASSERT_COUNTERS * 4
-                );
+            // if (this.bindings.time.host.frame % WgpuToyRenderer.STATS_PERIOD === 0) {
+            //     this.wgpu.queue.writeBuffer(
+            //         this.bindings.debugBuffer.device,
+            //         0,
+            //         new Uint32Array(40) // NUM_ASSERT_COUNTERS * 4
+            //     );
 
-                if (this.bindings.time.host.frame > 0) {
-                    const mean =
-                        (performance.now() - this.lastStats) / WgpuToyRenderer.STATS_PERIOD;
-                    this.lastStats = performance.now();
-                    console.log(`${(1000 / mean).toFixed(1)} fps (${mean.toFixed(1)} ms)`);
-                }
-            }
+            //     if (this.bindings.time.host.frame > 0) {
+            //         const mean =
+            //             (performance.now() - this.lastStats) / WgpuToyRenderer.STATS_PERIOD;
+            //         this.lastStats = performance.now();
+            //         console.log(`${(1000 / mean).toFixed(1)} fps (${mean.toFixed(1)} ms)`);
+            //     }
+            // }
 
             // Handle shader errors
             if (WgpuToyRenderer.shaderError) {
@@ -472,7 +472,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Copy over dynamic state
         newBindings.custom = this.bindings.custom;
-        newBindings.userData = this.bindings.userData;
+        // newBindings.userData = this.bindings.userData;
         newBindings.channels = this.bindings.channels;
 
         // Clean up old bindings

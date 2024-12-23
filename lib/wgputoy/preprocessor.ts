@@ -1,7 +1,6 @@
 /**
  * WGSL shader preprocessor implementation
  */
-import { NUM_ASSERT_COUNTERS } from './bind';
 import { fetchInclude, parseUint32, WGSLError } from './utils';
 
 // Regular expressions for preprocessing
@@ -20,8 +19,8 @@ export class SourceMap {
     workgroupCount = new Map<string, [number, number, number]>();
     dispatchOnce = new Map<string, boolean>();
     dispatchCount = new Map<string, number>();
-    assertMap: number[] = [];
-    userData = new Map<string, Uint32Array>([['_dummy', new Uint32Array([0])]]);
+    // assertMap: number[] = [];
+    // userData = new Map<string, Uint32Array>([['_dummy', new Uint32Array([0])]]);
 
     /**
      * Add a line to the source map
@@ -39,7 +38,7 @@ export class Preprocessor {
     private defines: Map<string, string>;
     private source: SourceMap;
     private storageCount: number;
-    private assertCount: number;
+    // private assertCount: number;
     private specialStrings: boolean;
 
     constructor(defines: Map<string, string>) {
@@ -47,7 +46,7 @@ export class Preprocessor {
         this.defines.set('STRING_MAX_LEN', STRING_MAX_LEN.toString());
         this.source = new SourceMap();
         this.storageCount = 0;
-        this.assertCount = 0;
+        // this.assertCount = 0;
         this.specialStrings = false;
     }
 
@@ -111,13 +110,13 @@ export class Preprocessor {
                     this.handleStorage(tokens, lineNum);
                     break;
 
-                case '#assert':
-                    this.handleAssert(tokens, lineNum);
-                    break;
+                // case '#assert':
+                //     this.handleAssert(tokens, lineNum);
+                //     break;
 
-                case '#data':
-                    this.handleData(tokens, lineNum);
-                    break;
+                // case '#data':
+                //     this.handleData(tokens, lineNum);
+                //     break;
 
                 default:
                     throw new WGSLError('Unrecognized preprocessor directive', lineNum);
@@ -263,9 +262,7 @@ export class Preprocessor {
         this.storageCount++;
     }
 
-    /**
-     * Handle #assert directive
-     */
+    /*
     private handleAssert(tokens: string[], lineNum: number): void {
         if (this.assertCount >= NUM_ASSERT_COUNTERS) {
             throw new WGSLError(
@@ -280,9 +277,6 @@ export class Preprocessor {
         this.assertCount++;
     }
 
-    /**
-     * Handle #data directive
-     */
     private handleData(tokens: string[], lineNum: number): void {
         if (tokens.length < 4 || tokens[2] !== 'u32') {
             throw new WGSLError('Invalid #data syntax', lineNum);
@@ -303,6 +297,7 @@ export class Preprocessor {
             this.source.userData.set(name, data);
         }
     }
+    */
 
     /**
      * Process complete shader source
