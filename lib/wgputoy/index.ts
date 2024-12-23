@@ -6,6 +6,7 @@
 import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
 import { WgpuContext } from './context';
+import { loadHDR } from './hdr';
 import { Preprocessor, SourceMap } from './preprocessor';
 import { countNewlines } from './utils';
 
@@ -500,56 +501,127 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     async loadChannel(index: number, data: Uint8Array): Promise<void> {
         const start = performance.now();
 
-        try {
-            // Create ImageBitmap from data
-            const blob = new Blob([data], { type: 'image/png' });
-            const imageBitmap = await createImageBitmap(blob);
+        // Create ImageBitmap from data
+        const blob = new Blob([data], { type: 'image/png' });
+        const imageBitmap = await createImageBitmap(blob);
 
-            // Create texture
-            const texture = this.wgpu.device.createTexture({
-                size: {
-                    width: imageBitmap.width,
-                    height: imageBitmap.height,
-                    depthOrArrayLayers: 1
-                },
-                format: 'rgba8unorm-srgb',
-                usage:
-                    GPUTextureUsage.TEXTURE_BINDING |
-                    GPUTextureUsage.COPY_DST |
-                    GPUTextureUsage.RENDER_ATTACHMENT
-            });
+        // Create texture
+        let texture = this.wgpu.device.createTexture({
+            size: {
+                width: imageBitmap.width,
+                height: imageBitmap.height,
+                depthOrArrayLayers: 1
+            },
+            format: 'rgba8unorm-srgb',
+            usage:
+                GPUTextureUsage.TEXTURE_BINDING |
+                GPUTextureUsage.COPY_DST |
+                GPUTextureUsage.RENDER_ATTACHMENT
+        });
 
-            // Copy image data to texture
-            this.wgpu.device.queue.copyExternalImageToTexture(
-                { source: imageBitmap },
-                { texture },
-                {
-                    width: imageBitmap.width,
-                    height: imageBitmap.height,
-                    depthOrArrayLayers: 1
-                }
-            );
+        // Copy image data to texture
+        this.wgpu.device.queue.copyExternalImageToTexture(
+            { source: imageBitmap },
+            { texture },
+            {
+                width: imageBitmap.width,
+                height: imageBitmap.height,
+                depthOrArrayLayers: 1
+            }
+        );
 
-            // Update channel texture
-            this.bindings.channels[index].setTexture(texture);
+        // Generate mipmap chain
+        const blitter = new Blitter(
+            this.wgpu.device,
+            texture.createView(),
+            ColorSpace.Linear,
+            'rgba8unorm-srgb',
+            'linear'
+        );
+        texture = blitter.createTexture(
+            this.wgpu.device,
+            this.wgpu.queue,
+            imageBitmap.width,
+            imageBitmap.height,
+            1 + Math.floor(Math.log2(Math.max(imageBitmap.width, imageBitmap.height)))
+        );
 
-            // Recreate bind group since we changed a texture
-            this.computeBindGroup = this.bindings.createBindGroup(
-                this.wgpu.device,
-                this.computeBindGroupLayout
-            );
+        // Update channel texture
+        this.bindings.channels[index].setTexture(texture);
 
-            console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
-        } catch (error) {
-            console.error(`Error loading channel ${index}:`, error);
-        }
+        // Recreate bind group since we changed a texture
+        this.computeBindGroup = this.bindings.createBindGroup(
+            this.wgpu.device,
+            this.computeBindGroupLayout
+        );
+
+        console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
     }
 
     /**
      * Load HDR texture into channel
      */
     async loadChannelHDR(index: number, data: Uint8Array): Promise<void> {
-        // TODO: Implement HDR loading
-        console.log('HDR loading not implemented', index, data);
+        const start = performance.now();
+
+        // Load HDR data
+        const { rgbe, width, height } = loadHDR(data);
+
+        // Create RGBE texture
+        const rgbeTexture = this.wgpu.device.createTexture({
+            size: {
+                width,
+                height,
+                depthOrArrayLayers: 1
+            },
+            mipLevelCount: 1,
+            sampleCount: 1,
+            dimension: '2d',
+            format: 'rgba8unorm',
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+        });
+
+        // Copy RGBE data to texture
+        this.wgpu.device.queue.writeTexture(
+            { texture: rgbeTexture },
+            rgbe,
+            {
+                offset: 0,
+                bytesPerRow: 4 * width,
+                rowsPerImage: height
+            },
+            {
+                width,
+                height,
+                depthOrArrayLayers: 1
+            }
+        );
+
+        // Convert RGBE to float texture and generate mipmap chain
+        const blitter = new Blitter(
+            this.wgpu.device,
+            rgbeTexture.createView(),
+            ColorSpace.Rgbe,
+            'rgba16float',
+            'linear'
+        );
+        const texture = blitter.createTexture(
+            this.wgpu.device,
+            this.wgpu.queue,
+            width,
+            height,
+            1 + Math.floor(Math.log2(Math.max(width, height)))
+        );
+
+        // Update channel texture
+        this.bindings.channels[index].setTexture(texture);
+
+        // Recreate bind group since we changed a texture
+        this.computeBindGroup = this.bindings.createBindGroup(
+            this.wgpu.device,
+            this.computeBindGroupLayout
+        );
+
+        console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
     }
 }
