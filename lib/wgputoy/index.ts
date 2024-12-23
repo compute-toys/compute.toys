@@ -3,7 +3,6 @@
  * TypeScript port of the Rust compute-toys project
  */
 
-import { WebGPUTextureLoader } from '../web-texture-tool/src/webgpu-texture-loader';
 import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
 import { WgpuContext } from './context';
@@ -42,7 +41,6 @@ export class WgpuToyRenderer {
     private onErrorCb?: (summary: string, row: number, col: number) => void;
     private passF32: boolean;
     private screenBlitter: Blitter;
-    private textureLoader: WebGPUTextureLoader;
     // private querySet?: GPUQuerySet;
     private lastStats: number = performance.now();
     // private source: SourceMap;
@@ -83,8 +81,6 @@ export class WgpuToyRenderer {
             wgpu.surfaceConfig.format,
             'nearest'
         );
-
-        this.textureLoader = new WebGPUTextureLoader(wgpu.device, {});
 
         // this.source = new SourceMap();
     }
@@ -509,12 +505,19 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             const blob = new Blob([data], { type: 'image/png' });
             const imageBitmap = await createImageBitmap(blob);
 
-            const result = await this.textureLoader.fromImageBitmap(imageBitmap, {
-                mipmaps: true,
-                colorSpace: 'sRGB'
+            // Create texture
+            const texture = this.wgpu.device.createTexture({
+                size: {
+                    width: imageBitmap.width,
+                    height: imageBitmap.height,
+                    depthOrArrayLayers: 1
+                },
+                format: 'rgba8unorm-srgb',
+                usage:
+                    GPUTextureUsage.TEXTURE_BINDING |
+                    GPUTextureUsage.COPY_DST |
+                    GPUTextureUsage.RENDER_ATTACHMENT
             });
-
-            const texture: GPUTexture = result.texture;
 
             // Copy image data to texture
             this.wgpu.device.queue.copyExternalImageToTexture(
