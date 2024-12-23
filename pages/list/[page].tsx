@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { Fragment } from 'react';
 import { Item, theme } from 'theme/theme';
 
-export const runtime = 'experimental-edge';
+// export const runtime = 'experimental-edge';
 
 const SHADERS_PER_PAGE = 12;
 
