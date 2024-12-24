@@ -30,6 +30,7 @@
     "@mui/material": "^5.16.7",
     "@mui/utils": "^6.1.7",
     "@react-hook/resize-observer": "^2.0.2",
+    "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.10",
     "firacode": "^6.2.0",
     "jotai": "^2.10.4",

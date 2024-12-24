@@ -1,7 +1,8 @@
-import { supabase } from 'lib/db/supabaseclient';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from 'lib/supabase/server';
 import Profile from './profile';
 
-export async function getShaders(context) {
+async function getShaders(supabase: SupabaseClient, context) {
     // context.res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
 
     const { username } = context.params;
@@ -27,6 +28,7 @@ export async function getShaders(context) {
 }
 
 export default async function ProfilePage({ params }) {
-    const { props } = await getShaders({ params });
+    const supabase = await createClient();
+    const { props } = await getShaders(supabase, { params });
     return <Profile {...props} />;
 }

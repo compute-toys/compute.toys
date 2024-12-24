@@ -1,4 +1,5 @@
 'use client';
+import { SupabaseClient } from '@supabase/supabase-js';
 import { UniformSliderRef } from 'components/editor/uniformsliders';
 import { atom, Getter, useAtomValue, useSetAtom } from 'jotai';
 import { useResetAtom } from 'jotai/utils';
@@ -17,9 +18,7 @@ import {
     titleAtom,
     visibilityAtom
 } from 'lib/atoms/atoms';
-import { useAuth } from 'lib/db/authcontext';
 import {
-    supabase,
     SUPABASE_SHADER_TABLE_NAME,
     SUPABASE_SHADERTHUMB_BUCKET_NAME
 } from 'lib/db/supabaseclient';
@@ -66,7 +65,7 @@ const upsertResult = (
     };
 };
 
-type HOST_GET = (id: number) => Promise<void>;
+// type HOST_GET = (id: number) => Promise<void>;
 type HOST_UPSERT = (dataUrl: string, forceCreate: boolean) => Promise<UpsertResult>;
 type HOST_DELETE = (id: number) => Promise<boolean>;
 
@@ -74,10 +73,10 @@ const getSliderActiveSettings = (sliderRefMap: Map<string, UniformSliderRef>) =>
     // convert our map of references into a plain array of objects
     return [...sliderRefMap.keys()].map(uuid => {
         return {
-            name: sliderRefMap.get(uuid).getUniform(),
-            value: sliderRefMap.get(uuid).getVal(),
-            minRange: sliderRefMap.get(uuid).getMinRange(),
-            maxRange: sliderRefMap.get(uuid).getMaxRange()
+            name: sliderRefMap.get(uuid)!.getUniform(),
+            value: sliderRefMap.get(uuid)!.getVal(),
+            minRange: sliderRefMap.get(uuid)!.getMinRange(),
+            maxRange: sliderRefMap.get(uuid)!.getMaxRange()
         } as UniformActiveSettings;
     });
 };
@@ -127,10 +126,10 @@ export const useResetShaderData = () => {
     return reset;
 };
 
-export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT, HOST_DELETE] {
-    const atomGetter = useAtomGetter();
-
-    const { user } = useAuth();
+export default function useShaderSerDe(
+    supabase: SupabaseClient
+): [undefined, HOST_UPSERT, HOST_DELETE] {
+    const atomGetter = useAtomGetter()!;
 
     /*
         We DO NOT want to use getters here, even though
@@ -144,8 +143,11 @@ export default function useShaderSerDe(): [HOST_GET, HOST_UPSERT, HOST_DELETE] {
     const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
 
     const uploadThumb = async (id: number, dataUrl: string) => {
+        const { data, error } = await supabase.auth.getUser();
+        if (error || !data?.user) throw error;
+
         const fileExt = 'jpg';
-        const fileName = `${user!.id}/${id}.${fileExt}`;
+        const fileName = `${data.user!.id}/${id}.${fileExt}`;
 
         // convert to a format that the API likes by stripping the header
         // TODO: make this less brittle

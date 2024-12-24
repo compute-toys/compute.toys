@@ -100,8 +100,8 @@ const WgpuToyController = props => {
             const names: string[] = [];
             const values: number[] = [];
             [...sliderRefMap().keys()].map(uuid => {
-                names.push(sliderRefMap().get(uuid).getUniform());
-                values.push(sliderRefMap().get(uuid).getVal());
+                names.push(sliderRefMap().get(uuid)!.getUniform());
+                values.push(sliderRefMap().get(uuid)!.getVal());
             }, this);
             if (names.length > 0) {
                 await wgputoy.set_custom_floats(names, Float32Array.from(values));
@@ -265,7 +265,6 @@ const WgpuToyController = props => {
             canvas.addEventListener('keydown', handleKeyDown);
             return () => canvas.removeEventListener('keydown', handleKeyDown);
         }
-        return null;
     }, []);
 
     useEffect(() => {
@@ -278,7 +277,6 @@ const WgpuToyController = props => {
             canvas.addEventListener('keyup', handleKeyUp);
             return () => canvas.removeEventListener('keyup', handleKeyUp);
         }
-        return null;
     }, []);
 
     useEffect(() => {
@@ -353,7 +351,7 @@ const WgpuToyController = props => {
             }
 
             const mediaRecorder = new MediaRecorder(canvas.captureStream(), options);
-            const chunks = [];
+            const chunks: Blob[] = [];
 
             mediaRecorder.ondataavailable = function (e) {
                 if (e.data.size > 0) {
@@ -489,7 +487,7 @@ const WgpuToyController = props => {
             } else {
                 const padding = 16;
                 dimensions = getDimensions(
-                    (parentRef.offsetWidth - padding) * window.devicePixelRatio
+                    (parentRef!.offsetWidth - padding) * window.devicePixelRatio
                 );
             }
             const newScale = halfResolution ? 0.5 : 1;

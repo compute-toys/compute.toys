@@ -1,8 +1,6 @@
 'use client';
 import { fromUniformActiveSettings } from 'components/editor/uniformsliders';
 import { useSetAtom } from 'jotai';
-import dynamic from 'next/dynamic';
-import { useEffect } from 'react';
 import {
     authorProfileAtom,
     codeAtom,
@@ -23,6 +21,8 @@ import {
 import { ShaderActiveSettings, useResetShaderData } from 'lib/db/serializeshader';
 import { fixup_shader_code } from 'lib/util/fixup';
 import { defaultTextures } from 'lib/util/textureutils';
+import dynamic from 'next/dynamic';
+import { useEffect } from 'react';
 
 export function useShader(props) {
     const reset = useResetShaderData();

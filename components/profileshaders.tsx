@@ -1,3 +1,4 @@
+'use client';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
@@ -13,6 +14,7 @@ import Typography from '@mui/material/Typography';
 import visuallyHidden from '@mui/utils/visuallyHidden';
 import useShaderSerDe from 'lib/db/serializeshader';
 import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
+import { createClient } from 'lib/supabase/client';
 import { toDateString, toUnixTime } from 'lib/util/dateutils';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Image from 'next/image';
@@ -62,7 +64,7 @@ function getComparator<Key extends keyof any>(
 
 interface HeadCell {
     disablePadding: boolean;
-    id: keyof Data;
+    id: keyof Data | null;
     label: string;
     align: 'left' | 'right' | 'inherit' | 'center' | 'justify';
     unsortable: boolean;
@@ -143,7 +145,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
                                 <TableSortLabel
                                     active={orderBy === headCell.id}
                                     direction={orderBy === headCell.id ? order : 'asc'}
-                                    onClick={createSortHandler(headCell.id)}
+                                    onClick={createSortHandler(headCell.id!)}
                                 >
                                     {headCell.label}
                                     {orderBy === headCell.id ? (
@@ -194,11 +196,12 @@ export const ProfileShaders = props => {
         setOrderBy(property);
     };
 
-    const [, , deleteShader] = useShaderSerDe();
+    const supabase = createClient();
+    const [, , deleteShader] = useShaderSerDe(supabase);
     const handleDeleteShader = (id, name) => {
         if (confirm(`Are you sure you want to delete shader #${id} "${name}"?`)) {
             deleteShader(id);
-            document.getElementById(`row-id-${id}`).style.display = 'none';
+            document.getElementById(`row-id-${id}`)!.style.display = 'none';
         }
     };
 

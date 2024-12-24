@@ -25,7 +25,7 @@ import 'firacode';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { saveColorTransitionSignalAtom, shaderIDAtom } from 'lib/atoms/atoms';
 import { canvasParentElAtom } from 'lib/atoms/wgputoyatoms';
-import { supabase } from 'lib/db/supabaseclient';
+import { createClient } from 'lib/supabase/client';
 import dynamic from 'next/dynamic';
 import { useCallback } from 'react';
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
@@ -62,6 +62,8 @@ export default function Editor(props) {
     const setCanvasParentEl = useSetAtom(canvasParentElAtom);
     const shaderID = useAtomValue(shaderIDAtom);
 
+    const supabase = createClient();
+
     const renderParentNodeRef = useCallback(parent => {
         if (parent) {
             setCanvasParentEl(parent);
@@ -73,7 +75,7 @@ export default function Editor(props) {
         ssr: false
     });
 
-    let metadataEditor = null;
+    let metadataEditor: JSX.Element | null = null;
     if (supabase && !props.standalone) {
         metadataEditor = (
             <ItemWithTransitionSignal

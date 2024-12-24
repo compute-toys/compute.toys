@@ -3,20 +3,19 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { SupabaseClient } from '@supabase/supabase-js';
 import UploadButton from 'components/buttons/uploadbutton';
 import Avatar from 'components/global/avatar';
-import { useAuth } from 'lib/db/authcontext';
-import { supabase, SUPABASE_SHADER_TABLE_NAME } from 'lib/db/supabaseclient';
+import { ProfileShaders } from 'components/profileshaders';
+import { SUPABASE_SHADER_TABLE_NAME } from 'lib/db/supabaseclient';
+import { createClient } from 'lib/supabase/client';
 import { toDateString } from 'lib/util/dateutils';
 import { ChangeEvent, Fragment, useEffect, useState } from 'react';
 import { CssTextField, Item, theme } from 'theme/theme';
-import { ProfileShaders } from 'components/profileshaders';
-
-export const runtime = 'experimental-edge';
 
 const PROFILE_AVATAR_WIDTH = 96;
 
-async function loadShaders(username: string) {
+async function loadShaders(supabase: SupabaseClient, username: string) {
     try {
         const { data, error, status } = await supabase
             .from(SUPABASE_SHADER_TABLE_NAME)
@@ -57,27 +56,35 @@ export default function Profile(props) {
     const [avatar, setAvatar] = useState(props.profile.avatar_url);
     const [aboutEditor, setAboutEditor] = useState(props.profile.about);
     const [unsavedChanges, setUnsavedChanges] = useState(false);
-    const { user } = useAuth();
 
-    const [shaders, setShaders] = useState([]);
+    const [shaders, setShaders] = useState<any[]>([]);
     const [editable, setEditable] = useState(false);
-    const [errorMessage, setErrorMessage] = useState(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    const supabase = createClient();
 
     useEffect(() => {
-        // RLS prevents editing server-side
-        setEditable(props.profile.id === (user ? user.id : ''));
+        supabase.auth.getUser().then(({ data, error }) => {
+            if (error || !data?.user) throw error;
+            const { user } = data;
+            setEditable(props.profile.id === (user ? user.id : ''));
+        });
     });
 
     useEffect(() => {
-        loadShaders(props.profile.username).then(res => {
+        loadShaders(supabase, props.profile.username).then(res => {
             setShaders(res.shaders);
             setErrorMessage(res.error);
         });
-    }, [user, props.profile.id]);
+    }, [props.profile.id]);
 
     //https://github.com/supabase/supabase/blob/master/examples/nextjs-ts-user-management/components/Account.tsx
     const uploadAvatar = async (event: ChangeEvent<HTMLInputElement>) => {
         try {
+            const { data, error } = await supabase.auth.getUser();
+            if (error || !data?.user) throw error;
+            const { user } = data;
+
             setUploading(true);
 
             if (!event.target.files || event.target.files.length === 0) {
@@ -128,6 +135,10 @@ export default function Profile(props) {
 
     async function saveChanges() {
         try {
+            const { data, error } = await supabase.auth.getUser();
+            if (error || !data?.user) throw error;
+            const { user } = data;
+
             setLoading(true);
 
             const updates = {
@@ -135,11 +146,11 @@ export default function Profile(props) {
                 about: aboutEditor
             };
 
-            const { error } = await supabase.from('profile').upsert(updates);
+            const result = await supabase.from('profile').upsert(updates);
 
-            if (error) {
-                setErrorMessage('Error updating username: ' + error.message);
-                throw error;
+            if (result.error) {
+                setErrorMessage('Error updating username: ' + result.error.message);
+                throw result.error;
             }
 
             setErrorMessage(null);

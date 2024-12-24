@@ -8,7 +8,9 @@ interface WindowManagementContextInterface {
     uuidOrder: string[];
 }
 
-const WindowManagementContext = createContext<WindowManagementContextInterface>(undefined);
+const WindowManagementContext = createContext<WindowManagementContextInterface | undefined>(
+    undefined
+);
 
 export const WindowManagementProvider = ({ ...props }) => {
     const [uuids, setUuids] = useState<string[]>([]);
