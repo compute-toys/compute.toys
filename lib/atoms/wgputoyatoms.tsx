@@ -1,6 +1,6 @@
 'use client';
 import { atom } from 'jotai';
-import { WgpuToyRenderer } from 'lib/wgputoy';
+import { WgpuToyRenderer } from 'lib/engine';
 import { getDimensions } from '../../types/canvasdimensions';
 
 const isSSR = typeof window === 'undefined';
