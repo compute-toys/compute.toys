@@ -21,10 +21,10 @@ const getTotalCount = async (supabase: SupabaseClient): Promise<number> => {
     return count;
 };
 
-async function getShaders(supabase: SupabaseClient, context) {
+async function getShaders(supabase: SupabaseClient, page: number) {
     // context.res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
 
-    const { from, to } = getPagination(context.params.page, SHADERS_PER_PAGE);
+    const { from, to } = getPagination(page, SHADERS_PER_PAGE);
     const { data, error } = await supabase
         .from('shader')
         .select(
@@ -44,7 +44,6 @@ async function getShaders(supabase: SupabaseClient, context) {
 
     const totalCount = await getTotalCount(supabase);
     const numPages = Math.ceil(totalCount / SHADERS_PER_PAGE);
-    const page = Number(context.params.page);
 
     if (page < 1 || page > numPages) return { notFound: true };
 
@@ -61,6 +60,7 @@ async function getShaders(supabase: SupabaseClient, context) {
 
 export default async function ShaderListPage({ params }) {
     const supabase = await createClient();
-    const { props } = await getShaders(supabase, { params });
+    const { page } = await params;
+    const { props } = await getShaders(supabase, Number(page));
     return <ShaderList {...props} />;
 }

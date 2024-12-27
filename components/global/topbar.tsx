@@ -44,7 +44,7 @@ export default function TopBar(props) {
                                 {/* <Avatar url={profile.avatar ?? null} size={24} displayOnNull={false} /> */}
                                 <Box height="100%" zIndex="10">
                                     <Link href={`/profile/${props.user.user_metadata.username}`}>
-                                        {props.user.user_metadata.username}
+                                        {props.user.email}
                                     </Link>
                                 </Box>
                                 <span>
