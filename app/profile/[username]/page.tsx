@@ -2,6 +2,8 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from 'lib/supabase/server';
 import Profile from './profile';
 
+export const runtime = 'edge';
+
 async function getShaders(supabase: SupabaseClient, context) {
     // context.res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
 

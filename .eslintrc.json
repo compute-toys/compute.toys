@@ -43,7 +43,7 @@
         "missingExports": true,
         "unusedExports": true,
         "ignoreExports": [
-          "app/layout.tsx",
+          "app/*.tsx",
           "app/**/page.tsx",
           "app/**/route.ts",
           "theme/themeModule.ts",

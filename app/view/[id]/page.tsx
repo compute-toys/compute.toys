@@ -3,6 +3,8 @@ import { createClient } from 'lib/supabase/server';
 import { fetchShader } from 'lib/view/server';
 import ViewShader from './view';
 
+export const runtime = 'edge';
+
 async function getShader(supabase: SupabaseClient, context) {
     const id = Number(context.params.id);
     if (Number.isNaN(id)) return { notFound: true };

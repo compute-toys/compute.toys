@@ -2,6 +2,8 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from 'lib/supabase/server';
 import ShaderList from './list';
 
+export const runtime = 'edge';
+
 const SHADERS_PER_PAGE = 12;
 
 const getPagination = (page: number, size: number) => {
