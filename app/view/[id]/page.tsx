@@ -1,18 +1,16 @@
-import { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from 'lib/supabase/server';
 import { fetchShader } from 'lib/view/server';
+import { notFound } from 'next/navigation';
 import ViewShader from './view';
 
 export const runtime = 'edge';
 
-async function getShader(supabase: SupabaseClient, context) {
-    const id = Number(context.params.id);
-    if (Number.isNaN(id)) return { notFound: true };
-    return { props: { id, shader: await fetchShader(supabase, id) } };
-}
-
 export default async function ViewShaderPage({ params }) {
     const supabase = await createClient();
-    const { props } = await getShader(supabase, { params });
-    return <ViewShader {...props} />;
+    let { id } = await params;
+    id = Number(id);
+    if (Number.isNaN(id)) notFound();
+    const shader = await fetchShader(supabase, id);
+    if (!shader) notFound();
+    return <ViewShader id={id} shader={shader} />;
 }

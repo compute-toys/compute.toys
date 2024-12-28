@@ -1,36 +1,23 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from 'lib/supabase/server';
+import { notFound } from 'next/navigation';
 import Profile from './profile';
 
 export const runtime = 'edge';
 
-async function getShaders(supabase: SupabaseClient, context) {
-    // context.res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
-
-    const { username } = context.params;
-
-    const { data: idData, error: idError } = await supabase
+async function getShaders(supabase: SupabaseClient, username: string) {
+    const { data, error } = await supabase
         .from('profile')
         .select('*')
         .eq('username', username)
         .single();
-
-    if (idError) {
-        context.res.statusCode = 404;
-        return {
-            notFound: true
-        };
-    }
-
-    return {
-        props: {
-            profile: idData
-        }
-    };
+    if (error) notFound();
+    return data;
 }
 
 export default async function ProfilePage({ params }) {
     const supabase = await createClient();
-    const { props } = await getShaders(supabase, { params });
-    return <Profile {...props} />;
+    const { username } = await params;
+    const profile = await getShaders(supabase, username);
+    return <Profile profile={profile} />;
 }

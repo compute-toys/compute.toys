@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from 'lib/supabase/server';
+import { notFound } from 'next/navigation';
 import ShaderList from './list';
 
 export const runtime = 'edge';
@@ -45,7 +46,7 @@ async function getShaders(supabase: SupabaseClient, page: number) {
     const totalCount = await getTotalCount(supabase);
     const numPages = Math.ceil(totalCount / SHADERS_PER_PAGE);
 
-    if (page < 1 || page > numPages) return { notFound: true };
+    if (page < 1 || page > numPages || Number.isNaN(page)) notFound();
 
     return {
         props: {
