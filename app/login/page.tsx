@@ -1,13 +1,27 @@
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { CssTextField, Item } from 'theme/theme';
 import { login } from './actions';
 
 export const runtime = 'edge';
 
 export default function LoginPage() {
     return (
-        <form>
-            <label htmlFor="email">Email:</label>
-            <input id="email" name="email" type="email" required />
-            <button formAction={login}>Login / Sign up</button>
-        </form>
+        <Box sx={{ p: 4 }}>
+            <Item sx={{ color: 'white' }}>
+                <Typography>Enter your email address</Typography>
+                <Stack direction="row" justifyContent={'center'} sx={{ marginTop: '10px' }}>
+                    <form>
+                        <CssTextField id="email" name="email" type="email" required />
+                        <br />
+                        <Button formAction={login} type="submit">
+                            Login / Sign up
+                        </Button>
+                    </form>
+                </Stack>
+            </Item>
+        </Box>
     );
 }
