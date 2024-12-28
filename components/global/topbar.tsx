@@ -4,6 +4,7 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { logout } from 'app/login/actions';
 import Link from 'next/link';
 import { Fragment } from 'react';
 import Logo from './logo';
@@ -48,9 +49,11 @@ export default function TopBar(props) {
                                     </Link>
                                 </Box>
                                 <span>
-                                    <Button>
-                                        <Link href={'/logout'}>logout</Link>
-                                    </Button>
+                                    <form>
+                                        <Button formAction={logout} type="submit">
+                                            Logout
+                                        </Button>
+                                    </form>
                                 </span>
                             </>
                         ) : (
