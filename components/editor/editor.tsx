@@ -2,6 +2,7 @@
 // MUI sizing from refs:
 // https://github.com/mui/material-ui/issues/15662
 
+import Giscus from '@giscus/react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
@@ -33,27 +34,22 @@ import { Frame } from 'theme/theme';
 import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
 
-// https://github.com/utterance/utterances/issues/161
 function Comments() {
     return (
-        <section
-            style={{ width: '100%' }}
-            ref={element => {
-                if (!element) {
-                    return;
-                }
-
-                const scriptElement = document.createElement('script');
-                scriptElement.setAttribute('src', 'https://utteranc.es/client.js');
-                scriptElement.setAttribute('repo', 'compute-toys/comments');
-                scriptElement.setAttribute('issue-term', 'pathname');
-                scriptElement.setAttribute('theme', 'dark-blue');
-                scriptElement.setAttribute('crossorigin', 'anonymous');
-                scriptElement.setAttribute('async', 'true');
-                const div = document.createElement('div');
-                div.appendChild(scriptElement);
-                element.replaceChildren(div);
-            }}
+        <Giscus
+            id="comments"
+            repo="compute-toys/comments"
+            repoId="R_kgDOKRTytw"
+            category="Announcements"
+            categoryId="DIC_kwDOKRTyt84CllQC"
+            mapping="pathname"
+            strict="0"
+            reactionsEnabled="1"
+            emitMetadata="1"
+            inputPosition="top"
+            theme="dark"
+            lang="en"
+            loading="lazy"
         />
     );
 }
