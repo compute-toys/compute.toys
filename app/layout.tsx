@@ -1,7 +1,6 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import Footer from 'components/footer';
-import FavIconHead from 'components/global/faviconhead';
 import { ShadowCanvas } from 'components/global/shadowcanvas';
 import TopBar from 'components/global/topbar';
 import { createClient } from 'lib/supabase/server';
@@ -22,7 +21,6 @@ export default async function RootLayout({
             <body>
                 <WindowManagementProvider>
                     <ThemeProvider theme={theme}>
-                        <FavIconHead />
                         <ShadowCanvas />
                         <CssBaseline />
                         <TopBar user={error || !data?.user ? null : data.user} />

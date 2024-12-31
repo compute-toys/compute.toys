@@ -1,6 +1,11 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AuthorProfile } from 'lib/atoms/atoms';
-import { SUPABASE_SHADER_TABLE_NAME } from 'lib/db/supabaseclient';
+import {
+    SUPABASE_SHADER_TABLE_NAME,
+    SUPABASE_SHADERTHUMB_BUCKET_NAME
+} from 'lib/db/supabaseclient';
+import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
+import { Metadata } from 'next';
 import { Database } from 'types/database.types';
 
 export interface Shader {
@@ -44,24 +49,28 @@ export async function fetchShader(
     return data as Shader;
 }
 
-// export function buildHead(shader) {
-//     const image = getFullyQualifiedSupabaseBucketURL(
-//         SUPABASE_SHADERTHUMB_BUCKET_NAME,
-//         shader.thumb_url
-//     );
-//     return (
-//         <Head>
-//             <title>{shader.name}</title>
-//             <meta property="og:type" content="image" />
-//             <meta property="og:site_name" content="@compute.toys" />
-//             <meta property="og:title" content={shader.name} />
-//             <meta property="og:description" content={shader.description} />
-//             <meta property="og:image" content={image} />
-//             <meta name="twitter:card" content="summary_large_image" />
-//             <meta name="twitter:site:id" content="@compute_toys" />
-//             <meta name="twitter:title" content={shader.name} />
-//             <meta name="twitter:description" content={shader.description} />
-//             <meta name="twitter:image" content={image} />
-//         </Head>
-//     );
-// }
+export function buildHead(shader: Shader): Metadata {
+    const images = shader.thumb_url
+        ? getFullyQualifiedSupabaseBucketURL(SUPABASE_SHADERTHUMB_BUCKET_NAME, shader.thumb_url)
+        : undefined;
+    const title = shader.name;
+    const description = shader.description ?? undefined;
+    return {
+        title,
+        description,
+        openGraph: {
+            type: 'website',
+            siteName: '@compute.toys',
+            title,
+            description,
+            images
+        },
+        twitter: {
+            card: 'summary_large_image',
+            siteId: '@compute_toys',
+            title,
+            description,
+            images
+        }
+    };
+}
