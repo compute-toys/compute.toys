@@ -2,7 +2,7 @@
 import { DynamicEditor, useShader } from 'lib/view/client';
 
 export default function Index(props) {
-    useShader(props);
+    useShader(props.shader);
     return (
         <div>
             <style>{`

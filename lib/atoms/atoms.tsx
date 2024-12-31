@@ -31,9 +31,9 @@ fn main_image(@builtin(global_invocation_id) id: vec3u) {
 }
 `;
 
-interface AuthorProfile {
-    username: string;
-    avatar_url: string;
+export interface AuthorProfile {
+    username: string | null;
+    avatar_url: string | null;
     id: string;
 }
 

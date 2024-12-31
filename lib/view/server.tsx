@@ -1,11 +1,27 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import { AuthorProfile } from 'lib/atoms/atoms';
 import { SUPABASE_SHADER_TABLE_NAME } from 'lib/db/supabaseclient';
+import { Database } from 'types/database.types';
 
-export async function fetchShader(supabase: SupabaseClient, id: number) {
+export interface Shader {
+    id: number;
+    name: string;
+    description: string | null;
+    thumb_url: string | null;
+    visibility: Database['public']['Enums']['visibility'];
+    body: string;
+    profile: AuthorProfile;
+}
+
+export async function fetchShader(
+    supabase: SupabaseClient<Database>,
+    id: number
+): Promise<Shader | null> {
     const { data, error, status } = await supabase
         .from(SUPABASE_SHADER_TABLE_NAME)
         .select(
             `
+            id,
             name,
             description,
             thumb_url,
@@ -25,7 +41,7 @@ export async function fetchShader(supabase: SupabaseClient, id: number) {
         console.error(error.message);
     }
 
-    return data;
+    return data as Shader;
 }
 
 // export function buildHead(shader) {
