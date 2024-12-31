@@ -14,17 +14,12 @@ import { CssTextField, Item, theme } from 'theme/theme';
 
 const PROFILE_AVATAR_WIDTH = 96;
 
-async function loadShaders(supabase: SupabaseClient, username: string) {
+async function loadShaders(supabase: SupabaseClient, id: string) {
     try {
         const { data, error, status } = await supabase
             .from(SUPABASE_SHADER_TABLE_NAME)
-            .select(
-                `
-                    *,
-                    profile:author!inner(username)  
-                `
-            )
-            .eq('profile.username', username);
+            .select()
+            .eq('author', id);
 
         if (error && status !== 406) {
             throw error;
@@ -72,7 +67,7 @@ export default function Profile({ avatar_url, about, username, id }) {
     });
 
     useEffect(() => {
-        loadShaders(supabase, username).then(res => {
+        loadShaders(supabase, id).then(res => {
             setShaders(res.shaders);
             setErrorMessage(res.error);
         });

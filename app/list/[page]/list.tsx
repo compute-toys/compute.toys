@@ -90,7 +90,7 @@ function ShaderPicker(props) {
                                                 textDecoration: 'underline'
                                             }}
                                         >
-                                            {shader.profile.username}
+                                            {shader.profile.username ?? 'anonymous'}
                                         </span>
                                     </Link>
                                 </span>
