@@ -7,7 +7,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import UploadButton from 'components/buttons/uploadbutton';
 import Avatar from 'components/global/avatar';
 import { ProfileShaders } from 'components/profileshaders';
-import { SUPABASE_SHADER_TABLE_NAME } from 'lib/db/supabaseclient';
 import { createClient } from 'lib/supabase/client';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { CssTextField, Item, theme } from 'theme/theme';
@@ -16,10 +15,7 @@ const PROFILE_AVATAR_WIDTH = 96;
 
 async function loadShaders(supabase: SupabaseClient, id: string) {
     try {
-        const { data, error, status } = await supabase
-            .from(SUPABASE_SHADER_TABLE_NAME)
-            .select()
-            .eq('author', id);
+        const { data, error, status } = await supabase.from('shader').select().eq('author', id);
 
         if (error && status !== 406) {
             throw error;

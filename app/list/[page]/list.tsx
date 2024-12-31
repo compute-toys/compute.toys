@@ -6,7 +6,6 @@ import ImageListItemBar from '@mui/material/ImageListItemBar';
 import Pagination from '@mui/material/Pagination';
 import PaginationItem from '@mui/material/PaginationItem';
 import Avatar from 'components/global/avatar';
-import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -53,10 +52,7 @@ function ShaderPicker(props) {
                                     cursor: 'pointer',
                                     pointerEvents: 'none'
                                 }}
-                                src={getFullyQualifiedSupabaseBucketURL(
-                                    SUPABASE_SHADERTHUMB_BUCKET_NAME,
-                                    shader.thumb_url
-                                )}
+                                src={getFullyQualifiedSupabaseBucketURL(shader.thumb_url)}
                                 alt={shader.name}
                                 width={512}
                                 height={288}

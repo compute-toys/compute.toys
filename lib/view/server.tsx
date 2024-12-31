@@ -1,9 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { AuthorProfile } from 'lib/atoms/atoms';
-import {
-    SUPABASE_SHADER_TABLE_NAME,
-    SUPABASE_SHADERTHUMB_BUCKET_NAME
-} from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import { Metadata } from 'next';
 import { Database } from 'types/database.types';
@@ -23,7 +19,7 @@ export async function fetchShader(
     id: number
 ): Promise<Shader | null> {
     const { data, error, status } = await supabase
-        .from(SUPABASE_SHADER_TABLE_NAME)
+        .from('shader')
         .select(
             `
             id,
@@ -51,7 +47,7 @@ export async function fetchShader(
 
 export function buildHead(shader: Shader): Metadata {
     const images = shader.thumb_url
-        ? getFullyQualifiedSupabaseBucketURL(SUPABASE_SHADERTHUMB_BUCKET_NAME, shader.thumb_url)
+        ? getFullyQualifiedSupabaseBucketURL(shader.thumb_url)
         : undefined;
     const title = shader.name;
     const description = shader.description ?? undefined;

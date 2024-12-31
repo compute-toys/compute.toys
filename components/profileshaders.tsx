@@ -13,7 +13,6 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import visuallyHidden from '@mui/utils/visuallyHidden';
 import useShaderSerDe from 'lib/db/serializeshader';
-import { SUPABASE_SHADERTHUMB_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { createClient } from 'lib/supabase/client';
 import { toDateString, toUnixTime } from 'lib/util/dateutils';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
@@ -230,7 +229,6 @@ export const ProfileShaders = props => {
                                                     height={TABLE_PREVIEW_HEIGHT}
                                                     width={TABLE_PREVIEW_WIDTH}
                                                     src={getFullyQualifiedSupabaseBucketURL(
-                                                        SUPABASE_SHADERTHUMB_BUCKET_NAME,
                                                         row.thumb_url
                                                     )}
                                                     alt={row.name}

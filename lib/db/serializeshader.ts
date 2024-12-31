@@ -18,10 +18,6 @@ import {
     titleAtom,
     visibilityAtom
 } from 'lib/atoms/atoms';
-import {
-    SUPABASE_SHADER_TABLE_NAME,
-    SUPABASE_SHADERTHUMB_BUCKET_NAME
-} from 'lib/db/supabaseclient';
 import { useMemo, useRef } from 'react';
 import { theme } from 'theme/theme';
 
@@ -153,7 +149,7 @@ export default function useShaderSerDe(
         // TODO: make this less brittle
         const buf = Buffer.from(dataUrl.replace('data:image/jpeg;base64,', ''), 'base64');
         const { error: uploadError } = await supabase.storage
-            .from(SUPABASE_SHADERTHUMB_BUCKET_NAME)
+            .from('shaderthumb')
             .upload(fileName, buf, { contentType: 'image/jpeg', upsert: true });
 
         if (uploadError) {
@@ -175,7 +171,7 @@ export default function useShaderSerDe(
     const create = async (dataUrl: string) => {
         try {
             const { data, error, status } = await supabase
-                .from(SUPABASE_SHADER_TABLE_NAME)
+                .from('shader')
                 .insert([
                     {
                         author: null, // automatically set by postgres trigger
@@ -216,7 +212,7 @@ export default function useShaderSerDe(
         try {
             // TODO: let supabase know we don't need the record
             const { error, status } = await supabase
-                .from(SUPABASE_SHADER_TABLE_NAME)
+                .from('shader')
                 .update({
                     name: atomGetter(titleAtom),
                     description: atomGetter(descriptionAtom),
@@ -255,10 +251,7 @@ export default function useShaderSerDe(
 
     const del = async (id: number) => {
         try {
-            const { error, status } = await supabase
-                .from(SUPABASE_SHADER_TABLE_NAME)
-                .delete()
-                .eq('id', id);
+            const { error, status } = await supabase.from('shader').delete().eq('id', id);
             if (error && status !== 406) {
                 throw error;
             } else {
