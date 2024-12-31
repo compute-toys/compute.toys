@@ -83,7 +83,7 @@ function ShaderPicker(props) {
                                     }}
                                 >
                                     <span>by </span>
-                                    <Link href={`/profile/${shader.profile.username}`}>
+                                    <Link href={`/userid/${shader.profile.id}`}>
                                         <span
                                             style={{
                                                 fontWeight: 'bold',
@@ -97,7 +97,7 @@ function ShaderPicker(props) {
                             }
                             style={{ borderRadius: '4px', textAlign: 'left' }}
                             actionIcon={
-                                <Link href={`/profile/${shader.profile.username}`}>
+                                <Link href={`/userid/${shader.profile.id}`}>
                                     <Box sx={{ margin: '10px' }}>
                                         <Avatar url={shader.profile.avatar_url} size={25} />
                                     </Box>

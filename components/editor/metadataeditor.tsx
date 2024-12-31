@@ -189,7 +189,7 @@ export const MetadataEditor = user => {
                         />
                         <Typography color={theme.palette.dracula.green}>
                             {authorProfile.username ? (
-                                <Link href={`/profile/${authorProfile.username}`}>
+                                <Link href={`/userid/${authorProfile.id}`}>
                                     {authorProfile.username}
                                 </Link>
                             ) : null}

@@ -9,8 +9,7 @@ import Avatar from 'components/global/avatar';
 import { ProfileShaders } from 'components/profileshaders';
 import { SUPABASE_SHADER_TABLE_NAME } from 'lib/db/supabaseclient';
 import { createClient } from 'lib/supabase/client';
-import { toDateString } from 'lib/util/dateutils';
-import { ChangeEvent, Fragment, useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { CssTextField, Item, theme } from 'theme/theme';
 
 const PROFILE_AVATAR_WIDTH = 96;
@@ -50,11 +49,12 @@ async function loadShaders(supabase: SupabaseClient, username: string) {
     }
 }
 
-export default function Profile(props) {
+export default function Profile({ avatar_url, about, username, id }) {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [avatar, setAvatar] = useState(props.profile.avatar_url);
-    const [aboutEditor, setAboutEditor] = useState(props.profile.about);
+    const [avatar, setAvatar] = useState(avatar_url);
+    const [aboutEditor, setAboutEditor] = useState(about);
+    const [usernameEditor, setUsernameEditor] = useState(username);
     const [unsavedChanges, setUnsavedChanges] = useState(false);
 
     const [shaders, setShaders] = useState<any[]>([]);
@@ -67,16 +67,16 @@ export default function Profile(props) {
         supabase.auth.getUser().then(({ data, error }) => {
             if (error || !data?.user) throw error;
             const { user } = data;
-            setEditable(props.profile.id === (user ? user.id : ''));
+            setEditable(id === (user ? user.id : ''));
         });
     });
 
     useEffect(() => {
-        loadShaders(supabase, props.profile.username).then(res => {
+        loadShaders(supabase, username).then(res => {
             setShaders(res.shaders);
             setErrorMessage(res.error);
         });
-    }, [props.profile.id]);
+    }, [id]);
 
     //https://github.com/supabase/supabase/blob/master/examples/nextjs-ts-user-management/components/Account.tsx
     const uploadAvatar = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -143,6 +143,7 @@ export default function Profile(props) {
 
             const updates = {
                 id: user!.id,
+                username: usernameEditor,
                 about: aboutEditor
             };
 
@@ -203,10 +204,25 @@ export default function Profile(props) {
                         width: '100%'
                     }}
                 >
-                    <Typography variant="h6">{props.profile.username}</Typography>
-                    <Typography>Since: {toDateString(props.profile.created_at)}</Typography>
                     {editable ? (
-                        <Fragment>
+                        <>
+                            <CssTextField
+                                id="profile-username"
+                                aria-label={'Username'}
+                                size="medium"
+                                label={'Username'}
+                                value={usernameEditor || ''}
+                                rows={1}
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                                    setUsernameEditor(event.target.value);
+                                    setUnsavedChanges(true);
+                                }}
+                                sx={{
+                                    marginTop: '1em',
+                                    input: { color: theme.palette.dracula.foreground },
+                                    label: { color: theme.palette.dracula.foreground }
+                                }}
+                            />
                             <CssTextField
                                 multiline
                                 fullWidth
@@ -241,9 +257,12 @@ export default function Profile(props) {
                                     <span>{loading ? 'Loading' : 'Save'}</span>
                                 </Button>
                             ) : null}
-                        </Fragment>
+                        </>
                     ) : (
-                        <Typography>About: {props.profile.about}</Typography>
+                        <>
+                            <Typography variant="h6">{username}</Typography>
+                            <Typography>About: {about}</Typography>
+                        </>
                     )}
                 </Stack>
             </Stack>

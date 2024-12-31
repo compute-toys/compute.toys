@@ -33,6 +33,7 @@ async function getShaders(supabase: SupabaseClient, page: number) {
             id,
             name,
             profile:author (
+                id,
                 username,
                 avatar_url
             ),
