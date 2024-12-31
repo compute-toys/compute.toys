@@ -112,4 +112,4 @@ export function useShader(props) {
     );
 }
 
-export const DynamicEditor = dynamic(() => import('components/editor/editor'));
+export const DynamicEditor: any = dynamic(() => import('components/editor/editor'));

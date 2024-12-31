@@ -36,7 +36,7 @@ import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
 
 interface EditorProps {
-    user: User;
+    user?: User;
     standalone?: boolean;
     embed?: boolean;
 }

@@ -42,7 +42,7 @@ const VisibilityInput = styled(InputBase)(({ theme }) => ({
     }
 }));
 
-export const MetadataEditor = ({ user }: { user: User }) => {
+export const MetadataEditor = ({ user }: { user?: User }) => {
     const setCodeNeedSave = useSetAtom(codeNeedSaveAtom);
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
