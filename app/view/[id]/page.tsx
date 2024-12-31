@@ -7,10 +7,11 @@ export const runtime = 'edge';
 
 export default async function ViewShaderPage({ params }) {
     const supabase = await createClient();
+    const { data, error } = await supabase.auth.getUser();
     let { id } = await params;
     id = Number(id);
     if (Number.isNaN(id)) notFound();
     const shader = await fetchShader(supabase, id);
     if (!shader) notFound();
-    return <ViewShader id={id} shader={shader} />;
+    return <ViewShader id={id} shader={shader} user={error || !data?.user ? null : data.user} />;
 }

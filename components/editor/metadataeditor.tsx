@@ -9,6 +9,7 @@ import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { User } from '@supabase/supabase-js';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
     authorProfileAtom,
@@ -41,7 +42,7 @@ const VisibilityInput = styled(InputBase)(({ theme }) => ({
     }
 }));
 
-export const MetadataEditor = user => {
+export const MetadataEditor = ({ user }: { user: User }) => {
     const setCodeNeedSave = useSetAtom(codeNeedSaveAtom);
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
@@ -192,11 +193,9 @@ export const MetadataEditor = user => {
                             displayOnNull={false}
                         />
                         <Typography color={theme.palette.dracula.green}>
-                            {authorProfile.username ? (
-                                <Link href={`/userid/${authorProfile.id}`}>
-                                    {authorProfile.username}
-                                </Link>
-                            ) : null}
+                            <Link href={`/userid/${authorProfile.id}`}>
+                                {authorProfile.username ?? 'anonymous'}
+                            </Link>
                         </Typography>
                     </Stack>
                 ) : null}

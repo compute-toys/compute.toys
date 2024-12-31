@@ -6,7 +6,7 @@ export default function Index(props) {
     return (
         <div>
             {/* {props.shader ? buildHead(props.shader) : null} */}
-            <DynamicEditor />
+            <DynamicEditor user={props.user} />
         </div>
     );
 }
