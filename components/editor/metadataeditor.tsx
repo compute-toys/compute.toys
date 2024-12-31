@@ -22,6 +22,7 @@ import {
 } from 'lib/atoms/atoms';
 import { createClient } from 'lib/supabase/client';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ChangeEvent, useEffect } from 'react';
 import { CssTextField, theme } from 'theme/theme';
 import { canvasElAtom } from '../../lib/atoms/wgputoyatoms';
@@ -45,7 +46,7 @@ export const MetadataEditor = user => {
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
     const [visibility, setVisibility] = useAtom(visibilityAtom);
-    const [shaderID /*, setShaderID*/] = useAtom(shaderIDAtom);
+    const [shaderID, setShaderID] = useAtom(shaderIDAtom);
     const setShaderDataUrlThumb = useSetAtom(shaderDataUrlThumbAtom);
     const shadowCanvasEl = useAtomValue(shadowCanvasElAtom);
     const canvasEl = useAtomValue(canvasElAtom);
@@ -53,6 +54,7 @@ export const MetadataEditor = user => {
 
     const supabase = createClient();
     const [, upsertToHost] = useShaderSerDe(supabase);
+    const router = useRouter();
 
     //TODO: not the best place for this logic
     const upsertShader = async (forceCreate: boolean) => {
@@ -64,12 +66,14 @@ export const MetadataEditor = user => {
         const result: UpsertResult = await upsertToHost(dataUrl, forceCreate);
         if (result.success) {
             setCodeNeedSave(false);
-            // if (result.needsRedirect) {
-            //     setTimeout(() => {
-            //         setShaderID(result.id);
-            //         router.push(`/view/${result.id}`);
-            //     }, 0);
-            // }
+            if (result.needsRedirect) {
+                setTimeout(() => {
+                    setShaderID(result.id!);
+                    router.push(`/view/${result.id}`);
+                }, 0);
+            }
+        } else {
+            console.error(result.message);
         }
     };
 

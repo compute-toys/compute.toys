@@ -190,6 +190,7 @@ export default function useShaderSerDe(
                         })
                     }
                 ])
+                .select()
                 .single();
 
             if (error && status !== 406) {
