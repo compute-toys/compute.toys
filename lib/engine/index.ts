@@ -502,8 +502,10 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const start = performance.now();
 
         // Create ImageBitmap from data
-        const blob = new Blob([data], { type: 'image/png' });
-        const imageBitmap = await createImageBitmap(blob);
+        const imageBitmap = await createImageBitmap(new Blob([data]), {
+            premultiplyAlpha: 'none',
+            colorSpaceConversion: 'none'
+        });
 
         // Create texture
         let texture = this.wgpu.device.createTexture({
