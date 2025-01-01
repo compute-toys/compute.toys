@@ -141,11 +141,12 @@ export class Preprocessor {
                     }
 
                     // Pad array to fixed length
+                    const len = chars.length;
                     while (chars.length < STRING_MAX_LEN) {
                         chars.push(0);
                     }
 
-                    return `String(${chars.length}, array<u32,${STRING_MAX_LEN}>(${chars
+                    return `String(${len}, array<u32,${STRING_MAX_LEN}>(${chars
                         .map(c => `0x${c.toString(16).padStart(4, '0')}`)
                         .join(', ')}))`;
                 } catch (e) {
