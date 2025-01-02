@@ -13,7 +13,7 @@
     "lint": "eslint .",
     "fix": "eslint --fix .",
     "preview": "vite preview",
-    "pages:setup": "curl https://sh.rustup.rs -sSf | sh -s -- -y && . $HOME/.cargo/env && curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh",
+    "pages:setup": "curl https://sh.rustup.rs -sSf | sh -s -- -y && . $HOME/.cargo/env && curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && yarn build",
     "pages:preview": "wrangler pages dev"
   },
   "dependencies": {
