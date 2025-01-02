@@ -1,5 +1,5 @@
-import '@fontsource/lobster';
-import 'firacode';
+import '@fontsource/lobster/index.css';
+import 'firacode/distr/fira_code.css';
 
 export default function Logo() {
     return (

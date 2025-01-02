@@ -2,7 +2,7 @@ import darkScrollbar from '@mui/material/darkScrollbar';
 import Paper from '@mui/material/Paper';
 import { createTheme, styled } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
-import 'firacode';
+import 'firacode/distr/fira_code.css';
 import 'theme/themeModule';
 
 export const theme = createTheme({

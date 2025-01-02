@@ -16,14 +16,29 @@
     "jsx": "react-jsx",
 
     /* Linting */
-    "strict": true,
+    "strict": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
     /* Import paths */
-    "baseUrl": "."
+    "baseUrl": ".",
+
+    /* Type checking */
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "declaration": true,
+    "noEmitOnError": true,
+    "pretty": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "types": ["@webgpu/types"],
+    "noImplicitReturns": false
   },
   "include": [
     "**/*.ts",

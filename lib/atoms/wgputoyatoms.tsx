@@ -22,7 +22,7 @@ export const canvasParentElAtom = atom<HTMLElement | null, [HTMLElement | null],
         const target = get(canvasParentElBaseAtom);
         return target ? target : null;
     },
-    (get, set, newValue) => set(canvasParentElBaseAtom, newValue ? newValue : false)
+    (_get, set, newValue) => set(canvasParentElBaseAtom, newValue ? newValue : false)
 );
 
 type WgpuStatus = 'available' | 'unavailable' | 'unknown';

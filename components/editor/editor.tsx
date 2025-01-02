@@ -20,7 +20,7 @@ import Monaco from 'components/editor/monaco';
 import TexturePicker from 'components/editor/texturepicker';
 import UniformSliders from 'components/editor/uniformsliders';
 import { WgpuToyWrapper } from 'components/wgputoy';
-import 'firacode';
+import 'firacode/distr/fira_code.css';
 import { useSetAtom } from 'jotai';
 import { saveColorTransitionSignalAtom } from 'lib/atoms/atoms';
 import { canvasParentElAtom } from 'lib/atoms/wgputoyatoms';

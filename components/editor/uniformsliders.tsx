@@ -231,7 +231,7 @@ const UniformSlider = (props: UniformSliderProps) => {
                 max={sliderMaxRange}
                 valueLabelDisplay="auto"
                 value={sliderVal}
-                onChange={(event: Event, newValue: number | number[]) => {
+                onChange={(_event: Event, newValue: number | number[]) => {
                     setSliderVal(newValue as number);
                 }}
             />
