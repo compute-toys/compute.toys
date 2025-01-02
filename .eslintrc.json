@@ -1,7 +1,6 @@
 {
   "extends": [
     "eslint:recommended",
-    "next/core-web-vitals",
     "plugin:n/recommended",
     "prettier"
   ],
@@ -44,9 +43,7 @@
         "unusedExports": true,
         "ignoreExports": [
           "src/pages/index.tsx",
-          "theme/themeModule.ts",
-          "next-env.d.ts",
-          "next.config.mjs"
+          "theme/themeModule.ts"
         ]
       }
     ],

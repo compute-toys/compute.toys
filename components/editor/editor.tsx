@@ -24,12 +24,13 @@ import 'firacode';
 import { useSetAtom } from 'jotai';
 import { saveColorTransitionSignalAtom } from 'lib/atoms/atoms';
 import { canvasParentElAtom } from 'lib/atoms/wgputoyatoms';
-import dynamic from 'next/dynamic';
 import { useCallback } from 'react';
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import { Frame } from 'theme/theme';
 import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
+import Timer from 'components/timer';
+import Resolution from 'components/resolution';
 
 export default function Editor(props) {
     const setCanvasParentEl = useSetAtom(canvasParentElAtom);
@@ -39,11 +40,6 @@ export default function Editor(props) {
             setCanvasParentEl(parent);
         }
     }, []);
-
-    const Timer = dynamic(() => import('components/timer'), { ssr: false });
-    const Resolution = dynamic(() => import('components/resolution'), {
-        ssr: false
-    });
 
     let embedStyle = {};
     if (props.embed) {

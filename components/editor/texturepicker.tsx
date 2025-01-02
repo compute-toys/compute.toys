@@ -8,7 +8,6 @@ import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { customTexturesAtom, loadedTexturesAtom, Texture } from 'lib/atoms/atoms';
-import Image from 'next/image';
 import { Dispatch, Fragment, MouseEventHandler, SetStateAction, useState } from 'react';
 import { Item, theme } from 'theme/theme';
 
@@ -45,7 +44,7 @@ const TextureThumbsList = ({
                         });
                     }}
                 >
-                    <Image
+                    <img
                         style={{ borderRadius: '4px' }}
                         src={item.thumb || item.img}
                         alt={item.img}
@@ -152,13 +151,12 @@ export default function TexturePicker() {
                                 setPickerHidden(!pickerHidden);
                             }}
                         >
-                            <Image
+                            <img
                                 style={{ borderRadius: '4px' }}
                                 src={item.thumb || item.img}
                                 alt={'Channel ' + index + ' texture'}
                                 width={size}
                                 height={size}
-                                priority={true}
                             />
                             <ImageListItemBar subtitle={'channel' + index} />
                         </ImageListItem>

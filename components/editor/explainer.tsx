@@ -4,7 +4,6 @@ import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import { useAtomValue } from 'jotai';
 import { wgputoyPreludeAtom } from 'lib/atoms/wgputoyatoms';
-import Link from 'next/link';
 import { Fragment, useState } from 'react';
 
 import DraggableWindow from '../global/draggable-window';
@@ -136,49 +135,6 @@ const ExplainerBody = () => {
                 <br />
                 assert(1, isfinite(col.y))
             </pre>
-            <h1>Examples</h1>
-            <div style={{ fontWeight: 'bold', fontSize: '0.8rem' }}>
-                <Link href={'https://compute.toys/view/77'} target="_blank">
-                    Simple single pass shader
-                </Link>
-                <br />
-                <br />
-                <Link href={'https://compute.toys/view/46'} target="_blank">
-                    Preprocessor #include
-                </Link>
-                <br />
-                <br />
-                <Link href={'https://compute.toys/view/59'} target="_blank">
-                    Terminal overlay
-                </Link>
-                <br />
-                <br />
-                <Link href={'https://compute.toys/view/76'} target="_blank">
-                    Storage usage
-                </Link>
-                <br />
-                <br />
-                <Link href={'https://compute.toys/view/25'} target="_blank">
-                    Workgroup shared memory
-                </Link>
-                <br />
-                <br />
-                <Link href={'https://compute.toys/view/48'} target="_blank">
-                    Preprocessor #dispatch_count
-                </Link>
-                <br />
-                <br />
-                <Link href={'https://compute.toys/view/47'} target="_blank">
-                    Preprocessor #workgroup_count
-                </Link>
-                <br />
-                <br />
-                <Link href={'https://compute.toys/view/17'} target="_blank">
-                    Assert
-                </Link>
-                <br />
-                <br />
-            </div>
             <h1>Prelude</h1>
             Every shader begins with a common <i>prelude</i>. The prelude contains the data inputs
             and outputs for this shader, as well as a few helper functions and type definitions to

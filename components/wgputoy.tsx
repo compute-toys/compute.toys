@@ -2,12 +2,12 @@
 import WarningIcon from '@mui/icons-material/Warning';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import Logo from 'components/global/logo';
+import Controller from 'components/wgputoycontroller';
 import { useAtom, useSetAtom } from 'jotai';
 import { canvasElAtom, wgpuAvailabilityAtom } from 'lib/atoms/wgputoyatoms';
-import dynamic from 'next/dynamic';
 import { Suspense, useCallback, useState } from 'react';
 import { theme } from 'theme/theme';
-import Logo from './global/logo';
 
 export const WgpuToyWrapper = props => {
     const setCanvasEl = useSetAtom(canvasElAtom);
@@ -40,10 +40,6 @@ export const WgpuToyWrapper = props => {
     const onLoad = useCallback(() => {
         setLoaded(true);
     }, []);
-
-    const Controller = dynamic(() => import('./wgputoycontroller'), {
-        ssr: false
-    });
 
     return (
         <div style={props.style}>
