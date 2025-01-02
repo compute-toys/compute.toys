@@ -5,11 +5,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useAtom, useSetAtom } from 'jotai';
 import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useState } from 'react';
-
 import { customTexturesAtom, loadedTexturesAtom } from '../../lib/atoms/atoms';
 import { getTextureFromProvidedUrl } from '../../lib/util/textureutils';
 import { CssTextField, Item, theme } from '../../theme/theme';
-import AllowedTextureSources from './allowedtexturesources';
 
 export default function PickFileModal({
     open,
@@ -109,7 +107,6 @@ export default function PickFileModal({
                                 label: { color: theme.palette.dracula.cyan }
                             }}
                         />
-                        <AllowedTextureSources></AllowedTextureSources>
                         <Button
                             sx={
                                 validating

@@ -1,4 +1,3 @@
-import AllowedTextureResources from '../../config/allowedtexturesources.json';
 import { Texture } from '../atoms/atoms';
 
 const MAX_IMAGE_DIMENSION_PX = 8192;
@@ -10,37 +9,6 @@ const MAX_IMAGE_BYTE_SIZE = 30000000;
  * details to tell why
  */
 const GENERIC_LOAD_ERROR = 'Could not load image. Check that it is a valid';
-
-/**
- * Creates a validator function for each entry in allowedtexturesources.json
- *
- * @throws Error if there's an issue with the configuration
- */
-const domainValidators = AllowedTextureResources.map(resource => {
-    const trimmed = resource.domain.trim().toLowerCase();
-
-    // we're using the same domain list as the one that next.js uses. nextjs supports double wildcards,
-    // though that's too permissive
-    if (trimmed.startsWith('**')) {
-        throw new Error('** wildcard is not supported');
-    }
-
-    // nextjs * matches a single subdomain segment, so reproducing that logic here
-    if (trimmed.startsWith('*')) {
-        const wildCardSplit = trimmed.split('*');
-        if (wildCardSplit.length !== 2) {
-            throw new Error('Only one wildcard in allowed texture domain, at the start');
-        }
-
-        return (domain: string): boolean => {
-            const prefixSplit = domain.split(wildCardSplit[1]);
-            return !prefixSplit[0].includes('.');
-        };
-    }
-    return (domain: string): boolean => {
-        return domain === trimmed;
-    };
-});
 
 /**
  * Given a user-provided URL, check that:
@@ -62,10 +30,6 @@ const validateTextureUrl = (url: string): Promise<string> => {
             urlObj = new URL(withHttps);
         } catch {
             throw 'Invalid URL';
-        }
-
-        if (!domainValidators.some(validator => validator(urlObj.hostname))) {
-            throw 'URL not included in allowed domains';
         }
 
         fetch(urlObj)
