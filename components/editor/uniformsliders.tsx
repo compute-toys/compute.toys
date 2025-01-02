@@ -12,13 +12,7 @@ import Stack from '@mui/material/Stack';
 import { styled, useTheme } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import { useAtom, useSetAtom } from 'jotai';
-import {
-    manualReloadAtom,
-    sliderRefMapAtom,
-    sliderSerDeNeedsUpdateAtom,
-    sliderUpdateSignalAtom
-} from 'lib/atoms/atoms';
-import { UniformActiveSettings } from 'lib/db/serializeshader';
+import { manualReloadAtom, sliderRefMapAtom, sliderUpdateSignalAtom } from 'lib/atoms/atoms';
 import {
     ChangeEvent,
     FocusEvent,
@@ -48,34 +42,6 @@ interface UniformSliderProps {
     index: number;
     sliderRefMap: Map<string, UniformSliderRef>;
 }
-
-export const fromUniformActiveSettings = (sliderSerDeArray: Array<UniformActiveSettings>) => {
-    const sliderRefMap = new Map<string, UniformSliderRef>();
-
-    sliderSerDeArray.forEach((slider: UniformActiveSettings) => {
-        const uuid = UUID();
-        const sliderRef: UniformSliderRef = {
-            getVal: () => {
-                return slider.value;
-            },
-            getUniform: () => {
-                return slider.name;
-            },
-            getUUID: () => {
-                return uuid;
-            },
-            getMinRange: () => {
-                return slider.minRange;
-            },
-            getMaxRange: () => {
-                return slider.maxRange;
-            }
-        };
-        sliderRefMap.set(uuid, sliderRef);
-    });
-
-    return sliderRefMap;
-};
 
 // needs float: left to avoid drifting away from the absolute-positioned label
 const StyledTextField = styled(TextField)({
@@ -319,7 +285,6 @@ export default function UniformSliders() {
 
     // keeps a count of sliders and also force an update when the count changes
     const [sliderCount, setSliderCount] = useState(0);
-    const [sliderSerDeNeedsUpdate, setSliderSerDeNeedsUpdate] = useAtom(sliderSerDeNeedsUpdateAtom);
     const [sliderRefMap, setSliderRefMap] = useAtom(sliderRefMapAtom);
 
     const setManualReload = useSetAtom(manualReloadAtom);
@@ -367,14 +332,6 @@ export default function UniformSliders() {
         // recompile with new prelude
         setManualReload(true);
     };
-
-    useEffect(() => {
-        if (sliderSerDeNeedsUpdate) {
-            setSliderCount([...sliderRefMap.keys()].length);
-            setSliderSerDeNeedsUpdate(false);
-            setManualReload(true);
-        }
-    });
 
     const uniformTitle =
         sliderCount > 0 ? (

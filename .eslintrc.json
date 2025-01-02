@@ -43,8 +43,7 @@
         "missingExports": true,
         "unusedExports": true,
         "ignoreExports": [
-          "pages",
-          "src/pages",
+          "src/pages/index.tsx",
           "theme/themeModule.ts",
           "next-env.d.ts",
           "next.config.mjs"

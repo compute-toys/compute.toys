@@ -4,7 +4,6 @@ import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTransientAtom } from 'jotai-game';
 import {
     codeAtom,
-    dbLoadedAtom,
     entryPointsAtom,
     float32EnabledAtom,
     halfResolutionAtom,
@@ -23,7 +22,6 @@ import {
     sliderRefMapAtom,
     sliderUpdateSignalAtom,
     timerAtom,
-    titleAtom,
     widthAtom
 } from 'lib/atoms/atoms';
 import {
@@ -59,7 +57,6 @@ const WgpuToyController = props => {
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
     const [recording, setRecording] = useAtom(recordingAtom);
-    const title = useAtomValue(titleAtom);
 
     // must be transient so we can access updated value in play loop
     const [sliderUpdateSignal, setSliderUpdateSignal] = useTransientAtom(sliderUpdateSignalAtom);
@@ -67,7 +64,6 @@ const WgpuToyController = props => {
     const [needsInitialReset, setNeedsInitialReset] = useTransientAtom(needsInitialResetAtom);
     const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
     const [codeHot] = useTransientAtom(codeAtom);
-    const [dbLoaded] = useTransientAtom(dbLoadedAtom);
     const [hotReloadHot] = useTransientAtom(hotReloadAtom);
     const [sliderRefMap] = useTransientAtom(sliderRefMapAtom);
     const [timer, setTimer] = useTransientAtom(timerAtom);
@@ -148,7 +144,7 @@ const WgpuToyController = props => {
         results in the effect hook for manualReload never getting called.
      */
     const liveReloadCallback = useCallback(() => {
-        if (needsInitialReset() && dbLoaded()) {
+        if (needsInitialReset()) {
             awaitableReloadCallback().then(ready => {
                 // we don't want to reset in general except on load
                 if (ready && parseError().success) {
@@ -156,7 +152,7 @@ const WgpuToyController = props => {
                     setNeedsInitialReset(false);
                 }
             });
-        } else if (dbLoaded() && manualReload()) {
+        } else if (manualReload()) {
             reloadCallback();
         }
     }, []);
@@ -370,7 +366,7 @@ const WgpuToyController = props => {
                 document.body.appendChild(a);
                 a.style.display = 'none';
                 a.href = url;
-                const fileName = sanitizeString(title + ' - ' + getFormattedDateTime() + '.webm');
+                const fileName = sanitizeString(getFormattedDateTime() + '.webm');
                 a.download = fileName;
                 a.click();
                 window.URL.revokeObjectURL(url);
@@ -394,7 +390,7 @@ const WgpuToyController = props => {
                 mediaRecorder.stop();
             }
         }
-    }, [recording, title]);
+    }, [recording]);
 
     useEffect(() => {
         if (canvas !== false) {
@@ -538,11 +534,9 @@ const WgpuToyController = props => {
     useEffect(() => {
         if (isSafeContext(wgputoy)) {
             wgputoy.set_pass_f32(float32Enabled);
-            if (dbLoaded()) {
-                awaitableReloadCallback().then(() => {
-                    resetCallback();
-                });
-            }
+            awaitableReloadCallback().then(() => {
+                resetCallback();
+            });
         }
     }, [float32Enabled]);
 

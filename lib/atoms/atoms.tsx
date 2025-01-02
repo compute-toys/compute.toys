@@ -31,12 +31,6 @@ fn main_image(@builtin(global_invocation_id) id: vec3u) {
 }
 `;
 
-interface AuthorProfile {
-    username: string;
-    avatar_url: string;
-    id: string;
-}
-
 export interface Texture {
     img: string;
     thumb?: string;
@@ -64,20 +58,12 @@ export const scaleAtom = atom<number>(1);
 
 export const customTexturesAtom = atom<Texture[]>([]);
 
-export const dbLoadedAtom = atom<boolean>(false);
 export const saveColorTransitionSignalAtom = atom<string | false>(false);
 
 export const codeAtom = atomWithReset<string>(DEFAULT_SHADER);
 export const codeNeedSaveAtom = atomWithReset<boolean>(false);
 export const monacoEditorAtom = atomWithReset<Monaco.editor.IStandaloneCodeEditor | false>(false);
 
-export const authorProfileAtom = atomWithReset<AuthorProfile | false>(false);
-export const shaderIDAtom = atomWithReset<number | false>(false);
-export const titleAtom = atomWithReset<string>('New Shader');
-export const descriptionAtom = atomWithReset<string>('');
-
-export type Visibility = 'private' | 'unlisted' | 'public';
-export const visibilityAtom = atomWithReset<Visibility>('private');
 export const loadedTexturesAtom = atomWithReset<Texture[]>([
     { img: '/textures/blank.png' },
     { img: '/textures/blank.png' }
@@ -87,8 +73,6 @@ export const entryPointsAtom = atomWithReset([]);
 export const sliderRefMapAtom = atom<Map<string, UniformSliderRef>>(
     new Map<string, UniformSliderRef>()
 );
-export const sliderSerDeNeedsUpdateAtom = atomWithReset<boolean>(true);
 export const sliderUpdateSignalAtom = atom<boolean>(false);
-export const shaderDataUrlThumbAtom = atomWithReset<string>('');
 export const float32EnabledAtom = atomWithReset<boolean>(false);
 export const halfResolutionAtom = atomWithReset<boolean>(false);
