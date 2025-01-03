@@ -130,12 +130,14 @@ const ExplainerBody = () => {
             storage texture, which displays the result in the canvas on this page.
             <br />
             <br />
+            {/*
             Debugging assertions are supported with an <HiLite>assert</HiLite> helper function:
             <pre style={{ color: theme.palette.neutral.main }}>
                 assert(0, isfinite(col.x))
                 <br />
                 assert(1, isfinite(col.y))
             </pre>
+            */}
             <h1>Examples</h1>
             <div style={{ fontWeight: 'bold', fontSize: '0.8rem' }}>
                 <Link href={'https://compute.toys/view/77'} target="_blank">
@@ -173,11 +175,13 @@ const ExplainerBody = () => {
                 </Link>
                 <br />
                 <br />
+                {/*
                 <Link href={'https://compute.toys/view/17'} target="_blank">
                     Assert
                 </Link>
                 <br />
                 <br />
+                */}
             </div>
             <h1>Prelude</h1>
             Every shader begins with a common <i>prelude</i>. The prelude contains the data inputs
