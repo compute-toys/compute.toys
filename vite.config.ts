@@ -6,5 +6,6 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 
 // https://vite.dev/config/
 export default defineConfig({
+    base: './',
     plugins: [react(), tsconfigPaths(), wasm(), topLevelAwait()]
 });
