@@ -65,8 +65,8 @@ export const codeNeedSaveAtom = atomWithReset<boolean>(false);
 export const monacoEditorAtom = atomWithReset<Monaco.editor.IStandaloneCodeEditor | false>(false);
 
 export const loadedTexturesAtom = atomWithReset<Texture[]>([
-    { img: '/textures/blank.png' },
-    { img: '/textures/blank.png' }
+    { img: './textures/blank.png' },
+    { img: './textures/blank.png' }
 ]);
 export const entryPointsAtom = atomWithReset([]);
 // we create a new refmap when deserializing from DB, don't need a reset
