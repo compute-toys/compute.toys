@@ -2,7 +2,6 @@
 import WarningIcon from '@mui/icons-material/Warning';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Logo from 'components/global/logo';
 import Controller from 'components/wgputoycontroller';
 import { useAtom, useSetAtom } from 'jotai';
 import { canvasElAtom, wgpuAvailabilityAtom } from 'lib/atoms/wgputoyatoms';
@@ -64,8 +63,13 @@ export const WgpuToyWrapper = props => {
                     </Typography>
                     <Typography>WebGPU support was not detected in your browser.</Typography>
                     <Typography>
-                        For information on how to set up your browser to run WebGPU code, please see
-                        the instructions linked on the <Logo /> homepage.
+                        <a
+                            href="https://github.com/gpuweb/gpuweb/wiki/Implementation-Status"
+                            style={{ textDecoration: 'underline' }}
+                        >
+                            Click here
+                        </a>{' '}
+                        for further information about supported browsers.
                     </Typography>
                 </Stack>
             )}

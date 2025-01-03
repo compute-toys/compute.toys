@@ -8,13 +8,14 @@ import { Fragment, useState } from 'react';
 
 import DraggableWindow from '../global/draggable-window';
 import { HiLite } from '../global/hilite';
-import Logo from '../global/logo';
 
 const EXPLAINER_INNER_HEIGHT = '570';
 
 const ExplainerBody = () => {
     const theme = useTheme();
     const prelude = useAtomValue(wgputoyPreludeAtom);
+
+    const Logo = () => <>compute.toys</>;
 
     return (
         <div
