@@ -30,7 +30,7 @@ export const wgpuAvailabilityAtom = atom<WgpuStatus>('unknown');
 
 export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async get => {
     if (!isSSR && get(canvasElAtom) !== false && get(canvasParentElAtom)) {
-        const parentEl = get(canvasParentElAtom);
+        const parentEl = get(canvasParentElAtom)!;
         const dim = getDimensions(parentEl.offsetWidth * window.devicePixelRatio);
         return create_renderer(dim.x, dim.y, (get(canvasElAtom) as HTMLCanvasElement).id);
     } else {

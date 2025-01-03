@@ -9,6 +9,7 @@ import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { User } from '@supabase/supabase-js';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import {
     authorProfileAtom,
@@ -20,12 +21,12 @@ import {
     Visibility,
     visibilityAtom
 } from 'lib/atoms/atoms';
+import { createClient } from 'lib/supabase/client';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { ChangeEvent, useEffect } from 'react';
 import { CssTextField, theme } from 'theme/theme';
 import { canvasElAtom } from '../../lib/atoms/wgputoyatoms';
-import { useAuth } from '../../lib/db/authcontext';
 import useShaderSerDe, { UpsertResult } from '../../lib/db/serializeshader';
 import Avatar from '../global/avatar';
 import { shadowCanvasElAtom, shadowCanvasToDataUrl } from '../global/shadowcanvas';
@@ -41,7 +42,7 @@ const VisibilityInput = styled(InputBase)(({ theme }) => ({
     }
 }));
 
-export const MetadataEditor = () => {
+export const MetadataEditor = ({ user }: { user?: User }) => {
     const setCodeNeedSave = useSetAtom(codeNeedSaveAtom);
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
@@ -51,8 +52,9 @@ export const MetadataEditor = () => {
     const shadowCanvasEl = useAtomValue(shadowCanvasElAtom);
     const canvasEl = useAtomValue(canvasElAtom);
     const authorProfile = useAtomValue(authorProfileAtom);
-    const [, upsertToHost] = useShaderSerDe();
-    const { user } = useAuth();
+
+    const supabase = createClient();
+    const [, upsertToHost] = useShaderSerDe(supabase);
     const router = useRouter();
 
     //TODO: not the best place for this logic
@@ -67,10 +69,12 @@ export const MetadataEditor = () => {
             setCodeNeedSave(false);
             if (result.needsRedirect) {
                 setTimeout(() => {
-                    setShaderID(result.id);
+                    setShaderID(result.id!);
                     router.push(`/view/${result.id}`);
                 }, 0);
             }
+        } else {
+            console.error(result.message);
         }
     };
 
@@ -189,11 +193,9 @@ export const MetadataEditor = () => {
                             displayOnNull={false}
                         />
                         <Typography color={theme.palette.dracula.green}>
-                            {authorProfile.username ? (
-                                <Link href={`/profile/${authorProfile.username}`}>
-                                    {authorProfile.username}
-                                </Link>
-                            ) : null}
+                            <Link href={`/userid/${authorProfile.id}`}>
+                                {authorProfile.username ?? 'anonymous'}
+                            </Link>
                         </Typography>
                     </Stack>
                 ) : null}

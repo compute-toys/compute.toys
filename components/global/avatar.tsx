@@ -1,5 +1,5 @@
+'use client';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { SUPABASE_AVATAR_BUCKET_NAME } from 'lib/db/supabaseclient';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -20,7 +20,7 @@ export default function Avatar({
     useEffect(() => {
         if (url) {
             if (!verbatim) {
-                setAvatarUrl(getFullyQualifiedSupabaseBucketURL(SUPABASE_AVATAR_BUCKET_NAME, url));
+                setAvatarUrl(getFullyQualifiedSupabaseBucketURL(url, true));
             } else {
                 setAvatarUrl(url);
             }

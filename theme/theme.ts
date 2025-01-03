@@ -1,3 +1,4 @@
+'use client';
 import darkScrollbar from '@mui/material/darkScrollbar';
 import Paper from '@mui/material/Paper';
 import { createTheme, styled } from '@mui/material/styles';

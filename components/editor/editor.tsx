@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { User } from '@supabase/supabase-js';
 import FullscreenButton from 'components/buttons/fullscreenbutton';
 import HotReloadToggle from 'components/buttons/hotreloadtoggle';
 import PlayPauseButton from 'components/buttons/playpausebutton';
@@ -26,13 +27,19 @@ import 'firacode';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { saveColorTransitionSignalAtom, shaderIDAtom } from 'lib/atoms/atoms';
 import { canvasParentElAtom } from 'lib/atoms/wgputoyatoms';
-import { supabase } from 'lib/db/supabaseclient';
+import { createClient } from 'lib/supabase/client';
 import dynamic from 'next/dynamic';
 import { useCallback } from 'react';
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import { Frame } from 'theme/theme';
 import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
+
+interface EditorProps {
+    user?: User;
+    standalone?: boolean;
+    embed?: boolean;
+}
 
 function Comments() {
     return (
@@ -54,9 +61,11 @@ function Comments() {
     );
 }
 
-export default function Editor(props) {
+export default function Editor(props: EditorProps) {
     const setCanvasParentEl = useSetAtom(canvasParentElAtom);
     const shaderID = useAtomValue(shaderIDAtom);
+
+    const supabase = createClient();
 
     const renderParentNodeRef = useCallback(parent => {
         if (parent) {
@@ -69,14 +78,14 @@ export default function Editor(props) {
         ssr: false
     });
 
-    let metadataEditor = null;
+    let metadataEditor: JSX.Element | null = null;
     if (supabase && !props.standalone) {
         metadataEditor = (
             <ItemWithTransitionSignal
                 sx={{ textAlign: 'left', marginTop: '20px' }}
                 transitionAtom={saveColorTransitionSignalAtom}
             >
-                <MetadataEditor />
+                <MetadataEditor user={props.user} />
             </ItemWithTransitionSignal>
         );
     }

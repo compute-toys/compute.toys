@@ -67,7 +67,7 @@ const copyToShadowCanvas = async (
         );
         shadowCanvas.width = dim.x;
         shadowCanvas.height = dim.y;
-        const shadowCtx = shadowCanvas.getContext('2d');
+        const shadowCtx = shadowCanvas.getContext('2d')!;
 
         const img = new window.Image();
         const dataUrl = canvas.toDataURL();

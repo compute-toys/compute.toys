@@ -104,7 +104,7 @@ const validate = (text: string, this_uuid: string, sliderRefMap: Map<string, Uni
     const matched = text.match(/^[a-zA-Z][a-zA-Z0-9_]*$/);
     const nameValid = matched && matched.length === 1;
     const foundDuplicate = [...sliderRefMap.keys()].find(uuid => {
-        return this_uuid !== uuid && sliderRefMap.get(uuid).getUniform() === text;
+        return this_uuid !== uuid && sliderRefMap.get(uuid)!.getUniform() === text;
     });
     return nameValid && !foundDuplicate;
 };
@@ -170,16 +170,16 @@ const UniformSlider = (props: UniformSliderProps) => {
     const initFromHost = props.sliderRefMap.has(props.uuid) && props.sliderRefMap.get(props.uuid);
 
     const [sliderVal, setSliderVal] = useState(
-        initFromHost ? props.sliderRefMap.get(props.uuid).getVal() : 0
+        initFromHost ? props.sliderRefMap.get(props.uuid)!.getVal() : 0
     );
     const [sliderUniform, setSliderUniform] = useState(
-        initFromHost ? props.sliderRefMap.get(props.uuid).getUniform() : 'uniform_' + props.index
+        initFromHost ? props.sliderRefMap.get(props.uuid)!.getUniform() : 'uniform_' + props.index
     );
     const [sliderMinRange, setSliderMinRange] = useState(
-        props.sliderRefMap.get(props.uuid).getMinRange() || 0
+        props.sliderRefMap.get(props.uuid)?.getMinRange() || 0
     );
     const [sliderMaxRange, setSliderMaxRange] = useState(
-        props.sliderRefMap.get(props.uuid).getMaxRange() || 1
+        props.sliderRefMap.get(props.uuid)?.getMaxRange() || 1
     );
 
     const setSliderUpdateSignal = useSetAtom(sliderUpdateSignalAtom);

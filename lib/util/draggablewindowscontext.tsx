@@ -1,3 +1,4 @@
+'use client';
 import { createContext, useContext, useState } from 'react';
 
 interface WindowManagementContextInterface {
@@ -7,7 +8,9 @@ interface WindowManagementContextInterface {
     uuidOrder: string[];
 }
 
-const WindowManagementContext = createContext<WindowManagementContextInterface>(undefined);
+const WindowManagementContext = createContext<WindowManagementContextInterface | undefined>(
+    undefined
+);
 
 export const WindowManagementProvider = ({ ...props }) => {
     const [uuids, setUuids] = useState<string[]>([]);

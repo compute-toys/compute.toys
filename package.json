@@ -14,7 +14,8 @@
     "fix": "next lint --fix",
     "pages:setup": "curl https://sh.rustup.rs -sSf | sh -s -- -y && . $HOME/.cargo/env && curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && npx @cloudflare/next-on-pages",
     "pages:build": "npx @cloudflare/next-on-pages",
-    "pages:preview": "wrangler pages dev"
+    "pages:preview": "wrangler pages dev",
+    "supabase:types": ". ./.env && supabase gen types typescript --project-id $NEXT_PUBLIC_SUPABASE_PROJECT_ID > types/database.types.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -30,8 +31,8 @@
     "@mui/material": "^5.16.7",
     "@mui/utils": "^6.1.7",
     "@react-hook/resize-observer": "^2.0.2",
-    "@supabase/gotrue-js": "^1.22.13",
-    "@supabase/supabase-js": "^1.35.2",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.47.10",
     "firacode": "^6.2.0",
     "jotai": "^2.10.4",
     "jotai-game": "^0.2.0",
@@ -60,7 +61,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "prettier": "^3.4.2",
     "prettier-plugin-organize-imports": "^4.1.0",
-    "supabase": "^1.219.2",
+    "supabase": "^2.1.1",
     "typescript": "^5.7.2",
     "vercel": "^39.2.4",
     "wrangler": "^3.99.0"
