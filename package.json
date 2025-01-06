@@ -27,7 +27,7 @@
     "@monaco-editor/react": "^4.4.5",
     "@mui/icons-material": "^5.16.13",
     "@mui/lab": "^5.0.0-alpha.175",
-    "@mui/material": "^5.16.7",
+    "@mui/material": "^5.16.13",
     "@mui/utils": "^6.1.7",
     "@react-hook/resize-observer": "^2.0.2",
     "@supabase/gotrue-js": "^1.22.13",
