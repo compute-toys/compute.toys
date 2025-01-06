@@ -519,10 +519,10 @@
   resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.7.tgz#d0ece53ce99ab5a8e37ebdfe5e32452a2bfc073e"
   integrity sha512-X8R8Oj771YRl/w+c1HqAC1szL8zWQRwFvgDwT129k9ACdBoud/+/rX9V0qiMl6LWUdP9voC2nDVZYPMQQsb6eA==
 
-"@fontsource/lobster@^5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@fontsource/lobster/-/lobster-5.1.0.tgz#0e969614724e508228d0a6808e39d683edb1c377"
-  integrity sha512-kEIt+NiswgZoA7loqiIXZKpO336yZjvvy3gvBj/hLYGPrZajDDGTr4bKEfsa7NmeD3cXYIO4FDiC5GfB0ONyQw==
+"@fontsource/lobster@^5.1.1":
+  version "5.1.1"
+  resolved "https://registry.yarnpkg.com/@fontsource/lobster/-/lobster-5.1.1.tgz#b4afbee3c90d5c699a85daa16788027997744442"
+  integrity sha512-NalmVtEQtEv80T658yl1T2CXf1+I8ypDSYz4bgxMdR9bMhVu2myguXY1exhBhPQ+iNKmxatoLuukJp/QgNaBOQ==
 
 "@fortawesome/fontawesome-common-types@6.7.2":
   version "6.7.2"
