@@ -173,16 +173,6 @@ const ExplainerBody = () => {
                 </Link>
                 <br />
                 <br />
-                <Link href={'https://compute.toys/view/25'} target="_blank">
-                    Workgroup shared memory
-                </Link>
-                <br />
-                <br />
-                <Link href={'https://compute.toys/view/210'} target="_blank">
-                    Threads execution order
-                </Link>
-                <br />
-                <br />
                 <Link href={'https://compute.toys/view/47'} target="_blank">
                     Preprocessor #workgroup_count
                 </Link>
@@ -198,6 +188,16 @@ const ExplainerBody = () => {
                 </Link>
                 <br />
                 <br />
+                <Link href={'https://compute.toys/view/25'} target="_blank">
+                    Workgroup shared memory
+                </Link>
+                <br />
+                <br />
+                <Link href={'https://compute.toys/view/210'} target="_blank">
+                    Threads execution order
+                </Link>
+                <br />
+                <br />
                 <Link href={'https://compute.toys/view/1199'} target="_blank">
                     Enable WGSL extension
                 </Link>
@@ -209,12 +209,7 @@ const ExplainerBody = () => {
                 <br />
                 <br />
                 <Link href={'https://compute.toys/view/59'} target="_blank">
-                    Text overlay
-                </Link>
-                <br />
-                <br />
-                <Link href={'https://compute.toys/view/677'} target="_blank">
-                    Mouse & keyboard
+                    Terminal text overlay
                 </Link>
                 <br />
                 <br />
