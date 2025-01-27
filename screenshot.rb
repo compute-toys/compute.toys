@@ -4,6 +4,7 @@ require 'base64'
 require 'fileutils'
 require 'json'
 require 'open-uri'
+require 'net/http'
 require 'rest-client'
 require 'screenshot'
 require 'tmpdir'
@@ -124,7 +125,7 @@ begin
     end
 
     puts "Downloading from: #{image_url}"
-    image_data = URI.open(image_url).read
+    image_data = Net::HTTP.get(URI.parse(image_url))
     save_locally(screenshot, image_data)
 
     if ENV['GITHUB_TOKEN']

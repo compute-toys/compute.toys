@@ -14,7 +14,7 @@ jobs:
       pull-requests: write
       deployments: write
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - run: echo Deploying ${{ github.event.pull_request.head.sha }}
     - name: Await CF Pages
       id: cf-pages
