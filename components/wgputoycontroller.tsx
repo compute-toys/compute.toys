@@ -535,16 +535,14 @@ const WgpuToyController = props => {
     useResizeObserver(parentRef, () => {
         if (!needsInitialReset() && isSafeContext(wgputoy) && updateResolution()) {
             wgputoy.resize(width(), height(), scale());
-            wgputoy.reset();
-            recompile();
+            resetCallback();
         }
     });
 
     useEffect(() => {
         if (!needsInitialReset() && isSafeContext(wgputoy) && updateResolution()) {
             wgputoy.resize(width(), height(), scale());
-            wgputoy.reset();
-            recompile();
+            resetCallback();
         }
     }, [halfResolution]);
 

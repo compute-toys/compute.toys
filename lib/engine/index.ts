@@ -3,6 +3,7 @@
  * TypeScript port of the Rust compute-toys project
  */
 
+import { Mutex } from 'async-mutex';
 import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
 import { WgpuContext } from './context';
@@ -45,6 +46,8 @@ export class WgpuToyRenderer {
     // private querySet?: GPUQuerySet;
     private lastStats: number = performance.now();
     // private source: SourceMap;
+
+    private compileMutex = new Mutex();
 
     // static readonly STATS_PERIOD = 100;
     // static readonly ASSERTS_SIZE = 40; // NUM_ASSERT_COUNTERS * 4
@@ -220,6 +223,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      * Compile preprocessed shader code
      */
     async compile(source: SourceMap): Promise<void> {
+        const release = await this.compileMutex.acquire();
         const start = performance.now();
         const prelude = source.extensions + this.getPrelude();
         const preludeLines = countNewlines(prelude);
@@ -291,12 +295,16 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         console.log(`Shader compiled in ${(performance.now() - start).toFixed(2)}ms`);
         // this.source = source;
+        release();
     }
 
     /**
      * Main render function
      */
     async render(): Promise<void> {
+        if (this.compileMutex.isLocked()) {
+            return;
+        }
         try {
             const textureView = this.wgpu.surface.getCurrentTexture().createView();
 
@@ -332,41 +340,46 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             // Dispatch compute passes
             let dispatchCounter = 0;
             for (const pipeline of this.computePipelines) {
-                if (!pipeline.dispatchOnce || this.bindings.time.host.frame === 0) {
-                    for (let i = 0; i < pipeline.dispatchCount; i++) {
-                        const pass = encoder.beginComputePass();
-
-                        const workgroupCount = pipeline.workgroupCount ?? [
-                            Math.ceil(this.screenWidth / pipeline.workgroupSize[0]),
-                            Math.ceil(this.screenHeight / pipeline.workgroupSize[1]),
-                            1
-                        ];
-
-                        // Update dispatch info
-                        this.wgpu.queue.writeBuffer(
-                            this.bindings.dispatchInfo.device,
-                            dispatchCounter * 256,
-                            new Uint32Array([i])
-                        );
-
-                        pass.setPipeline(pipeline.pipeline);
-                        pass.setBindGroup(0, this.computeBindGroup, [dispatchCounter * 256]);
-                        pass.dispatchWorkgroups(...workgroupCount);
-                        pass.end();
-
-                        // Copy write texture to read texture
-                        encoder.copyTextureToTexture(
-                            { texture: this.bindings.texWrite.texture() },
-                            { texture: this.bindings.texRead.texture() },
-                            {
-                                width: this.screenWidth,
-                                height: this.screenHeight,
-                                depthOrArrayLayers: 4
-                            }
-                        );
-
-                        dispatchCounter++;
+                if (pipeline.dispatchOnce) {
+                    if (this.bindings.time.host.frame === 0) {
+                        console.log(`Dispatching ${pipeline.name} once`);
+                    } else {
+                        continue;
                     }
+                }
+                for (let i = 0; i < pipeline.dispatchCount; i++) {
+                    const pass = encoder.beginComputePass();
+
+                    const workgroupCount = pipeline.workgroupCount ?? [
+                        Math.ceil(this.screenWidth / pipeline.workgroupSize[0]),
+                        Math.ceil(this.screenHeight / pipeline.workgroupSize[1]),
+                        1
+                    ];
+
+                    // Update dispatch info
+                    this.wgpu.queue.writeBuffer(
+                        this.bindings.dispatchInfo.device,
+                        dispatchCounter * 256,
+                        new Uint32Array([i])
+                    );
+
+                    pass.setPipeline(pipeline.pipeline);
+                    pass.setBindGroup(0, this.computeBindGroup, [dispatchCounter * 256]);
+                    pass.dispatchWorkgroups(...workgroupCount);
+                    pass.end();
+
+                    // Copy write texture to read texture
+                    encoder.copyTextureToTexture(
+                        { texture: this.bindings.texWrite.texture() },
+                        { texture: this.bindings.texRead.texture() },
+                        {
+                            width: this.screenWidth,
+                            height: this.screenHeight,
+                            depthOrArrayLayers: 4
+                        }
+                    );
+
+                    dispatchCounter++;
                 }
             }
 
