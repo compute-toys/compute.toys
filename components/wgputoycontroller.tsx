@@ -80,7 +80,7 @@ const WgpuToyController = props => {
     // "hot" access and effect hook access for code
     const code = useAtomValue(codeAtom);
 
-    const [parseError, setParseError] = useTransientAtom(parseErrorAtom);
+    const [, setParseError] = useTransientAtom(parseErrorAtom);
     const loadedTextures = useAtomValue(loadedTexturesAtom);
     const setEntryPoints = useSetAtom(entryPointsAtom);
     const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
