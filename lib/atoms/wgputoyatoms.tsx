@@ -28,7 +28,9 @@ export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async get => {
     const parentEl = get(canvasParentElAtom);
     if (!parentEl) return false;
     const dim = getDimensions(parentEl.offsetWidth * window.devicePixelRatio);
-    return WgpuToyRenderer.create(dim.x, dim.y, canvas);
+    const engine = await WgpuToyRenderer.create(dim.x, dim.y, canvas);
+    console.log('WebGPU engine created');
+    return engine;
 });
 
 export const wgputoyPreludeAtom = atom<string>('');

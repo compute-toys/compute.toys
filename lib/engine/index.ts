@@ -441,7 +441,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      */
     setPassF32(passF32: boolean): void {
         this.passF32 = passF32;
-        this.reset();
+        // this.reset();
     }
 
     /**
@@ -455,7 +455,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         this.wgpu.height = this.screenHeight;
         this.wgpu.surface.configure(this.wgpu.surfaceConfig);
 
-        this.reset();
+        // this.reset();
     }
 
     /**

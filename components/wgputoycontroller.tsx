@@ -45,6 +45,7 @@ declare global {
 }
 
 const needsInitialResetAtom = atom<boolean>(false);
+const performingInitialResetAtom = atom<boolean>(false);
 
 /*
     Controller component. Returns null because we expect to be notified
@@ -65,6 +66,9 @@ const WgpuToyController = props => {
     const [sliderUpdateSignal, setSliderUpdateSignal] = useTransientAtom(sliderUpdateSignalAtom);
     const [manualReload, setManualReload] = useTransientAtom(manualReloadAtom);
     const [needsInitialReset, setNeedsInitialReset] = useTransientAtom(needsInitialResetAtom);
+    const [performingInitialReset, setPerformingInitialReset] = useTransientAtom(
+        performingInitialResetAtom
+    );
     const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
     const [codeHot] = useTransientAtom(codeAtom);
     const [dbLoaded] = useTransientAtom(dbLoadedAtom);
@@ -88,7 +92,7 @@ const WgpuToyController = props => {
     const parentRef = useAtomValue<HTMLElement | null>(canvasParentElAtom);
 
     const [width, setWidth] = useTransientAtom(widthAtom);
-    const [, setHeight] = useTransientAtom(heightAtom);
+    const [height, setHeight] = useTransientAtom(heightAtom);
     const [scale, setScale] = useTransientAtom(scaleAtom);
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
@@ -104,42 +108,28 @@ const WgpuToyController = props => {
                 values.push(sliderRefMap().get(uuid).getVal());
             }, this);
             if (names.length > 0) {
+                // console.log(`Setting uniforms: ${names} with values: ${values}`);
                 await wgputoy.setCustomFloats(names, Float32Array.from(values));
             }
             setSliderUpdateSignal(false);
         }
     }, []);
 
-    const reloadCallback = useCallback(() => {
-        updateUniforms().then(() => {
-            if (isSafeContext(wgputoy)) {
-                wgputoy.preprocess(codeHot()).then(s => {
-                    if (s) {
-                        wgputoy.compile(s);
-                        setPrelude(wgputoy.getPrelude());
-                        wgputoy.render();
-                    }
-                });
-                setManualReload(false);
-            }
-        });
-    }, []);
-
-    const awaitableReloadCallback = async () => {
-        return updateUniforms().then(() => {
-            if (isSafeContext(wgputoy)) {
-                wgputoy.preprocess(codeHot()).then(s => {
-                    if (s) {
-                        wgputoy.compile(s);
-                        setPrelude(wgputoy.getPrelude());
-                        wgputoy.render();
-                    }
-                });
-                return true;
+    const recompile = async () => {
+        await updateUniforms();
+        if (isSafeContext(wgputoy)) {
+            console.log('Recompiling shader...');
+            const s = await wgputoy.preprocess(codeHot());
+            if (s) {
+                await wgputoy.compile(s);
+                setPrelude(wgputoy.getPrelude());
+                wgputoy.render();
             } else {
-                return false;
+                console.error('Recompilation failed');
             }
-        });
+            return true;
+        }
+        return false;
     };
 
     /*
@@ -147,42 +137,68 @@ const WgpuToyController = props => {
         where manualReload gets set before the controller is loaded, which
         results in the effect hook for manualReload never getting called.
      */
-    const liveReloadCallback = useCallback(() => {
-        if (needsInitialReset() && dbLoaded()) {
-            awaitableReloadCallback().then(ready => {
-                // we don't want to reset in general except on load
-                if (ready && parseError().success) {
-                    resetCallback();
-                    setNeedsInitialReset(false);
+    useAnimationFrame(async e => {
+        if (!isSafeContext(wgputoy)) {
+            return;
+        }
+        if (sliderUpdateSignal() && !needsInitialReset()) {
+            await updateUniforms();
+        }
+        if (performingInitialReset()) {
+            // wait for initial reset to complete
+        } else if (needsInitialReset() && dbLoaded()) {
+            console.log('Initialising engine...');
+            setPerformingInitialReset(true);
+            if (!isSafeContext(wgputoy)) {
+                console.error('Initialisation aborted: engine not available');
+                return;
+            }
+            wgputoy.onSuccess(handleSuccess);
+            wgputoy.onError(handleError);
+            setTimer(0);
+            wgputoy.setPassF32(float32Enabled);
+            updateResolution();
+            wgputoy.resize(width(), height(), scale());
+            wgputoy.reset();
+            loadTexture(0, loadedTextures[0].img);
+            loadTexture(1, loadedTextures[1].img);
+            await updateUniforms();
+            console.log('Compiling shader...');
+            const s = await wgputoy.preprocess(codeHot());
+            if (!s) {
+                console.error('Initialisation aborted: shader compilation failed');
+                return;
+            }
+            await wgputoy.compile(s);
+            setPrelude(wgputoy.getPrelude());
+            wgputoy.render();
+            setManualReload(false);
+            setNeedsInitialReset(false);
+            setPerformingInitialReset(false);
+            console.log('Initialisation complete');
+        } else if (dbLoaded() && manualReload()) {
+            console.log('Manual reload triggered');
+            recompile().then(ready => {
+                if (ready) {
+                    setManualReload(false);
                 }
             });
-        } else if (dbLoaded() && manualReload()) {
-            reloadCallback();
         }
-    }, []);
-
-    useAnimationFrame(e => {
-        if (isSafeContext(wgputoy)) {
-            if (sliderUpdateSignal()) {
-                updateUniforms().then(() => {
-                    liveReloadCallback();
-                });
-            } else {
-                liveReloadCallback();
+        if (needsInitialReset()) {
+            return;
+        }
+        if (sliderUpdateSignal() && !isPlaying()) {
+            wgputoy.setTimeDelta(e.delta);
+            wgputoy.render();
+        } else if (isPlaying() || manualReload()) {
+            let t = timer();
+            if (!manualReload()) {
+                t += e.delta;
             }
-            if (sliderUpdateSignal() && !isPlaying()) {
-                wgputoy.setTimeDelta(e.delta);
-                wgputoy.render();
-            } else if (isPlaying() || manualReload()) {
-                let t = timer();
-                if (!manualReload()) {
-                    t += e.delta;
-                }
-                setTimer(t);
-                wgputoy.setTimeElapsed(t);
-                wgputoy.setTimeDelta(e.delta);
-                wgputoy.render();
-            }
+            setTimer(t);
+            wgputoy.setTimeElapsed(t);
+            wgputoy.setTimeDelta(e.delta);
+            wgputoy.render();
         }
     });
 
@@ -195,10 +211,11 @@ const WgpuToyController = props => {
     }, []);
 
     const resetCallback = useCallback(() => {
-        if (isSafeContext(wgputoy)) {
+        if (!needsInitialReset() && isSafeContext(wgputoy)) {
+            console.log('Resetting engine...');
             setTimer(0);
             wgputoy.reset();
-            reloadCallback();
+            recompile();
         }
     }, []);
 
@@ -225,6 +242,7 @@ const WgpuToyController = props => {
 
     const loadTexture = useCallback((index: number, uri: string) => {
         if (isSafeContext(wgputoy)) {
+            console.log(`Loading texture ${index} from ${uri}`);
             fetch(uri)
                 .then(response => {
                     if (!response.ok) {
@@ -258,6 +276,7 @@ const WgpuToyController = props => {
     useEffect(() => {
         const handleKeyDown = e => {
             if (isSafeContext(wgputoy)) {
+                // console.log(`Key down: ${e.keyCode}`);
                 if (typeof e.keyCode === 'number') wgputoy.setKeydown(e.keyCode, true);
             }
         };
@@ -271,6 +290,7 @@ const WgpuToyController = props => {
     useEffect(() => {
         const handleKeyUp = e => {
             if (isSafeContext(wgputoy)) {
+                // console.log(`Key up: ${e.keyCode}`);
                 if (typeof e.keyCode === 'number') wgputoy.setKeydown(e.keyCode, false);
             }
         };
@@ -400,6 +420,7 @@ const WgpuToyController = props => {
         if (canvas !== false) {
             const handleMouseMove = (e: MouseEvent) => {
                 if (isSafeContext(wgputoy)) {
+                    // console.log(`Mouse move: ${e.offsetX}, ${e.offsetY}`);
                     wgputoy.setMousePos(
                         e.offsetX / canvas.clientWidth,
                         e.offsetY / canvas.clientHeight
@@ -412,6 +433,7 @@ const WgpuToyController = props => {
 
             const handleMouseUp = () => {
                 if (isSafeContext(wgputoy)) {
+                    // console.log('Mouse up');
                     wgputoy.setMouseClick(false);
                     canvas.onmousemove = null;
                 }
@@ -419,6 +441,7 @@ const WgpuToyController = props => {
 
             const handleMouseDown = (e: MouseEvent) => {
                 if (isSafeContext(wgputoy)) {
+                    // console.log('Mouse down');
                     wgputoy.setMouseClick(true);
                     handleMouseMove(e);
                     canvas.onmousemove = handleMouseMove;
@@ -428,13 +451,6 @@ const WgpuToyController = props => {
             canvas.onmousedown = handleMouseDown;
             canvas.onmouseup = handleMouseUp;
             canvas.onmouseleave = handleMouseUp;
-        }
-    }, []);
-
-    useEffect(() => {
-        if (isSafeContext(wgputoy)) {
-            wgputoy.onSuccess(handleSuccess);
-            wgputoy.onError(handleError);
         }
     }, []);
 
@@ -463,7 +479,12 @@ const WgpuToyController = props => {
             special case where we're paused and a reload is called
         */
         if (hotReload || (!isPlaying() && manualReload())) {
-            reloadCallback();
+            console.log('Hot reload triggered...');
+            recompile().then(ready => {
+                if (ready) {
+                    setManualReload(false);
+                }
+            });
         }
     }, [code, hotReload, manualReload()]);
 
@@ -493,26 +514,39 @@ const WgpuToyController = props => {
                     (parentRef.offsetWidth - padding) * window.devicePixelRatio
                 );
             }
-            const newScale = halfResolution ? 0.5 : 1;
-            if (dimensions.x !== width() || newScale !== scale()) {
-                setWidth(dimensions.x);
-                setHeight(dimensions.y);
-                setScale(newScale);
-                wgputoy.resize(dimensions.x, dimensions.y, newScale);
-                reloadCallback();
-            }
             if (canvas) {
                 canvas.width = dimensions.x;
                 canvas.height = dimensions.y;
                 canvas.style.width = `${dimensions.x / window.devicePixelRatio}px`;
                 canvas.style.height = `${dimensions.y / window.devicePixelRatio}px`;
             }
+            const newScale = halfResolution ? 0.5 : 1;
+            if (dimensions.x !== width() || newScale !== scale()) {
+                console.log(`Resizing to ${dimensions.x}x${dimensions.y} @ ${newScale}x`);
+                setWidth(dimensions.x);
+                setHeight(dimensions.y);
+                setScale(newScale);
+                return true;
+            }
         }
+        return false;
     };
 
-    useResizeObserver(parentRef, updateResolution);
+    useResizeObserver(parentRef, () => {
+        if (!needsInitialReset() && isSafeContext(wgputoy) && updateResolution()) {
+            wgputoy.resize(width(), height(), scale());
+            wgputoy.reset();
+            recompile();
+        }
+    });
 
-    useEffect(updateResolution, [halfResolution]);
+    useEffect(() => {
+        if (!needsInitialReset() && isSafeContext(wgputoy) && updateResolution()) {
+            wgputoy.resize(width(), height(), scale());
+            wgputoy.reset();
+            recompile();
+        }
+    }, [halfResolution]);
 
     useEffect(() => {
         if (reset) {
@@ -522,11 +556,15 @@ const WgpuToyController = props => {
     }, [reset]);
 
     useEffect(() => {
-        loadTexture(0, loadedTextures[0].img);
+        if (!needsInitialReset()) {
+            loadTexture(0, loadedTextures[0].img);
+        }
     }, [loadedTextures[0]]);
 
     useEffect(() => {
-        loadTexture(1, loadedTextures[1].img);
+        if (!needsInitialReset()) {
+            loadTexture(1, loadedTextures[1].img);
+        }
     }, [loadedTextures[1]]);
 
     useEffect(() => {
@@ -537,10 +575,12 @@ const WgpuToyController = props => {
     }, [requestFullscreenSignal]);
 
     useEffect(() => {
-        if (isSafeContext(wgputoy)) {
+        if (!needsInitialReset() && isSafeContext(wgputoy)) {
+            console.log(`Setting passF32 to ${float32Enabled}`);
             wgputoy.setPassF32(float32Enabled);
+            wgputoy.reset();
             if (dbLoaded()) {
-                awaitableReloadCallback().then(() => {
+                recompile().then(() => {
                     resetCallback();
                 });
             }
