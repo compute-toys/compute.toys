@@ -28,14 +28,16 @@ interface ComputePipeline {
 /**
  * Core renderer class for compute toy
  */
-export class WgpuToyRenderer {
+export class ComputeEngine {
+    private static instance: ComputeEngine | null = null;
+
     private device: GPUDevice;
-    private surface: GPUCanvasContext;
-    private surfaceConfig: GPUCanvasConfiguration;
+
+    private surface?: GPUCanvasContext;
     private screenWidth: number;
     private screenHeight: number;
 
-    private bindings: Bindings;
+    private bindings?: Bindings;
     private computePipelineLayout: GPUPipelineLayout;
     private lastComputePipelines?: ComputePipeline[];
     private computePipelines: ComputePipeline[] = [];
@@ -43,7 +45,7 @@ export class WgpuToyRenderer {
     private computeBindGroupLayout: GPUBindGroupLayout;
     private onSuccessCb?: (entryPoints: string[]) => void;
     private onErrorCb?: (summary: string, row: number, col: number) => void;
-    private passF32: boolean;
+    private passF32: boolean = false;
     private screenBlitter: Blitter;
     // private querySet?: GPUQuerySet;
     private lastStats: number = performance.now();
@@ -59,54 +61,14 @@ export class WgpuToyRenderer {
     /**
      * Create a new renderer instance
      */
-    constructor(device: GPUDevice, context: GPUCanvasContext, config: GPUCanvasConfiguration, width: number, height: number) {
+    private constructor(device: GPUDevice) {
         this.device = device;
-        this.surface = context;
-        this.surfaceConfig = config;
-        this.screenWidth = width;
-        this.screenHeight = height;
-
-        this.passF32 = false;
-
-        // Initialize bindings
-        this.bindings = new Bindings(this.device, this.screenWidth, this.screenHeight, this.passF32);
-
-        // Set up pipeline and bind group layouts
-        this.computeBindGroupLayout = this.bindings.createBindGroupLayout(this.device);
-        this.computePipelineLayout = this.bindings.createPipelineLayout(
-            this.device,
-            this.computeBindGroupLayout
-        );
-        this.computeBindGroup = this.bindings.createBindGroup(
-            this.device,
-            this.computeBindGroupLayout
-        );
-
-        // Set up screen blitting
-        this.screenBlitter = new Blitter(
-            this.device,
-            this.bindings.texScreen.view,
-            ColorSpace.Linear,
-            this.surfaceConfig.format,
-            'nearest'
-        );
-
-        // this.source = new SourceMap();
     }
 
     /**
      * Factory method to create a new renderer
      */
-    static async create(
-        width: number,
-        height: number,
-        canvas: HTMLCanvasElement
-    ): Promise<WgpuToyRenderer> {
-        const context = canvas.getContext('webgpu');
-        if (!context) {
-            throw new Error('WebGPU not supported');
-        }
-
+    public static async create(): Promise<void> {
         // Initialize WebGPU adapter and device
         const adapter = await navigator.gpu.requestAdapter({
             powerPreference: 'high-performance'
@@ -124,25 +86,37 @@ export class WgpuToyRenderer {
             // requiredFeatures: [...adapter.features],
         });
 
-        const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+        if (ComputeEngine.instance) {
+            console.log('Destroying existing engine');
+            ComputeEngine.instance.device.destroy();
+        }
+        ComputeEngine.instance = new ComputeEngine(device);
+        console.log('WebGPU engine created');
+    }
 
-        // Configure the swap chain
-        const config: GPUCanvasConfiguration = {
-            device,
+    /**
+     * Get the current renderer instance
+     */
+    public static getInstance(): ComputeEngine {
+        if (!ComputeEngine.instance) {
+            throw new Error('WebGPU engine not initialised');
+        }
+        return ComputeEngine.instance;
+    }
+
+    public setSurface(canvas: HTMLCanvasElement) {
+        this.surface = canvas.getContext('webgpu');
+        if (!this.surface) {
+            throw new Error('WebGPU not supported');
+        }
+        const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+        this.surface.configure({
+            device: this.device,
             format: presentationFormat,
             alphaMode: 'opaque',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
-            viewFormats: [
-                presentationFormat
-                // Add SRGB/non-SRGB variants as needed
-                // presentationFormat === 'bgra8unorm' ? 'bgra8unorm-srgb' : 'bgra8unorm',
-                // presentationFormat === 'rgba8unorm' ? 'rgba8unorm-srgb' : 'rgba8unorm'
-            ].filter((format): format is GPUTextureFormat => !!format)
-        };
-
-        context.configure(config);
-
-        return new WgpuToyRenderer(device, context, config, width, height);
+            viewFormats: [presentationFormat]
+        });
     }
 
     /**
@@ -374,8 +348,8 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             // }
 
             // Handle shader errors
-            if (WgpuToyRenderer.shaderError) {
-                WgpuToyRenderer.shaderError = false;
+            if (ComputeEngine.shaderError) {
+                ComputeEngine.shaderError = false;
                 if (this.lastComputePipelines) {
                     this.computePipelines = this.lastComputePipelines;
                 }
@@ -525,10 +499,12 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             this.passF32
         );
 
-        // Copy over dynamic state
-        newBindings.custom = this.bindings.custom;
-        // newBindings.userData = this.bindings.userData;
-        newBindings.channels = this.bindings.channels;
+        if (this.bindings) {
+            // Copy over dynamic state
+            newBindings.custom = this.bindings.custom;
+            // newBindings.userData = this.bindings.userData;
+            newBindings.channels = this.bindings.channels;
+        }
 
         // Clean up old bindings
         // this.bindings.destroy();
@@ -541,11 +517,12 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         this.computeBindGroupLayout = layout;
 
         // Recreate screen blitter
+        const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
         this.screenBlitter = new Blitter(
             this.device,
             this.bindings.texScreen.view,
             ColorSpace.Linear,
-            this.surfaceConfig.format,
+            presentationFormat,
             'linear'
         );
     }
@@ -680,10 +657,5 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         );
 
         console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
-    }
-
-    destroy() {
-        console.log('Destroying engine');
-        this.device.destroy();
     }
 }

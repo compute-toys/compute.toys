@@ -1,9 +1,5 @@
 'use client';
 import { atom } from 'jotai';
-import { WgpuToyRenderer } from 'lib/engine';
-import { getDimensions } from '../../types/canvasdimensions';
-
-const isSSR = typeof window === 'undefined';
 
 // Using 'false' here to satisfy type checker for Jotai's function overloads
 export const canvasElAtom = atom<HTMLCanvasElement | false>(false);
@@ -21,20 +17,4 @@ export const canvasParentElAtom = atom<HTMLElement | null, [HTMLElement | null],
 type WgpuStatus = 'available' | 'unavailable' | 'unknown';
 export const wgpuAvailabilityAtom = atom<WgpuStatus>('unknown');
 
-export const wgputoyAtom = atom<Promise<WgpuToyRenderer | false>>(async get => {
-    if (isSSR) return false;
-    const canvas = get(canvasElAtom);
-    if (!canvas) return false;
-    const parentEl = get(canvasParentElAtom);
-    if (!parentEl) return false;
-    const dim = getDimensions(parentEl.offsetWidth * window.devicePixelRatio);
-    const engine = await WgpuToyRenderer.create(dim.x, dim.y, canvas);
-    console.log('WebGPU engine created');
-    return engine;
-});
-
 export const wgputoyPreludeAtom = atom<string>('');
-
-// type predicate
-export const isSafeContext = (context: WgpuToyRenderer | false): context is WgpuToyRenderer =>
-    context !== false;
