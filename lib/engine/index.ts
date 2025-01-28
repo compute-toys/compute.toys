@@ -6,7 +6,6 @@
 import { Mutex } from 'async-mutex';
 import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
-import { WgpuContext } from './context';
 import { loadHDR } from './hdr';
 import { Preprocessor, SourceMap } from './preprocessor';
 import { countNewlines } from './utils';
@@ -30,9 +29,12 @@ interface ComputePipeline {
  * Core renderer class for compute toy
  */
 export class WgpuToyRenderer {
-    private wgpu: WgpuContext;
+    private device: GPUDevice;
+    private surface: GPUCanvasContext;
+    private surfaceConfig: GPUCanvasConfiguration;
     private screenWidth: number;
     private screenHeight: number;
+
     private bindings: Bindings;
     private computePipelineLayout: GPUPipelineLayout;
     private lastComputePipelines?: ComputePipeline[];
@@ -57,32 +59,35 @@ export class WgpuToyRenderer {
     /**
      * Create a new renderer instance
      */
-    constructor(wgpu: WgpuContext) {
-        this.wgpu = wgpu;
-        this.screenWidth = wgpu.width;
-        this.screenHeight = wgpu.height;
+    constructor(device: GPUDevice, context: GPUCanvasContext, config: GPUCanvasConfiguration, width: number, height: number) {
+        this.device = device;
+        this.surface = context;
+        this.surfaceConfig = config;
+        this.screenWidth = width;
+        this.screenHeight = height;
+
         this.passF32 = false;
 
         // Initialize bindings
-        this.bindings = new Bindings(this.wgpu, this.screenWidth, this.screenHeight, this.passF32);
+        this.bindings = new Bindings(this.device, this.screenWidth, this.screenHeight, this.passF32);
 
         // Set up pipeline and bind group layouts
-        this.computeBindGroupLayout = this.bindings.createBindGroupLayout(wgpu.device);
+        this.computeBindGroupLayout = this.bindings.createBindGroupLayout(this.device);
         this.computePipelineLayout = this.bindings.createPipelineLayout(
-            wgpu.device,
+            this.device,
             this.computeBindGroupLayout
         );
         this.computeBindGroup = this.bindings.createBindGroup(
-            wgpu.device,
+            this.device,
             this.computeBindGroupLayout
         );
 
         // Set up screen blitting
         this.screenBlitter = new Blitter(
-            wgpu.device,
+            this.device,
             this.bindings.texScreen.view,
             ColorSpace.Linear,
-            wgpu.surfaceConfig.format,
+            this.surfaceConfig.format,
             'nearest'
         );
 
@@ -97,8 +102,47 @@ export class WgpuToyRenderer {
         height: number,
         canvas: HTMLCanvasElement
     ): Promise<WgpuToyRenderer> {
-        const wgpu = await WgpuContext.init(width, height, canvas);
-        return new WgpuToyRenderer(wgpu);
+        const context = canvas.getContext('webgpu');
+        if (!context) {
+            throw new Error('WebGPU not supported');
+        }
+
+        // Initialize WebGPU adapter and device
+        const adapter = await navigator.gpu.requestAdapter({
+            powerPreference: 'high-performance'
+        });
+        if (!adapter) {
+            throw new Error('No appropriate GPUAdapter found');
+        }
+
+        // Log adapter capabilities
+        console.info('Adapter features:', adapter.features);
+        console.info('Adapter limits:', adapter.limits);
+
+        const device = await adapter.requestDevice({
+            label: 'Compute Toy GPU Device'
+            // requiredFeatures: [...adapter.features],
+        });
+
+        const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+
+        // Configure the swap chain
+        const config: GPUCanvasConfiguration = {
+            device,
+            format: presentationFormat,
+            alphaMode: 'opaque',
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+            viewFormats: [
+                presentationFormat
+                // Add SRGB/non-SRGB variants as needed
+                // presentationFormat === 'bgra8unorm' ? 'bgra8unorm-srgb' : 'bgra8unorm',
+                // presentationFormat === 'rgba8unorm' ? 'rgba8unorm-srgb' : 'rgba8unorm'
+            ].filter((format): format is GPUTextureFormat => !!format)
+        };
+
+        context.configure(config);
+
+        return new WgpuToyRenderer(device, context, config, width, height);
     }
 
     /**
@@ -245,7 +289,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         this.onSuccessCb?.(entryPointNames);
 
         // Create shader module
-        const shaderModule = this.wgpu.device.createShaderModule({
+        const shaderModule = this.device.createShaderModule({
             label: 'Compute shader',
             code: wgsl
         });
@@ -280,7 +324,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             workgroupCount: source.workgroupCount.get(name),
             dispatchOnce: source.dispatchOnce.get(name) ?? false,
             dispatchCount: source.dispatchCount.get(name) ?? 1,
-            pipeline: this.wgpu.device.createComputePipeline({
+            pipeline: this.device.createComputePipeline({
                 label: `Pipeline ${name}`,
                 layout: this.computePipelineLayout,
                 compute: {
@@ -306,16 +350,16 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             return;
         }
         try {
-            const textureView = this.wgpu.surface.getCurrentTexture().createView();
+            const textureView = this.surface.getCurrentTexture().createView();
 
-            const encoder = this.wgpu.device.createCommandEncoder();
+            const encoder = this.device.createCommandEncoder();
 
             // Update bindings
-            this.bindings.stage(this.wgpu.queue);
+            this.bindings.stage(this.device.queue);
 
             // Clear debug buffer periodically
             // if (this.bindings.time.host.frame % WgpuToyRenderer.STATS_PERIOD === 0) {
-            //     this.wgpu.queue.writeBuffer(
+            //     this.device.queue.writeBuffer(
             //         this.bindings.debugBuffer.device,
             //         0,
             //         new Uint32Array(40) // NUM_ASSERT_COUNTERS * 4
@@ -357,7 +401,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
                     ];
 
                     // Update dispatch info
-                    this.wgpu.queue.writeBuffer(
+                    this.device.queue.writeBuffer(
                         this.bindings.dispatchInfo.device,
                         dispatchCounter * 256,
                         new Uint32Array([i])
@@ -387,7 +431,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             this.screenBlitter.blit(encoder, textureView);
 
             // Submit command buffer
-            this.wgpu.queue.submit([encoder.finish()]);
+            this.device.queue.submit([encoder.finish()]);
 
             // Update frame counter
             this.bindings.time.host.frame += 1;
@@ -464,9 +508,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         this.screenWidth = Math.floor(width * scale);
         this.screenHeight = Math.floor(height * scale);
 
-        this.wgpu.width = this.screenWidth;
-        this.wgpu.height = this.screenHeight;
-        this.wgpu.surface.configure(this.wgpu.surfaceConfig);
+        // this.surface.configure(this.surfaceConfig);
 
         // this.reset();
     }
@@ -477,7 +519,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     reset(): void {
         // Create new bindings with current settings
         const newBindings = new Bindings(
-            this.wgpu,
+            this.device,
             this.screenWidth,
             this.screenHeight,
             this.passF32
@@ -493,17 +535,17 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         this.bindings = newBindings;
 
         // Recreate pipeline and binding group layouts
-        const layout = this.bindings.createBindGroupLayout(this.wgpu.device);
-        this.computePipelineLayout = this.bindings.createPipelineLayout(this.wgpu.device, layout);
-        this.computeBindGroup = this.bindings.createBindGroup(this.wgpu.device, layout);
+        const layout = this.bindings.createBindGroupLayout(this.device);
+        this.computePipelineLayout = this.bindings.createPipelineLayout(this.device, layout);
+        this.computeBindGroup = this.bindings.createBindGroup(this.device, layout);
         this.computeBindGroupLayout = layout;
 
         // Recreate screen blitter
         this.screenBlitter = new Blitter(
-            this.wgpu.device,
+            this.device,
             this.bindings.texScreen.view,
             ColorSpace.Linear,
-            this.wgpu.surfaceConfig.format,
+            this.surfaceConfig.format,
             'linear'
         );
     }
@@ -521,7 +563,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         });
 
         // Create texture
-        let texture = this.wgpu.device.createTexture({
+        let texture = this.device.createTexture({
             size: {
                 width: imageBitmap.width,
                 height: imageBitmap.height,
@@ -535,7 +577,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         });
 
         // Copy image data to texture
-        this.wgpu.device.queue.copyExternalImageToTexture(
+        this.device.queue.copyExternalImageToTexture(
             { source: imageBitmap },
             { texture },
             {
@@ -547,15 +589,15 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Generate mipmap chain
         const blitter = new Blitter(
-            this.wgpu.device,
+            this.device,
             texture.createView(),
             ColorSpace.Linear,
             'rgba8unorm-srgb',
             'linear'
         );
         texture = blitter.createTexture(
-            this.wgpu.device,
-            this.wgpu.queue,
+            this.device,
+            this.device.queue,
             imageBitmap.width,
             imageBitmap.height,
             1 + Math.floor(Math.log2(Math.max(imageBitmap.width, imageBitmap.height)))
@@ -566,7 +608,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Recreate bind group since we changed a texture
         this.computeBindGroup = this.bindings.createBindGroup(
-            this.wgpu.device,
+            this.device,
             this.computeBindGroupLayout
         );
 
@@ -583,7 +625,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const { rgbe, width, height } = loadHDR(data);
 
         // Create RGBE texture
-        const rgbeTexture = this.wgpu.device.createTexture({
+        const rgbeTexture = this.device.createTexture({
             size: {
                 width,
                 height,
@@ -597,7 +639,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         });
 
         // Copy RGBE data to texture
-        this.wgpu.device.queue.writeTexture(
+        this.device.queue.writeTexture(
             { texture: rgbeTexture },
             rgbe,
             {
@@ -614,15 +656,15 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Convert RGBE to float texture and generate mipmap chain
         const blitter = new Blitter(
-            this.wgpu.device,
+            this.device,
             rgbeTexture.createView(),
             ColorSpace.Rgbe,
             'rgba16float',
             'linear'
         );
         const texture = blitter.createTexture(
-            this.wgpu.device,
-            this.wgpu.queue,
+            this.device,
+            this.device.queue,
             width,
             height,
             1 + Math.floor(Math.log2(Math.max(width, height)))
@@ -633,10 +675,15 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Recreate bind group since we changed a texture
         this.computeBindGroup = this.bindings.createBindGroup(
-            this.wgpu.device,
+            this.device,
             this.computeBindGroupLayout
         );
 
         console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
+    }
+
+    destroy() {
+        console.log('Destroying engine');
+        this.device.destroy();
     }
 }

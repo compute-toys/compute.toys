@@ -1,5 +1,3 @@
-import { WgpuContext } from './context';
-
 // Constants
 const NUM_KEYCODES = 256;
 const MAX_CUSTOM_PARAMS = 32;
@@ -265,7 +263,7 @@ export class Bindings {
     bilinearRepeat: SamplerBinding;
     trilinearRepeat: SamplerBinding;
 
-    constructor(wgpu: WgpuContext, width: number, height: number, passF32: boolean) {
+    constructor(device: GPUDevice, width: number, height: number, passF32: boolean) {
         const uniformBuffer: GPUBufferBindingLayout = {
             type: 'uniform'
         };
@@ -302,7 +300,7 @@ export class Bindings {
         };
 
         // Create textures
-        const texScreen = wgpu.device.createTexture({
+        const texScreen = device.createTexture({
             size: {
                 width,
                 height,
@@ -315,7 +313,7 @@ export class Bindings {
             sampleCount: 1
         });
 
-        const texRead = wgpu.device.createTexture({
+        const texRead = device.createTexture({
             size: {
                 width,
                 height,
@@ -328,7 +326,7 @@ export class Bindings {
             sampleCount: 1
         });
 
-        const texWrite = wgpu.device.createTexture({
+        const texWrite = device.createTexture({
             size: {
                 width,
                 height,
@@ -341,13 +339,13 @@ export class Bindings {
             sampleCount: 1
         });
 
-        const channel0 = wgpu.device.createTexture(blank);
-        const channel1 = wgpu.device.createTexture(blank);
+        const channel0 = device.createTexture(blank);
+        const channel1 = device.createTexture(blank);
 
         // Initialize time binding
         this.time = new BufferBinding<Time>({
             host: new Time(),
-            device: wgpu.device.createBuffer({
+            device: device.createBuffer({
                 size: 16, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
@@ -358,7 +356,7 @@ export class Bindings {
         // Initialize mouse binding
         this.mouse = new BufferBinding<Mouse>({
             host: new Mouse(width / 2, height / 2, 0),
-            device: wgpu.device.createBuffer({
+            device: device.createBuffer({
                 size: 16, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
@@ -369,7 +367,7 @@ export class Bindings {
         // Initialize keyboard binding
         this.keys = new BufferBinding<BitArray>({
             host: new BitArray(NUM_KEYCODES),
-            device: wgpu.device.createBuffer({
+            device: device.createBuffer({
                 size: 32, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
@@ -380,7 +378,7 @@ export class Bindings {
         // Initialize custom binding
         this.custom = new BufferBinding<[string[], Float32Array]>({
             host: [['_dummy'], new Float32Array([0])],
-            device: wgpu.device.createBuffer({
+            device: device.createBuffer({
                 size: MAX_CUSTOM_PARAMS * 4,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
@@ -391,7 +389,7 @@ export class Bindings {
         // Initialize user data binding
         // this.userData = new BufferBinding<Map<string, Uint32Array>>({
         //     host: new Map([['_dummy', new Uint32Array([0])]]),
-        //     device: wgpu.device.createBuffer({
+        //     device: device.createBuffer({
         //         size: USER_DATA_BYTES,
         //         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         //     }),
@@ -403,7 +401,7 @@ export class Bindings {
         const storageSize = 128 * 1024 * 1024; // 128MB
         this.storage1 = new BufferBinding<void>({
             host: undefined,
-            device: wgpu.device.createBuffer({
+            device: device.createBuffer({
                 size: storageSize,
                 usage: GPUBufferUsage.STORAGE
             }),
@@ -413,7 +411,7 @@ export class Bindings {
 
         this.storage2 = new BufferBinding<void>({
             host: undefined,
-            device: wgpu.device.createBuffer({
+            device: device.createBuffer({
                 size: storageSize,
                 usage: GPUBufferUsage.STORAGE
             }),
@@ -424,7 +422,7 @@ export class Bindings {
         // Initialize debug buffer
         // this.debugBuffer = new BufferBinding<void>({
         //     host: undefined,
-        //     device: wgpu.device.createBuffer({
+        //     device: device.createBuffer({
         //         size: 16 * NUM_ASSERT_COUNTERS, // Aligned to 16 bytes
         //         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
         //     }),
@@ -435,7 +433,7 @@ export class Bindings {
         // Initialize dispatch info buffer
         this.dispatchInfo = new BufferBinding<void>({
             host: undefined,
-            device: wgpu.device.createBuffer({
+            device: device.createBuffer({
                 size: 256 * OFFSET_ALIGNMENT,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
@@ -502,7 +500,7 @@ export class Bindings {
             layout: {
                 type: 'non-filtering'
             },
-            bind: wgpu.device.createSampler(),
+            bind: device.createSampler(),
             decl: 'var nearest: sampler'
         });
 
@@ -510,7 +508,7 @@ export class Bindings {
             layout: {
                 type: 'filtering'
             },
-            bind: wgpu.device.createSampler({
+            bind: device.createSampler({
                 magFilter: 'linear',
                 minFilter: 'linear'
             }),
@@ -521,7 +519,7 @@ export class Bindings {
             layout: {
                 type: 'filtering'
             },
-            bind: wgpu.device.createSampler({
+            bind: device.createSampler({
                 magFilter: 'linear',
                 minFilter: 'linear',
                 mipmapFilter: 'linear'
@@ -533,7 +531,7 @@ export class Bindings {
             layout: {
                 type: 'non-filtering'
             },
-            bind: wgpu.device.createSampler(repeat),
+            bind: device.createSampler(repeat),
             decl: 'var nearest_repeat: sampler'
         });
 
@@ -541,7 +539,7 @@ export class Bindings {
             layout: {
                 type: 'filtering'
             },
-            bind: wgpu.device.createSampler({
+            bind: device.createSampler({
                 ...repeat,
                 magFilter: 'linear',
                 minFilter: 'linear'
@@ -553,7 +551,7 @@ export class Bindings {
             layout: {
                 type: 'filtering'
             },
-            bind: wgpu.device.createSampler({
+            bind: device.createSampler({
                 ...repeat,
                 magFilter: 'linear',
                 minFilter: 'linear',
