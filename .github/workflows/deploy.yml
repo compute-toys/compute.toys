@@ -35,6 +35,7 @@ jobs:
           cache: 'yarn'
       - run: yarn
       - run: yarn build
+      - run: npm install -g vercel
       - name: Deploy to Vercel Action
         uses: BetaHuhn/deploy-to-vercel-action@v1
         with:
