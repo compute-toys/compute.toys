@@ -140,12 +140,14 @@ const ExplainerBody = () => {
             storage texture, which displays the result in the canvas on this page.
             <br />
             <br />
+            {/*
             Debugging assertions are supported with an <HiLite>assert</HiLite> helper function:
             <pre style={{ color: theme.palette.neutral.main }}>
                 assert(0, isfinite(col.x))
                 <br />
                 assert(1, isfinite(col.y))
             </pre>
+            */}
             <h1>Examples</h1>
             <div style={{ fontWeight: 'bold', fontSize: '0.8rem' }}>
                 <Link href={'https://compute.toys/view/46'} target="_blank">
@@ -200,11 +202,6 @@ const ExplainerBody = () => {
                 <br />
                 <Link href={'https://compute.toys/view/1199'} target="_blank">
                     Enable WGSL extension
-                </Link>
-                <br />
-                <br />
-                <Link href={'https://compute.toys/view/17'} target="_blank">
-                    Assert
                 </Link>
                 <br />
                 <br />
