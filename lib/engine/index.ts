@@ -78,12 +78,13 @@ export class ComputeEngine {
         }
 
         // Log adapter capabilities
-        console.info('Adapter features:', adapter.features);
-        console.info('Adapter limits:', adapter.limits);
+        const features = [...adapter.features] as GPUFeatureName[];
+        console.log('Adapter features:', features);
+        console.log('Adapter limits:', adapter.limits);
 
         const device = await adapter.requestDevice({
-            label: 'Compute Toy GPU Device'
-            // requiredFeatures: [...adapter.features],
+            label: `compute.toys device created at ${new Date().toLocaleTimeString()}`,
+            requiredFeatures: features
         });
 
         if (ComputeEngine.instance) {
