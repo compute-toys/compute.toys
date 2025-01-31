@@ -48,9 +48,11 @@ const ExplainerBody = () => {
             </pre>
             Timing information is in the <HiLite>time</HiLite> struct:
             <pre style={{ color: theme.palette.neutral.main }}>
-                time.frame: u32
-                <br />
                 time.elapsed: f32
+                <br />
+                time.delta: f32
+                <br />
+                time.frame: u32
             </pre>
             Custom uniforms are in the <HiLite>custom</HiLite> struct:
             <pre style={{ color: theme.palette.neutral.main }}>
@@ -110,7 +112,15 @@ const ExplainerBody = () => {
                     multiple times in a row
                 </li>
                 <li>
+                    <HiLite>#dispatch_once ENTRYPOINT</HiLite> for initialization purposes, ensuring
+                    the entrypoint is dispatched only once
+                </li>
+                <li>
                     <HiLite>#storage NAME TYPE</HiLite> for declaring a storage buffer
+                </li>
+                <li>
+                    <HiLite>SCREEN_WIDTH</HiLite> and <HiLite>SCREEN_HEIGHT</HiLite> are predefined
+                    variables for accessing the canvas dimensions
                 </li>
             </ul>
             <h1>Storage</h1>
@@ -130,26 +140,18 @@ const ExplainerBody = () => {
             storage texture, which displays the result in the canvas on this page.
             <br />
             <br />
+            {/*
             Debugging assertions are supported with an <HiLite>assert</HiLite> helper function:
             <pre style={{ color: theme.palette.neutral.main }}>
                 assert(0, isfinite(col.x))
                 <br />
                 assert(1, isfinite(col.y))
             </pre>
+            */}
             <h1>Examples</h1>
             <div style={{ fontWeight: 'bold', fontSize: '0.8rem' }}>
-                <Link href={'https://compute.toys/view/77'} target="_blank">
-                    Simple single pass shader
-                </Link>
-                <br />
-                <br />
                 <Link href={'https://compute.toys/view/46'} target="_blank">
                     Preprocessor #include
-                </Link>
-                <br />
-                <br />
-                <Link href={'https://compute.toys/view/59'} target="_blank">
-                    Terminal overlay
                 </Link>
                 <br />
                 <br />
@@ -158,13 +160,18 @@ const ExplainerBody = () => {
                 </Link>
                 <br />
                 <br />
-                <Link href={'https://compute.toys/view/25'} target="_blank">
-                    Workgroup shared memory
+                <Link href={'https://compute.toys/view/1334'} target="_blank">
+                    Texture usage
                 </Link>
                 <br />
                 <br />
-                <Link href={'https://compute.toys/view/48'} target="_blank">
-                    Preprocessor #dispatch_count
+                <Link href={'https://compute.toys/view/77'} target="_blank">
+                    Texture pass
+                </Link>
+                <br />
+                <br />
+                <Link href={'https://compute.toys/view/1586'} target="_blank">
+                    Custom uniforms
                 </Link>
                 <br />
                 <br />
@@ -173,8 +180,43 @@ const ExplainerBody = () => {
                 </Link>
                 <br />
                 <br />
-                <Link href={'https://compute.toys/view/17'} target="_blank">
-                    Assert
+                <Link href={'https://compute.toys/view/528'} target="_blank">
+                    Preprocessor #dispatch_once
+                </Link>
+                <br />
+                <br />
+                <Link href={'https://compute.toys/view/48'} target="_blank">
+                    Preprocessor #dispatch_count
+                </Link>
+                <br />
+                <br />
+                <Link href={'https://compute.toys/view/25'} target="_blank">
+                    Workgroup shared memory
+                </Link>
+                <br />
+                <br />
+                <Link href={'https://compute.toys/view/210'} target="_blank">
+                    Threads execution order
+                </Link>
+                <br />
+                <br />
+                <Link href={'https://compute.toys/view/1199'} target="_blank">
+                    Enable WGSL extension
+                </Link>
+                <br />
+                <br />
+                <Link href={'https://compute.toys/view/59'} target="_blank">
+                    Terminal text overlay
+                </Link>
+                <br />
+                <br />
+                <Link href={'https://compute.toys/view/459'} target="_blank">
+                    Simple raymarcher
+                </Link>
+                <br />
+                <br />
+                <Link href={'https://compute.toys/view/1361'} target="_blank">
+                    Simple rasterizer
                 </Link>
                 <br />
                 <br />

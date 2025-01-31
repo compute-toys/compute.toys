@@ -26,13 +26,8 @@ import {
     titleAtom,
     widthAtom
 } from 'lib/atoms/atoms';
-import {
-    canvasElAtom,
-    canvasParentElAtom,
-    isSafeContext,
-    wgputoyAtom,
-    wgputoyPreludeAtom
-} from 'lib/atoms/wgputoyatoms';
+import { canvasElAtom, canvasParentElAtom, wgputoyPreludeAtom } from 'lib/atoms/wgputoyatoms';
+import { ComputeEngine } from 'lib/engine';
 import { useCallback, useEffect } from 'react';
 import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
@@ -45,6 +40,7 @@ declare global {
 }
 
 const needsInitialResetAtom = atom<boolean>(false);
+const performingInitialResetAtom = atom<boolean>(false);
 
 /*
     Controller component. Returns null because we expect to be notified
@@ -65,6 +61,9 @@ const WgpuToyController = props => {
     const [sliderUpdateSignal, setSliderUpdateSignal] = useTransientAtom(sliderUpdateSignalAtom);
     const [manualReload, setManualReload] = useTransientAtom(manualReloadAtom);
     const [needsInitialReset, setNeedsInitialReset] = useTransientAtom(needsInitialResetAtom);
+    const [performingInitialReset, setPerformingInitialReset] = useTransientAtom(
+        performingInitialResetAtom
+    );
     const [isPlaying, setIsPlaying] = useTransientAtom(isPlayingAtom);
     const [codeHot] = useTransientAtom(codeAtom);
     const [dbLoaded] = useTransientAtom(dbLoadedAtom);
@@ -76,19 +75,18 @@ const WgpuToyController = props => {
     // "hot" access and effect hook access for code
     const code = useAtomValue(codeAtom);
 
-    const [parseError, setParseError] = useTransientAtom(parseErrorAtom);
+    const [, setParseError] = useTransientAtom(parseErrorAtom);
     const loadedTextures = useAtomValue(loadedTexturesAtom);
     const setEntryPoints = useSetAtom(entryPointsAtom);
     const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
 
-    const wgputoy = useAtomValue(wgputoyAtom);
     const canvas = useAtomValue(canvasElAtom);
     const [, setPrelude] = useAtom(wgputoyPreludeAtom);
 
     const parentRef = useAtomValue<HTMLElement | null>(canvasParentElAtom);
 
     const [width, setWidth] = useTransientAtom(widthAtom);
-    const [, setHeight] = useTransientAtom(heightAtom);
+    const [height, setHeight] = useTransientAtom(heightAtom);
     const [scale, setScale] = useTransientAtom(scaleAtom);
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
@@ -96,50 +94,30 @@ const WgpuToyController = props => {
     const halfResolution = useAtomValue(halfResolutionAtom);
 
     const updateUniforms = useCallback(async () => {
-        if (isSafeContext(wgputoy)) {
-            const names: string[] = [];
-            const values: number[] = [];
-            [...sliderRefMap().keys()].map(uuid => {
-                names.push(sliderRefMap().get(uuid).getUniform());
-                values.push(sliderRefMap().get(uuid).getVal());
-            }, this);
-            if (names.length > 0) {
-                await wgputoy.set_custom_floats(names, Float32Array.from(values));
-            }
-            setSliderUpdateSignal(false);
+        const names: string[] = [];
+        const values: number[] = [];
+        [...sliderRefMap().keys()].map(uuid => {
+            names.push(sliderRefMap().get(uuid).getUniform());
+            values.push(sliderRefMap().get(uuid).getVal());
+        }, this);
+        if (names.length > 0) {
+            // console.log(`Setting uniforms: ${names} with values: ${values}`);
+            await ComputeEngine.getInstance().setCustomFloats(names, Float32Array.from(values));
         }
+        setSliderUpdateSignal(false);
     }, []);
 
-    const reloadCallback = useCallback(() => {
-        updateUniforms().then(() => {
-            if (isSafeContext(wgputoy)) {
-                wgputoy.preprocess(codeHot()).then(s => {
-                    if (s) {
-                        wgputoy.compile(s);
-                        setPrelude(wgputoy.prelude());
-                        wgputoy.render();
-                    }
-                });
-                setManualReload(false);
-            }
-        });
-    }, []);
-
-    const awaitableReloadCallback = async () => {
-        return updateUniforms().then(() => {
-            if (isSafeContext(wgputoy)) {
-                wgputoy.preprocess(codeHot()).then(s => {
-                    if (s) {
-                        wgputoy.compile(s);
-                        setPrelude(wgputoy.prelude());
-                        wgputoy.render();
-                    }
-                });
-                return true;
-            } else {
-                return false;
-            }
-        });
+    const recompile = async () => {
+        await updateUniforms();
+        console.log('Recompiling shader...');
+        const s = await ComputeEngine.getInstance().preprocess(codeHot());
+        if (s) {
+            await ComputeEngine.getInstance().compile(s);
+            setPrelude(ComputeEngine.getInstance().getPrelude());
+            ComputeEngine.getInstance().render();
+        } else {
+            console.error('Recompilation failed');
+        }
     };
 
     /*
@@ -147,42 +125,65 @@ const WgpuToyController = props => {
         where manualReload gets set before the controller is loaded, which
         results in the effect hook for manualReload never getting called.
      */
-    const liveReloadCallback = useCallback(() => {
-        if (needsInitialReset() && dbLoaded()) {
-            awaitableReloadCallback().then(ready => {
-                // we don't want to reset in general except on load
-                if (ready && parseError().success) {
-                    resetCallback();
-                    setNeedsInitialReset(false);
-                }
-            });
-        } else if (dbLoaded() && manualReload()) {
-            reloadCallback();
+    useAnimationFrame(async e => {
+        if (sliderUpdateSignal() && !needsInitialReset()) {
+            await updateUniforms();
         }
-    }, []);
-
-    useAnimationFrame(e => {
-        if (isSafeContext(wgputoy)) {
-            if (sliderUpdateSignal()) {
-                updateUniforms().then(() => {
-                    liveReloadCallback();
-                });
-            } else {
-                liveReloadCallback();
+        if (performingInitialReset()) {
+            // wait for initial reset to complete
+        } else if (needsInitialReset() && dbLoaded()) {
+            console.log('Initialising engine...');
+            setPerformingInitialReset(true);
+            await ComputeEngine.create();
+            const engine = ComputeEngine.getInstance();
+            if (!canvas) {
+                console.error('Canvas not found');
+                return;
             }
-            if (sliderUpdateSignal() && !isPlaying()) {
-                wgputoy.set_time_delta(e.delta);
-                wgputoy.render();
-            } else if (isPlaying() || manualReload()) {
-                let t = timer();
-                if (!manualReload()) {
-                    t += e.delta;
-                }
-                setTimer(t);
-                wgputoy.set_time_elapsed(t);
-                wgputoy.set_time_delta(e.delta);
-                wgputoy.render();
+            engine.setSurface(canvas);
+            engine.onSuccess(handleSuccess);
+            engine.onError(handleError);
+            setTimer(0);
+            engine.setPassF32(float32Enabled);
+            updateResolution();
+            engine.resize(width(), height(), scale());
+            engine.reset();
+            loadTexture(0, loadedTextures[0].img);
+            loadTexture(1, loadedTextures[1].img);
+            await updateUniforms();
+            console.log('Compiling shader...');
+            const s = await engine.preprocess(codeHot());
+            if (!s) {
+                console.error('Initialisation aborted: shader compilation failed');
+                return;
             }
+            await engine.compile(s);
+            setPrelude(engine.getPrelude());
+            engine.render();
+            setManualReload(false);
+            setNeedsInitialReset(false);
+            setPerformingInitialReset(false);
+            console.log('Initialisation complete');
+        } else if (dbLoaded() && manualReload()) {
+            console.log('Manual reload triggered');
+            await recompile();
+            setManualReload(false);
+        }
+        if (needsInitialReset()) {
+            return;
+        }
+        if (sliderUpdateSignal() && !isPlaying()) {
+            ComputeEngine.getInstance().setTimeDelta(e.delta);
+            ComputeEngine.getInstance().render();
+        } else if (isPlaying() || manualReload()) {
+            let t = timer();
+            if (!manualReload()) {
+                t += e.delta;
+            }
+            setTimer(t);
+            ComputeEngine.getInstance().setTimeElapsed(t);
+            ComputeEngine.getInstance().setTimeDelta(e.delta);
+            ComputeEngine.getInstance().render();
         }
     });
 
@@ -195,10 +196,11 @@ const WgpuToyController = props => {
     }, []);
 
     const resetCallback = useCallback(() => {
-        if (isSafeContext(wgputoy)) {
+        if (!needsInitialReset()) {
+            console.log('Resetting engine...');
             setTimer(0);
-            wgputoy.reset();
-            reloadCallback();
+            ComputeEngine.getInstance().reset();
+            recompile();
         }
     }, []);
 
@@ -221,34 +223,31 @@ const WgpuToyController = props => {
         if (!hotReloadHot()) setSaveColorTransitionSignal(theme.palette.dracula.orange);
     }, []);
 
-    if (window) window['wgsl_error_handler'] = handleError;
+    // if (window) window['wgsl_error_handler'] = handleError;
 
     const loadTexture = useCallback((index: number, uri: string) => {
-        if (isSafeContext(wgputoy)) {
-            fetch(uri)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to load image');
-                    }
-                    return response.blob();
-                })
-                .then(b => b.arrayBuffer())
-                .then(data => {
-                    if (uri.match(/\.hdr/i)) {
-                        wgputoy.load_channel_hdr(index, new Uint8Array(data));
-                    } else {
-                        wgputoy.load_channel(index, new Uint8Array(data));
-                    }
-                })
-                .catch(error => console.error(error));
-        }
+        console.log(`Loading texture ${index} from ${uri}`);
+        fetch(uri)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load image');
+                }
+                return response.blob();
+            })
+            .then(b => b.arrayBuffer())
+            .then(data => {
+                if (uri.match(/\.hdr/i)) {
+                    ComputeEngine.getInstance().loadChannelHDR(index, new Uint8Array(data));
+                } else {
+                    ComputeEngine.getInstance().loadChannel(index, new Uint8Array(data));
+                }
+            })
+            .catch(error => console.error(error));
     }, []);
 
     const requestFullscreen = useCallback(() => {
-        if (isSafeContext(wgputoy) && canvas !== false) {
-            if (!document.fullscreenElement) {
-                canvas.requestFullscreen({ navigationUI: 'hide' });
-            }
+        if (canvas && !document.fullscreenElement) {
+            canvas.requestFullscreen({ navigationUI: 'hide' });
         }
     }, []);
 
@@ -257,9 +256,9 @@ const WgpuToyController = props => {
 
     useEffect(() => {
         const handleKeyDown = e => {
-            if (isSafeContext(wgputoy)) {
-                if (typeof e.keyCode === 'number') wgputoy.set_keydown(e.keyCode, true);
-            }
+            // console.log(`Key down: ${e.keyCode}`);
+            if (typeof e.keyCode === 'number')
+                ComputeEngine.getInstance().setKeydown(e.keyCode, true);
         };
         if (canvas) {
             canvas.addEventListener('keydown', handleKeyDown);
@@ -270,9 +269,9 @@ const WgpuToyController = props => {
 
     useEffect(() => {
         const handleKeyUp = e => {
-            if (isSafeContext(wgputoy)) {
-                if (typeof e.keyCode === 'number') wgputoy.set_keydown(e.keyCode, false);
-            }
+            // console.log(`Key up: ${e.keyCode}`);
+            if (typeof e.keyCode === 'number')
+                ComputeEngine.getInstance().setKeydown(e.keyCode, false);
         };
         if (canvas) {
             canvas.addEventListener('keyup', handleKeyUp);
@@ -399,41 +398,32 @@ const WgpuToyController = props => {
     useEffect(() => {
         if (canvas !== false) {
             const handleMouseMove = (e: MouseEvent) => {
-                if (isSafeContext(wgputoy)) {
-                    wgputoy.set_mouse_pos(
-                        e.offsetX / canvas.clientWidth,
-                        e.offsetY / canvas.clientHeight
-                    );
-                    if (!isPlaying()) {
-                        wgputoy.render();
-                    }
+                // console.log(`Mouse move: ${e.offsetX}, ${e.offsetY}`);
+                ComputeEngine.getInstance().setMousePos(
+                    e.offsetX / canvas.clientWidth,
+                    e.offsetY / canvas.clientHeight
+                );
+                if (!isPlaying()) {
+                    ComputeEngine.getInstance().render();
                 }
             };
 
             const handleMouseUp = () => {
-                if (isSafeContext(wgputoy)) {
-                    wgputoy.set_mouse_click(false);
-                    canvas.onmousemove = null;
-                }
+                // console.log('Mouse up');
+                ComputeEngine.getInstance().setMouseClick(false);
+                canvas.onmousemove = null;
             };
 
             const handleMouseDown = (e: MouseEvent) => {
-                if (isSafeContext(wgputoy)) {
-                    wgputoy.set_mouse_click(true);
-                    handleMouseMove(e);
-                    canvas.onmousemove = handleMouseMove;
-                }
+                // console.log('Mouse down');
+                ComputeEngine.getInstance().setMouseClick(true);
+                handleMouseMove(e);
+                canvas.onmousemove = handleMouseMove;
             };
 
             canvas.onmousedown = handleMouseDown;
             canvas.onmouseup = handleMouseUp;
             canvas.onmouseleave = handleMouseUp;
-        }
-    }, []);
-
-    useEffect(() => {
-        if (isSafeContext(wgputoy)) {
-            wgputoy.on_success(handleSuccess);
         }
     }, []);
 
@@ -462,56 +452,64 @@ const WgpuToyController = props => {
             special case where we're paused and a reload is called
         */
         if (hotReload || (!isPlaying() && manualReload())) {
-            reloadCallback();
+            console.log('Hot reload triggered...');
+            recompile().then(() => setManualReload(false));
         }
     }, [code, hotReload, manualReload()]);
 
     const updateResolution = () => {
-        if (isSafeContext(wgputoy)) {
-            let dimensions = { x: 0, y: 0 }; // dimensions in device (physical) pixels
-            if (document.fullscreenElement) {
-                // calculate actual screen resolution, accounting for both zoom and hidpi
-                // https://stackoverflow.com/a/55839671/78204
-                dimensions.x =
-                    Math.round(
-                        (window.screen.width * window.devicePixelRatio) /
-                            (window.outerWidth / window.innerWidth) /
-                            80
-                    ) * 80;
-                dimensions.y =
-                    Math.round(
-                        (window.screen.height * window.devicePixelRatio) /
-                            (window.outerWidth / window.innerWidth) /
-                            60
-                    ) * 60;
-            } else if (props.embed) {
-                dimensions = getDimensions(window.innerWidth * window.devicePixelRatio);
-            } else {
-                const padding = 16;
-                dimensions = getDimensions(
-                    (parentRef.offsetWidth - padding) * window.devicePixelRatio
-                );
-            }
-            const newScale = halfResolution ? 0.5 : 1;
-            if (dimensions.x !== width() || newScale !== scale()) {
-                setWidth(dimensions.x);
-                setHeight(dimensions.y);
-                setScale(newScale);
-                wgputoy.resize(dimensions.x, dimensions.y, newScale);
-                reloadCallback();
-            }
-            if (canvas) {
-                canvas.width = dimensions.x;
-                canvas.height = dimensions.y;
-                canvas.style.width = `${dimensions.x / window.devicePixelRatio}px`;
-                canvas.style.height = `${dimensions.y / window.devicePixelRatio}px`;
-            }
+        let dimensions = { x: 0, y: 0 }; // dimensions in device (physical) pixels
+        if (document.fullscreenElement) {
+            // calculate actual screen resolution, accounting for both zoom and hidpi
+            // https://stackoverflow.com/a/55839671/78204
+            dimensions.x =
+                Math.round(
+                    (window.screen.width * window.devicePixelRatio) /
+                        (window.outerWidth / window.innerWidth) /
+                        80
+                ) * 80;
+            dimensions.y =
+                Math.round(
+                    (window.screen.height * window.devicePixelRatio) /
+                        (window.outerWidth / window.innerWidth) /
+                        60
+                ) * 60;
+        } else if (props.embed) {
+            dimensions = getDimensions(window.innerWidth * window.devicePixelRatio);
+        } else {
+            const padding = 16;
+            dimensions = getDimensions((parentRef.offsetWidth - padding) * window.devicePixelRatio);
         }
+        if (canvas) {
+            canvas.width = dimensions.x;
+            canvas.height = dimensions.y;
+            canvas.style.width = `${dimensions.x / window.devicePixelRatio}px`;
+            canvas.style.height = `${dimensions.y / window.devicePixelRatio}px`;
+        }
+        const newScale = halfResolution ? 0.5 : 1;
+        if (dimensions.x !== width() || newScale !== scale()) {
+            console.log(`Resizing to ${dimensions.x}x${dimensions.y} @ ${newScale}x`);
+            setWidth(dimensions.x);
+            setHeight(dimensions.y);
+            setScale(newScale);
+            return true;
+        }
+        return false;
     };
 
-    useResizeObserver(parentRef, updateResolution);
+    useResizeObserver(parentRef, () => {
+        if (!needsInitialReset() && updateResolution()) {
+            ComputeEngine.getInstance().resize(width(), height(), scale());
+            resetCallback();
+        }
+    });
 
-    useEffect(updateResolution, [halfResolution]);
+    useEffect(() => {
+        if (!needsInitialReset() && updateResolution()) {
+            ComputeEngine.getInstance().resize(width(), height(), scale());
+            resetCallback();
+        }
+    }, [halfResolution]);
 
     useEffect(() => {
         if (reset) {
@@ -521,11 +519,15 @@ const WgpuToyController = props => {
     }, [reset]);
 
     useEffect(() => {
-        loadTexture(0, loadedTextures[0].img);
+        if (!needsInitialReset()) {
+            loadTexture(0, loadedTextures[0].img);
+        }
     }, [loadedTextures[0]]);
 
     useEffect(() => {
-        loadTexture(1, loadedTextures[1].img);
+        if (!needsInitialReset()) {
+            loadTexture(1, loadedTextures[1].img);
+        }
     }, [loadedTextures[1]]);
 
     useEffect(() => {
@@ -536,10 +538,12 @@ const WgpuToyController = props => {
     }, [requestFullscreenSignal]);
 
     useEffect(() => {
-        if (isSafeContext(wgputoy)) {
-            wgputoy.set_pass_f32(float32Enabled);
+        if (!needsInitialReset()) {
+            console.log(`Setting passF32 to ${float32Enabled}`);
+            ComputeEngine.getInstance().setPassF32(float32Enabled);
+            ComputeEngine.getInstance().reset();
             if (dbLoaded()) {
-                awaitableReloadCallback().then(() => {
+                recompile().then(() => {
                     resetCallback();
                 });
             }

@@ -6,6 +6,7 @@ import FavIconHead from 'components/global/faviconhead';
 import { ShadowCanvas } from 'components/global/shadowcanvas';
 import { useSetAtom } from 'jotai';
 import { codeNeedSaveAtom, dbLoadedAtom } from 'lib/atoms/atoms';
+import { WindowManagementProvider } from 'lib/util/draggablewindowscontext';
 import { theme } from 'theme/theme';
 
 export default function App() {
@@ -16,11 +17,13 @@ export default function App() {
     setCodeNeedSave(false);
 
     return (
-        <ThemeProvider theme={theme}>
-            <FavIconHead />
-            <ShadowCanvas />
-            <CssBaseline />
-            <Editor standalone />
-        </ThemeProvider>
+        <WindowManagementProvider>
+            <ThemeProvider theme={theme}>
+                <FavIconHead />
+                <ShadowCanvas />
+                <CssBaseline />
+                <Editor standalone />
+            </ThemeProvider>
+        </WindowManagementProvider>
     );
 }
