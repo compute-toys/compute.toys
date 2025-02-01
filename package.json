@@ -5,14 +5,12 @@
   },
   "packageManager": "yarn@1.22.22",
   "scripts": {
-    "predev": "wasm-pack build --dev wgpu-compute-toy --out-dir ../lib/wgputoy",
     "dev": "next dev",
-    "prebuild": "wasm-pack build --release wgpu-compute-toy --out-dir ../lib/wgputoy",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "fix": "next lint --fix",
-    "pages:setup": "curl https://sh.rustup.rs -sSf | sh -s -- -y && . $HOME/.cargo/env && curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh && npx @cloudflare/next-on-pages",
+    "pages:setup": "npx @cloudflare/next-on-pages",
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:preview": "wrangler pages dev",
     "supabase:types": ". ./.env && supabase gen types typescript --project-id $NEXT_PUBLIC_SUPABASE_PROJECT_ID > types/database.types.ts"
@@ -33,6 +31,7 @@
     "@react-hook/resize-observer": "^2.0.2",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.47.10",
+    "async-mutex": "^0.5.0",
     "firacode": "^6.2.0",
     "jotai": "^2.10.4",
     "jotai-game": "^0.2.0",
