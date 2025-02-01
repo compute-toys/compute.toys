@@ -11,20 +11,6 @@ jobs:
     steps:
       - name: Checkout from repo
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-          target: wasm32-unknown-unknown
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: wgpu-compute-toy
-      - run: cargo install wasm-pack --force
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
