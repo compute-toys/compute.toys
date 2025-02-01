@@ -65,7 +65,10 @@ export default function Profile({ avatar_url, about, username, id }) {
 
     useEffect(() => {
         supabase.auth.getUser().then(({ data, error }) => {
-            if (error || !data?.user) throw error;
+            if (error || !data?.user) {
+                console.log('Not logged in');
+                return;
+            }
             const { user } = data;
             setEditable(id === (user ? user.id : ''));
         });
