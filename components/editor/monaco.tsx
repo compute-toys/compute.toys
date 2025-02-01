@@ -14,7 +14,7 @@ import {
     resetAtom,
     vimAtom
 } from 'lib/atoms/atoms';
-import SingletonRouter, { Router } from 'next/router';
+import { useNavigationGuard } from 'next-navigation-guard';
 import { wgslConfiguration, wgslLanguageDef } from 'public/grammars/wgsl';
 import { useEffect, useRef, useState } from 'react';
 import { defineMonacoTheme } from 'theme/monacotheme';
@@ -24,15 +24,14 @@ declare type Monaco = typeof import('monaco-editor');
 const Monaco = props => {
     const [code, setCode] = useAtom(codeAtom);
     const [isRecording, setRecording] = useTransientAtom(recordingAtom);
-    const codeNeedSave = useAtomValue(codeNeedSaveAtom);
-    const setCodeNeedSave = useSetAtom(codeNeedSaveAtom);
+    const [codeNeedSave, setCodeNeedSave] = useAtom(codeNeedSaveAtom);
     const parseError = useAtomValue(parseErrorAtom);
     const [isPlaying] = useTransientAtom(isPlayingAtom);
     const setPlay = useSetAtom(playAtom);
     const setManualReload = useSetAtom(manualReloadAtom);
     const setReset = useSetAtom(resetAtom);
     const vim = useAtomValue(vimAtom);
-    const [vimContext, setVimContext] = useState(undefined);
+    const [vimContext, setVimContext] = useState<any>(undefined);
     const [editor, setEditor] = useAtom(monacoEditorAtom);
 
     const monacoRef = useRef<Monaco | null>(null);
@@ -72,7 +71,7 @@ const Monaco = props => {
                     }
                 ]);
             }
-            document.getElementById('editor-canvas').style.border = !parseError.success
+            document.getElementById('editor-canvas')!.style.border = !parseError.success
                 ? '4px solid #ff6f59'
                 : '';
         }
@@ -95,7 +94,7 @@ const Monaco = props => {
                     if (resp.status !== 200) return null;
                     const text = await resp.text();
                     return {
-                        range: new monacoRef.current.Range(n, 1, n, model.getLineMaxColumn(n)),
+                        range: new monacoRef.current!.Range(n, 1, n, model.getLineMaxColumn(n)),
                         contents: [{ value: '**SOURCE**' }, { value: '```wgsl\n' + text + '\n```' }]
                     };
                 }
@@ -105,36 +104,10 @@ const Monaco = props => {
         defineMonacoTheme(monaco, 'global');
     };
 
-    useEffect(() => {
-        const message = 'You have unsaved changes. Do you really want to leave?';
-
-        // unsaved changes with reload/undo
-        const beforeunload = (e: Event) => {
-            if (codeNeedSave) {
-                e.preventDefault();
-                return message;
-            }
-        };
-
-        // unsaved changes with route change
-        // next.js hack: https://github.com/vercel/next.js/discussions/32231#discussioncomment-1766710
-        // @ts-expect-error change is private
-        SingletonRouter.router.change = (...args) => {
-            if (codeNeedSave && !confirm(message)) {
-                return new Promise(resolve => resolve(false));
-            } else {
-                // @ts-expect-error change is private
-                return Router.prototype.change.apply(SingletonRouter.router, args);
-            }
-        };
-
-        window.addEventListener('beforeunload', beforeunload);
-        return () => {
-            window.removeEventListener('beforeunload', beforeunload);
-            // @ts-expect-error change is private
-            delete SingletonRouter.router.change;
-        };
-    }, [codeNeedSave]);
+    useNavigationGuard({
+        enabled: codeNeedSave,
+        confirm: () => window.confirm('You have unsaved changes that will be lost.')
+    });
 
     useEffect(() => {
         if (vim) {
@@ -162,7 +135,7 @@ const Monaco = props => {
             height="calc(100vh - 270px)" // preference
             language="wgsl"
             onChange={value => {
-                setCode(value);
+                setCode(value!);
                 setCodeNeedSave(true);
             }}
             beforeMount={editorWillMount}

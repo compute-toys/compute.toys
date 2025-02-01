@@ -33,11 +33,11 @@ export class ComputeEngine {
 
     private device: GPUDevice;
 
-    private surface?: GPUCanvasContext;
+    private surface: GPUCanvasContext;
     private screenWidth: number;
     private screenHeight: number;
 
-    private bindings?: Bindings;
+    private bindings: Bindings;
     private computePipelineLayout: GPUPipelineLayout;
     private lastComputePipelines?: ComputePipeline[];
     private computePipelines: ComputePipeline[] = [];
@@ -106,10 +106,11 @@ export class ComputeEngine {
     }
 
     public setSurface(canvas: HTMLCanvasElement) {
-        this.surface = canvas.getContext('webgpu');
-        if (!this.surface) {
+        const context = canvas.getContext('webgpu');
+        if (!context) {
             throw new Error('WebGPU not supported');
         }
+        this.surface = context;
         const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
         this.surface.configure({
             device: this.device,

@@ -10,11 +10,13 @@ function getImageConfig() {
         }))
     };
 
-    if (process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME) {
-        config.remotePatterns.push({ hostname: process.env.NEXT_PUBLIC_SUPABASE_HOSTNAME });
+    if (process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID) {
+        config.remotePatterns.push({
+            hostname: `${process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID}.supabase.co`
+        });
     } else {
         console.warn(
-            'NEXT_PUBLIC_SUPABASE_HOSTNAME is not set, images from supabase will not be loaded'
+            'NEXT_PUBLIC_SUPABASE_PROJECT_ID is not set, images from supabase will not be loaded'
         );
         config.unoptimized = true;
     }
