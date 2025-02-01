@@ -329,7 +329,7 @@ const WgpuToyController = props => {
 
                 return sanitized;
             }
-            const options: any = {
+            const options: MediaRecorderOptions = {
                 audioBitsPerSecond: 0,
                 videoBitsPerSecond: 8000000
             };

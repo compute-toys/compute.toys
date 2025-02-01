@@ -1,11 +1,12 @@
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import Button from '@mui/material/Button';
+import { SxProps, Theme } from '@mui/material/styles';
 import { ChangeEventHandler } from 'react';
 
 type UploadButtonProps = {
     onUpload: ChangeEventHandler<HTMLInputElement>;
-    sx?: any;
-    iconSx?: any;
+    sx?: SxProps<Theme>;
+    iconSx?: SxProps<Theme>;
     loading: boolean;
 };
 

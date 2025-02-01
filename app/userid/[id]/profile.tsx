@@ -10,10 +10,19 @@ import { ProfileShaders } from 'components/profileshaders';
 import { createClient } from 'lib/supabase/client';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { CssTextField, Item, theme } from 'theme/theme';
+import { Database } from 'types/database.types';
 
 const PROFILE_AVATAR_WIDTH = 96;
 
-async function loadShaders(supabase: SupabaseClient, id: string) {
+type Shader = Database['public']['Tables']['shader']['Row'];
+
+async function loadShaders(
+    supabase: SupabaseClient<Database>,
+    id: string
+): Promise<{
+    shaders: Shader[];
+    error: string | null;
+}> {
     try {
         const { data, error, status } = await supabase.from('shader').select().eq('author', id);
 
@@ -48,7 +57,7 @@ export default function Profile({ avatar_url, about, username, id }) {
     const [usernameEditor, setUsernameEditor] = useState(username);
     const [unsavedChanges, setUnsavedChanges] = useState(false);
 
-    const [shaders, setShaders] = useState<any[]>([]);
+    const [shaders, setShaders] = useState<Shader[]>([]);
     const [editable, setEditable] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

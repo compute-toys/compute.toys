@@ -21,7 +21,6 @@ import {
 import { ShaderActiveSettings, useResetShaderData } from 'lib/db/serializeshader';
 import { fixup_shader_code } from 'lib/util/fixup';
 import { defaultTextures } from 'lib/util/textureutils';
-import dynamic from 'next/dynamic';
 import { Shader } from './server';
 
 export function useShader(shader: Shader) {
@@ -87,5 +86,3 @@ export function useShader(shader: Shader) {
     setDBLoaded(true);
     setCodeNeedSave(false);
 }
-
-export const DynamicEditor: any = dynamic(() => import('components/editor/editor'));
