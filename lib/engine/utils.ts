@@ -43,7 +43,7 @@ export function parseUint32(value: string, line: number): number {
 }
 
 // Cache for fetched includes
-const includeCache = new Map<string, Promise<string>>();
+const includeCache = new Map<string, Promise<string | null>>();
 
 /**
  * Fetch and cache shader include files
