@@ -108,6 +108,8 @@ function ShaderPicker(props) {
 }
 
 export default function ShaderList(props) {
+    const urlPrefix = props.query ? `/search/${props.query}` : '/list';
+
     return (
         <Fragment>
             <Box
@@ -128,7 +130,7 @@ export default function ShaderList(props) {
                         renderItem={item => (
                             <PaginationItem
                                 component={Link}
-                                href={`/list/${item.page}`}
+                                href={`${urlPrefix}/${item.page}`}
                                 {...item}
                             />
                         )}

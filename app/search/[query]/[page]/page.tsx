@@ -13,18 +13,17 @@ const getPagination = (page: number, size: number) => {
     return { from, to };
 };
 
-const getTotalCount = async (supabase: SupabaseClient): Promise<number> => {
+const getTotalCount = async (supabase: SupabaseClient, query: string): Promise<number> => {
     const { error, count } = await supabase
         .from('shader')
         .select('*', { count: 'exact', head: true })
-        .eq('visibility', 'public');
+        .eq('visibility', 'public')
+        .ilike('name', `%${query}%`);
     if (error || count === null) return 0;
     return count;
 };
 
-async function getShaders(supabase: SupabaseClient, page: number) {
-    // context.res.setHeader('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=59');
-
+async function getShaders(supabase: SupabaseClient, query: string, page: number) {
     const { from, to } = getPagination(page, SHADERS_PER_PAGE);
     const { data, error } = await supabase
         .from('shader')
@@ -42,9 +41,10 @@ async function getShaders(supabase: SupabaseClient, page: number) {
         )
         .order('created_at', { ascending: false })
         .range(from, to)
-        .eq('visibility', 'public');
+        .eq('visibility', 'public')
+        .ilike('name', `%${query}%`);
 
-    const totalCount = await getTotalCount(supabase);
+    const totalCount = await getTotalCount(supabase, query);
     const numPages = Math.ceil(totalCount / SHADERS_PER_PAGE);
 
     if (page < 1 || page > numPages || Number.isNaN(page)) notFound();
@@ -55,14 +55,15 @@ async function getShaders(supabase: SupabaseClient, page: number) {
             totalCount,
             numPages,
             error,
-            page
+            page,
+            query
         }
     };
 }
 
-export default async function ShaderListPage({ params }) {
+export default async function SearchShaderListPage({ params }) {
     const supabase = await createClient();
-    const { page } = await params;
-    const { props } = await getShaders(supabase, Number(page));
+    const { query, page } = await params;
+    const { props } = await getShaders(supabase, query, Number(page));
     return <ShaderList {...props} />;
 }
