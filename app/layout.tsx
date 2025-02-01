@@ -5,7 +5,18 @@ import { ShadowCanvas } from 'components/global/shadowcanvas';
 import TopBar from 'components/global/topbar';
 import { createClient } from 'lib/supabase/server';
 import { WindowManagementProvider } from 'lib/util/draggablewindowscontext';
+import { NavigationGuardProvider } from 'next-navigation-guard';
 import { theme } from 'theme/theme';
+
+const Providers = ({ children }: { children: React.ReactNode }) => {
+    return (
+        <WindowManagementProvider>
+            <NavigationGuardProvider>
+                <ThemeProvider theme={theme}>{children}</ThemeProvider>
+            </NavigationGuardProvider>
+        </WindowManagementProvider>
+    );
+};
 
 export default async function RootLayout({
     // Layouts must accept a children prop.
@@ -19,15 +30,13 @@ export default async function RootLayout({
     return (
         <html lang="en">
             <body>
-                <WindowManagementProvider>
-                    <ThemeProvider theme={theme}>
-                        <ShadowCanvas />
-                        <CssBaseline />
-                        <TopBar user={error || !data?.user ? null : data.user} />
-                        {children}
-                        <Footer />
-                    </ThemeProvider>
-                </WindowManagementProvider>
+                <Providers>
+                    <ShadowCanvas />
+                    <CssBaseline />
+                    <TopBar user={error || !data?.user ? null : data.user} />
+                    {children}
+                    <Footer />
+                </Providers>
             </body>
         </html>
     );
