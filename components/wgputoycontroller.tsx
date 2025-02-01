@@ -39,7 +39,7 @@ declare global {
     }
 }
 
-const needsInitialResetAtom = atom<boolean>(false);
+const needsInitialResetAtom = atom<boolean>(true);
 const performingInitialResetAtom = atom<boolean>(false);
 
 /*
