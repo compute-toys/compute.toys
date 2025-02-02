@@ -43,8 +43,8 @@ export async function verify(formData: FormData) {
         throw error;
     }
 
-    revalidatePath('/', 'layout');
-    redirect('/');
+    revalidatePath('/list/1', 'layout');
+    redirect('/list/1');
 }
 
 export async function logout() {
@@ -56,6 +56,6 @@ export async function logout() {
         throw error;
     }
 
-    revalidatePath('/', 'layout');
-    redirect('/');
+    revalidatePath('/list/1', 'layout');
+    redirect('/list/1');
 }
