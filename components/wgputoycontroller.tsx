@@ -39,7 +39,7 @@ declare global {
     }
 }
 
-const needsInitialResetAtom = atom<boolean>(false);
+const needsInitialResetAtom = atom<boolean>(true);
 const performingInitialResetAtom = atom<boolean>(false);
 
 /*
@@ -97,8 +97,8 @@ const WgpuToyController = props => {
         const names: string[] = [];
         const values: number[] = [];
         [...sliderRefMap().keys()].map(uuid => {
-            names.push(sliderRefMap().get(uuid).getUniform());
-            values.push(sliderRefMap().get(uuid).getVal());
+            names.push(sliderRefMap().get(uuid)!.getUniform());
+            values.push(sliderRefMap().get(uuid)!.getVal());
         }, this);
         if (names.length > 0) {
             // console.log(`Setting uniforms: ${names} with values: ${values}`);
@@ -264,7 +264,6 @@ const WgpuToyController = props => {
             canvas.addEventListener('keydown', handleKeyDown);
             return () => canvas.removeEventListener('keydown', handleKeyDown);
         }
-        return null;
     }, []);
 
     useEffect(() => {
@@ -277,7 +276,6 @@ const WgpuToyController = props => {
             canvas.addEventListener('keyup', handleKeyUp);
             return () => canvas.removeEventListener('keyup', handleKeyUp);
         }
-        return null;
     }, []);
 
     useEffect(() => {
@@ -331,7 +329,7 @@ const WgpuToyController = props => {
 
                 return sanitized;
             }
-            const options: any = {
+            const options: MediaRecorderOptions = {
                 audioBitsPerSecond: 0,
                 videoBitsPerSecond: 8000000
             };
@@ -352,7 +350,7 @@ const WgpuToyController = props => {
             }
 
             const mediaRecorder = new MediaRecorder(canvas.captureStream(), options);
-            const chunks = [];
+            const chunks: Blob[] = [];
 
             mediaRecorder.ondataavailable = function (e) {
                 if (e.data.size > 0) {
@@ -478,7 +476,9 @@ const WgpuToyController = props => {
             dimensions = getDimensions(window.innerWidth * window.devicePixelRatio);
         } else {
             const padding = 16;
-            dimensions = getDimensions((parentRef.offsetWidth - padding) * window.devicePixelRatio);
+            dimensions = getDimensions(
+                (parentRef!.offsetWidth - padding) * window.devicePixelRatio
+            );
         }
         if (canvas) {
             canvas.width = dimensions.x;

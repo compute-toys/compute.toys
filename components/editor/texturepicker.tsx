@@ -89,10 +89,7 @@ const DraggablePicker = (props: DraggablePickerProps) => {
                     style={{
                         // just a little bit less than the full screen height, 100px here is somewhat arbitrary
                         maxHeight: 'calc(100vh - 100px)',
-                        overflowY: 'auto',
-                        [theme.breakpoints.down('md')]: {
-                            backgroundColor: theme.palette.secondary.main
-                        }
+                        overflowY: 'auto'
                     }}
                 >
                     <TextureThumbsList

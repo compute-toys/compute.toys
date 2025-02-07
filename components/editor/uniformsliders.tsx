@@ -104,64 +104,75 @@ const validate = (text: string, this_uuid: string, sliderRefMap: Map<string, Uni
     const matched = text.match(/^[a-zA-Z][a-zA-Z0-9_]*$/);
     const nameValid = matched && matched.length === 1;
     const foundDuplicate = [...sliderRefMap.keys()].find(uuid => {
-        return this_uuid !== uuid && sliderRefMap.get(uuid).getUniform() === text;
+        return this_uuid !== uuid && sliderRefMap.get(uuid)!.getUniform() === text;
     });
     return nameValid && !foundDuplicate;
 };
 
-const CustomTextField = forwardRef((props: any, inputRef: MutableRefObject<any>) => {
-    /*
+const CustomTextField = forwardRef(
+    (
+        props: {
+            sliderUniform: string;
+            uuid: string;
+            sliderRefMap: Map<string, UniformSliderRef>;
+            setSliderUniform: (value: string) => void;
+            index: number;
+        },
+        inputRef: MutableRefObject<HTMLInputElement>
+    ) => {
+        /*
         Avoid re-rendering the containing (parent) component
         by storing in-progress edits in local state
      */
-    const [temporaryFieldValue, setTemporaryFieldValue] = useState('Uniform');
-    const [err, setErr] = useState(false);
-    const setManualReload = useSetAtom(manualReloadAtom);
+        const [temporaryFieldValue, setTemporaryFieldValue] = useState('Uniform');
+        const [err, setErr] = useState(false);
+        const setManualReload = useSetAtom(manualReloadAtom);
 
-    useEffect(() => {
-        setTemporaryFieldValue(props.sliderUniform);
-    }, [props.sliderUniform]);
+        useEffect(() => {
+            setTemporaryFieldValue(props.sliderUniform);
+        }, [props.sliderUniform]);
 
-    const onEnterKey = event => {
-        if (event.keyCode === 13) {
-            // enter
-            inputRef.current.blur();
-        }
-    };
+        const onEnterKey = event => {
+            if (event.keyCode === 13) {
+                // enter
+                inputRef.current.blur();
+            }
+        };
 
-    return (
-        <StyledTextField
-            error={err}
-            id="outlined-name"
-            aria-label={'Uniform name input'}
-            sx={{
-                display: 'table-cell',
-                gridRow: '1',
-                gridColumn: 'span 3',
-                verticalAlign: 'middle',
-                input: { color: getRainbowColor(props.index) },
-                label: { color: getRainbowColor(props.index) }
-            }}
-            inputRef={inputRef}
-            size="small"
-            label={err ? 'Invalid' : 'Name'}
-            value={temporaryFieldValue}
-            onKeyDown={onEnterKey}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                setTemporaryFieldValue(event.target.value);
-            }}
-            onBlur={(event: FocusEvent<HTMLInputElement>) => {
-                if (validate(event.target.value, props.uuid, props.sliderRefMap)) {
-                    props.setSliderUniform(event.target.value);
-                    setManualReload(true);
-                    setErr(false);
-                } else {
-                    setErr(true);
-                }
-            }}
-        />
-    );
-});
+        return (
+            <StyledTextField
+                error={err}
+                id="outlined-name"
+                aria-label={'Uniform name input'}
+                sx={{
+                    display: 'table-cell',
+                    gridRow: '1',
+                    gridColumn: 'span 3',
+                    verticalAlign: 'middle',
+                    input: { color: getRainbowColor(props.index) },
+                    label: { color: getRainbowColor(props.index) }
+                }}
+                inputRef={inputRef}
+                size="small"
+                label={err ? 'Invalid' : 'Name'}
+                value={temporaryFieldValue}
+                onKeyDown={onEnterKey}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                    setTemporaryFieldValue(event.target.value);
+                }}
+                onBlur={(event: FocusEvent<HTMLInputElement>) => {
+                    if (validate(event.target.value, props.uuid, props.sliderRefMap)) {
+                        props.setSliderUniform(event.target.value);
+                        setManualReload(true);
+                        setErr(false);
+                    } else {
+                        setErr(true);
+                    }
+                }}
+            />
+        );
+    }
+);
 
 CustomTextField.displayName = 'CustomTextField';
 
@@ -170,22 +181,22 @@ const UniformSlider = (props: UniformSliderProps) => {
     const initFromHost = props.sliderRefMap.has(props.uuid) && props.sliderRefMap.get(props.uuid);
 
     const [sliderVal, setSliderVal] = useState(
-        initFromHost ? props.sliderRefMap.get(props.uuid).getVal() : 0
+        initFromHost ? props.sliderRefMap.get(props.uuid)!.getVal() : 0
     );
     const [sliderUniform, setSliderUniform] = useState(
-        initFromHost ? props.sliderRefMap.get(props.uuid).getUniform() : 'uniform_' + props.index
+        initFromHost ? props.sliderRefMap.get(props.uuid)!.getUniform() : 'uniform_' + props.index
     );
     const [sliderMinRange, setSliderMinRange] = useState(
-        props.sliderRefMap.get(props.uuid).getMinRange() || 0
+        props.sliderRefMap.get(props.uuid)?.getMinRange() || 0
     );
     const [sliderMaxRange, setSliderMaxRange] = useState(
-        props.sliderRefMap.get(props.uuid).getMaxRange() || 1
+        props.sliderRefMap.get(props.uuid)?.getMaxRange() || 1
     );
 
     const setSliderUpdateSignal = useSetAtom(sliderUpdateSignalAtom);
 
     let sliderRef: UniformSliderRef;
-    const inputRef = useRef<HTMLInputElement>();
+    const inputRef = useRef<HTMLInputElement>(null);
 
     // TODO: check if dependency array can be more restrictive here
     useEffect(() => {

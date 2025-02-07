@@ -85,9 +85,9 @@ const validateTextureUrl = (url: string): Promise<string> => {
                         );
                     }
 
-                    let img: HTMLImageElement = new Image();
+                    let img: HTMLImageElement | null = new Image();
                     img.addEventListener('load', () => {
-                        if ('naturalHeight' in img) {
+                        if ('naturalHeight' in img!) {
                             if (img.naturalHeight + img.naturalWidth === 0) {
                                 reject(GENERIC_LOAD_ERROR);
                             } else if (img.naturalHeight > MAX_IMAGE_DIMENSION_PX) {

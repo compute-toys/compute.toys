@@ -6,8 +6,6 @@
 	"image": "mcr.microsoft.com/devcontainers/base:jammy",
 	"features": {
 		"ghcr.io/devcontainers/features/node:1": {},
-		"ghcr.io/devcontainers/features/rust:1": {},
-		"devwasm.azurecr.io/dev-wasm/dev-wasm-feature/rust-wasi:0": {},
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 	},
 
@@ -19,8 +17,6 @@
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": {
-		"submodule": "git submodule update --init --recursive",
-		"wasm-pack": "curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh",
 		"yarn": "yarn",
 		"deno": "curl -fsSL https://deno.land/install.sh | sh"
 	},
