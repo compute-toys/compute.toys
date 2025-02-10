@@ -8,6 +8,13 @@ import { WindowManagementProvider } from 'lib/util/draggablewindowscontext';
 import { NavigationGuardProvider } from 'next-navigation-guard';
 import { theme } from 'theme/theme';
 
+const originTrialTokens = [
+    // subgroups compute.toys
+    'Av+MJ5j8ubFN+wgLBmJQwejnyZoFn/KokLv+PL8I22Q1UW0WiuTTovXEeUbU5LeRXAX5Lz+A931YjkHoEkgYPw4AAABweyJvcmlnaW4iOiJodHRwczovL2NvbXB1dGUudG95czo0NDMiLCJmZWF0dXJlIjoiV2ViR1BVU3ViZ3JvdXBzRmVhdHVyZXMiLCJleHBpcnkiOjE3NDQ3NjE1OTksImlzU3ViZG9tYWluIjp0cnVlfQ==',
+    // subgroups localhost:3000
+    'AsZgfZD/vWRALun4XVG5Kw3uoM3GqntRnKxuXzP0DiQneMCGEeivIJoItiL3qNZ1/FldAnuFR+yyQ1QYvTUUvQcAAABaeyJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjMwMDAiLCJmZWF0dXJlIjoiV2ViR1BVU3ViZ3JvdXBzRmVhdHVyZXMiLCJleHBpcnkiOjE3NDQ3NjE1OTl9'
+];
+
 const Providers = ({ children }: { children: React.ReactNode }) => {
     return (
         <WindowManagementProvider>
@@ -29,6 +36,11 @@ export default async function RootLayout({
     const { data, error } = await supabase.auth.getUser();
     return (
         <html lang="en">
+            <head>
+                {originTrialTokens.map((token, index) => (
+                    <meta key={index} httpEquiv="origin-trial" content={token} />
+                ))}
+            </head>
             <body>
                 <Providers>
                     <ShadowCanvas />
