@@ -4,14 +4,17 @@ import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import { Metadata } from 'next';
 import { Database } from 'types/database.types';
 
-export interface Shader {
+export interface ShaderMetadata {
     id: number;
     name: string;
     description: string | null;
     thumb_url: string | null;
     visibility: Database['public']['Enums']['visibility'];
-    body: string;
     profile: AuthorProfile;
+}
+
+export interface Shader extends ShaderMetadata {
+    body: string;
 }
 
 export async function fetchShader(
