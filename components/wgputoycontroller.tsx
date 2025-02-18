@@ -28,6 +28,8 @@ import {
 } from 'lib/atoms/atoms';
 import { canvasElAtom, canvasParentElAtom, wgputoyPreludeAtom } from 'lib/atoms/wgputoyatoms';
 import { ComputeEngine } from 'lib/engine';
+import { compileShader } from 'lib/slang';
+import { createCompiler } from 'lib/slang/try-slang';
 import { useCallback, useEffect } from 'react';
 import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
@@ -110,14 +112,20 @@ const WgpuToyController = props => {
     const recompile = async () => {
         await updateUniforms();
         console.log('Recompiling shader...');
-        const s = await ComputeEngine.getInstance().preprocess(codeHot());
-        if (s) {
-            await ComputeEngine.getInstance().compile(s);
-            setPrelude(ComputeEngine.getInstance().getPrelude());
-            ComputeEngine.getInstance().render();
-        } else {
-            console.error('Recompilation failed');
+        let slang = codeHot();
+        let wgsl = await compileShader(slang);
+        if (!wgsl) {
+            console.error('Translating Slang to WGSL failed');
+            return;
         }
+        const source = await ComputeEngine.getInstance().preprocess(wgsl);
+        if (!source) {
+            console.error('Preprocessing failed');
+            return;
+        }
+        await ComputeEngine.getInstance().compile(source);
+        setPrelude(ComputeEngine.getInstance().getPrelude());
+        ComputeEngine.getInstance().render();
     };
 
     /*
@@ -164,6 +172,7 @@ const WgpuToyController = props => {
             setNeedsInitialReset(false);
             setPerformingInitialReset(false);
             console.log('Initialisation complete');
+            await createCompiler();
         } else if (dbLoaded() && manualReload()) {
             console.log('Manual reload triggered');
             await recompile();
