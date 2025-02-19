@@ -1,7 +1,7 @@
 import pako from 'pako';
 import { ReflectionJSON } from 'types/reflection';
 import type { GlobalSession, MainModule, Module } from 'types/slang-wasm';
-import playgroundSource from '../shaders/playground.slang';
+import stdlibSource from '../shaders/std.slang';
 import ShaderConverter from './glue';
 
 let compiler: Compiler | null = null;
@@ -13,7 +13,7 @@ class Compiler {
 
     constructor(private mainModule: MainModule) {
         // Create empty files that will be populated later
-        ['user.slang', 'playground.slang'].forEach(file => {
+        ['user.slang', 'std.slang'].forEach(file => {
             mainModule.FS.createDataFile(
                 '/',
                 file,
@@ -39,14 +39,9 @@ class Compiler {
 
         const components: Module[] = [];
 
-        // Load playground and user modules
-        const playground = session.loadModuleFromSource(
-            playgroundSource,
-            'playground',
-            '/playground.slang'
-        );
-        if (!playground) throw this.mainModule.getLastError();
-        components.push(playground);
+        const stdlib = session.loadModuleFromSource(stdlibSource, 'std', '/std.slang');
+        if (!stdlib) throw this.mainModule.getLastError();
+        components.push(stdlib);
 
         const userModule = session.loadModuleFromSource(shaderSource, 'user', '/user.slang');
         if (!userModule) throw this.mainModule.getLastError();

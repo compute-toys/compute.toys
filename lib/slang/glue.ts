@@ -7,7 +7,7 @@ import type {
 
 class ShaderConverter {
     private getBufferSize(param: ReflectionParameter): number {
-        const zeros = param.userAttribs?.find(attr => attr.name === 'playground_ZEROS');
+        const zeros = param.userAttribs?.find(attr => attr.name === 'StorageBuffer');
         if (zeros && zeros.arguments.length > 0) {
             return zeros.arguments[0] as number;
         }
@@ -77,8 +77,7 @@ class ShaderConverter {
         return entryPoints
             .filter(ep =>
                 ep.userAttribs?.some(
-                    attr =>
-                        attr.name === 'playground_CALL_SIZE_OF' || attr.name === 'playground_CALL'
+                    attr => attr.name === 'Cover' || attr.name === 'WorkgroupCount'
                 )
             )
             .map(ep => {
@@ -87,19 +86,14 @@ class ShaderConverter {
                 let countY: number = 0;
                 let countZ: number = 0;
 
-                // Check for playground_CALL first (fixed size)
-                const callAttr = ep.userAttribs?.find(attr => attr.name === 'playground_CALL');
+                const callAttr = ep.userAttribs?.find(attr => attr.name === 'WorkgroupCount');
 
                 if (callAttr && callAttr.arguments.length >= 3) {
-                    // CALL provides raw dimensions that need to be divided by thread group size
-                    countX = Math.ceil((callAttr.arguments[0] as number) / threadGroupSize[0]);
-                    countY = Math.ceil((callAttr.arguments[1] as number) / threadGroupSize[1]);
-                    countZ = Math.ceil((callAttr.arguments[2] as number) / threadGroupSize[2]);
+                    countX = callAttr.arguments[0] as number;
+                    countY = callAttr.arguments[1] as number;
+                    countZ = callAttr.arguments[2] as number;
                 } else {
-                    // If no playground_CALL, look for playground_CALL_SIZE_OF
-                    const sizeOfAttr = ep.userAttribs?.find(
-                        attr => attr.name === 'playground_CALL_SIZE_OF'
-                    );
+                    const sizeOfAttr = ep.userAttribs?.find(attr => attr.name === 'Cover');
 
                     if (sizeOfAttr && sizeOfAttr.arguments.length > 0) {
                         const targetName = sizeOfAttr.arguments[0] as string;
@@ -136,7 +130,7 @@ class ShaderConverter {
 
     private generateDispatchDirectives(entryPoints: ReflectionEntryPoint[]): string {
         return entryPoints
-            .filter(ep => ep.userAttribs?.some(attr => attr.name === 'playground_CALL_ONCE'))
+            .filter(ep => ep.userAttribs?.some(attr => attr.name === 'DispatchOnce'))
             .map(ep => `#dispatch_once ${ep.name}`)
             .join('\n');
     }

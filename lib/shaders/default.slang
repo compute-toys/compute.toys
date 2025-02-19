@@ -1,13 +1,10 @@
-import playground;
+import std;
 
-[playground::ZEROS(131072)]
+[StorageBuffer(131072)]
 RWStructuredBuffer<float> buf;
 
-// Fills buffer with a sine wave
-// This entry point will only be called once at the start of rendering
-// Remove the ONCE attribute to call it every frame
-[playground::CALL::SIZE_OF("buf")]
-[playground::CALL::ONCE]
+[Cover("buf")]
+[DispatchOnce]
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void fillBuffer(uint2 dispatchThreadId : SV_DispatchThreadID)
