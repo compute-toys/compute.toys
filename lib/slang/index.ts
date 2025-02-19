@@ -1,30 +1,113 @@
+import pako from 'pako';
+import { ReflectionJSON } from 'types/reflection';
+import type { GlobalSession, MainModule, Module, ThreadGroupSize } from 'types/slang-wasm';
+import playgroundSource from '../shaders/playground.slang';
 import ShaderConverter from './glue';
-import { createCompiler } from './try-slang';
 
-export async function compileShader(userSource: string): Promise<string | null> {
-    const compiler = await createCompiler();
-    if (compiler == null) throw new Error('No compiler available');
-    const compiledResult = compiler.compile(userSource, '', 'WGSL', true);
-    console.log(compiler.diagnosticsMsg);
+let compiler: Compiler | null = null;
 
-    if (!compiledResult) {
-        console.log('Compilation returned empty result.');
-        return null;
+class Compiler {
+    private static SLANG_STAGE_COMPUTE = 6;
+    private globalSession: GlobalSession;
+    private wgslTarget: number;
+
+    constructor(private mainModule: MainModule) {
+        // Create empty files that will be populated later
+        ['user.slang', 'playground.slang'].forEach(file => {
+            mainModule.FS.createDataFile(
+                '/',
+                file,
+                new DataView(new ArrayBuffer(0)),
+                true,
+                true,
+                false
+            );
+        });
+
+        const globalSession = mainModule.createGlobalSession();
+        if (!globalSession) throw mainModule.getLastError();
+        this.globalSession = globalSession;
+
+        const target = mainModule.getCompileTargets()?.find(t => t.name === 'WGSL');
+        if (!target) throw mainModule.getLastError();
+        this.wgslTarget = target.value;
     }
 
-    let [compiledCode, layout, hashedStrings, reflectionJsonObj, threadGroupSize] = compiledResult;
-    let reflectionJson = reflectionJsonObj;
+    compile(shaderSource: string): string {
+        const session = this.globalSession.createSession(this.wgslTarget);
+        if (!session) throw this.mainModule.getLastError();
 
-    const converter = new ShaderConverter();
-    let convertedCode = converter.convert(reflectionJson);
-    convertedCode += compiledCode
-        .split('\n')
-        .filter(line => !line.trim().startsWith('@binding'))
-        .join('\n');
+        const components: Module[] = [];
 
-    console.log(convertedCode);
+        // Load playground and user modules
+        const playground = session.loadModuleFromSource(
+            playgroundSource,
+            'playground',
+            '/playground.slang'
+        );
+        if (!playground) throw this.mainModule.getLastError();
+        components.push(playground);
 
-    console.log(reflectionJson);
+        const userModule = session.loadModuleFromSource(shaderSource, 'user', '/user.slang');
+        if (!userModule) throw this.mainModule.getLastError();
+        components.push(userModule);
 
-    return convertedCode;
+        // Add entry points
+        const count = userModule.getDefinedEntryPointCount();
+        for (let i = 0; i < count; i++) {
+            const name = userModule.getDefinedEntryPoint(i).getName();
+            const entryPoint = userModule.findAndCheckEntryPoint(
+                name,
+                Compiler.SLANG_STAGE_COMPUTE
+            );
+            if (!entryPoint) throw this.mainModule.getLastError();
+            components.push(entryPoint);
+        }
+
+        // Create and link program
+        const program = session.createCompositeComponentType(components);
+        const linkedProgram = program.link();
+        const outCode = linkedProgram.getTargetCode(0);
+        if (!outCode) throw this.mainModule.getLastError();
+
+        // Get reflection data
+        const layout = linkedProgram.getLayout(0);
+        const reflectionJson: ReflectionJSON = layout?.toJsonObject();
+
+        session.delete();
+
+        const converter = new ShaderConverter();
+        return (
+            converter.convert(reflectionJson) +
+            outCode
+                .split('\n')
+                .filter(line => !line.trim().startsWith('@binding'))
+                .join('\n')
+        );
+    }
+}
+
+export async function getCompiler() {
+    if (compiler === null) {
+        const moduleConfig = {
+            instantiateWasm: async (
+                imports: WebAssembly.Imports,
+                receiveInstance: (instance: WebAssembly.Instance) => void
+            ) => {
+                const response = await fetch('/wasm/slang-wasm.wasm.gz');
+                const compressedData = new Uint8Array(await response.arrayBuffer());
+                const wasmBinary = pako.inflate(compressedData);
+                const { instance } = await WebAssembly.instantiate(wasmBinary, imports);
+                receiveInstance(instance);
+                return instance.exports;
+            }
+        };
+
+        // @ts-ignore
+        const createModule = (await import(/* webpackIgnore: true */ '/wasm/slang-wasm.js'))
+            .default;
+        const moduleInstance = await createModule(moduleConfig);
+        compiler = new Compiler(moduleInstance);
+    }
+    return compiler;
 }

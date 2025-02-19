@@ -28,8 +28,7 @@ import {
 } from 'lib/atoms/atoms';
 import { canvasElAtom, canvasParentElAtom, wgputoyPreludeAtom } from 'lib/atoms/wgputoyatoms';
 import { ComputeEngine } from 'lib/engine';
-import { compileShader } from 'lib/slang';
-import { createCompiler } from 'lib/slang/try-slang';
+import { getCompiler } from 'lib/slang';
 import { useCallback, useEffect } from 'react';
 import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
@@ -112,8 +111,9 @@ const WgpuToyController = props => {
     const recompile = async () => {
         await updateUniforms();
         console.log('Recompiling shader...');
-        let slang = codeHot();
-        let wgsl = await compileShader(slang);
+        const slang = codeHot();
+        const compiler = await getCompiler();
+        const wgsl = compiler.compile(slang);
         if (!wgsl) {
             console.error('Translating Slang to WGSL failed');
             return;
@@ -172,7 +172,7 @@ const WgpuToyController = props => {
             setNeedsInitialReset(false);
             setPerformingInitialReset(false);
             console.log('Initialisation complete');
-            await createCompiler();
+            await getCompiler();
         } else if (dbLoaded() && manualReload()) {
             console.log('Manual reload triggered');
             await recompile();

@@ -3,7 +3,7 @@ import type {
     ReflectionJSON,
     ReflectionParameter,
     ReflectionType
-} from './compiler';
+} from 'types/reflection';
 
 class ShaderConverter {
     private getBufferSize(param: ReflectionParameter): number {
