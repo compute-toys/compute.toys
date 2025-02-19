@@ -1,6 +1,6 @@
 import pako from 'pako';
 import { ReflectionJSON } from 'types/reflection';
-import type { GlobalSession, MainModule, Module, ThreadGroupSize } from 'types/slang-wasm';
+import type { GlobalSession, MainModule, Module } from 'types/slang-wasm';
 import playgroundSource from '../shaders/playground.slang';
 import ShaderConverter from './glue';
 
