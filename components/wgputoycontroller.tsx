@@ -28,7 +28,7 @@ import {
 } from 'lib/atoms/atoms';
 import { canvasElAtom, canvasParentElAtom, wgputoyPreludeAtom } from 'lib/atoms/wgputoyatoms';
 import { ComputeEngine } from 'lib/engine';
-import { getCompiler } from 'lib/slang';
+import { getCompiler } from 'lib/slang/compiler';
 import { useCallback, useEffect } from 'react';
 import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
