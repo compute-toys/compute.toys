@@ -49,25 +49,31 @@ class ShaderConverter {
     }
 
     private generateDefines(params: ReflectionParameter[]): string {
-        return params
-            .map(p => {
-                if (p.name === 'targetTexture') {
-                    return '#define targetTexture_0 channel0';
+        const defines: string[] = [];
+
+        for (const p of params) {
+            let value = p.name;
+
+            if (p.type.kind === 'parameterBlock' && p.type.elementType?.kind === 'struct') {
+                const struct = p.type.elementType;
+                for (const field of struct.fields) {
+                    defines.push(`#define ${field.name}_0 ${field.name}`);
                 }
-                if (p.name === 'outputTexture') {
-                    return '#define outputTexture_0 screen';
-                }
-                if (
-                    p.type.kind === 'resource' &&
-                    p.type.baseShape === 'structuredBuffer' &&
-                    this.getBufferSize(p) > 0
-                ) {
-                    return `#define ${p.name}_0 fields.${p.name}`;
-                }
-                return '';
-            })
-            .filter(Boolean)
-            .join('\n');
+            }
+
+            if (p.name === 'targetTexture') {
+                value = 'channel0';
+            } else if (
+                p.type.kind === 'resource' &&
+                p.type.baseShape === 'structuredBuffer' &&
+                this.getBufferSize(p) > 0
+            ) {
+                value = `fields.${p.name}`;
+            }
+            defines.push(`#define ${p.name}_0 ${value}`);
+        }
+
+        return defines.filter(Boolean).join('\n');
     }
 
     private generateWorkgroupCounts(

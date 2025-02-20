@@ -4,7 +4,7 @@ import { atom } from 'jotai';
 import { atomWithReset } from 'jotai/utils';
 import Monaco from 'monaco-editor';
 import { ParseError } from 'types/parseerror';
-import defaultShader from '../shaders/default.wgsl';
+import defaultShader from '../shaders/default.slang';
 
 export interface AuthorProfile {
     username: string | null;

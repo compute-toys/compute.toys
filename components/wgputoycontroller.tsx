@@ -160,19 +160,25 @@ const WgpuToyController = props => {
             loadTexture(1, loadedTextures[1].img);
             await updateUniforms();
             console.log('Compiling shader...');
-            const s = await engine.preprocess(codeHot());
-            if (!s) {
+            const slang = codeHot();
+            const compiler = await getCompiler();
+            const wgsl = compiler.compile(slang);
+            if (!wgsl) {
+                console.error('Translating Slang to WGSL failed');
+                return;
+            }
+            const source = await engine.preprocess(wgsl);
+            if (!source) {
                 console.error('Initialisation aborted: shader compilation failed');
                 return;
             }
-            await engine.compile(s);
+            await engine.compile(source);
             setPrelude(engine.getPrelude());
             engine.render();
             setManualReload(false);
             setNeedsInitialReset(false);
             setPerformingInitialReset(false);
             console.log('Initialisation complete');
-            await getCompiler();
         } else if (dbLoaded() && manualReload()) {
             console.log('Manual reload triggered');
             await recompile();

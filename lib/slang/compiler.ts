@@ -64,16 +64,21 @@ class Compiler {
         const linkedProgram = program.link();
         const outCode = linkedProgram.getTargetCode(0);
         if (!outCode) throw this.mainModule.getLastError();
+        console.log(outCode);
 
         // Get reflection data
         const layout = linkedProgram.getLayout(0);
         const reflectionJson: ReflectionJSON = layout?.toJsonObject();
+        console.log(reflectionJson);
 
         session.delete();
 
         const converter = new ShaderConverter();
+        const glue = converter.convert(reflectionJson);
+        console.log(glue);
+
         return (
-            converter.convert(reflectionJson) +
+            glue +
             outCode
                 .split('\n')
                 .filter(line => !line.trim().startsWith('@binding'))

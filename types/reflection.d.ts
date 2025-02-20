@@ -7,6 +7,10 @@ export type ReflectionBinding =
     | {
           kind: 'descriptorTableSlot';
           index: number;
+      }
+    | {
+          kind: 'subElementRegisterSpace';
+          index: number;
       };
 
 export type ReflectionType =
@@ -34,13 +38,25 @@ export type ReflectionType =
           kind: 'resource';
           baseShape: 'texture2D';
           access?: 'readWrite';
+      }
+    | {
+          kind: 'parameterBlock';
+          elementType: ReflectionType;
+          containerVarLayout?: {
+              bindings: ReflectionBinding[];
+          };
+          elementVarLayout?: {
+              type: ReflectionType;
+              binding: ReflectionBinding;
+          };
       };
 
 export type ReflectionParameter = {
-    binding: ReflectionBinding;
+    binding?: ReflectionBinding;
     name: string;
     type: ReflectionType;
     userAttribs?: ReflectionUserAttribute[];
+    semanticName?: string;
 };
 
 export type ReflectionJSON = {
