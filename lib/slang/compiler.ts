@@ -89,12 +89,13 @@ class Compiler {
 
 export async function getCompiler() {
     if (compiler === null) {
+        const url = 'https://compute-toys.github.io/slang-playground/wasm/slang-wasm';
         const moduleConfig = {
             instantiateWasm: async (
                 imports: WebAssembly.Imports,
                 receiveInstance: (instance: WebAssembly.Instance) => void
             ) => {
-                const response = await fetch('/wasm/slang-wasm.wasm.gz');
+                const response = await fetch(url + '.wasm.gz');
                 const compressedData = new Uint8Array(await response.arrayBuffer());
                 const wasmBinary = pako.inflate(compressedData);
                 const { instance } = await WebAssembly.instantiate(wasmBinary, imports);
@@ -104,8 +105,7 @@ export async function getCompiler() {
         };
 
         // @ts-ignore
-        const createModule = (await import(/* webpackIgnore: true */ '/wasm/slang-wasm.js'))
-            .default;
+        const createModule = (await import(/* webpackIgnore: true */ url + '.js')).default;
         const moduleInstance = await createModule(moduleConfig);
         compiler = new Compiler(moduleInstance);
     }
