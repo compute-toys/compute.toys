@@ -27,7 +27,8 @@
     "sourceMap": true,
     "jsx": "preserve",
     "types": [
-      "@webgpu/types"
+      "@webgpu/types",
+      "@types/emscripten"
     ],
     "noImplicitReturns": false,
     "plugins": [
@@ -35,7 +36,7 @@
         "name": "next"
       }
     ],
-    "strictNullChecks": true
+    "strictNullChecks": true,
   },
   "include": [
     "**/*.ts",

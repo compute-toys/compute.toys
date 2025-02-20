@@ -28,6 +28,7 @@ import {
 } from 'lib/atoms/atoms';
 import { canvasElAtom, canvasParentElAtom, wgputoyPreludeAtom } from 'lib/atoms/wgputoyatoms';
 import { ComputeEngine } from 'lib/engine';
+import { getCompiler } from 'lib/slang/compiler';
 import { useCallback, useEffect } from 'react';
 import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
@@ -110,14 +111,21 @@ const WgpuToyController = props => {
     const recompile = async () => {
         await updateUniforms();
         console.log('Recompiling shader...');
-        const s = await ComputeEngine.getInstance().preprocess(codeHot());
-        if (s) {
-            await ComputeEngine.getInstance().compile(s);
-            setPrelude(ComputeEngine.getInstance().getPrelude());
-            ComputeEngine.getInstance().render();
-        } else {
-            console.error('Recompilation failed');
+        const slang = codeHot();
+        const compiler = await getCompiler();
+        const wgsl = compiler.compile(slang);
+        if (!wgsl) {
+            console.error('Translating Slang to WGSL failed');
+            return;
         }
+        const source = await ComputeEngine.getInstance().preprocess(wgsl);
+        if (!source) {
+            console.error('Preprocessing failed');
+            return;
+        }
+        await ComputeEngine.getInstance().compile(source);
+        setPrelude(ComputeEngine.getInstance().getPrelude());
+        ComputeEngine.getInstance().render();
     };
 
     /*
@@ -152,12 +160,19 @@ const WgpuToyController = props => {
             loadTexture(1, loadedTextures[1].img);
             await updateUniforms();
             console.log('Compiling shader...');
-            const s = await engine.preprocess(codeHot());
-            if (!s) {
+            const slang = codeHot();
+            const compiler = await getCompiler();
+            const wgsl = compiler.compile(slang);
+            if (!wgsl) {
+                console.error('Translating Slang to WGSL failed');
+                return;
+            }
+            const source = await engine.preprocess(wgsl);
+            if (!source) {
                 console.error('Initialisation aborted: shader compilation failed');
                 return;
             }
-            await engine.compile(s);
+            await engine.compile(source);
             setPrelude(engine.getPrelude());
             engine.render();
             setManualReload(false);
