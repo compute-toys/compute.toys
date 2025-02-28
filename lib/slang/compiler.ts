@@ -1,10 +1,12 @@
 import pako from 'pako';
 import { ReflectionJSON } from 'types/reflection';
-import type { GlobalSession, MainModule, Module } from 'types/slang-wasm';
+import type { GlobalSession, LanguageServer, MainModule, Module } from 'types/slang-wasm';
 import stdlibSource from '../shaders/std.slang';
 import ShaderConverter from './glue';
 
+let moduleInstance: MainModule | null = null;
 let compiler: Compiler | null = null;
+let slangd: LanguageServer | null = null;
 
 class Compiler {
     private static SLANG_STAGE_COMPUTE = 6;
@@ -87,27 +89,44 @@ class Compiler {
     }
 }
 
-export async function getCompiler() {
-    if (compiler === null) {
-        const url = 'https://compute-toys.github.io/slang-playground/wasm/slang-wasm';
-        const moduleConfig = {
-            instantiateWasm: async (
-                imports: WebAssembly.Imports,
-                receiveInstance: (instance: WebAssembly.Instance) => void
-            ) => {
-                const response = await fetch(url + '.wasm.gz');
-                const compressedData = new Uint8Array(await response.arrayBuffer());
-                const wasmBinary = pako.inflate(compressedData);
-                const { instance } = await WebAssembly.instantiate(wasmBinary, imports);
-                receiveInstance(instance);
-                return instance.exports;
-            }
-        };
+async function getModule(): Promise<MainModule> {
+    if (moduleInstance) {
+        return moduleInstance;
+    }
 
-        // @ts-ignore
-        const createModule = (await import(/* webpackIgnore: true */ url + '.js')).default;
-        const moduleInstance = await createModule(moduleConfig);
-        compiler = new Compiler(moduleInstance);
+    const url = 'https://compute-toys.github.io/slang-playground/wasm/slang-wasm';
+    const moduleConfig = {
+        instantiateWasm: async (
+            imports: WebAssembly.Imports,
+            receiveInstance: (instance: WebAssembly.Instance) => void
+        ) => {
+            const response = await fetch(url + '.wasm.gz');
+            const compressedData = new Uint8Array(await response.arrayBuffer());
+            const wasmBinary = pako.inflate(compressedData);
+            const { instance } = await WebAssembly.instantiate(wasmBinary, imports);
+            receiveInstance(instance);
+            return instance.exports;
+        }
+    };
+
+    // @ts-ignore
+    const createModule = (await import(/* webpackIgnore: true */ url + '.js')).default;
+    moduleInstance = await createModule(moduleConfig);
+    if (!moduleInstance) throw new Error('Failed to initialise module');
+    return moduleInstance;
+}
+
+export async function getCompiler(): Promise<Compiler> {
+    if (compiler === null) {
+        compiler = new Compiler(await getModule());
     }
     return compiler;
+}
+
+export async function getLanguageServer(): Promise<LanguageServer> {
+    if (slangd === null) {
+        slangd = (await getModule()).createLanguageServer();
+        if (!slangd) throw new Error('Failed to initialise language server');
+    }
+    return slangd;
 }

@@ -14,7 +14,14 @@ import {
     resetAtom,
     vimAtom
 } from 'lib/atoms/atoms';
+import {
+    debugSlangServer,
+    registerSlangLanguageServer,
+    updateSlangDiagnostics,
+    updateSlangDocument
+} from 'lib/slang/language-server';
 import { useNavigationGuard } from 'next-navigation-guard';
+import { slangConfiguration, slangLanguageDef } from 'public/grammars/slang';
 import { wgslConfiguration, wgslLanguageDef } from 'public/grammars/wgsl';
 import { useEffect, useRef, useState } from 'react';
 import { defineMonacoTheme } from 'theme/monacotheme';
@@ -33,23 +40,27 @@ const Monaco = props => {
     const vim = useAtomValue(vimAtom);
     const [vimContext, setVimContext] = useState<any>(undefined);
     const [editor, setEditor] = useAtom(monacoEditorAtom);
+    const [language, setLanguage] = useState('wgsl'); // Default language
 
     const monacoRef = useRef<Monaco | null>(null);
 
+    // Handle WGSL parse errors
     useEffect(() => {
         const monaco = monacoRef.current;
-        if (monaco && parseError) {
+        if (monaco && parseError && language === 'wgsl') {
             // consider whether multi-model editing needs to be handled for some reason
             const model = monaco.editor.getModels()[0];
+            if (!model) return;
+
             let line = parseError.position.row;
             if (parseError.success) {
-                monaco.editor.setModelMarkers(model, 'owner', []);
+                monaco.editor.setModelMarkers(model, 'wgsl', []);
             } else if (0 < line && line < model.getLineCount()) {
                 if (parseError.position.col === model.getLineMaxColumn(line)) {
                     // naga emits some weird positions
                     line += 1;
                 }
-                monaco.editor.setModelMarkers(model, 'owner', [
+                monaco.editor.setModelMarkers(model, 'wgsl', [
                     {
                         startLineNumber: line,
                         startColumn: model.getLineFirstNonWhitespaceColumn(line),
@@ -60,7 +71,7 @@ const Monaco = props => {
                     }
                 ]);
             } else {
-                monaco.editor.setModelMarkers(model, 'owner', [
+                monaco.editor.setModelMarkers(model, 'wgsl', [
                     {
                         startLineNumber: 1,
                         startColumn: 1,
@@ -75,9 +86,10 @@ const Monaco = props => {
                 ? '4px solid #ff6f59'
                 : '';
         }
-    }, [parseError]);
+    }, [parseError, language]);
 
-    const editorWillMount = (monaco: Monaco) => {
+    const editorWillMount = async (monaco: Monaco) => {
+        // Register WGSL language
         if (!monaco.languages.getLanguages().some(({ id }) => id === 'wgsl')) {
             monaco.languages.register({ id: 'wgsl' });
         }
@@ -101,6 +113,15 @@ const Monaco = props => {
                 return null;
             }
         });
+
+        // Register Slang language
+        if (!monaco.languages.getLanguages().some(({ id }) => id === 'slang')) {
+            monaco.languages.register({ id: 'slang' });
+        }
+        monaco.languages.setLanguageConfiguration('slang', slangConfiguration);
+        monaco.languages.setMonarchTokensProvider('slang', slangLanguageDef);
+
+        // Define Monaco theme
         defineMonacoTheme(monaco, 'global');
     };
 
@@ -129,52 +150,156 @@ const Monaco = props => {
         }
     }, [vim]);
 
+    // Update Slang document and diagnostics when code changes
+    useEffect(() => {
+        if (!code || !editor || !monacoRef.current) return;
+
+        const model = editor.getModel();
+        if (!model) return;
+
+        const currentLanguage = model.getLanguageId();
+
+        if (currentLanguage === 'slang') {
+            console.log('Language is Slang, updating document and diagnostics');
+            updateSlangDocument(code)
+                .then(diagnostics => {
+                    console.log(
+                        'Document updated, diagnostics:',
+                        diagnostics ? `Found ${diagnostics.size()} diagnostics` : 'No diagnostics'
+                    );
+
+                    // Update diagnostics after document is updated
+                    if (monacoRef.current && model) {
+                        return updateSlangDiagnostics(monacoRef.current, model);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error updating Slang document or diagnostics:', error);
+                });
+        }
+    }, [code, editor]);
+
+    // Add a useEffect to initialize the Slang language server when the component mounts
+    useEffect(() => {
+        const monaco = monacoRef.current;
+        if (!monaco) return;
+
+        // Register Slang language and server
+        const initSlang = async () => {
+            console.log('Initializing Slang language and server');
+            try {
+                await registerSlangLanguageServer(monaco);
+                console.log('Slang language and server initialized successfully');
+            } catch (error) {
+                console.error('Error initializing Slang:', error);
+            }
+        };
+
+        initSlang();
+    }, [monacoRef.current]);
+
+    // Add language selector UI
+    const languageSelector = (
+        <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
+            <select
+                value={language}
+                onChange={e => {
+                    const newLanguage = e.target.value;
+                    setLanguage(newLanguage);
+
+                    // Update the model's language
+                    if (editor && editor.getModel() && monacoRef.current) {
+                        monacoRef.current.editor.setModelLanguage(editor.getModel()!, newLanguage);
+
+                        // Clear markers when switching languages
+                        monacoRef.current.editor.setModelMarkers(editor.getModel()!, 'wgsl', []);
+                        monacoRef.current.editor.setModelMarkers(editor.getModel()!, 'slang', []);
+
+                        // Update diagnostics if switching to Slang
+                        if (newLanguage === 'slang' && code) {
+                            console.log('Switching to Slang, updating document and diagnostics');
+                            updateSlangDocument(code)
+                                .then(diagnostics => {
+                                    console.log(
+                                        'Document updated after language switch, diagnostics:',
+                                        diagnostics
+                                            ? `Found ${diagnostics.size()} diagnostics`
+                                            : 'No diagnostics'
+                                    );
+
+                                    // Force a diagnostic update
+                                    debugSlangServer().then(() => {
+                                        return updateSlangDiagnostics(
+                                            monacoRef.current!,
+                                            editor.getModel()!
+                                        );
+                                    });
+                                })
+                                .catch(error => {
+                                    console.error(
+                                        'Error updating Slang document after language switch:',
+                                        error
+                                    );
+                                });
+                        }
+                    }
+                }}
+            >
+                <option value="wgsl">WGSL</option>
+                <option value="slang">Slang</option>
+            </select>
+        </div>
+    );
+
     // height fills the screen with room for texture picker
     return (
-        <Editor
-            height="calc(100vh - 270px)" // preference
-            language="wgsl"
-            onChange={value => {
-                setCode(value!);
-                setCodeNeedSave(true);
-            }}
-            beforeMount={editorWillMount}
-            onMount={(_editor, monaco: Monaco) => {
-                monacoRef.current = monaco;
-                setEditor(_editor);
-                // Compile shortcut
-                _editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.Enter, () => {
-                    setManualReload(true);
-                });
-                // Play/Pause shortcut
-                _editor.addCommand(
-                    monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow,
-                    () => {
-                        setPlay(!isPlaying());
-                    }
-                );
-                // Record shortcut
-                _editor.addCommand(
-                    monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR,
-                    () => {
-                        setRecording(!isRecording());
-                    }
-                );
-                // Rewind shortcut
-                _editor.addCommand(
-                    monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow,
-                    () => {
-                        setReset(true);
-                    }
-                );
-                // https://github.com/microsoft/monaco-editor/issues/392
-                document.fonts.ready.then(() => monaco.editor.remeasureFonts());
-            }}
-            options={props.editorOptions}
-            theme="global" // preference
-            value={code}
-            width={undefined} // fit to bounding box
-        />
+        <>
+            {languageSelector}
+            <Editor
+                height="calc(100vh - 270px)" // preference
+                language={language}
+                onChange={value => {
+                    setCode(value!);
+                    setCodeNeedSave(true);
+                }}
+                beforeMount={editorWillMount}
+                onMount={(_editor, monaco: Monaco) => {
+                    monacoRef.current = monaco;
+                    setEditor(_editor);
+                    // Compile shortcut
+                    _editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.Enter, () => {
+                        setManualReload(true);
+                    });
+                    // Play/Pause shortcut
+                    _editor.addCommand(
+                        monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow,
+                        () => {
+                            setPlay(!isPlaying());
+                        }
+                    );
+                    // Record shortcut
+                    _editor.addCommand(
+                        monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR,
+                        () => {
+                            setRecording(!isRecording());
+                        }
+                    );
+                    // Rewind shortcut
+                    _editor.addCommand(
+                        monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow,
+                        () => {
+                            setReset(true);
+                        }
+                    );
+                    // https://github.com/microsoft/monaco-editor/issues/392
+                    document.fonts.ready.then(() => monaco.editor.remeasureFonts());
+                }}
+                options={props.editorOptions}
+                theme="global" // preference
+                value={code}
+                width={undefined} // fit to bounding box
+            />
+        </>
     );
 };
 
