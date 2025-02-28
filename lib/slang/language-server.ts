@@ -4,176 +4,10 @@ import { getLanguageServer } from './compiler';
 
 const userCodeURI = 'file:///user.slang';
 
-// Debug function to inspect the language server
-export async function debugSlangServer() {
-    try {
-        const slangd = await getLanguageServer();
-        console.log('Language server object:', slangd);
-        console.log(
-            'Available methods:',
-            Object.getOwnPropertyNames(Object.getPrototypeOf(slangd))
-        );
-
-        const diagnostics = slangd.getDiagnostics(userCodeURI);
-        if (!diagnostics) {
-            throw new Error('No diagnostics found');
-        }
-
-        console.log('Diagnostics for user.slang:', diagnostics);
-        console.log('Diagnostics size:', diagnostics.size());
-
-        for (let i = 0; i < diagnostics.size(); i++) {
-            const diagnostic = diagnostics.get(i);
-            if (diagnostic) {
-                console.log(`Diagnostic ${i}:`, {
-                    severity: diagnostic.severity,
-                    message: diagnostic.message.toString(),
-                    range: diagnostic.range,
-                    code: diagnostic.code?.toString()
-                });
-            }
-        }
-
-        return diagnostics;
-    } catch (error) {
-        console.error('Error in debugSlangServer:', error);
-        return null;
-    }
-}
-
-// Helper function to translate severity levels
-function translateSeverity(severity: number): monaco.MarkerSeverity {
-    switch (severity) {
-        case 1:
-            return monaco.MarkerSeverity.Error;
-        case 2:
-            return monaco.MarkerSeverity.Warning;
-        case 3:
-            return monaco.MarkerSeverity.Info;
-        case 4:
-            return monaco.MarkerSeverity.Hint;
-        default:
-            return monaco.MarkerSeverity.Error;
-    }
-}
-
-// Get diagnostics from the Slang language server
-async function getSlangDiagnostics() {
-    try {
-        const slangd = await getLanguageServer();
-        console.log('Getting diagnostics for:', userCodeURI);
-
-        const diagnostics = slangd.getDiagnostics(userCodeURI);
-        console.log(
-            'Diagnostics result:',
-            diagnostics ? `Found ${diagnostics.size()} diagnostics` : 'No diagnostics returned'
-        );
-
-        return diagnostics;
-    } catch (error) {
-        console.error('Error getting Slang diagnostics:', error);
-        return null;
-    }
-}
-
-// Update Monaco editor markers with Slang diagnostics
-export async function updateSlangDiagnostics(
-    monacoInstance: typeof monaco,
-    model: monaco.editor.ITextModel
-) {
-    try {
-        console.log('Updating Slang diagnostics for model:', model.uri.toString());
-
-        const diagnostics = await getSlangDiagnostics();
-
-        if (!diagnostics) {
-            console.log('Clearing markers due to no diagnostics');
-            monacoInstance.editor.setModelMarkers(model, 'slang', []);
-            return;
-        }
-
-        const markers: monaco.editor.IMarkerData[] = [];
-
-        for (let i = 0; i < diagnostics.size(); i++) {
-            const diagnostic = diagnostics.get(i);
-            if (!diagnostic) continue;
-
-            markers.push({
-                severity: translateSeverity(diagnostic.severity),
-                message: diagnostic.message.toString(),
-                startLineNumber: diagnostic.range.start.line + 1,
-                startColumn: diagnostic.range.start.character + 1,
-                endLineNumber: diagnostic.range.end.line + 1,
-                endColumn: diagnostic.range.end.character + 1
-            });
-        }
-
-        console.log(`Setting ${markers.length} markers on model`);
-        monacoInstance.editor.setModelMarkers(model, 'slang', markers);
-    } catch (error) {
-        console.error('Error updating Slang diagnostics:', error);
-    }
-}
-
-// Update the document content in the language server
-export async function updateSlangDocument(content: string) {
-    try {
-        const slangd = await getLanguageServer();
-        console.log('Updating Slang document with content length:', content.length);
-
-        // Close and reopen the document with new content
-        slangd.didCloseTextDocument(userCodeURI);
-        slangd.didOpenTextDocument(userCodeURI, content);
-
-        // Force a parse by requesting hover information
-        slangd.hover(userCodeURI, { line: 0, character: 0 });
-
-        // Wait for processing
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        const diagnostics = slangd.getDiagnostics(userCodeURI);
-        console.log(
-            'Diagnostics after update:',
-            diagnostics ? `Found ${diagnostics.size()} diagnostics` : 'No diagnostics returned'
-        );
-
-        return diagnostics;
-    } catch (error) {
-        console.error('Error updating Slang document:', error);
-        return null;
-    }
-}
-
 // Register the language server features with Monaco
 export async function registerSlangLanguageServer(monacoInstance: typeof monaco) {
     const slangd = await getLanguageServer();
     console.log('Registering Slang language server');
-
-    // Initialize with empty documents
-    slangd.didOpenTextDocument(userCodeURI, '');
-
-    // Check initial diagnostics
-    const initialDiagnostics = slangd.getDiagnostics(userCodeURI);
-    console.log(
-        'Initial diagnostics:',
-        initialDiagnostics ? `Found ${initialDiagnostics.size()} diagnostics` : 'No diagnostics'
-    );
-
-    // Set up diagnostics checking
-    monacoInstance.languages.onLanguage('slang', () => {
-        console.log('Slang language loaded, setting up diagnostics');
-
-        const diagnosticsInterval = setInterval(() => {
-            monacoInstance.editor
-                .getModels()
-                .filter(model => model.getLanguageId() === 'slang')
-                .forEach(model =>
-                    updateSlangDiagnostics(monacoInstance, model).catch(console.error)
-                );
-        }, 2000);
-
-        return { dispose: () => clearInterval(diagnosticsInterval) };
-    });
 
     // Register hover provider
     monacoInstance.languages.registerHoverProvider('slang', {
@@ -359,4 +193,67 @@ export async function registerSlangLanguageServer(monacoInstance: typeof monaco)
             return { data: rawData };
         }
     });
+}
+
+// Combined function to update Slang document and diagnostics
+export async function updateSlangDocumentAndDiagnostics(
+    content: string,
+    model: monaco.editor.ITextModel,
+    monacoInstance: typeof monaco
+) {
+    console.log('Updating Slang document and diagnostics');
+    try {
+        // Get language server instance
+        const slangd = await getLanguageServer();
+
+        // Update document content
+        console.log('Updating Slang document with content length:', content.length);
+        slangd.didCloseTextDocument(userCodeURI);
+        slangd.didOpenTextDocument(userCodeURI, content);
+
+        // Get diagnostics
+        console.log('Getting diagnostics for:', userCodeURI);
+        const diagnostics = slangd.getDiagnostics(userCodeURI);
+        if (diagnostics === undefined) {
+            throw new Error('Unable to get diagnostics');
+        }
+
+        console.log(
+            'Diagnostics result:',
+            diagnostics ? `Found ${diagnostics.size()} diagnostics` : 'No diagnostics returned'
+        );
+
+        // Update Monaco editor markers with diagnostics
+        if (monacoInstance && model) {
+            const markers: monaco.editor.IMarkerData[] = [];
+
+            // Map severity levels to Monaco marker severities
+            const severityMap = [
+                monaco.MarkerSeverity.Error, // Default for index 0
+                monaco.MarkerSeverity.Error,
+                monaco.MarkerSeverity.Warning,
+                monaco.MarkerSeverity.Info,
+                monaco.MarkerSeverity.Hint
+            ];
+
+            for (let i = 0; i < diagnostics.size(); i++) {
+                const diagnostic = diagnostics.get(i);
+                if (!diagnostic) continue;
+
+                markers.push({
+                    severity: severityMap[diagnostic.severity] || monaco.MarkerSeverity.Error,
+                    message: diagnostic.message.toString(),
+                    startLineNumber: diagnostic.range.start.line + 1,
+                    startColumn: diagnostic.range.start.character + 1,
+                    endLineNumber: diagnostic.range.end.line + 1,
+                    endColumn: diagnostic.range.end.character + 1
+                });
+            }
+
+            console.log(`Setting ${markers.length} markers on model`);
+            monacoInstance.editor.setModelMarkers(model, 'slang', markers);
+        }
+    } catch (error) {
+        console.error('Error updating Slang document or diagnostics:', error);
+    }
 }

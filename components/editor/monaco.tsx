@@ -15,10 +15,8 @@ import {
     vimAtom
 } from 'lib/atoms/atoms';
 import {
-    debugSlangServer,
     registerSlangLanguageServer,
-    updateSlangDiagnostics,
-    updateSlangDocument
+    updateSlangDocumentAndDiagnostics
 } from 'lib/slang/language-server';
 import { useNavigationGuard } from 'next-navigation-guard';
 import { slangConfiguration, slangLanguageDef } from 'public/grammars/slang';
@@ -161,21 +159,7 @@ const Monaco = props => {
 
         if (currentLanguage === 'slang') {
             console.log('Language is Slang, updating document and diagnostics');
-            updateSlangDocument(code)
-                .then(diagnostics => {
-                    console.log(
-                        'Document updated, diagnostics:',
-                        diagnostics ? `Found ${diagnostics.size()} diagnostics` : 'No diagnostics'
-                    );
-
-                    // Update diagnostics after document is updated
-                    if (monacoRef.current && model) {
-                        return updateSlangDiagnostics(monacoRef.current, model);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error updating Slang document or diagnostics:', error);
-                });
+            updateSlangDocumentAndDiagnostics(code, model, monacoRef.current);
         }
     }, [code, editor]);
 
@@ -218,29 +202,11 @@ const Monaco = props => {
                         // Update diagnostics if switching to Slang
                         if (newLanguage === 'slang' && code) {
                             console.log('Switching to Slang, updating document and diagnostics');
-                            updateSlangDocument(code)
-                                .then(diagnostics => {
-                                    console.log(
-                                        'Document updated after language switch, diagnostics:',
-                                        diagnostics
-                                            ? `Found ${diagnostics.size()} diagnostics`
-                                            : 'No diagnostics'
-                                    );
-
-                                    // Force a diagnostic update
-                                    debugSlangServer().then(() => {
-                                        return updateSlangDiagnostics(
-                                            monacoRef.current!,
-                                            editor.getModel()!
-                                        );
-                                    });
-                                })
-                                .catch(error => {
-                                    console.error(
-                                        'Error updating Slang document after language switch:',
-                                        error
-                                    );
-                                });
+                            updateSlangDocumentAndDiagnostics(
+                                code,
+                                editor.getModel()!,
+                                monacoRef.current
+                            );
                         }
                     }
                 }}
