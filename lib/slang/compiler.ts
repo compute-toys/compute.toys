@@ -4,7 +4,22 @@ import type { GlobalSession, LanguageServer, MainModule, Module } from 'types/sl
 import stdlibSource from '../shaders/std.slang';
 import ShaderConverter from './glue';
 
-let moduleInstance: MainModule | null = null;
+const moduleURL = 'https://compute-toys.github.io/slang-playground/wasm/slang-wasm';
+const moduleConfig = {
+    instantiateWasm: async (
+        imports: WebAssembly.Imports,
+        receiveInstance: (instance: WebAssembly.Instance) => void
+    ) => {
+        const response = await fetch(moduleURL + '.wasm.gz');
+        const compressedData = new Uint8Array(await response.arrayBuffer());
+        const wasmBinary = pako.inflate(compressedData);
+        const { instance } = await WebAssembly.instantiate(wasmBinary, imports);
+        receiveInstance(instance);
+        return instance.exports;
+    }
+};
+
+let initialisationPromise: Promise<void> | null = null;
 let compiler: Compiler | null = null;
 let slangd: LanguageServer | null = null;
 
@@ -89,44 +104,52 @@ class Compiler {
     }
 }
 
-async function getModule(): Promise<MainModule> {
-    if (moduleInstance) {
-        return moduleInstance;
+/**
+ * Initialises both the compiler and language server.
+ * This should be called before any other functions that access these resources.
+ */
+async function initialiseSlang(): Promise<void> {
+    if (initialisationPromise) {
+        return initialisationPromise;
     }
 
-    const url = 'https://compute-toys.github.io/slang-playground/wasm/slang-wasm';
-    const moduleConfig = {
-        instantiateWasm: async (
-            imports: WebAssembly.Imports,
-            receiveInstance: (instance: WebAssembly.Instance) => void
-        ) => {
-            const response = await fetch(url + '.wasm.gz');
-            const compressedData = new Uint8Array(await response.arrayBuffer());
-            const wasmBinary = pako.inflate(compressedData);
-            const { instance } = await WebAssembly.instantiate(wasmBinary, imports);
-            receiveInstance(instance);
-            return instance.exports;
+    initialisationPromise = (async () => {
+        console.log('Initialising Slang module, compiler, and language server');
+
+        // @ts-ignore
+        const createModule = (await import(/* webpackIgnore: true */ moduleURL + '.js')).default;
+        const slangModule = await createModule(moduleConfig);
+        if (!slangModule) throw new Error('Failed to initialise module');
+
+        // Initialise compiler
+        if (compiler === null) {
+            console.log('Initialising compiler');
+            compiler = new Compiler(slangModule);
         }
-    };
 
-    // @ts-ignore
-    const createModule = (await import(/* webpackIgnore: true */ url + '.js')).default;
-    moduleInstance = await createModule(moduleConfig);
-    if (!moduleInstance) throw new Error('Failed to initialise module');
-    return moduleInstance;
+        // Initialise language server
+        if (slangd === null) {
+            console.log('Initialising language server');
+            slangd = slangModule.createLanguageServer();
+            if (!slangd) throw new Error('Failed to initialise language server');
+        }
+    })();
+
+    return initialisationPromise;
 }
 
+/**
+ * Gets the compiler instance, ensuring it's initialised first.
+ */
 export async function getCompiler(): Promise<Compiler> {
-    if (compiler === null) {
-        compiler = new Compiler(await getModule());
-    }
-    return compiler;
+    await initialiseSlang();
+    return compiler!;
 }
 
+/**
+ * Gets the language server instance, ensuring it's initialised first.
+ */
 export async function getLanguageServer(): Promise<LanguageServer> {
-    if (slangd === null) {
-        slangd = (await getModule()).createLanguageServer();
-        if (!slangd) throw new Error('Failed to initialise language server');
-    }
-    return slangd;
+    await initialiseSlang();
+    return slangd!;
 }
