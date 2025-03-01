@@ -61,9 +61,7 @@ class ShaderConverter {
                 }
             }
 
-            if (p.name === 'targetTexture') {
-                value = 'channel0';
-            } else if (
+            if (
                 p.type.kind === 'resource' &&
                 p.type.baseShape === 'structuredBuffer' &&
                 this.getBufferSize(p) > 0

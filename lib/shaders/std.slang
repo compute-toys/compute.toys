@@ -23,6 +23,9 @@ public struct DispatchOnceAttribute {};
 [format("rgba8")]
 public RWTexture2D screen;
 
+public Texture2D<float4> channel0;
+public Texture2D<float4> channel1;
+
 public struct Time {
     public uint frame;
     public float elapsed;
