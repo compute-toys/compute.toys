@@ -6,6 +6,7 @@ import {
     codeAtom,
     codeNeedSaveAtom,
     isPlayingAtom,
+    languageAtom,
     manualReloadAtom,
     monacoEditorAtom,
     parseErrorAtom,
@@ -38,7 +39,7 @@ const Monaco = props => {
     const vim = useAtomValue(vimAtom);
     const [vimContext, setVimContext] = useState<any>(undefined);
     const [editor, setEditor] = useAtom(monacoEditorAtom);
-    const [language, setLanguage] = useState('wgsl'); // Default language
+    const language = useAtomValue(languageAtom);
 
     const monacoRef = useRef<Monaco | null>(null);
 
@@ -182,90 +183,69 @@ const Monaco = props => {
         initSlang();
     }, [monacoRef.current]);
 
-    // Add language selector UI
-    const languageSelector = (
-        <div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
-            <select
-                value={language}
-                onChange={e => {
-                    const newLanguage = e.target.value;
-                    setLanguage(newLanguage);
+    // Update model language when language atom changes
+    useEffect(() => {
+        if (editor && editor.getModel() && monacoRef.current) {
+            monacoRef.current.editor.setModelLanguage(editor.getModel()!, language);
 
-                    // Update the model's language
-                    if (editor && editor.getModel() && monacoRef.current) {
-                        monacoRef.current.editor.setModelLanguage(editor.getModel()!, newLanguage);
+            // Clear markers when switching languages
+            monacoRef.current.editor.setModelMarkers(editor.getModel()!, 'wgsl', []);
+            monacoRef.current.editor.setModelMarkers(editor.getModel()!, 'slang', []);
 
-                        // Clear markers when switching languages
-                        monacoRef.current.editor.setModelMarkers(editor.getModel()!, 'wgsl', []);
-                        monacoRef.current.editor.setModelMarkers(editor.getModel()!, 'slang', []);
-
-                        // Update diagnostics if switching to Slang
-                        if (newLanguage === 'slang' && code) {
-                            console.log('Switching to Slang, updating document and diagnostics');
-                            updateSlangDocumentAndDiagnostics(
-                                code,
-                                editor.getModel()!,
-                                monacoRef.current
-                            );
-                        }
-                    }
-                }}
-            >
-                <option value="wgsl">WGSL</option>
-                <option value="slang">Slang</option>
-            </select>
-        </div>
-    );
+            // Update diagnostics if switching to Slang
+            if (language === 'slang' && code) {
+                console.log('Switching to Slang, updating document and diagnostics');
+                updateSlangDocumentAndDiagnostics(code, editor.getModel()!, monacoRef.current);
+            }
+        }
+    }, [language, editor, code]);
 
     // height fills the screen with room for texture picker
     return (
-        <>
-            {languageSelector}
-            <Editor
-                height="calc(100vh - 270px)" // preference
-                language={language}
-                onChange={value => {
-                    setCode(value!);
-                    setCodeNeedSave(true);
-                }}
-                beforeMount={editorWillMount}
-                onMount={(_editor, monaco: Monaco) => {
-                    monacoRef.current = monaco;
-                    setEditor(_editor);
-                    // Compile shortcut
-                    _editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.Enter, () => {
-                        setManualReload(true);
-                    });
-                    // Play/Pause shortcut
-                    _editor.addCommand(
-                        monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow,
-                        () => {
-                            setPlay(!isPlaying());
-                        }
-                    );
-                    // Record shortcut
-                    _editor.addCommand(
-                        monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR,
-                        () => {
-                            setRecording(!isRecording());
-                        }
-                    );
-                    // Rewind shortcut
-                    _editor.addCommand(
-                        monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow,
-                        () => {
-                            setReset(true);
-                        }
-                    );
-                    // https://github.com/microsoft/monaco-editor/issues/392
-                    document.fonts.ready.then(() => monaco.editor.remeasureFonts());
-                }}
-                options={props.editorOptions}
-                theme="global" // preference
-                value={code}
-                width={undefined} // fit to bounding box
-            />
-        </>
+        <Editor
+            height="calc(100vh - 270px)" // preference
+            language={language}
+            onChange={value => {
+                setCode(value!);
+                setCodeNeedSave(true);
+            }}
+            beforeMount={editorWillMount}
+            onMount={(_editor, monaco: Monaco) => {
+                monacoRef.current = monaco;
+                setEditor(_editor);
+                // Compile shortcut
+                _editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.Enter, () => {
+                    setManualReload(true);
+                });
+                // Play/Pause shortcut
+                _editor.addCommand(
+                    monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow,
+                    () => {
+                        setPlay(!isPlaying());
+                    }
+                );
+                // Record shortcut
+                _editor.addCommand(
+                    monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR,
+                    () => {
+                        setRecording(!isRecording());
+                    }
+                );
+                // Rewind shortcut
+                _editor.addCommand(
+                    monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow,
+                    () => {
+                        setReset(true);
+                    }
+                );
+                // https://github.com/microsoft/monaco-editor/issues/392
+                document.fonts.ready.then(() => monaco.editor.remeasureFonts());
+            }}
+            options={props.editorOptions}
+            theme="global" // preference
+            value={code}
+            width={undefined} // fit to bounding box
+        />
     );
 };
 

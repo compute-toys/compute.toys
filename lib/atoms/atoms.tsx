@@ -66,4 +66,5 @@ export const sliderSerDeNeedsUpdateAtom = atomWithReset<boolean>(true);
 export const sliderUpdateSignalAtom = atom<boolean>(false);
 export const shaderDataUrlThumbAtom = atomWithReset<string>('');
 export const float32EnabledAtom = atomWithReset<boolean>(false);
+export const languageAtom = atomWithReset<string>('wgsl');
 export const halfResolutionAtom = atomWithReset<boolean>(false);
