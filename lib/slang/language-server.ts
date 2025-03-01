@@ -1,7 +1,7 @@
+import stdSlangShader from 'lib/shaders/std.slang';
 import * as monaco from 'monaco-editor';
 import { CompletionContext } from 'types/slang-wasm';
 import { getLanguageServer } from './compiler';
-import stdSlangShader from 'lib/shaders/std.slang';
 
 const userCodeURI = 'file:///user.slang';
 

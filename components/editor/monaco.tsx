@@ -15,13 +15,13 @@ import {
     resetAtom,
     vimAtom
 } from 'lib/atoms/atoms';
+import { slangConfiguration, slangLanguageDef } from 'lib/grammars/slang';
+import { wgslConfiguration, wgslLanguageDef } from 'lib/grammars/wgsl';
 import {
     registerSlangLanguageServer,
     updateSlangDocumentAndDiagnostics
 } from 'lib/slang/language-server';
 import { useNavigationGuard } from 'next-navigation-guard';
-import { slangConfiguration, slangLanguageDef } from 'public/grammars/slang';
-import { wgslConfiguration, wgslLanguageDef } from 'public/grammars/wgsl';
 import { useEffect, useRef, useState } from 'react';
 import { defineMonacoTheme } from 'theme/monacotheme';
 
