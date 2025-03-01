@@ -1,6 +1,7 @@
 import * as monaco from 'monaco-editor';
 import { CompletionContext } from 'types/slang-wasm';
 import { getLanguageServer } from './compiler';
+import stdSlangShader from 'lib/shaders/std.slang';
 
 const userCodeURI = 'file:///user.slang';
 
@@ -209,6 +210,7 @@ export async function updateSlangDocumentAndDiagnostics(
         // Update document content
         console.log('Updating Slang document with content length:', content.length);
         slangd.didCloseTextDocument(userCodeURI);
+        slangd.didOpenTextDocument('file:///std.slang', stdSlangShader);
         slangd.didOpenTextDocument(userCodeURI, content);
 
         // Get diagnostics
