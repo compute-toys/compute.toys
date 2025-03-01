@@ -119,8 +119,11 @@ const WgpuToyController = props => {
         const code = codeHot();
         if (language() === 'slang') {
             console.log('Translating Slang to WGSL...');
+            const startTime = performance.now();
             const compiler = await getCompiler();
             const wgsl = compiler.compile(code);
+            const endTime = performance.now();
+            console.log(`Translation took ${(endTime - startTime).toFixed(2)}ms`);
             if (!wgsl) {
                 console.error('Translating Slang to WGSL failed');
                 return null;
@@ -190,8 +193,8 @@ const WgpuToyController = props => {
             console.log('Initialisation complete');
         } else if (dbLoaded() && manualReload()) {
             console.log('Manual reload triggered');
-            await recompile();
             setManualReload(false);
+            await recompile();
         }
         if (needsInitialReset()) {
             return;
