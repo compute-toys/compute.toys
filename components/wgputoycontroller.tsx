@@ -112,7 +112,6 @@ const WgpuToyController = props => {
 
     /**
      * Processes the shader code based on the selected language
-     * @param code The shader code to process
      * @param engine The engine instance to use for preprocessing
      * @returns Processed shader source or null if processing failed
      */
