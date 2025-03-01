@@ -1,3 +1,4 @@
+import memoizee from 'memoizee';
 import pako from 'pako';
 import { ReflectionJSON } from 'types/reflection';
 import type { GlobalSession, LanguageServer, MainModule, Module } from 'types/slang-wasm';
@@ -19,7 +20,6 @@ const moduleConfig = {
     }
 };
 
-let initialisationPromise: Promise<void> | null = null;
 let compiler: Compiler | null = null;
 let slangd: LanguageServer | null = null;
 
@@ -108,48 +108,52 @@ class Compiler {
  * Initialises both the compiler and language server.
  * This should be called before any other functions that access these resources.
  */
-async function initialiseSlang(): Promise<void> {
-    if (initialisationPromise) {
-        return initialisationPromise;
-    }
-
-    initialisationPromise = (async () => {
+const initialiseSlang = memoizee(
+    async (): Promise<boolean> => {
         console.log('Initialising Slang module, compiler, and language server');
 
         // @ts-ignore
         const createModule = (await import(/* webpackIgnore: true */ moduleURL + '.js')).default;
-        const slangModule = await createModule(moduleConfig);
-        if (!slangModule) throw new Error('Failed to initialise module');
+        const slangModule: MainModule | null = await createModule(moduleConfig);
+        if (!slangModule) {
+            console.error('Failed to initialise Slang module');
+            return false;
+        }
 
-        // Initialise compiler
-        if (compiler === null) {
-            console.log('Initialising compiler');
+        try {
             compiler = new Compiler(slangModule);
+        } catch (error) {
+            console.error('Failed to initialise compiler', error);
+            return false;
         }
 
-        // Initialise language server
-        if (slangd === null) {
-            console.log('Initialising language server');
-            slangd = slangModule.createLanguageServer();
-            if (!slangd) throw new Error('Failed to initialise language server');
+        slangd = slangModule.createLanguageServer();
+        if (!slangd) {
+            console.error('Failed to initialise language server');
+            return false;
         }
-    })();
 
-    return initialisationPromise;
-}
+        return true;
+    },
+    { promise: true }
+);
 
 /**
  * Gets the compiler instance, ensuring it's initialised first.
  */
 export async function getCompiler(): Promise<Compiler> {
-    await initialiseSlang();
-    return compiler!;
+    if (await initialiseSlang()) {
+        return compiler!;
+    }
+    throw new Error('Failed to initialise compiler');
 }
 
 /**
  * Gets the language server instance, ensuring it's initialised first.
  */
 export async function getLanguageServer(): Promise<LanguageServer> {
-    await initialiseSlang();
-    return slangd!;
+    if (await initialiseSlang()) {
+        return slangd!;
+    }
+    throw new Error('Failed to initialise language server');
 }
