@@ -21,14 +21,16 @@ import {
     registerSlangLanguageServer,
     updateSlangDocumentAndDiagnostics
 } from 'lib/slang/language-server';
+import { debounce } from 'lib/util/debounce';
 import { useNavigationGuard } from 'next-navigation-guard';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { defineMonacoTheme } from 'theme/monacotheme';
 
 declare type Monaco = typeof import('monaco-editor');
 
 const Monaco = props => {
     const [code, setCode] = useAtom(codeAtom);
+    const [codeHot] = useTransientAtom(codeAtom);
     const [isRecording, setRecording] = useTransientAtom(recordingAtom);
     const [codeNeedSave, setCodeNeedSave] = useAtom(codeNeedSaveAtom);
     const parseError = useAtomValue(parseErrorAtom);
@@ -42,6 +44,30 @@ const Monaco = props => {
     const language = useAtomValue(languageAtom);
 
     const monacoRef = useRef<Monaco | null>(null);
+
+    // Create a reference to store the immediate update function
+    const immediateUpdateRef = useRef<((content: string, model: any, monaco: Monaco) => void) | null>(null);
+
+    // Create a debounced version of updateSlangDocumentAndDiagnostics
+    const debouncedUpdateSlang = useCallback(
+        debounce((content: string, model: any, monaco: Monaco) => {
+            if (language === 'slang') {
+                console.log('Debounced update of Slang document and diagnostics');
+                updateSlangDocumentAndDiagnostics(content, model, monaco);
+            }
+        }, 500),
+        [language]
+    );
+
+    // Store the immediate update function in a ref for use in event handlers
+    useEffect(() => {
+        immediateUpdateRef.current = (content: string, model: any, monaco: Monaco) => {
+            if (language === 'slang') {
+                console.log('Immediate update of Slang document and diagnostics');
+                updateSlangDocumentAndDiagnostics(content, model, monaco);
+            }
+        };
+    }, [language]);
 
     // Handle WGSL parse errors
     useEffect(() => {
@@ -159,10 +185,10 @@ const Monaco = props => {
         const currentLanguage = model.getLanguageId();
 
         if (currentLanguage === 'slang') {
-            console.log('Language is Slang, updating document and diagnostics');
-            updateSlangDocumentAndDiagnostics(code, model, monacoRef.current);
+            // Use the debounced update function instead of calling directly
+            debouncedUpdateSlang(code, model, monacoRef.current);
         }
-    }, [code, editor]);
+    }, [code, editor, debouncedUpdateSlang]);
 
     // Add a useEffect to initialize the Slang language server when the component mounts
     useEffect(() => {
@@ -193,12 +219,16 @@ const Monaco = props => {
             monacoRef.current.editor.setModelMarkers(editor.getModel()!, 'slang', []);
 
             // Update diagnostics if switching to Slang
-            if (language === 'slang' && code) {
-                console.log('Switching to Slang, updating document and diagnostics');
-                updateSlangDocumentAndDiagnostics(code, editor.getModel()!, monacoRef.current);
+            if (language === 'slang') {
+                const currentContent = editor.getModel()!.getValue();
+                if (currentContent) {
+                    console.log('Switching to Slang, updating document and diagnostics');
+                    // Use the debounced update function for consistency
+                    debouncedUpdateSlang(currentContent, editor.getModel()!, monacoRef.current);
+                }
             }
         }
-    }, [language, editor, code]);
+    }, [language, editor, debouncedUpdateSlang]);
 
     // height fills the screen with room for texture picker
     return (
