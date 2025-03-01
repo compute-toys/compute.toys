@@ -11,6 +11,7 @@ import {
     heightAtom,
     hotReloadAtom,
     isPlayingAtom,
+    languageAtom,
     loadedTexturesAtom,
     manualReloadAtom,
     parseErrorAtom,
@@ -71,6 +72,7 @@ const WgpuToyController = props => {
     const [hotReloadHot] = useTransientAtom(hotReloadAtom);
     const [sliderRefMap] = useTransientAtom(sliderRefMapAtom);
     const [timer, setTimer] = useTransientAtom(timerAtom);
+    const [language] = useTransientAtom(languageAtom);
 
     // transient atom can't be used with effect hook, and we want both
     // "hot" access and effect hook access for code
@@ -108,24 +110,39 @@ const WgpuToyController = props => {
         setSliderUpdateSignal(false);
     }, []);
 
+    /**
+     * Processes the shader code based on the selected language
+     * @param code The shader code to process
+     * @param engine The engine instance to use for preprocessing
+     * @returns Processed shader source or null if processing failed
+     */
+    const processShaderCode = async (engine: ComputeEngine) => {
+        const code = codeHot();
+        if (language() === 'slang') {
+            console.log('Translating Slang to WGSL...');
+            const compiler = await getCompiler();
+            const wgsl = compiler.compile(code);
+            if (!wgsl) {
+                console.error('Translating Slang to WGSL failed');
+                return null;
+            }
+            return engine.preprocess(wgsl);
+        } else {
+            // For WGSL, just preprocess directly
+            return engine.preprocess(code);
+        }
+    };
+
     const recompile = async () => {
         await updateUniforms();
         console.log('Recompiling shader...');
-        const slang = codeHot();
-        const compiler = await getCompiler();
-        const wgsl = compiler.compile(slang);
-        if (!wgsl) {
-            console.error('Translating Slang to WGSL failed');
-            return;
+        const engine = ComputeEngine.getInstance();
+        const source = await processShaderCode(engine);
+        if (source) {
+            await engine.compile(source);
+            setPrelude(engine.getPrelude());
+            engine.render();
         }
-        const source = await ComputeEngine.getInstance().preprocess(wgsl);
-        if (!source) {
-            console.error('Preprocessing failed');
-            return;
-        }
-        await ComputeEngine.getInstance().compile(source);
-        setPrelude(ComputeEngine.getInstance().getPrelude());
-        ComputeEngine.getInstance().render();
     };
 
     /*
@@ -160,14 +177,7 @@ const WgpuToyController = props => {
             loadTexture(1, loadedTextures[1].img);
             await updateUniforms();
             console.log('Compiling shader...');
-            const slang = codeHot();
-            const compiler = await getCompiler();
-            const wgsl = compiler.compile(slang);
-            if (!wgsl) {
-                console.error('Translating Slang to WGSL failed');
-                return;
-            }
-            const source = await engine.preprocess(wgsl);
+            const source = await processShaderCode(engine);
             if (!source) {
                 console.error('Initialisation aborted: shader compilation failed');
                 return;
