@@ -22,15 +22,19 @@ import {
     updateSlangDocumentAndDiagnostics
 } from 'lib/slang/language-server';
 import { debounce } from 'lib/util/debounce';
+import { editor as MonacoEditor } from 'monaco-editor';
 import { useNavigationGuard } from 'next-navigation-guard';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { defineMonacoTheme } from 'theme/monacotheme';
 
 declare type Monaco = typeof import('monaco-editor');
 
+interface VimMode {
+    dispose: () => void;
+}
+
 const Monaco = props => {
     const [code, setCode] = useAtom(codeAtom);
-    const [codeHot] = useTransientAtom(codeAtom);
     const [isRecording, setRecording] = useTransientAtom(recordingAtom);
     const [codeNeedSave, setCodeNeedSave] = useAtom(codeNeedSaveAtom);
     const parseError = useAtomValue(parseErrorAtom);
@@ -39,18 +43,20 @@ const Monaco = props => {
     const setManualReload = useSetAtom(manualReloadAtom);
     const setReset = useSetAtom(resetAtom);
     const vim = useAtomValue(vimAtom);
-    const [vimContext, setVimContext] = useState<any>(undefined);
+    const [vimContext, setVimContext] = useState<VimMode | undefined>(undefined);
     const [editor, setEditor] = useAtom(monacoEditorAtom);
     const language = useAtomValue(languageAtom);
 
     const monacoRef = useRef<Monaco | null>(null);
 
     // Create a reference to store the immediate update function
-    const immediateUpdateRef = useRef<((content: string, model: any, monaco: Monaco) => void) | null>(null);
+    const immediateUpdateRef = useRef<
+        ((content: string, model: MonacoEditor.ITextModel, monaco: Monaco) => void) | null
+    >(null);
 
     // Create a debounced version of updateSlangDocumentAndDiagnostics
     const debouncedUpdateSlang = useCallback(
-        debounce((content: string, model: any, monaco: Monaco) => {
+        debounce((content: string, model: MonacoEditor.ITextModel, monaco: Monaco) => {
             if (language === 'slang') {
                 console.log('Debounced update of Slang document and diagnostics');
                 updateSlangDocumentAndDiagnostics(content, model, monaco);
@@ -61,7 +67,11 @@ const Monaco = props => {
 
     // Store the immediate update function in a ref for use in event handlers
     useEffect(() => {
-        immediateUpdateRef.current = (content: string, model: any, monaco: Monaco) => {
+        immediateUpdateRef.current = (
+            content: string,
+            model: MonacoEditor.ITextModel,
+            monaco: Monaco
+        ) => {
             if (language === 'slang') {
                 console.log('Immediate update of Slang document and diagnostics');
                 updateSlangDocumentAndDiagnostics(content, model, monaco);

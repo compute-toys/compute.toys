@@ -112,7 +112,6 @@ const initialiseSlang = memoizee(
     async (): Promise<boolean> => {
         console.log('Initialising Slang module, compiler, and language server');
 
-        // @ts-ignore
         const createModule = (await import(/* webpackIgnore: true */ moduleURL + '.js')).default;
         const slangModule: MainModule | null = await createModule(moduleConfig);
         if (!slangModule) {
