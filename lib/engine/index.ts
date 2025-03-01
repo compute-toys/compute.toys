@@ -230,7 +230,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Preprocess shader source code
      */
-    async preprocess(shader: string): Promise<SourceMap | undefined> {
+    async preprocess(shader: string): Promise<SourceMap> {
         const defines = new Map<string, string>([
             ['SCREEN_WIDTH', this.screenWidth.toString()],
             ['SCREEN_HEIGHT', this.screenHeight.toString()]

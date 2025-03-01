@@ -9,6 +9,7 @@ import {
     descriptionAtom,
     entryPointsAtom,
     float32EnabledAtom,
+    languageAtom,
     loadedTexturesAtom,
     saveColorTransitionSignalAtom,
     shaderDataUrlThumbAtom,
@@ -38,6 +39,7 @@ export interface ShaderActiveSettings {
     uniforms: Array<UniformActiveSettings>;
     textures: Array<TextureActiveSettings>;
     float32Enabled?: boolean;
+    language?: string;
 }
 
 export interface UpsertResult {
@@ -104,6 +106,7 @@ export const useResetShaderData = () => {
     const resetSliderSerDeNeedsUpdateAtom = useResetAtom(sliderSerDeNeedsUpdateAtom);
     const resetShaderDataUrlThumb = useResetAtom(shaderDataUrlThumbAtom);
     const resetFloat32Enabled = useResetAtom(float32EnabledAtom);
+    const resetLanguage = useResetAtom(languageAtom);
 
     const reset = () => {
         resetAuthorProfile();
@@ -117,6 +120,7 @@ export const useResetShaderData = () => {
         resetSliderSerDeNeedsUpdateAtom();
         resetShaderDataUrlThumb();
         resetFloat32Enabled();
+        resetLanguage();
     };
 
     return reset;
@@ -182,7 +186,8 @@ export default function useShaderSerDe(
                             code: JSON.stringify(atomGetter(codeAtom)),
                             uniforms: getSliderActiveSettings(atomGetter(sliderRefMapAtom)),
                             textures: atomGetter(loadedTexturesAtom),
-                            float32Enabled: atomGetter(float32EnabledAtom)
+                            float32Enabled: atomGetter(float32EnabledAtom),
+                            language: atomGetter(languageAtom)
                         })
                     }
                 ])
@@ -221,7 +226,8 @@ export default function useShaderSerDe(
                         code: JSON.stringify(atomGetter(codeAtom)),
                         uniforms: getSliderActiveSettings(atomGetter(sliderRefMapAtom)),
                         textures: atomGetter(loadedTexturesAtom),
-                        float32Enabled: atomGetter(float32EnabledAtom)
+                        float32Enabled: atomGetter(float32EnabledAtom),
+                        language: atomGetter(languageAtom)
                     })
                 })
                 .eq('id', id)

@@ -9,6 +9,7 @@ import {
     dbLoadedAtom,
     descriptionAtom,
     float32EnabledAtom,
+    languageAtom,
     loadedTexturesAtom,
     manualReloadAtom,
     shaderIDAtom,
@@ -40,6 +41,7 @@ export function useShader(shader: Shader) {
     const setVisibility = useSetAtom(visibilityAtom);
     const setAuthorProfile = useSetAtom(authorProfileAtom);
     const setFloat32Enabled = useSetAtom(float32EnabledAtom);
+    const setLanguage = useSetAtom(languageAtom);
 
     setDBLoaded(false);
     reset();
@@ -48,13 +50,18 @@ export function useShader(shader: Shader) {
     setVisibility(shader.visibility);
 
     const body = JSON.parse(shader.body);
+    const code = fixup_shader_code(JSON.parse(body.code));
+    const uniforms = body.uniforms;
+    const textures = body.textures;
     const float32Enabled = 'float32Enabled' in body ? body.float32Enabled : false;
+    const language = 'language' in body ? body.language : 'wgsl';
 
     const shaderActiveSettings: ShaderActiveSettings = {
-        code: fixup_shader_code(JSON.parse(body.code)),
-        uniforms: body.uniforms,
-        textures: body.textures,
-        float32Enabled: float32Enabled
+        code,
+        uniforms,
+        textures,
+        float32Enabled,
+        language
     };
     setCode(shaderActiveSettings.code);
     setLoadedTextures(shaderActiveSettings.textures);
@@ -80,6 +87,7 @@ export function useShader(shader: Shader) {
     // need to inform the slider component of a change so it can get a count of all the enabled sliders
     setSliderSerDeNeedsUpdate(true);
     setFloat32Enabled(float32Enabled);
+    setLanguage(language);
     setAuthorProfile(shader.profile);
     setShaderID(shader.id);
     setManualReload(true);

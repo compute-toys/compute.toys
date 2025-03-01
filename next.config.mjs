@@ -31,6 +31,13 @@ const nextConfig = {
                   loader: 'custom',
                   loaderFile: './lib/util/loader.ts'
               },
+    webpack: (config) => {
+        config.module.rules.push({
+            test: /\.(slang|wgsl)$/,
+            type: 'asset/source'
+        });
+        return config;
+    },
     async redirects() {
         return [
             {
