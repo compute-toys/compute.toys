@@ -6,6 +6,7 @@ import {
     codeAtom,
     codeNeedSaveAtom,
     isPlayingAtom,
+    languageAtom,
     manualReloadAtom,
     monacoEditorAtom,
     parseErrorAtom,
@@ -14,12 +15,23 @@ import {
     resetAtom,
     vimAtom
 } from 'lib/atoms/atoms';
+import { slangConfiguration, slangLanguageDef } from 'lib/grammars/slang';
+import { wgslConfiguration, wgslLanguageDef } from 'lib/grammars/wgsl';
+import {
+    registerSlangLanguageServer,
+    updateSlangDocumentAndDiagnostics
+} from 'lib/slang/language-server';
+import { debounce } from 'lib/util/debounce';
+import { editor as MonacoEditor } from 'monaco-editor';
 import { useNavigationGuard } from 'next-navigation-guard';
-import { wgslConfiguration, wgslLanguageDef } from 'public/grammars/wgsl';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { defineMonacoTheme } from 'theme/monacotheme';
 
 declare type Monaco = typeof import('monaco-editor');
+
+interface VimMode {
+    dispose: () => void;
+}
 
 const Monaco = props => {
     const [code, setCode] = useAtom(codeAtom);
@@ -31,25 +43,59 @@ const Monaco = props => {
     const setManualReload = useSetAtom(manualReloadAtom);
     const setReset = useSetAtom(resetAtom);
     const vim = useAtomValue(vimAtom);
-    const [vimContext, setVimContext] = useState<any>(undefined);
+    const [vimContext, setVimContext] = useState<VimMode | undefined>(undefined);
     const [editor, setEditor] = useAtom(monacoEditorAtom);
+    const language = useAtomValue(languageAtom);
 
     const monacoRef = useRef<Monaco | null>(null);
 
+    // Create a reference to store the immediate update function
+    const immediateUpdateRef = useRef<
+        ((content: string, model: MonacoEditor.ITextModel, monaco: Monaco) => void) | null
+    >(null);
+
+    // Create a debounced version of updateSlangDocumentAndDiagnostics
+    const debouncedUpdateSlang = useCallback(
+        debounce((content: string, model: MonacoEditor.ITextModel, monaco: Monaco) => {
+            if (language === 'slang') {
+                console.log('Debounced update of Slang document and diagnostics');
+                updateSlangDocumentAndDiagnostics(content, model, monaco);
+            }
+        }, 500),
+        [language]
+    );
+
+    // Store the immediate update function in a ref for use in event handlers
+    useEffect(() => {
+        immediateUpdateRef.current = (
+            content: string,
+            model: MonacoEditor.ITextModel,
+            monaco: Monaco
+        ) => {
+            if (language === 'slang') {
+                console.log('Immediate update of Slang document and diagnostics');
+                updateSlangDocumentAndDiagnostics(content, model, monaco);
+            }
+        };
+    }, [language]);
+
+    // Handle WGSL parse errors
     useEffect(() => {
         const monaco = monacoRef.current;
-        if (monaco && parseError) {
+        if (monaco && parseError && language === 'wgsl') {
             // consider whether multi-model editing needs to be handled for some reason
             const model = monaco.editor.getModels()[0];
+            if (!model) return;
+
             let line = parseError.position.row;
             if (parseError.success) {
-                monaco.editor.setModelMarkers(model, 'owner', []);
+                monaco.editor.setModelMarkers(model, 'wgsl', []);
             } else if (0 < line && line < model.getLineCount()) {
                 if (parseError.position.col === model.getLineMaxColumn(line)) {
                     // naga emits some weird positions
                     line += 1;
                 }
-                monaco.editor.setModelMarkers(model, 'owner', [
+                monaco.editor.setModelMarkers(model, 'wgsl', [
                     {
                         startLineNumber: line,
                         startColumn: model.getLineFirstNonWhitespaceColumn(line),
@@ -60,7 +106,7 @@ const Monaco = props => {
                     }
                 ]);
             } else {
-                monaco.editor.setModelMarkers(model, 'owner', [
+                monaco.editor.setModelMarkers(model, 'wgsl', [
                     {
                         startLineNumber: 1,
                         startColumn: 1,
@@ -75,9 +121,10 @@ const Monaco = props => {
                 ? '4px solid #ff6f59'
                 : '';
         }
-    }, [parseError]);
+    }, [parseError, language]);
 
-    const editorWillMount = (monaco: Monaco) => {
+    const editorWillMount = async (monaco: Monaco) => {
+        // Register WGSL language
         if (!monaco.languages.getLanguages().some(({ id }) => id === 'wgsl')) {
             monaco.languages.register({ id: 'wgsl' });
         }
@@ -101,6 +148,15 @@ const Monaco = props => {
                 return null;
             }
         });
+
+        // Register Slang language
+        if (!monaco.languages.getLanguages().some(({ id }) => id === 'slang')) {
+            monaco.languages.register({ id: 'slang' });
+        }
+        monaco.languages.setLanguageConfiguration('slang', slangConfiguration);
+        monaco.languages.setMonarchTokensProvider('slang', slangLanguageDef);
+
+        // Define Monaco theme
         defineMonacoTheme(monaco, 'global');
     };
 
@@ -129,11 +185,66 @@ const Monaco = props => {
         }
     }, [vim]);
 
+    // Update Slang document and diagnostics when code changes
+    useEffect(() => {
+        if (!code || !editor || !monacoRef.current) return;
+
+        const model = editor.getModel();
+        if (!model) return;
+
+        const currentLanguage = model.getLanguageId();
+
+        if (currentLanguage === 'slang') {
+            // Use the debounced update function instead of calling directly
+            debouncedUpdateSlang(code, model, monacoRef.current);
+        }
+    }, [code, editor, debouncedUpdateSlang]);
+
+    // Add a useEffect to initialize the Slang language server when the component mounts
+    useEffect(() => {
+        const monaco = monacoRef.current;
+        if (!monaco) return;
+
+        // Register Slang language and server
+        const initSlang = async () => {
+            console.log('Initializing Slang language and server');
+            try {
+                await registerSlangLanguageServer(monaco);
+                console.log('Slang language and server initialized successfully');
+            } catch (error) {
+                console.error('Error initializing Slang:', error);
+            }
+        };
+
+        initSlang();
+    }, [monacoRef.current]);
+
+    // Update model language when language atom changes
+    useEffect(() => {
+        if (editor && editor.getModel() && monacoRef.current) {
+            monacoRef.current.editor.setModelLanguage(editor.getModel()!, language);
+
+            // Clear markers when switching languages
+            monacoRef.current.editor.setModelMarkers(editor.getModel()!, 'wgsl', []);
+            monacoRef.current.editor.setModelMarkers(editor.getModel()!, 'slang', []);
+
+            // Update diagnostics if switching to Slang
+            if (language === 'slang') {
+                const currentContent = editor.getModel()!.getValue();
+                if (currentContent) {
+                    console.log('Switching to Slang, updating document and diagnostics');
+                    // Use the debounced update function for consistency
+                    debouncedUpdateSlang(currentContent, editor.getModel()!, monacoRef.current);
+                }
+            }
+        }
+    }, [language, editor, debouncedUpdateSlang]);
+
     // height fills the screen with room for texture picker
     return (
         <Editor
             height="calc(100vh - 270px)" // preference
-            language="wgsl"
+            language={language}
             onChange={value => {
                 setCode(value!);
                 setCodeNeedSave(true);
