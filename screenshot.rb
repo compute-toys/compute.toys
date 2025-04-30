@@ -91,12 +91,12 @@ begin
     :orientation => "landscape",
     :browsers => [
       {
-        :os => "android",
-        :os_version => "14.0",
-        :browser => "Android Browser",
-        :device => "Samsung Galaxy Tab S10 Plus",
+        :os => "OS X",
+        :os_version => "Sequoia",
+        :browser => "Chrome",
+        # :device => "Samsung Galaxy Tab S10 Plus",
         :browser_version => nil,
-        :real_mobile => true
+        # :real_mobile => true
       }
     ]
   }
