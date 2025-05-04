@@ -31,21 +31,36 @@ class ShaderConverter {
         return bufferFields ? `struct StorageBuffers {\n${bufferFields}}` : '';
     }
 
+    private readonly emittedStructs = new Set<string>();
+    private structDefs = '';
+
+    private generateWGSLStruct(t: Extract<ReflectionType, { kind: 'struct' }>): void {
+        if (this.emittedStructs.has(t.name)) return;
+        this.emittedStructs.add(t.name);
+
+        let body = '';
+        for (const f of t.fields) body += `    ${f.name}: ${this.getWGSLType(f.type)},\n`;
+        this.structDefs += `struct ${t.name} {\n${body}};\n\n`;
+    }
+
     private getWGSLType(type: ReflectionType | undefined): string {
         if (!type) return 'f32';
-        if (type.kind === 'scalar') {
-            switch (type.scalarType) {
-                case 'float32':
-                    return 'f32';
-                case 'uint32':
-                    return 'atomic<u32>';
-                case 'int32':
-                    return 'i32';
-                default:
-                    return 'f32';
-            }
+        switch (type.kind) {
+            case 'scalar':
+                switch (type.scalarType) {
+                    case 'float32': return 'f32';
+                    case 'uint32':  return 'atomic<u32>'; //why does this need to be atomic?
+                    case 'int32':   return 'i32';
+                    default:        return 'f32';
+                }
+            case 'vector':
+                return `vec${type.elementCount}<${this.getWGSLType(type.elementType)}>`;
+            case 'struct':
+                this.generateWGSLStruct(type);
+                return type.name;
+            default:
+                return 'f32';
         }
-        return 'f32'; // default
     }
 
     private generateDefines(params: ReflectionParameter[]): string {
@@ -81,53 +96,47 @@ class ShaderConverter {
         return entryPoints
             .filter(ep =>
                 ep.userAttribs?.some(
-                    attr => attr.name === 'Cover' || attr.name === 'WorkgroupCount'
+                    a => a.name === 'Cover' || a.name === 'WorkgroupCount' || a.name === 'DispatchCount'
                 )
             )
             .map(ep => {
+                const lines: string[] = [];
                 const threadGroupSize = ep.threadGroupSize;
-                let countX: number = 0;
-                let countY: number = 0;
-                let countZ: number = 0;
-
-                const callAttr = ep.userAttribs?.find(attr => attr.name === 'WorkgroupCount');
-
-                if (callAttr && callAttr.arguments.length >= 3) {
-                    countX = callAttr.arguments[0] as number;
-                    countY = callAttr.arguments[1] as number;
-                    countZ = callAttr.arguments[2] as number;
+                let countX = 0, countY = 0, countZ = 0;
+    
+                const wgAttr = ep.userAttribs?.find(a => a.name === 'WorkgroupCount');
+                if (wgAttr && wgAttr.arguments.length >= 3) {
+                    countX = wgAttr.arguments[0] as number;
+                    countY = wgAttr.arguments[1] as number;
+                    countZ = wgAttr.arguments[2] as number;
                 } else {
-                    const sizeOfAttr = ep.userAttribs?.find(attr => attr.name === 'Cover');
-
-                    if (sizeOfAttr && sizeOfAttr.arguments.length > 0) {
-                        const targetName = sizeOfAttr.arguments[0] as string;
+                    const coverAttr = ep.userAttribs?.find(a => a.name === 'Cover');
+                    if (coverAttr && coverAttr.arguments.length > 0) {
+                        const targetName = coverAttr.arguments[0] as string;
                         const param = params.find(p => p.name === targetName);
-
-                        if (param) {
-                            if (param.type.kind === 'resource') {
-                                if (param.type.baseShape === 'structuredBuffer') {
-                                    countX = Math.floor(
-                                        this.getBufferSize(param) / threadGroupSize[0]
-                                    );
-                                } else if (param.type.baseShape === 'texture2D') {
-                                    countX = countY =
-                                        threadGroupSize[0] > 0
-                                            ? Math.floor(512 / threadGroupSize[0])
-                                            : 1;
-                                }
+                        if (param && param.type.kind === 'resource') {
+                            if (param.type.baseShape === 'structuredBuffer') {
+                                countX = Math.ceil(this.getBufferSize(param) / threadGroupSize[0]);
+                            } else if (param.type.baseShape === 'texture2D') {
+                                countX = countY = threadGroupSize[0] > 0 ? Math.ceil(512 / threadGroupSize[0]) : 1; //why 512?
                             }
                         }
                     }
                 }
-
-                // Set minimum counts and handle special case
+    
                 countX = Math.max(countX, 1);
                 countY = Math.max(countY, 1);
                 countZ = Math.max(countZ, 1);
-
-                const counts = `${countX} ${countY} ${countZ}`;
-
-                return `#workgroup_count ${ep.name} ${counts}`;
+    
+                lines.push(`#workgroup_count ${ep.name} ${countX} ${countY} ${countZ}`);
+    
+                const dispatchAttr = ep.userAttribs?.find(a => a.name === 'DispatchCount');
+                if (dispatchAttr) {
+                    const dispatchCount = dispatchAttr.arguments.length > 0 ? dispatchAttr.arguments[0] as number : 1;
+                    lines.push(`#dispatch_count ${ep.name} ${dispatchCount}`);
+                }
+    
+                return lines.join('\n');
             })
             .join('\n');
     }
