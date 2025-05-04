@@ -123,7 +123,8 @@ class ShaderConverter {
                         }
                     }
                 }
-    
+                
+                // Set minimum counts and handle special case
                 countX = Math.max(countX, 1);
                 countY = Math.max(countY, 1);
                 countZ = Math.max(countZ, 1);
