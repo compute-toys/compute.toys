@@ -3,7 +3,7 @@ on:
 #   push:
 #     branches: [master]
   pull_request:
-    branches: [master]
+    branches: [master, deploy]
     types: [opened, synchronize, reopened]
 jobs:
   build:
@@ -27,28 +27,28 @@ jobs:
         commitHash: ${{ github.event.pull_request.head.sha }}
     - run: echo Deployed ${{ steps.cf-pages.outputs.url }}
 
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.2'
-        bundler-cache: true
+    # - name: Set up Ruby
+    #   uses: ruby/setup-ruby@v1
+    #   with:
+    #     ruby-version: '3.2'
+    #     bundler-cache: true
 
-    - name: Install dependencies
-      run: |
-        gem install browserstack-screenshot
-        gem install rest-client
+    # - name: Install dependencies
+    #   run: |
+    #     gem install browserstack-screenshot
+    #     gem install rest-client
 
-    - name: Take screenshot
-      env:
-        BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
-        BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        URL: ${{ steps.cf-pages.outputs.url }}/new
-        GITHUB_REPOSITORY: ${{ github.repository }}
-        GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
-      run: ruby ./screenshot.rb
+    # - name: Take screenshot
+    #   env:
+    #     BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+    #     BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #     URL: ${{ steps.cf-pages.outputs.url }}/new
+    #     GITHUB_REPOSITORY: ${{ github.repository }}
+    #     GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+    #   run: ruby ./screenshot.rb
 
-    - uses: actions/upload-artifact@v4
-      with:
-        name: my-artifact
-        path: screenshots/
+    # - uses: actions/upload-artifact@v4
+    #   with:
+    #     name: my-artifact
+    #     path: screenshots/
