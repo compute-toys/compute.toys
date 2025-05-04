@@ -31,18 +31,6 @@ class ShaderConverter {
         return bufferFields ? `struct StorageBuffers {\n${bufferFields}}` : '';
     }
 
-    private readonly emittedStructs = new Set<string>();
-    private structDefs = '';
-
-    private generateWGSLStruct(t: Extract<ReflectionType, { kind: 'struct' }>): void {
-        if (this.emittedStructs.has(t.name)) return;
-        this.emittedStructs.add(t.name);
-
-        let body = '';
-        for (const f of t.fields) body += `    ${f.name}: ${this.getWGSLType(f.type)},\n`;
-        this.structDefs += `struct ${t.name} {\n${body}};\n\n`;
-    }
-
     private getWGSLType(type: ReflectionType | undefined): string {
         if (!type) return 'f32';
         switch (type.kind) {
@@ -56,8 +44,7 @@ class ShaderConverter {
             case 'vector':
                 return `vec${type.elementCount}<${this.getWGSLType(type.elementType)}>`;
             case 'struct':
-                this.generateWGSLStruct(type);
-                return type.name;
+                return `${type.name}_std430_0`;
             default:
                 return 'f32';
         }
