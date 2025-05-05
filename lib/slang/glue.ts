@@ -1,5 +1,5 @@
 import type { ReflectionEntryPoint, ReflectionParameter } from 'types/reflection';
-import { EnhancedReflectionJSON } from './compiler';
+import { EnhancedReflectionJSON, TextureDimensions } from './compiler';
 
 class ShaderConverter {
     private getBufferSize(param: ReflectionParameter): number {
@@ -80,7 +80,8 @@ class ShaderConverter {
 
     private generateWorkgroupCounts(
         entryPoints: ReflectionEntryPoint[],
-        params: ReflectionParameter[]
+        params: ReflectionParameter[],
+        channelDimensions: TextureDimensions[]
     ): string {
         return entryPoints
             .filter(ep =>
@@ -112,10 +113,25 @@ class ShaderConverter {
                             if (param.type.baseShape === 'structuredBuffer') {
                                 countX = Math.ceil(this.getBufferSize(param) / threadGroupSize[0]);
                             } else if (param.type.baseShape === 'texture2D') {
-                                countX = countY =
-                                    threadGroupSize[0] > 0
-                                        ? Math.ceil(512 / threadGroupSize[0])
-                                        : 1; //why 512?
+                                if (targetName === 'channel0' || targetName === 'channel1') {
+                                    const { width, height } =
+                                        channelDimensions[targetName === 'channel0' ? 0 : 1];
+                                    console.log(
+                                        `Using texture dimensions for ${targetName}: ${width}x${height}`
+                                    );
+                                    countX =
+                                        threadGroupSize[0] > 0
+                                            ? Math.ceil(width / threadGroupSize[0])
+                                            : 1;
+                                    countY =
+                                        threadGroupSize[1] > 0
+                                            ? Math.ceil(height / threadGroupSize[1])
+                                            : 1;
+                                } else {
+                                    throw new Error(
+                                        `No texture dimensions found for ${targetName}`
+                                    );
+                                }
                             }
                         }
                     }
@@ -149,7 +165,7 @@ class ShaderConverter {
             .join('\n');
     }
 
-    public convert(input: EnhancedReflectionJSON): string {
+    public convert(input: EnhancedReflectionJSON, channelDimensions: TextureDimensions[]): string {
         const storageStruct = this.generateStorageStruct(input);
 
         const parts = [
@@ -159,7 +175,7 @@ class ShaderConverter {
             '',
             this.generateDefines(input.parameters),
             '',
-            this.generateWorkgroupCounts(input.entryPoints, input.parameters),
+            this.generateWorkgroupCounts(input.entryPoints, input.parameters, channelDimensions),
             '',
             this.generateDispatchDirectives(input.entryPoints)
         ].filter(Boolean);

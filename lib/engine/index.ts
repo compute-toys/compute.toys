@@ -532,7 +532,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Load texture into channel
      */
-    async loadChannel(index: number, data: Uint8Array): Promise<void> {
+    async loadChannel(index: number, data: Uint8Array): Promise<{ width: number; height: number }> {
         const start = performance.now();
 
         // Create ImageBitmap from data
@@ -592,12 +592,18 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         );
 
         console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
+
+        // Return dimensions
+        return { width: imageBitmap.width, height: imageBitmap.height };
     }
 
     /**
      * Load HDR texture into channel
      */
-    async loadChannelHDR(index: number, data: Uint8Array): Promise<void> {
+    async loadChannelHDR(
+        index: number,
+        data: Uint8Array
+    ): Promise<{ width: number; height: number }> {
         const start = performance.now();
 
         // Load HDR data
@@ -659,5 +665,8 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         );
 
         console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
+
+        // Return dimensions
+        return { width, height };
     }
 }

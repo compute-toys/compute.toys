@@ -10,6 +10,11 @@ export interface EnhancedReflectionJSON extends ReflectionJSON {
     bindings: Record<string, BindingInfo>;
 }
 
+export interface TextureDimensions {
+    width: number;
+    height: number;
+}
+
 const moduleURL = 'https://compute-toys.github.io/slang-playground/wasm/slang-wasm';
 const moduleConfig = {
     instantiateWasm: async (
@@ -55,7 +60,7 @@ class Compiler {
         this.wgslTarget = target.value;
     }
 
-    compile(shaderSource: string): string {
+    compile(shaderSource: string, channelDimensions: TextureDimensions[]): string {
         const session = this.globalSession.createSession(this.wgslTarget);
         if (!session) throw this.mainModule.getLastError();
 
@@ -102,7 +107,7 @@ class Compiler {
         console.log('Enhanced reflection:', enhancedReflection);
 
         const converter = new ShaderConverter();
-        const glue = converter.convert(enhancedReflection);
+        const glue = converter.convert(enhancedReflection, channelDimensions);
         console.log(glue);
 
         return (
