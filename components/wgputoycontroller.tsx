@@ -23,13 +23,14 @@ import {
     scaleAtom,
     sliderRefMapAtom,
     sliderUpdateSignalAtom,
+    textureChannelDimensionsAtom,
     timerAtom,
     titleAtom,
     widthAtom
 } from 'lib/atoms/atoms';
 import { canvasElAtom, canvasParentElAtom, wgputoyPreludeAtom } from 'lib/atoms/wgputoyatoms';
 import { ComputeEngine } from 'lib/engine';
-import { getCompiler } from 'lib/slang/compiler';
+import { getCompiler, TextureDimensions } from 'lib/slang/compiler';
 import { useCallback, useEffect } from 'react';
 import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
@@ -96,6 +97,10 @@ const WgpuToyController = props => {
     const float32Enabled = useAtomValue(float32EnabledAtom);
     const halfResolution = useAtomValue(halfResolutionAtom);
 
+    const [textureDimensions, setTextureDimensions] = useTransientAtom(
+        textureChannelDimensionsAtom
+    );
+
     const updateUniforms = useCallback(async () => {
         const names: string[] = [];
         const values: number[] = [];
@@ -121,7 +126,7 @@ const WgpuToyController = props => {
             console.log('Translating Slang to WGSL...');
             const startTime = performance.now();
             const compiler = await getCompiler();
-            const wgsl = compiler.compile(code);
+            const wgsl = compiler.compile(code, textureDimensions());
             const endTime = performance.now();
             console.log(`Translation took ${(endTime - startTime).toFixed(2)}ms`);
             if (!wgsl) {
@@ -175,8 +180,8 @@ const WgpuToyController = props => {
             updateResolution();
             engine.resize(width(), height(), scale());
             engine.reset();
-            loadTexture(0, loadedTextures[0].img);
-            loadTexture(1, loadedTextures[1].img);
+            await loadTexture(0, loadedTextures[0].img);
+            await loadTexture(1, loadedTextures[1].img);
             await updateUniforms();
             console.log('Compiling shader...');
             const source = await processShaderCode(engine);
@@ -252,24 +257,48 @@ const WgpuToyController = props => {
 
     // if (window) window['wgsl_error_handler'] = handleError;
 
-    const loadTexture = useCallback((index: number, uri: string) => {
-        console.log(`Loading texture ${index} from ${uri}`);
-        fetch(uri)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to load image');
-                }
-                return response.blob();
-            })
-            .then(b => b.arrayBuffer())
-            .then(data => {
-                if (uri.match(/\.hdr/i)) {
-                    ComputeEngine.getInstance().loadChannelHDR(index, new Uint8Array(data));
-                } else {
-                    ComputeEngine.getInstance().loadChannel(index, new Uint8Array(data));
-                }
-            })
-            .catch(error => console.error(error));
+    const loadTexture = useCallback(async (index: number, url: string): Promise<boolean> => {
+        console.log(`Loading texture ${index} from ${url}`);
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                console.error(`Error fetching texture: ${response.statusText}`);
+                return false;
+            }
+
+            const contentType = response.headers.get('content-type');
+            const buffer = await response.arrayBuffer();
+            const data = new Uint8Array(buffer);
+
+            let dimensions: TextureDimensions;
+
+            if (contentType?.includes('image/x-radiance') || url.endsWith('.hdr')) {
+                dimensions = await ComputeEngine.getInstance().loadChannelHDR(index, data);
+            } else {
+                dimensions = await ComputeEngine.getInstance().loadChannel(index, data);
+            }
+
+            // Update texture dimensions in the atom
+            const newDimensions = [...textureDimensions()];
+            newDimensions[index] = dimensions;
+            setTextureDimensions(newDimensions);
+
+            // Trigger recompile when texture dimensions change
+            if (
+                dbLoaded() &&
+                !needsInitialReset() &&
+                !performingInitialReset() &&
+                !manualReload() &&
+                canvas
+            ) {
+                console.log('Texture dimensions changed, recompiling shader...');
+                return true;
+            }
+        } catch (error) {
+            console.error(`Error loading texture ${index}:`, error);
+        }
+        return false;
     }, []);
 
     const requestFullscreen = useCallback(() => {
@@ -547,13 +576,21 @@ const WgpuToyController = props => {
 
     useEffect(() => {
         if (!needsInitialReset()) {
-            loadTexture(0, loadedTextures[0].img);
+            loadTexture(0, loadedTextures[0].img).then(changed => {
+                if (changed) {
+                    recompile();
+                }
+            });
         }
     }, [loadedTextures[0]]);
 
     useEffect(() => {
         if (!needsInitialReset()) {
-            loadTexture(1, loadedTextures[1].img);
+            loadTexture(1, loadedTextures[1].img).then(changed => {
+                if (changed) {
+                    recompile();
+                }
+            });
         }
     }, [loadedTextures[1]]);
 

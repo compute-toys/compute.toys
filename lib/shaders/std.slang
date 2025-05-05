@@ -18,6 +18,11 @@ public struct CoverAttribute {
 };
 
 [__AttributeUsage(_AttributeTargets.Function)]
+public struct DispatchCountAttribute {
+    int count;
+};
+
+[__AttributeUsage(_AttributeTargets.Function)]
 public struct DispatchOnceAttribute {};
 
 [format("rgba8")]
