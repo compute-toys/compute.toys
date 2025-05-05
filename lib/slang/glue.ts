@@ -1,9 +1,5 @@
-import type {
-    ReflectionEntryPoint,
-    ReflectionJSON,
-    ReflectionParameter,
-    ReflectionType
-} from 'types/reflection';
+import type { ReflectionEntryPoint, ReflectionParameter } from 'types/reflection';
+import { EnhancedReflectionJSON, TextureDimensions } from './compiler';
 
 class ShaderConverter {
     private getBufferSize(param: ReflectionParameter): number {
@@ -14,39 +10,47 @@ class ShaderConverter {
         return 0;
     }
 
-    private generateStorageStruct(params: ReflectionParameter[]): string {
+    private generateStorageStruct(input: EnhancedReflectionJSON): string {
         let bufferFields = '';
-        for (const p of params) {
+        for (const p of input.parameters) {
             if (
                 p.type.kind === 'resource' &&
                 p.type.baseShape === 'structuredBuffer' &&
                 this.getBufferSize(p) > 0
             ) {
-                const type = p.type.resultType;
-                const typeName = this.getWGSLType(type);
-                const size = this.getBufferSize(p);
-                bufferFields += `    ${p.name}: array<${typeName}, ${size}>,\n`;
+                if (p.name in input.bindings) {
+                    const binding = input.bindings[p.name];
+                    const size = this.getBufferSize(p);
+                    bufferFields += `    ${p.name}: array<${binding.typeArgs[0]}, ${size}>,\n`;
+                } else {
+                    console.warn(`No binding found for ${p.name}`);
+                }
             }
         }
         return bufferFields ? `struct StorageBuffers {\n${bufferFields}}` : '';
     }
 
-    private getWGSLType(type: ReflectionType | undefined): string {
-        if (!type) return 'f32';
-        if (type.kind === 'scalar') {
-            switch (type.scalarType) {
-                case 'float32':
-                    return 'f32';
-                case 'uint32':
-                    return 'atomic<u32>';
-                case 'int32':
-                    return 'i32';
-                default:
-                    return 'f32';
-            }
+    /*
+    private getWGSLType(type: ReflectionType): string {
+        switch (type.kind) {
+            case 'scalar':
+                switch (type.scalarType) {
+                    case 'float32':
+                        return 'f32';
+                    case 'uint32':
+                        return 'u32';
+                    case 'int32':
+                        return 'i32';
+                    default:
+                        return 'f32';
+                }
+            case 'vector':
+                return `vec${type.elementCount}<${this.getWGSLType(type.elementType)}>`;
+            default:
+                throw new Error(`Unsupported type: ${type.kind}`);
         }
-        return 'f32'; // default
     }
+    */
 
     private generateDefines(params: ReflectionParameter[]): string {
         const defines: string[] = [];
@@ -76,44 +80,57 @@ class ShaderConverter {
 
     private generateWorkgroupCounts(
         entryPoints: ReflectionEntryPoint[],
-        params: ReflectionParameter[]
+        params: ReflectionParameter[],
+        channelDimensions: TextureDimensions[]
     ): string {
         return entryPoints
             .filter(ep =>
                 ep.userAttribs?.some(
-                    attr => attr.name === 'Cover' || attr.name === 'WorkgroupCount'
+                    a =>
+                        a.name === 'Cover' ||
+                        a.name === 'WorkgroupCount' ||
+                        a.name === 'DispatchCount'
                 )
             )
             .map(ep => {
+                const lines: string[] = [];
                 const threadGroupSize = ep.threadGroupSize;
-                let countX: number = 0;
-                let countY: number = 0;
-                let countZ: number = 0;
+                let countX = 0,
+                    countY = 0,
+                    countZ = 0;
 
-                const callAttr = ep.userAttribs?.find(attr => attr.name === 'WorkgroupCount');
-
-                if (callAttr && callAttr.arguments.length >= 3) {
-                    countX = callAttr.arguments[0] as number;
-                    countY = callAttr.arguments[1] as number;
-                    countZ = callAttr.arguments[2] as number;
+                const wgAttr = ep.userAttribs?.find(a => a.name === 'WorkgroupCount');
+                if (wgAttr && wgAttr.arguments.length >= 3) {
+                    countX = wgAttr.arguments[0] as number;
+                    countY = wgAttr.arguments[1] as number;
+                    countZ = wgAttr.arguments[2] as number;
                 } else {
-                    const sizeOfAttr = ep.userAttribs?.find(attr => attr.name === 'Cover');
-
-                    if (sizeOfAttr && sizeOfAttr.arguments.length > 0) {
-                        const targetName = sizeOfAttr.arguments[0] as string;
+                    const coverAttr = ep.userAttribs?.find(a => a.name === 'Cover');
+                    if (coverAttr && coverAttr.arguments.length > 0) {
+                        const targetName = coverAttr.arguments[0] as string;
                         const param = params.find(p => p.name === targetName);
-
-                        if (param) {
-                            if (param.type.kind === 'resource') {
-                                if (param.type.baseShape === 'structuredBuffer') {
-                                    countX = Math.floor(
-                                        this.getBufferSize(param) / threadGroupSize[0]
+                        if (param && param.type.kind === 'resource') {
+                            if (param.type.baseShape === 'structuredBuffer') {
+                                countX = Math.ceil(this.getBufferSize(param) / threadGroupSize[0]);
+                            } else if (param.type.baseShape === 'texture2D') {
+                                if (targetName === 'channel0' || targetName === 'channel1') {
+                                    const { width, height } =
+                                        channelDimensions[targetName === 'channel0' ? 0 : 1];
+                                    console.log(
+                                        `Using texture dimensions for ${targetName}: ${width}x${height}`
                                     );
-                                } else if (param.type.baseShape === 'texture2D') {
-                                    countX = countY =
+                                    countX =
                                         threadGroupSize[0] > 0
-                                            ? Math.floor(512 / threadGroupSize[0])
+                                            ? Math.ceil(width / threadGroupSize[0])
                                             : 1;
+                                    countY =
+                                        threadGroupSize[1] > 0
+                                            ? Math.ceil(height / threadGroupSize[1])
+                                            : 1;
+                                } else {
+                                    throw new Error(
+                                        `No texture dimensions found for ${targetName}`
+                                    );
                                 }
                             }
                         }
@@ -125,9 +142,18 @@ class ShaderConverter {
                 countY = Math.max(countY, 1);
                 countZ = Math.max(countZ, 1);
 
-                const counts = `${countX} ${countY} ${countZ}`;
+                lines.push(`#workgroup_count ${ep.name} ${countX} ${countY} ${countZ}`);
 
-                return `#workgroup_count ${ep.name} ${counts}`;
+                const dispatchAttr = ep.userAttribs?.find(a => a.name === 'DispatchCount');
+                if (dispatchAttr) {
+                    const dispatchCount =
+                        dispatchAttr.arguments.length > 0
+                            ? (dispatchAttr.arguments[0] as number)
+                            : 1;
+                    lines.push(`#dispatch_count ${ep.name} ${dispatchCount}`);
+                }
+
+                return lines.join('\n');
             })
             .join('\n');
     }
@@ -139,8 +165,8 @@ class ShaderConverter {
             .join('\n');
     }
 
-    public convert(input: ReflectionJSON): string {
-        const storageStruct = this.generateStorageStruct(input.parameters);
+    public convert(input: EnhancedReflectionJSON, channelDimensions: TextureDimensions[]): string {
+        const storageStruct = this.generateStorageStruct(input);
 
         const parts = [
             storageStruct,
@@ -149,7 +175,7 @@ class ShaderConverter {
             '',
             this.generateDefines(input.parameters),
             '',
-            this.generateWorkgroupCounts(input.entryPoints, input.parameters),
+            this.generateWorkgroupCounts(input.entryPoints, input.parameters, channelDimensions),
             '',
             this.generateDispatchDirectives(input.entryPoints)
         ].filter(Boolean);

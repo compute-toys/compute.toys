@@ -57,6 +57,10 @@ export const loadedTexturesAtom = atomWithReset<Texture[]>([
     { img: '/textures/blank.png' },
     { img: '/textures/blank.png' }
 ]);
+export const textureChannelDimensionsAtom = atomWithReset<{ width: number; height: number }[]>([
+    { width: 128, height: 128 },
+    { width: 128, height: 128 }
+]);
 export const entryPointsAtom = atomWithReset([]);
 // we create a new refmap when deserializing from DB, don't need a reset
 export const sliderRefMapAtom = atom<Map<string, UniformSliderRef>>(
