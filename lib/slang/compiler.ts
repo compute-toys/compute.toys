@@ -3,7 +3,12 @@ import pako from 'pako';
 import { ReflectionJSON } from 'types/reflection';
 import type { GlobalSession, LanguageServer, MainModule, Module } from 'types/slang-wasm';
 import stdlibSource from '../shaders/std.slang';
+import { BindingInfo, parseBindings } from './binding-parser';
 import ShaderConverter from './glue';
+
+export interface EnhancedReflectionJSON extends ReflectionJSON {
+    bindings: Record<string, BindingInfo>;
+}
 
 const moduleURL = 'https://compute-toys.github.io/slang-playground/wasm/slang-wasm';
 const moduleConfig = {
@@ -86,12 +91,18 @@ class Compiler {
         // Get reflection data
         const layout = linkedProgram.getLayout(0);
         const reflectionJson: ReflectionJSON = layout?.toJsonObject();
-        console.log(reflectionJson);
 
         session.delete();
 
+        const bindingInfo = parseBindings(outCode);
+        const enhancedReflection: EnhancedReflectionJSON = {
+            ...reflectionJson,
+            bindings: bindingInfo
+        };
+        console.log('Enhanced reflection:', enhancedReflection);
+
         const converter = new ShaderConverter();
-        const glue = converter.convert(reflectionJson);
+        const glue = converter.convert(enhancedReflection);
         console.log(glue);
 
         return (

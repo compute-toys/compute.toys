@@ -1,9 +1,5 @@
-import type {
-    ReflectionEntryPoint,
-    ReflectionJSON,
-    ReflectionParameter,
-    ReflectionType
-} from 'types/reflection';
+import type { ReflectionEntryPoint, ReflectionParameter } from 'types/reflection';
+import { EnhancedReflectionJSON } from './compiler';
 
 class ShaderConverter {
     private getBufferSize(param: ReflectionParameter): number {
@@ -14,32 +10,35 @@ class ShaderConverter {
         return 0;
     }
 
-    private generateStorageStruct(params: ReflectionParameter[]): string {
+    private generateStorageStruct(input: EnhancedReflectionJSON): string {
         let bufferFields = '';
-        for (const p of params) {
+        for (const p of input.parameters) {
             if (
                 p.type.kind === 'resource' &&
                 p.type.baseShape === 'structuredBuffer' &&
                 this.getBufferSize(p) > 0
             ) {
-                const type = p.type.resultType;
-                const typeName = this.getWGSLType(type);
-                const size = this.getBufferSize(p);
-                bufferFields += `    ${p.name}: array<${typeName}, ${size}>,\n`;
+                if (p.name in input.bindings) {
+                    const binding = input.bindings[p.name];
+                    const size = this.getBufferSize(p);
+                    bufferFields += `    ${p.name}: array<${binding.typeArgs[0]}, ${size}>,\n`;
+                } else {
+                    console.warn(`No binding found for ${p.name}`);
+                }
             }
         }
         return bufferFields ? `struct StorageBuffers {\n${bufferFields}}` : '';
     }
 
-    private getWGSLType(type: ReflectionType | undefined): string {
-        if (!type) return 'f32';
+    /*
+    private getWGSLType(type: ReflectionType): string {
         switch (type.kind) {
             case 'scalar':
                 switch (type.scalarType) {
                     case 'float32':
                         return 'f32';
                     case 'uint32':
-                        return 'atomic<u32>'; //why does this need to be atomic?
+                        return 'u32';
                     case 'int32':
                         return 'i32';
                     default:
@@ -47,12 +46,11 @@ class ShaderConverter {
                 }
             case 'vector':
                 return `vec${type.elementCount}<${this.getWGSLType(type.elementType)}>`;
-            case 'struct':
-                return `${type.name}_std430_0`;
             default:
-                return 'f32';
+                throw new Error(`Unsupported type: ${type.kind}`);
         }
     }
+    */
 
     private generateDefines(params: ReflectionParameter[]): string {
         const defines: string[] = [];
@@ -151,8 +149,8 @@ class ShaderConverter {
             .join('\n');
     }
 
-    public convert(input: ReflectionJSON): string {
-        const storageStruct = this.generateStorageStruct(input.parameters);
+    public convert(input: EnhancedReflectionJSON): string {
+        const storageStruct = this.generateStorageStruct(input);
 
         const parts = [
             storageStruct,
