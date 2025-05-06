@@ -7,6 +7,12 @@ const userCodeURI = 'file:///user.slang';
 
 // Register the language server features with Monaco
 export async function registerSlangLanguageServer(monacoInstance: typeof monaco) {
+    // Skip registration in server-side rendering
+    if (typeof window === 'undefined') {
+        console.log('Skipping Slang language server registration in SSR environment');
+        return;
+    }
+
     const slangd = await getLanguageServer();
     console.log('Registering Slang language server');
 
@@ -202,6 +208,12 @@ export async function updateSlangDocumentAndDiagnostics(
     model: monaco.editor.ITextModel,
     monacoInstance: typeof monaco
 ) {
+    // Skip in server-side rendering
+    if (typeof window === 'undefined') {
+        console.log('Skipping Slang document and diagnostics update in SSR environment');
+        return;
+    }
+
     console.log('Updating Slang document and diagnostics');
     try {
         // Get language server instance
