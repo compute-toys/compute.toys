@@ -37,7 +37,7 @@
     "jotai-game": "^0.2.0",
     "memoizee": "^0.4.17",
     "monaco-editor": "^0.52.2",
-    "next": "^15.1.6",
+    "next": "^15.2.4",
     "next-navigation-guard": "^0.1.2",
     "pako": "^2.1.0",
     "react": "^18.3.1",
