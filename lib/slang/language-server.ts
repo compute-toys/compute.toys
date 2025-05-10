@@ -2,6 +2,7 @@ import stdSlangShader from 'lib/shaders/std.slang';
 import * as monaco from 'monaco-editor';
 import { CompletionContext } from 'types/slang-wasm';
 import { getLanguageServer } from './compiler';
+import { ComputeEngine } from 'lib/engine';
 
 const userCodeURI = 'file:///user.slang';
 
@@ -218,11 +219,21 @@ export async function updateSlangDocumentAndDiagnostics(
     try {
         // Get language server instance
         const slangd = await getLanguageServer();
+        
 
         // Update document content
         console.log('Updating Slang document with content length:', content.length);
         slangd.didCloseTextDocument(userCodeURI);
-        slangd.didOpenTextDocument('file:///std.slang', stdSlangShader);
+        
+        let prelude = "";
+        try {
+            const engine = ComputeEngine.getInstance();
+            if (engine) {
+                prelude = engine.getSlangPrelude();
+            }
+        } catch (error) {}
+
+        slangd.didOpenTextDocument('file:///std.slang', stdSlangShader + prelude);
         slangd.didOpenTextDocument(userCodeURI, content);
 
         // Get diagnostics

@@ -75,7 +75,7 @@ class ShaderConverter {
             defines.push(`#define ${p.name}_0 ${value}`);
         }
 
-        return defines.filter(Boolean).join('\n');
+        return defines.filter(Boolean).join('\n') + '\n';
     }
 
     private generateWorkgroupCounts(
