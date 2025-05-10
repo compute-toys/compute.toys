@@ -31,6 +31,16 @@ public RWTexture2D screen;
 public Texture2D<float4> channel0;
 public Texture2D<float4> channel1;
 
+public RWTexture2DArray<float4> pass_out;
+public Texture2DArray<float4> pass_in;
+
+public SamplerState nearest;
+public SamplerState bilinear;
+public SamplerState trilinear;
+public SamplerState nearest_repeat;
+public SamplerState bilinear_repeat;
+public SamplerState trilinear_repeat;
+
 public struct Time {
     public uint frame;
     public float elapsed;
@@ -48,4 +58,14 @@ public struct DispatchInfo {
 
 public ParameterBlock<Time> time;
 public ParameterBlock<Mouse> mouse;
+public ParameterBlock<uint4[2]> _keyboard;
 public ParameterBlock<DispatchInfo> dispatch;
+
+public bool keyDown(uint keycode) {
+    //much faster than %
+    uint id0 = keycode >> 7;
+    uint a = keycode - (id0 << 7);
+    uint id1 = a >> 5;  
+    uint id2 = a - (id1 << 5);
+    return ((_keyboard[id0][id1] >> id2) & 1u) == 1u;
+}
