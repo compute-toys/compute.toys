@@ -125,14 +125,19 @@ export class ComputeEngine {
      * Get the prelude code for Slang
      */
     public getSlangPrelude(): string {
-        var prelude = 'public struct Custom {\n';
+        let prelude = 'public struct Custom {\n';
         const [customNames] = this.bindings.custom.host;
         for (const name of customNames) {
             prelude += `    public float ${name};\n`;
         }
         prelude += '};\n';
         prelude += 'public ParameterBlock<Custom> custom;\n\n';
-        prelude += 'public static const int2 SCREEN_SIZE = int2(' + this.screenWidth + ', ' + this.screenHeight + ');\n\n';
+        prelude +=
+            'public static const int2 SCREEN_SIZE = int2(' +
+            this.screenWidth +
+            ', ' +
+            this.screenHeight +
+            ');\n\n';
         return prelude;
     }
 
