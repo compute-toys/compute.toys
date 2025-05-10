@@ -3,7 +3,7 @@ import { createClient } from 'lib/supabase/server';
 import { buildHead, fetchShader } from 'lib/view/server';
 import { notFound } from 'next/navigation';
 import { Database } from 'types/database.types';
-import ViewShader from './view';
+import ClientSideEditor from './client-editor';
 
 export const runtime = 'edge';
 
@@ -25,5 +25,7 @@ export default async function ViewShaderPage({ params }) {
     const supabase = await createClient();
     const shader = await getShader(supabase, await params);
     const { data, error } = await supabase.auth.getUser();
-    return <ViewShader shader={shader} user={error || !data?.user ? null : data.user} />;
+    return (
+        <ClientSideEditor shaderData={shader} userData={error || !data?.user ? null : data.user} />
+    );
 }

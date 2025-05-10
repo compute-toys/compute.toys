@@ -128,6 +128,12 @@ const initialiseSlang = memoizee(
     async (): Promise<boolean> => {
         console.log('Initialising Slang module, compiler, and language server');
 
+        // Check if we're in a browser environment
+        if (typeof window === 'undefined') {
+            console.log('Not initializing Slang in SSR environment');
+            return false;
+        }
+
         const createModule = (await import(/* webpackIgnore: true */ moduleURL + '.js')).default;
         const slangModule: MainModule | null = await createModule(moduleConfig);
         if (!slangModule) {
