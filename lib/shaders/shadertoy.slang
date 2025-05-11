@@ -27,6 +27,8 @@ public typealias mat2  = float2x2; public typealias mat3  = float3x3; public typ
 [Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> mod(matrix<T, S0, S1> x, matrix<T, S0, S1> y) where T : __BuiltinFloatingPointType { return x - no_diff floor(y / x) * y; }
 
 [Differentiable] public __generic<T> T atan(T x, T y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
+[Differentiable] public __generic<T, int S> vector<T, S> atan(vector<T, S> x, vector<T, S> y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
+[Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> atan(matrix<T, S0, S1> x, matrix<T, S0, S1> y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
 
 // Cant do a template for this one
 [Differentiable] public mat2 operator *(mat2 a, mat2 b) { return mul(a, b); }
