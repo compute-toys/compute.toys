@@ -60,13 +60,13 @@ class Compiler {
         this.wgslTarget = target.value;
     }
 
-    compile(shaderSource: string, channelDimensions: TextureDimensions[]): string {
+    compile(shaderSource: string, channelDimensions: TextureDimensions[], prelude: string): string {
         const session = this.globalSession.createSession(this.wgslTarget);
         if (!session) throw this.mainModule.getLastError();
 
         const components: Module[] = [];
 
-        const stdlib = session.loadModuleFromSource(stdlibSource, 'std', '/std.slang');
+        const stdlib = session.loadModuleFromSource(stdlibSource + prelude, 'std', '/std.slang');
         if (!stdlib) throw this.mainModule.getLastError();
         components.push(stdlib);
 
