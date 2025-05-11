@@ -33,15 +33,7 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
 [Differentiable] public __generic<T, int S> vector<T, S> atan(vector<T, S> x, vector<T, S> y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
 [Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> atan(matrix<T, S0, S1> x, matrix<T, S0, S1> y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
 
-[Differentiable] public __generic<int S0, int S1, int S2> matrix<float, S0, S2> operator *(matrix<float, S0, S1> a, matrix<float, S1, S2> b) { return mul(a, b); }
-// GLSL matrices are transposed compared to HLSL matrices
-[Differentiable] public __generic<int S0, int S1> vector<float, S1> operator *(matrix<float, S0, S1> a, vector<float, S0> b) { return mul(b, a); }
-[Differentiable] public __generic<int S0, int S1> vector<float, S0> operator *(vector<float, S1> a, matrix<float, S0, S1> b) { return mul(b, a); }
-
-[Differentiable] public __generic<int S> void operator *=(inout matrix<float, S, S> a, matrix<float, S, S> b) { a = mul(a, b); }
-[Differentiable] public __generic<int S> void operator *=(inout vector<float, S> a, matrix<float, S, S> b) { a = mul(b, a); }
-
-// HLSL doenst provide a way to get the inverse of a matrix, so we have to implement it ourselves
+// HLSL/Slang doenst provide a way to get the inverse of a matrix, so we have to implement it ourselves
 [Differentiable] float2x2 inverse(float2x2 m)
 {
     float det = m._11 * m._22 - m._12 * m._21;
@@ -115,6 +107,14 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
 
     return inv;
 }
+
+[Differentiable] public __generic<int S0, int S1, int S2> matrix<float, S0, S2> operator *(matrix<float, S0, S1> a, matrix<float, S1, S2> b) { return mul(a, b); }
+// GLSL/Slang matrices are transposed compared to HLSL matrices
+[Differentiable] public __generic<int S0, int S1> vector<float, S1> operator *(matrix<float, S0, S1> a, vector<float, S0> b) { return mul(b, a); }
+[Differentiable] public __generic<int S0, int S1> vector<float, S0> operator *(vector<float, S1> a, matrix<float, S0, S1> b) { return mul(b, a); }
+
+[Differentiable] public __generic<int S> void operator *=(inout matrix<float, S, S> a, matrix<float, S, S> b) { a = mul(a, b); }
+[Differentiable] public __generic<int S> void operator *=(inout vector<float, S> a, matrix<float, S, S> b) { a = mul(b, a); }
 
 public uint floatBitsToUint(float x) { return asuint(x); };
 public int floatBitsToInt(float x) { return asint(x); };
