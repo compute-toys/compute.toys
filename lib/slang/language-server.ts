@@ -230,7 +230,9 @@ export async function updateSlangDocumentAndDiagnostics(
             if (engine) {
                 prelude = engine.getSlangPrelude();
             }
-        } catch (error) {}
+        } catch (error) {
+            console.error('Error getting Slang prelude:', error);
+        }
 
         slangd.didOpenTextDocument('file:///std.slang', stdSlangShader + prelude);
         slangd.didOpenTextDocument(userCodeURI, content);
