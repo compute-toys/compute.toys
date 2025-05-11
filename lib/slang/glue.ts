@@ -137,12 +137,15 @@ class ShaderConverter {
                     }
                 }
 
-                // Set minimum counts and handle special case
-                countX = Math.max(countX, 1);
-                countY = Math.max(countY, 1);
-                countZ = Math.max(countZ, 1);
+                const anyWgAttr = ep.userAttribs?.some(a => (a.name === 'WorkgroupCount' || a.name === 'Cover'));
+                if (anyWgAttr) { //make sure we need to set the workgroup count
+                    // Set minimum counts and handle special case
+                    countX = Math.max(countX, 1);
+                    countY = Math.max(countY, 1);
+                    countZ = Math.max(countZ, 1);
 
-                lines.push(`#workgroup_count ${ep.name} ${countX} ${countY} ${countZ}`);
+                    lines.push(`#workgroup_count ${ep.name} ${countX} ${countY} ${countZ}`);
+                }
 
                 const dispatchAttr = ep.userAttribs?.find(a => a.name === 'DispatchCount');
                 if (dispatchAttr) {
@@ -155,7 +158,7 @@ class ShaderConverter {
 
                 return lines.join('\n');
             })
-            .join('\n');
+            .join('\n') + '\n';
     }
 
     private generateDispatchDirectives(entryPoints: ReflectionEntryPoint[]): string {
