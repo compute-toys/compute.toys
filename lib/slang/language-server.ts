@@ -1,6 +1,6 @@
 import { ComputeEngine } from 'lib/engine';
-import stdSlangShader from 'lib/shaders/std.slang';
 import shadertoylibSource from 'lib/shaders/shadertoy.slang';
+import stdSlangShader from 'lib/shaders/std.slang';
 import * as monaco from 'monaco-editor';
 import { CompletionContext } from 'types/slang-wasm';
 import { getLanguageServer } from './compiler';

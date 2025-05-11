@@ -2,8 +2,8 @@ import memoizee from 'memoizee';
 import pako from 'pako';
 import { ReflectionJSON } from 'types/reflection';
 import type { GlobalSession, LanguageServer, MainModule, Module } from 'types/slang-wasm';
-import stdlibSource from '../shaders/std.slang';
 import shadertoylibSource from '../shaders/shadertoy.slang';
+import stdlibSource from '../shaders/std.slang';
 import { BindingInfo, parseBindings } from './binding-parser';
 import ShaderConverter from './glue';
 
@@ -71,7 +71,11 @@ class Compiler {
         if (!stdlib) throw this.mainModule.getLastError();
         components.push(stdlib);
 
-        const shadertoylib = session.loadModuleFromSource(shadertoylibSource, 'shadertoy', '/shadertoy.slang');
+        const shadertoylib = session.loadModuleFromSource(
+            shadertoylibSource,
+            'shadertoy',
+            '/shadertoy.slang'
+        );
         if (!shadertoylib) throw this.mainModule.getLastError();
         components.push(shadertoylib);
 
