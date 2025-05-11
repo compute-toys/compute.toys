@@ -33,13 +33,9 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
 [Differentiable] public __generic<T, int S> vector<T, S> atan(vector<T, S> x, vector<T, S> y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
 [Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> atan(matrix<T, S0, S1> x, matrix<T, S0, S1> y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
 
-// Cant do a template for this one
-[Differentiable] public mat2 operator *(mat2 a, mat2 b) { return mul(a, b); }
-[Differentiable] public vec2 operator *(mat2 a, vec2 b) { return mul(a, b); }
-[Differentiable] public mat3 operator *(mat3 a, mat3 b) { return mul(a, b); }
-[Differentiable] public vec3 operator *(mat3 a, vec3 b) { return mul(a, b); }
-[Differentiable] public mat4 operator *(mat4 a, mat4 b) { return mul(a, b); }
-[Differentiable] public vec4 operator *(mat4 a, vec4 b) { return mul(a, b); }
+[Differentiable] public __generic<int S0, int S1, int S2> matrix<float, S0, S2> operator *(matrix<float, S0, S1> a, matrix<float, S1, S2> b) { return mul(a, b); }
+[Differentiable] public __generic<int S0, int S1> vector<float, S0> operator *(matrix<float, S0, S1> a, vector<float, S1> b) { return mul(a, b); }
+[Differentiable] public __generic<int S0, int S1> vector<float, S1> operator *(vector<float, S0> a, matrix<float, S0, S1> b) { return mul(a, b); }
 
 public uint floatBitsToUint(float x) { return asuint(x); };
 public int floatBitsToInt(float x) { return asint(x); };
