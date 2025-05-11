@@ -1,11 +1,14 @@
 import std;
 
 // GLSL types
-public typealias vec2  = float2;   public typealias vec3  = float3;   public typealias vec4  = float4;
-public typealias ivec2 = int2;     public typealias ivec3 = int3;     public typealias ivec4 = int4;
-public typealias uvec2 = uint2;    public typealias uvec3 = uint3;    public typealias uvec4 = uint4;
-public typealias bvec2 = bool2;    public typealias bvec3 = bool3;    public typealias bvec4 = bool4;
-public typealias mat2  = float2x2; public typealias mat3  = float3x3; public typealias mat4  = float4x4;
+public typealias vec2  = float2;    public typealias vec3  = float3;    public typealias vec4  = float4;
+public typealias ivec2 = int2;      public typealias ivec3 = int3;      public typealias ivec4 = int4;
+public typealias uvec2 = uint2;     public typealias uvec3 = uint3;     public typealias uvec4 = uint4;
+public typealias bvec2 = bool2;     public typealias bvec3 = bool3;     public typealias bvec4 = bool4;
+public typealias mat2  = float2x2;  public typealias mat3  = float3x3;  public typealias mat4  = float4x4;
+public typealias mat2x2 = float2x2; public typealias mat2x3 = float2x3; public typealias mat2x4 = float2x4;
+public typealias mat3x2 = float3x2; public typealias mat3x3 = float3x3; public typealias mat3x4 = float3x4;
+public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public typealias mat4x4 = float4x4;
 
 // GLSL functions
 [Differentiable] public __generic<T> T mix(T a, T b, T c) where T : __BuiltinFloatingPointType { return a + (b - a) * c; }
