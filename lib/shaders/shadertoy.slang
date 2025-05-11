@@ -15,7 +15,7 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
 [Differentiable] public __generic<T, int S> vector<T, S> mix(vector<T, S> a, vector<T, S> b, vector<T, S> c) where T : __BuiltinFloatingPointType { return a + (b - a) * c; }
 [Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> mix(matrix<T, S0, S1> a, matrix<T, S0, S1> b, matrix<T, S0, S1> c) where T : __BuiltinFloatingPointType { return a + (b - a) * c; }
 
-[Differentiable] public __generic<T> T fract(T a) where T : __BuiltinFloatingPointType { return frac(a); }
+[Differentiable] public float fract(float a) { return frac(a); }
 [Differentiable] public __generic<T, int S> vector<T, S> frac(vector<T, S> a) where T : __BuiltinFloatingPointType { return frac(a); }
 [Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> frac(matrix<T, S0, S1> a) where T : __BuiltinFloatingPointType { return frac(a); }
 
@@ -36,6 +36,9 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
 [Differentiable] public __generic<int S0, int S1, int S2> matrix<float, S0, S2> operator *(matrix<float, S0, S1> a, matrix<float, S1, S2> b) { return mul(a, b); }
 [Differentiable] public __generic<int S0, int S1> vector<float, S0> operator *(matrix<float, S0, S1> a, vector<float, S1> b) { return mul(a, b); }
 [Differentiable] public __generic<int S0, int S1> vector<float, S1> operator *(vector<float, S0> a, matrix<float, S0, S1> b) { return mul(a, b); }
+
+[Differentiable] public __generic<int S> void operator *=(inout matrix<float, S, S> a, matrix<float, S, S> b) { a = mul(a, b); }
+[Differentiable] public __generic<int S> void operator *=(inout vector<float, S> a, matrix<float, S, S> b) { a = mul(a, b); }
 
 public uint floatBitsToUint(float x) { return asuint(x); };
 public int floatBitsToInt(float x) { return asint(x); };
