@@ -126,7 +126,8 @@ const WgpuToyController = props => {
             console.log('Translating Slang to WGSL...');
             const startTime = performance.now();
             const compiler = await getCompiler();
-            const wgsl = compiler.compile(code, textureDimensions());
+            const slangPrelude = engine.getSlangPrelude();
+            const wgsl = compiler.compile(code, textureDimensions(), slangPrelude);
             const endTime = performance.now();
             console.log(`Translation took ${(endTime - startTime).toFixed(2)}ms`);
             if (!wgsl) {
