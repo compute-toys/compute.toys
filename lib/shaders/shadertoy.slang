@@ -47,7 +47,6 @@ public __generic<int S> vector<float, S> intBitsToFloat(vector<int, S> x) { retu
 public static const vec2 iResolution = vec2(SCREEN_SIZE);
 public static float iTime = time.elapsed;
 public static float iTimeDelta = time.delta;
-public static float iFrameRate = time.frame;
 public static int iFrame = time.frame;
 public static vec2 iMousePos = vec2(mouse.pos.x, SCREEN_SIZE.y - 1 - mouse.pos.y);
 public static vec4 iMouse = vec4(iMousePos, (mouse.click == 1) ? iMousePos : 0.0);
