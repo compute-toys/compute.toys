@@ -1,5 +1,6 @@
 import { ComputeEngine } from 'lib/engine';
 import stdSlangShader from 'lib/shaders/std.slang';
+import shadertoylibSource from '../shaders/shadertoy.slang';
 import * as monaco from 'monaco-editor';
 import { CompletionContext } from 'types/slang-wasm';
 import { getLanguageServer } from './compiler';
@@ -235,6 +236,7 @@ export async function updateSlangDocumentAndDiagnostics(
         }
 
         slangd.didOpenTextDocument('file:///std.slang', stdSlangShader + prelude);
+        slangd.didOpenTextDocument('file:///shadertoy.slang', shadertoylibSource);
         slangd.didOpenTextDocument(userCodeURI, content);
 
         // Get diagnostics
