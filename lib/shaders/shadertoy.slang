@@ -42,7 +42,7 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
 [Differentiable] public __generic<int S> void operator *=(inout vector<float, S> a, matrix<float, S, S> b) { a = mul(b, a); }
 
 // HLSL doenst provide a way to get the inverse of a matrix, so we have to implement it ourselves
-float2x2 inverse(float2x2 m)
+[Differentiable] float2x2 inverse(float2x2 m)
 {
     float det = m._11 * m._22 - m._12 * m._21;
     float invD = 1.0 / det;
@@ -50,7 +50,7 @@ float2x2 inverse(float2x2 m)
                     -m._21, m._11) * invD;
 }
 
-float3x3 inverse(float3x3 m)
+[Differentiable] float3x3 inverse(float3x3 m)
 {
     float3x3 inv;
     inv._11 = (m._22 * m._33 - m._23 * m._32);
@@ -69,7 +69,7 @@ float3x3 inverse(float3x3 m)
     return inv * (1.0 / det);
 }
 
-float4x4 inverse(float4x4 m)
+[Differentiable] float4x4 inverse(float4x4 m)
 {
     float a00 = m._11, a01 = m._12, a02 = m._13, a03 = m._14;
     float a10 = m._21, a11 = m._22, a12 = m._23, a13 = m._24;
