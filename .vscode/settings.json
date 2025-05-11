@@ -1,9 +1,5 @@
 {
     "githubPullRequests.ignoredPullRequestBranches": [
         "master"
-    ],
-    "cSpell.words": [
-        "glslify",
-        "shadertoylib"
     ]
 }
