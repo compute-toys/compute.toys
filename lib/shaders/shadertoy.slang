@@ -34,11 +34,87 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
 [Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> atan(matrix<T, S0, S1> x, matrix<T, S0, S1> y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
 
 [Differentiable] public __generic<int S0, int S1, int S2> matrix<float, S0, S2> operator *(matrix<float, S0, S1> a, matrix<float, S1, S2> b) { return mul(a, b); }
-[Differentiable] public __generic<int S0, int S1> vector<float, S0> operator *(matrix<float, S0, S1> a, vector<float, S1> b) { return mul(a, b); }
-[Differentiable] public __generic<int S0, int S1> vector<float, S1> operator *(vector<float, S0> a, matrix<float, S0, S1> b) { return mul(a, b); }
+// GLSL matrices are transposed compared to HLSL matrices
+[Differentiable] public __generic<int S0, int S1> vector<float, S1> operator *(matrix<float, S0, S1> a, vector<float, S0> b) { return mul(b, a); }
+[Differentiable] public __generic<int S0, int S1> vector<float, S0> operator *(vector<float, S1> a, matrix<float, S0, S1> b) { return mul(b, a); }
 
 [Differentiable] public __generic<int S> void operator *=(inout matrix<float, S, S> a, matrix<float, S, S> b) { a = mul(a, b); }
-[Differentiable] public __generic<int S> void operator *=(inout vector<float, S> a, matrix<float, S, S> b) { a = mul(a, b); }
+[Differentiable] public __generic<int S> void operator *=(inout vector<float, S> a, matrix<float, S, S> b) { a = mul(b, a); }
+
+// HLSL doenst provide a way to get the inverse of a matrix, so we have to implement it ourselves
+float2x2 inverse(float2x2 m)
+{
+    float det = m._11 * m._22 - m._12 * m._21;
+    float invD = 1.0 / det;
+    return float2x2(m._22, -m._12,
+                    -m._21, m._11) * invD;
+}
+
+float3x3 inverse(float3x3 m)
+{
+    float3x3 inv;
+    inv._11 = (m._22 * m._33 - m._23 * m._32);
+    inv._12 = -(m._12 * m._33 - m._13 * m._32);
+    inv._13 = (m._12 * m._23 - m._13 * m._22);
+
+    inv._21 = -(m._21 * m._33 - m._23 * m._31);
+    inv._22 = (m._11 * m._33 - m._13 * m._31);
+    inv._23 = -(m._11 * m._23 - m._13 * m._21);
+
+    inv._31 = (m._21 * m._32 - m._22 * m._31);
+    inv._32 = -(m._11 * m._32 - m._12 * m._31);
+    inv._33 = (m._11 * m._22 - m._12 * m._21);
+
+    float det = m._11 * inv._11 + m._12 * inv._21 + m._13 * inv._31;
+    return inv * (1.0 / det);
+}
+
+float4x4 inverse(float4x4 m)
+{
+    float a00 = m._11, a01 = m._12, a02 = m._13, a03 = m._14;
+    float a10 = m._21, a11 = m._22, a12 = m._23, a13 = m._24;
+    float a20 = m._31, a21 = m._32, a22 = m._33, a23 = m._34;
+    float a30 = m._41, a31 = m._42, a32 = m._43, a33 = m._44;
+
+    float b00 = a00 * a11 - a01 * a10;
+    float b01 = a00 * a12 - a02 * a10;
+    float b02 = a00 * a13 - a03 * a10;
+    float b03 = a01 * a12 - a02 * a11;
+    float b04 = a01 * a13 - a03 * a11;
+    float b05 = a02 * a13 - a03 * a12;
+    float b06 = a20 * a31 - a21 * a30;
+    float b07 = a20 * a32 - a22 * a30;
+    float b08 = a20 * a33 - a23 * a30;
+    float b09 = a21 * a32 - a22 * a31;
+    float b10 = a21 * a33 - a23 * a31;
+    float b11 = a22 * a33 - a23 * a32;
+
+    float det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+    float invD = 1.0 / det;
+
+    float4x4 inv;
+    inv._11 = (a11 * b11 - a12 * b10 + a13 * b09) * invD;
+    inv._12 = (-a01 * b11 + a02 * b10 - a03 * b09) * invD;
+    inv._13 = (a31 * b05 - a32 * b04 + a33 * b03) * invD;
+    inv._14 = (-a21 * b05 + a22 * b04 - a23 * b03) * invD;
+
+    inv._21 = (-a10 * b11 + a12 * b08 - a13 * b07) * invD;
+    inv._22 = (a00 * b11 - a02 * b08 + a03 * b07) * invD;
+    inv._23 = (-a30 * b05 + a32 * b02 - a33 * b01) * invD;
+    inv._24 = (a20 * b05 - a22 * b02 + a23 * b01) * invD;
+
+    inv._31 = (a10 * b10 - a11 * b08 + a13 * b06) * invD;
+    inv._32 = (-a00 * b10 + a01 * b08 - a03 * b06) * invD;
+    inv._33 = (a30 * b04 - a31 * b02 + a33 * b00) * invD;
+    inv._34 = (-a20 * b04 + a21 * b02 - a23 * b00) * invD;
+
+    inv._41 = (-a10 * b09 + a11 * b07 - a12 * b06) * invD;
+    inv._42 = (a00 * b09 - a01 * b07 + a02 * b06) * invD;
+    inv._43 = (-a30 * b03 + a31 * b01 - a32 * b00) * invD;
+    inv._44 = (a20 * b03 - a21 * b01 + a22 * b00) * invD;
+
+    return inv;
+}
 
 public uint floatBitsToUint(float x) { return asuint(x); };
 public int floatBitsToInt(float x) { return asint(x); };
