@@ -157,7 +157,7 @@ public vec4 texelFetch(Texture2D<float4> tex, ivec2 coord, int lod) {
 }
 
 public vec4 textureLod(Texture2D<float4> tex, vec2 coord, float lod) {
-    return tex.SampleLevel(nearest, coord, lod);
+    return tex.SampleLevel(bilinear, coord, lod);
 }
 
 public vec4 texture(Texture2D<float4> tex, vec2 coord) {
