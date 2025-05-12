@@ -126,6 +126,13 @@ public __generic<int S> vector<int, S> floatBitsToInt(vector<float, S> x) { retu
 public __generic<int S> vector<float, S> uintBitsToFloat(vector<uint, S> x) { return asfloat(x); }
 public __generic<int S> vector<float, S> intBitsToFloat(vector<int, S> x) { return asfloat(x); }
 
+public __generic<int S> vector<bool, S> lessThan(vector<float, S> x, vector<float, S> y) { return x < y; }
+public __generic<int S> vector<bool, S> lessThanEqual(vector<float, S> x, vector<float, S> y) { return x <= y; }
+public __generic<int S> vector<bool, S> greaterThan(vector<float, S> x, vector<float, S> y) { return x > y; }
+public __generic<int S> vector<bool, S> greaterThanEqual(vector<float, S> x, vector<float, S> y) { return x >= y; }
+public __generic<int S> vector<bool, S> equal(vector<float, S> x, vector<float, S> y) { return x == y; }
+public __generic<int S> vector<bool, S> notEqual(vector<float, S> x, vector<float, S> y) { return x != y; }
+
 public static const vec2 iResolution = vec2(SCREEN_SIZE);
 public static float iTime = time.elapsed;
 public static float iTimeDelta = time.delta;
