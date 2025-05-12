@@ -108,7 +108,7 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
     return inv;
 }
 
-// GLSL/Slang matrices are transposed compared to HLSL matrices
+// HLSL/Slang matrices are transposed compared to GLSL matrices
 [Differentiable] public __generic<int S> matrix<float, S, S> operator *(matrix<float, S, S> a, matrix<float, S, S> b) { return mul(b, a); }
 [Differentiable] public __generic<int S0, int S1, int S2> matrix<float, S0, S2> operator *(matrix<float, S1, S2> a, matrix<float, S0, S1> b) { return mul(b, a); }
 [Differentiable] public __generic<int S0, int S1> vector<float, S1> operator *(matrix<float, S0, S1> a, vector<float, S0> b) { return mul(b, a); }
