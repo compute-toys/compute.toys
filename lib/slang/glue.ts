@@ -83,79 +83,89 @@ class ShaderConverter {
         params: ReflectionParameter[],
         channelDimensions: TextureDimensions[]
     ): string {
-        return entryPoints
-            .filter(ep =>
-                ep.userAttribs?.some(
-                    a =>
-                        a.name === 'Cover' ||
-                        a.name === 'WorkgroupCount' ||
-                        a.name === 'DispatchCount'
+        return (
+            entryPoints
+                .filter(ep =>
+                    ep.userAttribs?.some(
+                        a =>
+                            a.name === 'Cover' ||
+                            a.name === 'WorkgroupCount' ||
+                            a.name === 'DispatchCount'
+                    )
                 )
-            )
-            .map(ep => {
-                const lines: string[] = [];
-                const threadGroupSize = ep.threadGroupSize;
-                let countX = 0,
-                    countY = 0,
-                    countZ = 0;
+                .map(ep => {
+                    const lines: string[] = [];
+                    const threadGroupSize = ep.threadGroupSize;
+                    let countX = 0,
+                        countY = 0,
+                        countZ = 0;
 
-                const wgAttr = ep.userAttribs?.find(a => a.name === 'WorkgroupCount');
-                if (wgAttr && wgAttr.arguments.length >= 3) {
-                    countX = wgAttr.arguments[0] as number;
-                    countY = wgAttr.arguments[1] as number;
-                    countZ = wgAttr.arguments[2] as number;
-                } else {
-                    const coverAttr = ep.userAttribs?.find(a => a.name === 'Cover');
-                    if (coverAttr && coverAttr.arguments.length > 0) {
-                        const targetName = coverAttr.arguments[0] as string;
-                        const param = params.find(p => p.name === targetName);
-                        if (param && param.type.kind === 'resource') {
-                            if (param.type.baseShape === 'structuredBuffer') {
-                                countX = Math.ceil(this.getBufferSize(param) / threadGroupSize[0]);
-                            } else if (param.type.baseShape === 'texture2D') {
-                                if (targetName === 'channel0' || targetName === 'channel1') {
-                                    const { width, height } =
-                                        channelDimensions[targetName === 'channel0' ? 0 : 1];
-                                    console.log(
-                                        `Using texture dimensions for ${targetName}: ${width}x${height}`
+                    const wgAttr = ep.userAttribs?.find(a => a.name === 'WorkgroupCount');
+                    if (wgAttr && wgAttr.arguments.length >= 3) {
+                        countX = wgAttr.arguments[0] as number;
+                        countY = wgAttr.arguments[1] as number;
+                        countZ = wgAttr.arguments[2] as number;
+                    } else {
+                        const coverAttr = ep.userAttribs?.find(a => a.name === 'Cover');
+                        if (coverAttr && coverAttr.arguments.length > 0) {
+                            const targetName = coverAttr.arguments[0] as string;
+                            const param = params.find(p => p.name === targetName);
+                            if (param && param.type.kind === 'resource') {
+                                if (param.type.baseShape === 'structuredBuffer') {
+                                    countX = Math.ceil(
+                                        this.getBufferSize(param) / threadGroupSize[0]
                                     );
-                                    countX =
-                                        threadGroupSize[0] > 0
-                                            ? Math.ceil(width / threadGroupSize[0])
-                                            : 1;
-                                    countY =
-                                        threadGroupSize[1] > 0
-                                            ? Math.ceil(height / threadGroupSize[1])
-                                            : 1;
-                                } else {
-                                    throw new Error(
-                                        `No texture dimensions found for ${targetName}`
-                                    );
+                                } else if (param.type.baseShape === 'texture2D') {
+                                    if (targetName === 'channel0' || targetName === 'channel1') {
+                                        const { width, height } =
+                                            channelDimensions[targetName === 'channel0' ? 0 : 1];
+                                        console.log(
+                                            `Using texture dimensions for ${targetName}: ${width}x${height}`
+                                        );
+                                        countX =
+                                            threadGroupSize[0] > 0
+                                                ? Math.ceil(width / threadGroupSize[0])
+                                                : 1;
+                                        countY =
+                                            threadGroupSize[1] > 0
+                                                ? Math.ceil(height / threadGroupSize[1])
+                                                : 1;
+                                    } else {
+                                        throw new Error(
+                                            `No texture dimensions found for ${targetName}`
+                                        );
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // Set minimum counts and handle special case
-                countX = Math.max(countX, 1);
-                countY = Math.max(countY, 1);
-                countZ = Math.max(countZ, 1);
+                    const anyWgAttr = ep.userAttribs?.some(
+                        a => a.name === 'WorkgroupCount' || a.name === 'Cover'
+                    );
+                    if (anyWgAttr) {
+                        //make sure we need to set the workgroup count
+                        // Set minimum counts and handle special case
+                        countX = Math.max(countX, 1);
+                        countY = Math.max(countY, 1);
+                        countZ = Math.max(countZ, 1);
 
-                lines.push(`#workgroup_count ${ep.name} ${countX} ${countY} ${countZ}`);
+                        lines.push(`#workgroup_count ${ep.name} ${countX} ${countY} ${countZ}`);
+                    }
 
-                const dispatchAttr = ep.userAttribs?.find(a => a.name === 'DispatchCount');
-                if (dispatchAttr) {
-                    const dispatchCount =
-                        dispatchAttr.arguments.length > 0
-                            ? (dispatchAttr.arguments[0] as number)
-                            : 1;
-                    lines.push(`#dispatch_count ${ep.name} ${dispatchCount}`);
-                }
+                    const dispatchAttr = ep.userAttribs?.find(a => a.name === 'DispatchCount');
+                    if (dispatchAttr) {
+                        const dispatchCount =
+                            dispatchAttr.arguments.length > 0
+                                ? (dispatchAttr.arguments[0] as number)
+                                : 1;
+                        lines.push(`#dispatch_count ${ep.name} ${dispatchCount}`);
+                    }
 
-                return lines.join('\n');
-            })
-            .join('\n');
+                    return lines.join('\n');
+                })
+                .join('\n') + '\n'
+        );
     }
 
     private generateDispatchDirectives(entryPoints: ReflectionEntryPoint[]): string {
