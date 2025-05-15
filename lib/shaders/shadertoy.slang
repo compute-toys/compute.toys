@@ -108,12 +108,13 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
     return inv;
 }
 
-[Differentiable] public __generic<int S0, int S1, int S2> matrix<float, S0, S2> operator *(matrix<float, S0, S1> a, matrix<float, S1, S2> b) { return mul(a, b); }
-// GLSL/Slang matrices are transposed compared to HLSL matrices
+// HLSL/Slang matrices are transposed compared to GLSL matrices
+[Differentiable] public __generic<int S> matrix<float, S, S> operator *(matrix<float, S, S> a, matrix<float, S, S> b) { return mul(b, a); }
+[Differentiable] public __generic<int S0, int S1, int S2> matrix<float, S0, S2> operator *(matrix<float, S1, S2> a, matrix<float, S0, S1> b) { return mul(b, a); }
 [Differentiable] public __generic<int S0, int S1> vector<float, S1> operator *(matrix<float, S0, S1> a, vector<float, S0> b) { return mul(b, a); }
 [Differentiable] public __generic<int S0, int S1> vector<float, S0> operator *(vector<float, S1> a, matrix<float, S0, S1> b) { return mul(b, a); }
 
-[Differentiable] public __generic<int S> void operator *=(inout matrix<float, S, S> a, matrix<float, S, S> b) { a = mul(a, b); }
+[Differentiable] public __generic<int S> void operator *=(inout matrix<float, S, S> a, matrix<float, S, S> b) { a = mul(b, a); }
 [Differentiable] public __generic<int S> void operator *=(inout vector<float, S> a, matrix<float, S, S> b) { a = mul(b, a); }
 
 public uint floatBitsToUint(float x) { return asuint(x); };
@@ -125,6 +126,13 @@ public __generic<int S> vector<uint, S> floatBitsToUint(vector<float, S> x) { re
 public __generic<int S> vector<int, S> floatBitsToInt(vector<float, S> x) { return asint(x); }
 public __generic<int S> vector<float, S> uintBitsToFloat(vector<uint, S> x) { return asfloat(x); }
 public __generic<int S> vector<float, S> intBitsToFloat(vector<int, S> x) { return asfloat(x); }
+
+public __generic<int S> vector<bool, S> lessThan(vector<float, S> x, vector<float, S> y) { return x < y; }
+public __generic<int S> vector<bool, S> lessThanEqual(vector<float, S> x, vector<float, S> y) { return x <= y; }
+public __generic<int S> vector<bool, S> greaterThan(vector<float, S> x, vector<float, S> y) { return x > y; }
+public __generic<int S> vector<bool, S> greaterThanEqual(vector<float, S> x, vector<float, S> y) { return x >= y; }
+public __generic<int S> vector<bool, S> equal(vector<float, S> x, vector<float, S> y) { return x == y; }
+public __generic<int S> vector<bool, S> notEqual(vector<float, S> x, vector<float, S> y) { return x != y; }
 
 public static const vec2 iResolution = vec2(SCREEN_SIZE);
 public static float iTime = time.elapsed;
