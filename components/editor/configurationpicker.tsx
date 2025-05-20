@@ -61,7 +61,6 @@ export default function ConfigurationPicker() {
                 sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
                 subheader={
                     <ListSubheader sx={{ color: theme.palette.dracula.foreground }}>
-                        Settings
                     </ListSubheader>
                 }
             >
@@ -71,17 +70,26 @@ export default function ConfigurationPicker() {
                     >
                         <LineStyleIcon />
                     </ListItemIcon>
-                    <ListItemText id="config-list-label-float32" primary="Float32 Buffers" />
-                    <Switch
-                        edge="end"
-                        onChange={() => {
-                            setFloat32Enabled(!float32Enabled);
+                    <ListItemText id="config-list-label-float32" primary="Textures" />
+                    <Select
+                        value={float32Enabled}
+                        onChange={e => {
+                            setFloat32Enabled(e.target.value);
                         }}
-                        checked={float32Enabled}
+                        sx={{
+                            minWidth: '100px',
+                            color: theme.palette.dracula.foreground,
+                            '& .MuiSelect-icon': {
+                                color: theme.palette.dracula.foreground
+                            }
+                        }}
                         inputProps={{
                             'aria-labelledby': 'config-list-label-float32'
                         }}
-                    />
+                    >
+                        <MenuItem value={false as any}>float16</MenuItem>
+                        <MenuItem value={true  as any}>float32</MenuItem>
+                    </Select>
                 </ListItem>
                 <ListItem>
                     <ListItemIcon
