@@ -72,9 +72,9 @@ export default function ConfigurationPicker() {
                     </ListItemIcon>
                     <ListItemText id="config-list-label-float32" primary="Textures" />
                     <Select
-                        value={float32Enabled}
+                        value={float32Enabled ? 1 : 0}
                         onChange={e => {
-                            setFloat32Enabled(e.target.value);
+                            setFloat32Enabled(e.target.value==1);
                         }}
                         sx={{
                             minWidth: '100px',
@@ -87,8 +87,8 @@ export default function ConfigurationPicker() {
                             'aria-labelledby': 'config-list-label-float32'
                         }}
                     >
-                        <MenuItem value={false as any}>float16</MenuItem>
-                        <MenuItem value={true  as any}>float32</MenuItem>
+                        <MenuItem value={0}>float16</MenuItem>
+                        <MenuItem value={1}>float32</MenuItem>
                     </Select>
                 </ListItem>
                 <ListItem>
