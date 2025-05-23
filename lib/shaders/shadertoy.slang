@@ -29,9 +29,9 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
 [Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> mod(matrix<T, S0, S1> x, T y) where T : __BuiltinFloatingPointType { return x - no_diff floor(x / y) * y; }
 [Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> mod(matrix<T, S0, S1> x, matrix<T, S0, S1> y) where T : __BuiltinFloatingPointType { return x - no_diff floor(x / y) * y; }
 
-[Differentiable] public __generic<T> T atan(T x, T y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
-[Differentiable] public __generic<T, int S> vector<T, S> atan(vector<T, S> x, vector<T, S> y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
-[Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> atan(matrix<T, S0, S1> x, matrix<T, S0, S1> y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
+[Differentiable] public __generic<T> T atan(T y, T x) where T : __BuiltinFloatingPointType { return atan2(y, x); }
+[Differentiable] public __generic<T, int S> vector<T, S> atan(vector<T, S> y, vector<T, S> x) where T : __BuiltinFloatingPointType { return atan2(y, x); }
+[Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> atan(matrix<T, S0, S1> y, matrix<T, S0, S1> x) where T : __BuiltinFloatingPointType { return atan2(y, x); }
 
 // HLSL/Slang doenst provide a way to get the inverse of a matrix, so we have to implement it ourselves
 [Differentiable] float2x2 inverse(float2x2 m)
