@@ -1,11 +1,11 @@
 /**
  * WGSL shader preprocessor implementation
  */
-import { fetchInclude, parseUint32, WGSLError } from './utils';
+import { fetchInclude, parseUint32, safeEvalMath, WGSLError } from './utils';
 
 // Regular expressions for preprocessing
 const RE_COMMENT = /(\/\/.*|\/\*[\s\S]*?\*\/)/g;
-const RE_WORD = /[a-zA-Z_][a-zA-Z0-9_]*/g;
+const RE_WORD = /\b\w+\b/g;
 
 const STRING_MAX_LEN = 20;
 
@@ -35,15 +35,17 @@ export class SourceMap {
  * Handles WGSL preprocessing including includes, defines, etc.
  */
 export class Preprocessor {
+    private overrides: Map<string, string>;
     private defines: Map<string, string>;
     private source: SourceMap;
     private storageCount: number;
     // private assertCount: number;
     private specialStrings: boolean;
 
-    constructor(defines: Map<string, string>) {
-        this.defines = new Map(defines);
-        this.defines.set('STRING_MAX_LEN', STRING_MAX_LEN.toString());
+    constructor(overrides: Map<string, string>) {
+        this.overrides = new Map(overrides);
+        this.overrides.set('STRING_MAX_LEN', STRING_MAX_LEN.toString());
+        this.defines = new Map();
         this.source = new SourceMap();
         this.storageCount = 0;
         // this.assertCount = 0;
@@ -58,24 +60,26 @@ export class Preprocessor {
     }
 
     /**
-     * Substitute defines in source text
-     */
-    private substDefines(source: string): string {
-        return source.replace(RE_WORD, match => {
-            return this.defines.get(match) ?? match;
-        });
-    }
-
-    /**
      * Process a single line of shader source
      */
     private async processLine(lineOrig: string, lineNum: number): Promise<void> {
-        let line = this.substDefines(lineOrig);
+        // Substitute overrides and defines
+        let line = lineOrig
+            .replace(RE_WORD, match => this.overrides.get(match) ?? match)
+            .replace(RE_WORD, match => this.defines.get(match) ?? match);
 
         // Handle enable directives
         if (line.trimStart().startsWith('enable')) {
             line = line.replace(RE_COMMENT, '');
             this.source.extensions += line + '\n';
+            return;
+        }
+
+        // Handle override in one line and evaluate to number
+        if (line.trimStart().startsWith('override')) {
+            line = line.replace(RE_COMMENT, '');
+            const tokens = line.trim().replace('=', ' = ').replace(/\s+/g, ' ').split(' ');
+            this.handleOverride(tokens, lineNum);
             return;
         }
 
@@ -103,7 +107,7 @@ export class Preprocessor {
                     break;
 
                 case '#define':
-                    this.handleDefine(lineOrig, tokens, lineNum);
+                    this.handleDefine(tokens, lineNum);
                     break;
 
                 case '#storage':
@@ -203,9 +207,9 @@ export class Preprocessor {
 
         const [, name, x, y, z] = tokens;
         this.source.workgroupCount.set(name, [
-            parseUint32(x, lineNum),
-            parseUint32(y, lineNum),
-            parseUint32(z, lineNum)
+            parseUint32(safeEvalMath(x, lineNum), lineNum),
+            parseUint32(safeEvalMath(y, lineNum), lineNum),
+            parseUint32(safeEvalMath(z, lineNum), lineNum)
         ]);
     }
 
@@ -232,19 +236,38 @@ export class Preprocessor {
     /**
      * Handle #define directive
      */
-    private handleDefine(lineOrig: string, tokens: string[], lineNum: number): void {
-        const name = lineOrig.trim().split(' ')[1];
+    private handleDefine(tokens: string[], lineNum: number): void {
+        const name = tokens[1];
         if (!name) {
             throw new WGSLError('Invalid #define syntax', lineNum);
         }
 
         const value = tokens.slice(2).join(' ');
-        if (this.defines.has(name)) {
+        if (value.includes(name)) {
             throw new WGSLError(`Cannot redefine ${name}`, lineNum);
         }
 
         this.defines.set(name, value);
     }
+
+    // /**
+    //  * Handle override in one line and evaluate to number
+    //  */
+    private handleOverride(tokens: string[], lineNum: number): void {
+        const name = tokens[1];
+        let expression = tokens.slice(3).join('');
+        if (!name || !expression.endsWith(';')) {
+            throw new WGSLError('Please write override in single line and terminated', lineNum);
+        }
+        if (expression.includes(name)) {
+            throw new WGSLError(`Cannot redefine ${name}`, lineNum);
+        }
+
+        expression = expression.slice(0, -1);
+        expression = safeEvalMath(expression, lineNum);
+        this.defines.set(name, expression);
+    }
+
 
     /**
      * Handle #storage directive
