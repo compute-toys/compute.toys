@@ -268,7 +268,6 @@ export class Preprocessor {
         this.defines.set(name, expression);
     }
 
-
     /**
      * Handle #storage directive
      */
