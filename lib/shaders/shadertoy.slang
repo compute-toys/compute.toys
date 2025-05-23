@@ -134,7 +134,7 @@ public __generic<int S> vector<bool, S> greaterThanEqual(vector<float, S> x, vec
 public __generic<int S> vector<bool, S> equal(vector<float, S> x, vector<float, S> y) { return x == y; }
 public __generic<int S> vector<bool, S> notEqual(vector<float, S> x, vector<float, S> y) { return x != y; }
 
-public static const vec2 iResolution = vec2(SCREEN_SIZE);
+public static const vec3 iResolution = vec3(SCREEN_SIZE, 1);
 public static float iTime = time.elapsed;
 public static float iTimeDelta = time.delta;
 public static int iFrame = time.frame;
@@ -146,7 +146,7 @@ public vec4 texelFetch(int channel, ivec2 coord, int lod) {
 }
 
 public vec4 textureLod(int channel, vec2 coord, float lod) {
-    coord = coord*iResolution - 0.5;
+    coord = coord*iResolution.xy - 0.5;
     ivec2 icoord = ivec2(floor(coord));
     vec2 fcoord = fract(coord);
     vec4 v00 = texelFetch(channel, icoord + ivec2(0,0), 0);
