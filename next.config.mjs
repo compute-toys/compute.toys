@@ -54,6 +54,9 @@ const nextConfig = {
                 destination: '/list/1'
             }
         ];
+    },
+    experimental: {
+        reactCompiler: true
     }
 };
 
