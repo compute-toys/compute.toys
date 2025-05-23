@@ -207,9 +207,9 @@ export class Preprocessor {
 
         const [, name, x, y, z] = tokens;
         this.source.workgroupCount.set(name, [
-            parseUint32(safeEvalMath(x, lineNum), lineNum),
-            parseUint32(safeEvalMath(y, lineNum), lineNum),
-            parseUint32(safeEvalMath(z, lineNum), lineNum)
+            parseUint32(x, lineNum),
+            parseUint32(y, lineNum),
+            parseUint32(z, lineNum)
         ]);
     }
 
