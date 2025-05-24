@@ -84,30 +84,48 @@ export function countNewlines(text: string): number {
 }
 
 /**
- * Evaluate a mathematical expression safely
+ * Evaluate a mathematical expression (safely in terms of js vulnerabilities)
  */
-export function safeEvalMath(expression: string, lineNumber: number): string {
-    // return number in original formatting
-    if (/^-?(?:0x[\da-f]+|0b[01]+|\d*\.?\d+(?:e[+-]?\d+)?|\d+)$/i.test(expression)) {
-        return expression;
-    }
+export function evalMathExpression(expression: string, lineNumber: number): string {
+    const VALID_EXPRESSIONS = /^[0-9+\-*/%^.,()n]+$/;
+    const INTEGER_FUNCTIONS = /(select|abs|min|max|sign)/g;
+    const FLOAT_FUNCTIONS =
+        /(asin|acos|atan|atan2|asinh|acosh|atanh|sin|cos|tan|sinh|cosh|tanh|round|floor|ceil|pow|sqrt|log|log2|exp|exp2|fract|clamp|mix|smoothstep|radians|degrees)/g;
+    const ONE_FLOAT = /[+-]?(?=\d*[.eE])(?=\.?\d)\d*\.?\d*(?:[eE][+-]?\d+)?/;
+    const ONE_INTEGER = /^[-+]?\d+$/;
+    const ALL_INTEGERS = /[-+]?\d+/g;
 
-    const cleaned = expression.replace(/\s+/g, '');
-    if (cleaned === '') {
+    let result = expression.replace(/\s+/g, '');
+    if (result === '') {
         return '';
     }
 
-    // safe math expression
-    const validMathRegex = /^[0-9+\-*/%^.,()]+$/;
-    const validFunctions =
-        /(asin|acos|atan|atan2|asinh|acosh|atanh|sin|cos|tan|sinh|cosh|tanh|abs|min|max|round|floor|ceil|sign|pow|sqrt|log|log2|exp|exp2|fract|clamp|mix|smoothstep|step|select|radians|degrees)/g;
-    let stripped = cleaned.replace(validFunctions, '');
-    if (!validMathRegex.test(stripped)) {
+    // convert to bigint if there are no any floating point numbers or float functions
+    let isAbstractInteger = false;
+    if (!ONE_FLOAT.test(expression) && !FLOAT_FUNCTIONS.test(expression)) {
+        result = result.replace(ALL_INTEGERS, match => `${match}n`);
+        isAbstractInteger = true;
+    }
+
+    // safety check for eval vulnerabilities
+    let stripped = result.replace(INTEGER_FUNCTIONS, '').replace(FLOAT_FUNCTIONS, '');
+    if (!VALID_EXPRESSIONS.test(stripped)) {
         stripped = stripped.replace(/[0-9+\-*/%^.,()]+/g, '');
         throw new WGSLError(`Unsafe symbols '${stripped}' in expression ${expression}`, lineNumber);
     }
 
     const mathReplacements = {
+        'select(': '((f,t,cond) => cond ? t : f)(',
+        'abs(': '((x) => Math.abs(Number(x)))(',
+        'min(': '((x,y) => Math.min(Number(x),Number(y)))(',
+        'max(': '((x,y) => Math.max(Number(x),Number(y)))(',
+        'sign(': '((x) => Math.sign(Number(x)))(',
+        'sin(': 'Math.sin(',
+        'cos(': 'Math.cos(',
+        'tan(': 'Math.tan(',
+        'sinh(': 'Math.sinh(',
+        'cosh(': 'Math.cosh(',
+        'tanh(': 'Math.tanh(',
         'asin(': 'Math.asin(',
         'acos(': 'Math.acos(',
         'atan(': 'Math.atan(',
@@ -115,19 +133,9 @@ export function safeEvalMath(expression: string, lineNumber: number): string {
         'asinh(': 'Math.asinh(',
         'acosh(': 'Math.acosh(',
         'atanh(': 'Math.atanh(',
-        'sin(': 'Math.sin(',
-        'cos(': 'Math.cos(',
-        'tan(': 'Math.tan(',
-        'sinh(': 'Math.sinh(',
-        'cosh(': 'Math.cosh(',
-        'tanh(': 'Math.tanh(',
-        'abs(': 'Math.abs(',
-        'min(': 'Math.min(',
-        'max(': 'Math.max(',
         'round(': 'Math.round(',
         'floor(': 'Math.floor(',
         'ceil(': 'Math.ceil(',
-        'sign(': 'Math.sign(',
         'pow(': 'Math.pow(',
         'sqrt(': 'Math.sqrt(',
         'log(': 'Math.log(',
@@ -140,16 +148,16 @@ export function safeEvalMath(expression: string, lineNumber: number): string {
         'smoothstep(':
             '((e0,e1,x) => { let t = Math.min(Math.max((x-e0)/(e1-e0),0),1); return t*t*(3-2*t); })(',
         'step(': '((edge,x) => x < edge ? 0 : 1)(',
-        'select(': '((f,t,cond) => cond ? t : f)(',
         'radians(': '((x) => x * Math.PI / 180)(',
         'degrees(': '((x) => x * 180 / Math.PI)('
     };
 
-    let result = cleaned.replaceAll('^', '**');
+    result = result.replaceAll('^', '**');
     result = result.replace(/\b\w+\(/g, match => mathReplacements[match] || '');
 
     try {
-        return Function(`"use strict"; return (${result}).toString();`)();
+        result = Function(`'use strict'; return (${result}).toString();`)();
+        return !isAbstractInteger && ONE_INTEGER.test(result) ? `${result}.0` : result;
     } catch (error) {
         throw new WGSLError(`Invalid eval '${expression}' -> '${result}' (${error})`, lineNumber);
     }

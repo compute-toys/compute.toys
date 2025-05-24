@@ -1,7 +1,7 @@
 /**
  * WGSL shader preprocessor implementation
  */
-import { fetchInclude, parseUint32, safeEvalMath, WGSLError } from './utils';
+import { evalMathExpression, fetchInclude, parseUint32, WGSLError } from './utils';
 
 // Regular expressions for preprocessing
 const RE_COMMENT = /(\/\/.*|\/\*[\s\S]*?\*\/)/g;
@@ -257,14 +257,17 @@ export class Preprocessor {
         const name = tokens[1];
         let expression = tokens.slice(3).join('');
         if (!name || !expression.endsWith(';')) {
-            throw new WGSLError('Please write override in single line and terminated', lineNum);
+            throw new WGSLError(
+                `Please write override in single line ${lineNum} and terminated!`,
+                lineNum
+            );
         }
         if (expression.includes(name)) {
             throw new WGSLError(`Cannot redefine ${name}`, lineNum);
         }
 
         expression = expression.slice(0, -1);
-        expression = safeEvalMath(expression, lineNum);
+        expression = evalMathExpression(expression, lineNum);
         this.defines.set(name, expression);
     }
 
