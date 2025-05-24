@@ -84,10 +84,10 @@ export function countNewlines(text: string): number {
 }
 
 /**
- * Evaluate a mathematical expression (safely in terms of js vulnerabilities)
+ * Evaluate a mathematical expression with bigint/float support
  */
 export function evalMathExpression(expression: string, lineNumber: number): string {
-    const VALID_EXPRESSIONS = /^[0-9+\-*/%^.,()n]+$/;
+    const VALID_EXPRESSIONS = /^[0-9+\-*/%^.,()]+$/;
     const INTEGER_FUNCTIONS = /(select|abs|min|max|sign)/g;
     const FLOAT_FUNCTIONS =
         /(asin|acos|atan|atan2|asinh|acosh|atanh|sin|cos|tan|sinh|cosh|tanh|round|floor|ceil|pow|sqrt|log|log2|exp|exp2|fract|clamp|mix|smoothstep|radians|degrees)/g;
@@ -100,18 +100,18 @@ export function evalMathExpression(expression: string, lineNumber: number): stri
         return '';
     }
 
-    // convert to bigint if there are no any floating point numbers or float functions
-    let isAbstractInteger = false;
-    if (!ONE_FLOAT.test(expression) && !FLOAT_FUNCTIONS.test(expression)) {
-        result = result.replace(ALL_INTEGERS, match => `${match}n`);
-        isAbstractInteger = true;
-    }
-
     // safety check for eval vulnerabilities
     let stripped = result.replace(INTEGER_FUNCTIONS, '').replace(FLOAT_FUNCTIONS, '');
     if (!VALID_EXPRESSIONS.test(stripped)) {
         stripped = stripped.replace(/[0-9+\-*/%^.,()]+/g, '');
         throw new WGSLError(`Unsafe symbols '${stripped}' in expression ${expression}`, lineNumber);
+    }
+
+    // convert to bigint if there are no any floating point numbers or float functions
+    let isAbstractInteger = false;
+    if (!ONE_FLOAT.test(expression) && !FLOAT_FUNCTIONS.test(expression)) {
+        result = result.replace(ALL_INTEGERS, match => `${match}n`);
+        isAbstractInteger = true;
     }
 
     const mathReplacements = {
