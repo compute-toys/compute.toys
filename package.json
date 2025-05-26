@@ -51,7 +51,7 @@
     "@cloudflare/next-on-pages": "^1.13.12",
     "@types/emscripten": "^1.40.1",
     "@types/memoizee": "^0.4.12",
-    "@types/node": "^22.15.17",
+    "@types/node": "^22.15.21",
     "@types/react": "^18.3.12",
     "@webgpu/types": "^0.1.60",
     "depcheck": "^1.4.7",
