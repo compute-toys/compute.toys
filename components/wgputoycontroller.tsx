@@ -44,6 +44,7 @@ declare global {
 
 const needsInitialResetAtom = atom<boolean>(true);
 const performingInitialResetAtom = atom<boolean>(false);
+const isMouseDownAtom = atom<boolean>(false);
 
 /*
     Controller component. Returns null because we expect to be notified
@@ -58,6 +59,7 @@ const WgpuToyController = props => {
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
     const [recording, setRecording] = useAtom(recordingAtom);
+    const [isMouseDown, setIsMouseDown] = useTransientAtom(isMouseDownAtom);
     const title = useAtomValue(titleAtom);
 
     // must be transient so we can access updated value in play loop
@@ -452,8 +454,15 @@ const WgpuToyController = props => {
 
     useEffect(() => {
         if (canvas !== false) {
+            // Prevent all touch events from scrolling
+            const preventDefault = (e: TouchEvent) => {
+                e.preventDefault();
+            };
+            canvas.addEventListener('touchstart', preventDefault, { passive: false });
+            canvas.addEventListener('touchmove', preventDefault, { passive: false });
+            canvas.addEventListener('touchend', preventDefault, { passive: false });
+
             const handleMouseMove = (e: MouseEvent) => {
-                // console.log(`Mouse move: ${e.offsetX}, ${e.offsetY}`);
                 ComputeEngine.getInstance().setMousePos(
                     e.offsetX / canvas.clientWidth,
                     e.offsetY / canvas.clientHeight
@@ -463,22 +472,76 @@ const WgpuToyController = props => {
                 }
             };
 
+            const handleTouchMove = (e: TouchEvent) => {
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                const offsetX = touch.clientX - rect.left;
+                const offsetY = touch.clientY - rect.top;
+                ComputeEngine.getInstance().setMousePos(
+                    offsetX / canvas.clientWidth,
+                    offsetY / canvas.clientHeight
+                );
+                if (!isPlaying()) {
+                    ComputeEngine.getInstance().render();
+                }
+            };
+
             const handleMouseUp = () => {
-                // console.log('Mouse up');
                 ComputeEngine.getInstance().setMouseClick(false);
+                setIsMouseDown(false);
                 canvas.onmousemove = null;
             };
 
+            const handleTouchEnd = () => {
+                ComputeEngine.getInstance().setMouseClick(false);
+                canvas.ontouchmove = null;
+            };
+
             const handleMouseDown = (e: MouseEvent) => {
-                // console.log('Mouse down');
                 ComputeEngine.getInstance().setMouseClick(true);
                 handleMouseMove(e);
                 canvas.onmousemove = handleMouseMove;
+
+                if (!isMouseDown()) {
+                    ComputeEngine.getInstance().setMouseStart(
+                        e.offsetX / canvas.clientWidth,
+                        e.offsetY / canvas.clientHeight
+                    );
+                    setIsMouseDown(true);
+                }
             };
 
+            const handleTouchStart = (e: TouchEvent) => {
+                ComputeEngine.getInstance().setMouseClick(true);
+                handleTouchMove(e);
+                canvas.ontouchmove = handleTouchMove;
+
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                const offsetX = touch.clientX - rect.left;
+                const offsetY = touch.clientY - rect.top;
+                ComputeEngine.getInstance().setMouseStart(
+                    offsetX / canvas.clientWidth,
+                    offsetY / canvas.clientHeight
+                );
+            };
+
+            // Mouse events
             canvas.onmousedown = handleMouseDown;
             canvas.onmouseup = handleMouseUp;
             canvas.onmouseleave = handleMouseUp;
+
+            // Touch events
+            canvas.ontouchstart = handleTouchStart;
+            canvas.ontouchend = handleTouchEnd;
+            canvas.ontouchcancel = handleTouchEnd;
+
+            // Clean up event listeners when component unmounts
+            return () => {
+                canvas.removeEventListener('touchstart', preventDefault);
+                canvas.removeEventListener('touchmove', preventDefault);
+                canvas.removeEventListener('touchend', preventDefault);
+            };
         }
     }, []);
 
