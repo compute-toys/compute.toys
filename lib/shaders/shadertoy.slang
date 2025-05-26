@@ -138,8 +138,7 @@ public static const vec3 iResolution = vec3(SCREEN_SIZE, 1);
 public static float iTime = time.elapsed;
 public static float iTimeDelta = time.delta;
 public static int iFrame = time.frame;
-public static vec2 iMousePos = vec2(mouse.pos.x, SCREEN_SIZE.y - 1 - mouse.pos.y);
-public static vec4 iMouse = vec4(iMousePos, (mouse.click == 1) ? iMousePos : 0.0);
+public static vec4 iMouse = vec4(mouse.pos.x, SCREEN_SIZE.y - 1 - mouse.pos.y, mouse.start.x, SCREEN_SIZE.y - 1 - mouse.start.y);
 
 public vec4 texelFetch(int channel, ivec2 coord, int lod) {
     return pass_in[ivec3(coord, channel)];

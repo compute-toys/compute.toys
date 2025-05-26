@@ -44,6 +44,7 @@ declare global {
 
 const needsInitialResetAtom = atom<boolean>(true);
 const performingInitialResetAtom = atom<boolean>(false);
+const isMouseDownAtom = atom<boolean>(false);
 
 /*
     Controller component. Returns null because we expect to be notified
@@ -58,6 +59,7 @@ const WgpuToyController = props => {
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
     const [recording, setRecording] = useAtom(recordingAtom);
+    const [isMouseDown, setIsMouseDown] = useTransientAtom(isMouseDownAtom);
     const title = useAtomValue(titleAtom);
 
     // must be transient so we can access updated value in play loop
@@ -486,6 +488,7 @@ const WgpuToyController = props => {
 
             const handleMouseUp = () => {
                 ComputeEngine.getInstance().setMouseClick(false);
+                setIsMouseDown(false);
                 canvas.onmousemove = null;
             };
 
@@ -498,12 +501,29 @@ const WgpuToyController = props => {
                 ComputeEngine.getInstance().setMouseClick(true);
                 handleMouseMove(e);
                 canvas.onmousemove = handleMouseMove;
+
+                if (!isMouseDown()) {
+                    ComputeEngine.getInstance().setMouseStart(
+                        e.offsetX / canvas.clientWidth,
+                        e.offsetY / canvas.clientHeight
+                    );
+                    setIsMouseDown(true);
+                }
             };
 
             const handleTouchStart = (e: TouchEvent) => {
                 ComputeEngine.getInstance().setMouseClick(true);
                 handleTouchMove(e);
                 canvas.ontouchmove = handleTouchMove;
+
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                const offsetX = touch.clientX - rect.left;
+                const offsetY = touch.clientY - rect.top;
+                ComputeEngine.getInstance().setMousePos(
+                    offsetX / canvas.clientWidth,
+                    offsetY / canvas.clientHeight
+                );
             };
 
             // Mouse events
