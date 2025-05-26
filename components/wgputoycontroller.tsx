@@ -520,7 +520,7 @@ const WgpuToyController = props => {
                 const touch = e.touches[0];
                 const offsetX = touch.clientX - rect.left;
                 const offsetY = touch.clientY - rect.top;
-                ComputeEngine.getInstance().setMousePos(
+                ComputeEngine.getInstance().setMouseStart(
                     offsetX / canvas.clientWidth,
                     offsetY / canvas.clientHeight
                 );
