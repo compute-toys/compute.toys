@@ -81,7 +81,7 @@ export function countNewlines(text: string): number {
  */
 export function calcMathExpression(expression: string, lineNumber: number): string {
     const VALID_EXPRESSIONS = /^[+\-*/%(,)]*$/;
-    const BOOL_FUNCTIONS = /(^|&&|\|\||<<|>>)/g;
+    const BOOL_FUNCTIONS = /(\^|&&|\|\||<<|>>)/g;
     const INTEGER_FUNCTIONS = /(select|abs|min|max|sign)/g;
     const FLOAT_FUNCTIONS =
         /(asin|acos|atan|atan2|asinh|acosh|atanh|sin|cos|tan|sinh|cosh|tanh|round|floor|ceil|pow|sqrt|log|log2|exp|exp2|fract|clamp|mix|smoothstep|radians|degrees)/g;
