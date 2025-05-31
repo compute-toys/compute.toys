@@ -37,7 +37,7 @@ export default function Timer() {
                             display: 'inline-block'
                         }}
                     >
-                        {timer.toFixed(1)}s / {fps.toFixed(1)} FPS
+                        {timer.toFixed(1)}s {fps.toFixed(1)}FPS
                     </span>
                 </Box>
             </Fragment>

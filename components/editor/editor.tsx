@@ -102,6 +102,40 @@ export default function Editor(props: EditorProps) {
         };
     }
 
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+    const monacoOptions = (isMobile: boolean) => ({
+        stopRenderingLineAfter: isMobile ? 500 : 1000,
+        fontSize: isMobile ? 12 : 12,
+        lineHeight: isMobile ? 16 : 18,
+        fontFamily: "'Fira Code', monospace",
+        'bracketPairColorization.enabled': true,
+        mouseWheelZoom: true,
+        minimap: { enabled: !isMobile },
+        scrollBeyondLastLine: !isMobile,
+        automaticLayout: true,
+        lineNumbersMinChars: isMobile ? 3 : 4
+    });
+
+    const codeEditorWithPickers = (
+        <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
+            <div className="vim-status"></div>
+            <Monaco editorOptions={monacoOptions(isMobile)} />
+            <Box sx={{ paddingTop: '4px' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Button style={{ pointerEvents: 'none' }} />
+                    <div>
+                        <ReloadButton />
+                        <HotReloadToggle />
+                        <Explainer />
+                    </div>
+                    <VimButton />
+                </Box>
+            </Box>
+        </ItemWithTransitionSignal>
+    );
+
     const leftPanel = (
         <div ref={renderParentNodeRef}>
             <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
@@ -128,45 +162,26 @@ export default function Editor(props: EditorProps) {
                     </Grid>
                     <Grid item sx={{ textAlign: 'right' }} xs={3}>
                         <Resolution />
-                        <ScaleButton />
-                        <FullscreenButton />
+                        <Box>
+                            <ScaleButton />
+                            <FullscreenButton />
+                        </Box>
                     </Grid>
                 </Grid>
                 <UniformSliders />
             </ItemWithTransitionSignal>
             {metadataEditor}
+
+            {/* Conditionally show right panel content before comments on mobile */}
+            {isMobile && codeEditorWithPickers}
+
             {shaderID ? <Comments /> : null}
         </div>
     );
 
-    const theme = useTheme();
-
     const rightPanel = (
         <div>
-            <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
-                <div className="vim-status"></div>
-                <Monaco
-                    editorOptions={{
-                        stopRenderingLineAfter: 1000,
-                        fontFamily: "'Fira Code', monospace",
-                        'bracketPairColorization.enabled': true,
-                        mouseWheelZoom: true
-                        //fontLigatures: true,
-                    }}
-                />
-                <Box sx={{ paddingTop: '4px' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Button style={{ pointerEvents: 'none' }} />{' '}
-                        {/* invisible button, used only for centering */}
-                        <div>
-                            <ReloadButton />
-                            <HotReloadToggle />
-                            <Explainer />
-                        </div>
-                        <VimButton />
-                    </Box>
-                </Box>
-            </ItemWithTransitionSignal>
+            {!isMobile && codeEditorWithPickers}
             <Grid
                 container
                 spacing={2}
