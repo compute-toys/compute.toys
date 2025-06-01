@@ -1,11 +1,11 @@
 /**
  * WGSL shader preprocessor implementation
  */
-import { evalMathExpression, fetchInclude, parseUint32, WGSLError } from './utils';
+import { fetchInclude, parseUint32, WGSLError } from './utils';
 
 // Regular expressions for preprocessing
 const RE_COMMENT = /(\/\/.*|\/\*[\s\S]*?\*\/)/g;
-const RE_WORD = /\b\w+\b/g;
+const RE_WORD = /[a-zA-Z_][a-zA-Z0-9_]*/g;
 
 const STRING_MAX_LEN = 20;
 
@@ -35,17 +35,15 @@ export class SourceMap {
  * Handles WGSL preprocessing including includes, defines, etc.
  */
 export class Preprocessor {
-    private overrides: Map<string, string>;
     private defines: Map<string, string>;
     private source: SourceMap;
     private storageCount: number;
     // private assertCount: number;
     private specialStrings: boolean;
 
-    constructor(overrides: Map<string, string>) {
-        this.overrides = new Map(overrides);
-        this.overrides.set('STRING_MAX_LEN', STRING_MAX_LEN.toString());
-        this.defines = new Map();
+    constructor(defines: Map<string, string>) {
+        this.defines = new Map(defines);
+        this.defines.set('STRING_MAX_LEN', STRING_MAX_LEN.toString());
         this.source = new SourceMap();
         this.storageCount = 0;
         // this.assertCount = 0;
@@ -60,26 +58,24 @@ export class Preprocessor {
     }
 
     /**
+     * Substitute defines in source text
+     */
+    private substDefines(source: string): string {
+        return source.replace(RE_WORD, match => {
+            return this.defines.get(match) ?? match;
+        });
+    }
+
+    /**
      * Process a single line of shader source
      */
     private async processLine(lineOrig: string, lineNum: number): Promise<void> {
-        // Substitute overrides and defines
-        let line = lineOrig
-            .replace(RE_WORD, match => this.overrides.get(match) ?? match)
-            .replace(RE_WORD, match => this.defines.get(match) ?? match);
+        let line = this.substDefines(lineOrig);
 
         // Handle enable directives
         if (line.trimStart().startsWith('enable')) {
             line = line.replace(RE_COMMENT, '');
             this.source.extensions += line + '\n';
-            return;
-        }
-
-        // Handle override in one line and evaluate to number
-        if (line.trimStart().startsWith('override')) {
-            line = line.replace(RE_COMMENT, '');
-            const tokens = line.trim().replace('=', ' = ').replace(/\s+/g, ' ').split(' ');
-            this.handleOverride(tokens, lineNum);
             return;
         }
 
@@ -107,7 +103,7 @@ export class Preprocessor {
                     break;
 
                 case '#define':
-                    this.handleDefine(tokens, lineNum);
+                    this.handleDefine(lineOrig, tokens, lineNum);
                     break;
 
                 case '#storage':
@@ -236,39 +232,18 @@ export class Preprocessor {
     /**
      * Handle #define directive
      */
-    private handleDefine(tokens: string[], lineNum: number): void {
-        const name = tokens[1];
+    private handleDefine(lineOrig: string, tokens: string[], lineNum: number): void {
+        const name = lineOrig.trim().split(' ')[1];
         if (!name) {
             throw new WGSLError('Invalid #define syntax', lineNum);
         }
 
         const value = tokens.slice(2).join(' ');
-        if (value.includes(name)) {
+        if (this.defines.has(name)) {
             throw new WGSLError(`Cannot redefine ${name}`, lineNum);
         }
 
         this.defines.set(name, value);
-    }
-
-    // /**
-    //  * Handle override in one line and evaluate to number
-    //  */
-    private handleOverride(tokens: string[], lineNum: number): void {
-        const name = tokens[1];
-        let expression = tokens.slice(3).join('');
-        if (!name || !expression.endsWith(';')) {
-            throw new WGSLError(
-                `Please write override in single line ${lineNum} and terminated!`,
-                lineNum
-            );
-        }
-        if (expression.includes(name)) {
-            throw new WGSLError(`Cannot redefine ${name}`, lineNum);
-        }
-
-        expression = expression.slice(0, -1);
-        expression = evalMathExpression(expression, lineNum);
-        this.defines.set(name, expression);
     }
 
     /**
