@@ -31,20 +31,24 @@ class Time {
 
 class Mouse {
     pos: [number, number];
+    start: [number, number];
     click: number;
 
-    constructor(x: number, y: number, click: number) {
+    constructor(x: number, y: number, x0: number, y0: number, click: number) {
         this.pos = [x, y];
+        this.start = [x0, y0];
         this.click = click;
     }
 
     toBuffer(): Uint8Array {
-        const buffer = new Uint8Array(12);
+        const buffer = new Uint8Array(32);
         const view = new DataView(buffer.buffer);
 
         view.setInt32(0, this.pos[0], true);
         view.setInt32(4, this.pos[1], true);
-        view.setInt32(8, this.click, true);
+        view.setInt32(8, this.start[0], true);
+        view.setInt32(12, this.start[1], true);
+        view.setInt32(16, this.click, true);
 
         return buffer;
     }
@@ -355,9 +359,9 @@ export class Bindings {
 
         // Initialize mouse binding
         this.mouse = new BufferBinding<Mouse>({
-            host: new Mouse(width / 2, height / 2, 0),
+            host: new Mouse(width / 2, height / 2, width / 2, height / 2, 0),
             device: device.createBuffer({
-                size: 16, // Aligned to 16 bytes
+                size: 32, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
             layout: uniformBuffer,

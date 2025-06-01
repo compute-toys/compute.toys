@@ -49,6 +49,7 @@ public struct Time {
 
 public struct Mouse {
     public uint2 pos;
+    public uint2 start;
     public int click;
 };
 
