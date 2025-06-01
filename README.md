@@ -6,18 +6,15 @@ This is the source code of the [compute.toys](https://compute.toys) website.
 
 ## Development
 
-To install dependencies:
+Install dependencies and run dev server. You can read [Architecture Wiki](https://deepwiki.com/compute-toys/compute.toys/3-architecture-overview). We using WebGPU [/lib/engine](https://deepwiki.com/compute-toys/compute.toys/4.1-webgpu-engine) written in Typescript that previously [was in Rust](https://github.com/compute-toys/wgpu-compute-toy), Monaco editor as a code linter, Supabase for database, Jotai for state manager and Slang for shader compiler. Use this yarn commands in console:
 
-- make sure you've cloned submodules: `git submodule update --init --recursive`
-- run [`yarn`](https://yarnpkg.com/getting-started/install)
-
-To start the development server, run `yarn dev`, or use the debug configuration in VS Code.
-
-Some other useful commands are:
-
+- `yarn` to install dependencies
+- `yarn dev` to start the development server
 - `yarn build` to check everything builds properly (the CI will check this for PRs)
 - `yarn lint` to only check for lint errors and warnings
 - `yarn fix` to automatically fix lint errors where possible
+
+You can check latest dev version online [staging.compute.toys](https://staging.compute.toys/).
 
 ## Local Database
 
