@@ -9,7 +9,6 @@ import ListSubheader from '@mui/material/ListSubheader';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { useTheme } from '@mui/material/styles';
-import Switch from '@mui/material/Switch';
 import { useAtom, useAtomValue } from 'jotai';
 import {
     codeAtom,
@@ -72,9 +71,9 @@ export default function ConfigurationPicker() {
                     </ListItemIcon>
                     <ListItemText id="config-list-label-float32" primary="Textures" />
                     <Select
-                        value={float32Enabled}
+                        value={float32Enabled ? "true" : "false"}
                         onChange={e => {
-                            setFloat32Enabled(e.target.value === "true");
+                            setFloat32Enabled(e.target.value === 'true');
                         }}
                         sx={{
                             minWidth: '100px',
