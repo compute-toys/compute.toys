@@ -5,7 +5,7 @@ import { calcMathExpression, fetchInclude, parseInteger, WGSLError } from './uti
 
 // Regular expressions for preprocessing
 const RE_COMMENT = /(\/\/.*|\/\*[\s\S]*?\*\/)/g;
-const RE_WORD = /\b\w+\b/g;
+const RE_WORD = /[a-zA-Z_][a-zA-Z0-9_]*/g;
 
 const STRING_MAX_LEN = 20;
 type DirectiveFunction = (tokens: string[], lineNum: number) => void | Promise<void>;
