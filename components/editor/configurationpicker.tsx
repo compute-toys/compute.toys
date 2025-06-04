@@ -1,11 +1,11 @@
 'use client';
-import CodeIcon from '@mui/icons-material/Code';
 import LineStyleIcon from '@mui/icons-material/LineStyle';
+import PetsIcon from '@mui/icons-material/Pets';
+import SpeedIcon from '@mui/icons-material/Speed';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { useTheme } from '@mui/material/styles';
@@ -16,6 +16,7 @@ import {
     codeNeedSaveAtom,
     float32EnabledAtom,
     languageAtom,
+    profilerEnabledAtom,
     shaderIDAtom
 } from 'lib/atoms/atoms';
 import defaultSlangShader from 'lib/shaders/default.slang';
@@ -24,6 +25,7 @@ import { Item } from '../../theme/theme';
 
 export default function ConfigurationPicker() {
     const [float32Enabled, setFloat32Enabled] = useAtom(float32EnabledAtom);
+    const [profilerEnabled, setProfilerEnabled] = useAtom(profilerEnabledAtom);
     const [language, setLanguage] = useAtom(languageAtom);
     const [, setCode] = useAtom(codeAtom);
     const codeNeedSave = useAtomValue(codeNeedSaveAtom);
@@ -57,14 +59,35 @@ export default function ConfigurationPicker() {
             }}
             style={{ minHeight: '-moz-fill-available' }}
         >
-            <List
-                sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
-                subheader={
-                    <ListSubheader sx={{ color: theme.palette.dracula.foreground }}>
-                        Settings
-                    </ListSubheader>
-                }
-            >
+            <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+                <ListItem>
+                    <ListItemIcon
+                        sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
+                    >
+                        <PetsIcon />
+                    </ListItemIcon>
+                    <ListItemText id="config-list-label-language" primary="Language" />
+                    <Select
+                        value={language}
+                        onChange={e => {
+                            handleLanguageChange(e.target.value);
+                        }}
+                        sx={{
+                            minWidth: '100px',
+                            color: theme.palette.dracula.foreground,
+                            '& .MuiSelect-icon': {
+                                color: theme.palette.dracula.foreground
+                            }
+                        }}
+                        inputProps={{
+                            'aria-labelledby': 'config-list-label-language'
+                        }}
+                        style={{ height: '2em', margin: '0' }}
+                    >
+                        <MenuItem value="wgsl">WGSL</MenuItem>
+                        <MenuItem value="slang">Slang</MenuItem>
+                    </Select>
+                </ListItem>
                 <ListItem>
                     <ListItemIcon
                         sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
@@ -87,28 +110,19 @@ export default function ConfigurationPicker() {
                     <ListItemIcon
                         sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
                     >
-                        <CodeIcon />
+                        <SpeedIcon />
                     </ListItemIcon>
-                    <ListItemText id="config-list-label-language" primary="Language" />
-                    <Select
-                        value={language}
-                        onChange={e => {
-                            handleLanguageChange(e.target.value);
+                    <ListItemText id="config-profiler-attached" primary="Profiler [beta]" />
+                    <Switch
+                        edge="end"
+                        onChange={() => {
+                            setProfilerEnabled(!profilerEnabled);
                         }}
-                        sx={{
-                            minWidth: '100px',
-                            color: theme.palette.dracula.foreground,
-                            '& .MuiSelect-icon': {
-                                color: theme.palette.dracula.foreground
-                            }
-                        }}
+                        checked={profilerEnabled}
                         inputProps={{
-                            'aria-labelledby': 'config-list-label-language'
+                            'aria-labelledby': 'config-profiler-attached'
                         }}
-                    >
-                        <MenuItem value="wgsl">WGSL</MenuItem>
-                        <MenuItem value="slang">Slang</MenuItem>
-                    </Select>
+                    />
                 </ListItem>
             </List>
         </Item>

@@ -8,6 +8,7 @@ import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
 import { loadHDR } from './hdr';
 import { Preprocessor, SourceMap } from './preprocessor';
+import { Profiler } from './profiler';
 import { countNewlines } from './utils';
 
 // Regular expression for parsing compute shader entry points
@@ -22,6 +23,7 @@ interface ComputePipeline {
     workgroupCount?: [number, number, number];
     dispatchOnce: boolean;
     dispatchCount: number;
+    passDesc: GPUComputePassDescriptor;
     pipeline: GPUComputePipeline;
 }
 
@@ -44,10 +46,12 @@ export class ComputeEngine {
     private computeBindGroup: GPUBindGroup;
     private computeBindGroupLayout: GPUBindGroupLayout;
     private onSuccessCb?: (entryPoints: string[]) => void;
+    private onUpdateCb?: (entryTimers: string[]) => void;
     private onErrorCb?: (summary: string, row: number, col: number) => void;
     private passF32: boolean = false;
+    private profilerAttached: boolean = false;
+    private profiler: Profiler | null = null;
     private screenBlitter: Blitter;
-    // private querySet?: GPUQuerySet;
     private lastStats: number = performance.now();
     // private source: SourceMap;
 
@@ -314,12 +318,20 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         }
         this.lastComputePipelines = this.computePipelines;
 
+        if (this.profilerAttached) {
+            if (this.profiler) {
+                await this.profiler.dispose();
+            }
+            this.profiler = new Profiler(entryPointNames, this.device);
+        }
+
         this.computePipelines = entryPoints.map(([name, workgroupSize]) => ({
             name,
             workgroupSize,
             workgroupCount: source.workgroupCount.get(name),
             dispatchOnce: source.dispatchOnce.get(name) ?? false,
             dispatchCount: source.dispatchCount.get(name) ?? 1,
+            passDesc: this.profiler?.getPassDescriptor(name) ?? {},
             pipeline: this.device.createComputePipeline({
                 label: `Pipeline ${name}`,
                 layout: this.computePipelineLayout,
@@ -346,8 +358,6 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             return;
         }
         try {
-            const textureView = this.surface.getCurrentTexture().createView();
-
             const encoder = this.device.createCommandEncoder();
 
             // Update bindings
@@ -388,7 +398,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
                     }
                 }
                 for (let i = 0; i < pipeline.dispatchCount; i++) {
-                    const pass = encoder.beginComputePass();
+                    const pass = encoder.beginComputePass(pipeline.passDesc);
 
                     const workgroupCount = pipeline.workgroupCount ?? [
                         Math.ceil(this.screenWidth / pipeline.workgroupSize[0]),
@@ -424,10 +434,18 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             }
 
             // Blit to screen
-            this.screenBlitter.blit(encoder, textureView);
+            this.screenBlitter.blit(encoder, this.surface.getCurrentTexture().createView());
 
             // Submit command buffer
-            this.device.queue.submit([encoder.finish()]);
+            if (!this.profiler) {
+                this.device.queue.submit([encoder.finish()]);
+            } else {
+                this.profiler.beforeFinish(encoder);
+                this.device.queue.submit([encoder.finish()]);
+                if (!this.profiler.mapMutex.isLocked()) {
+                    this.profiler.afterFinish().then(res => this.onUpdateCb?.(res));
+                }
+            }
 
             // Update frame counter
             this.bindings.time.host.frame += 1;
@@ -441,6 +459,10 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      */
     onSuccess(callback: (entryPoints: string[]) => void): void {
         this.onSuccessCb = callback;
+    }
+
+    onUpdate(callback: (entryTimers: string[]) => void): void {
+        this.onUpdateCb = callback;
     }
 
     onError(callback: (summary: string, row: number, col: number) => void): void {
@@ -495,6 +517,23 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     setPassF32(passF32: boolean): void {
         this.passF32 = passF32;
         // this.reset();
+    }
+
+    /**
+     * Set profiler state
+     */
+    async setProfilerAttached(isEnabled: boolean): Promise<void> {
+        if (!isEnabled && this.profiler) {
+            return new Promise<void>(resolve => {
+                this.profiler?.dispose().then(() => {
+                    this.profiler = null;
+                    this.profilerAttached = false;
+                    resolve();
+                });
+            });
+        }
+        this.profilerAttached = isEnabled;
+        return Promise.resolve();
     }
 
     /**

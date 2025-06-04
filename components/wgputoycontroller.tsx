@@ -6,6 +6,7 @@ import {
     codeAtom,
     dbLoadedAtom,
     entryPointsAtom,
+    entryTimersAtom,
     float32EnabledAtom,
     halfResolutionAtom,
     heightAtom,
@@ -16,6 +17,7 @@ import {
     manualReloadAtom,
     parseErrorAtom,
     playAtom,
+    profilerEnabledAtom,
     recordingAtom,
     requestFullscreenAtom,
     resetAtom,
@@ -82,6 +84,7 @@ const WgpuToyController = props => {
     const [, setParseError] = useTransientAtom(parseErrorAtom);
     const loadedTextures = useAtomValue(loadedTexturesAtom);
     const setEntryPoints = useSetAtom(entryPointsAtom);
+    const setEntryTimers = useSetAtom(entryTimersAtom);
     const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
 
     const canvas = useAtomValue(canvasElAtom);
@@ -95,6 +98,7 @@ const WgpuToyController = props => {
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
     const float32Enabled = useAtomValue(float32EnabledAtom);
+    const [profilerEnabled, setProfilerEnabled] = useAtom(profilerEnabledAtom);
     const halfResolution = useAtomValue(halfResolutionAtom);
 
     const [textureDimensions, setTextureDimensions] = useTransientAtom(
@@ -175,9 +179,11 @@ const WgpuToyController = props => {
             }
             engine.setSurface(canvas);
             engine.onSuccess(handleSuccess);
+            engine.onUpdate(handleUpdate);
             engine.onError(handleError);
             setTimer(0);
             engine.setPassF32(float32Enabled);
+            setProfilerEnabled(false);
             updateResolution();
             engine.resize(width(), height(), scale());
             engine.reset();
@@ -245,6 +251,13 @@ const WgpuToyController = props => {
             success: true
         }));
         if (!hotReloadHot()) setSaveColorTransitionSignal('#24252C');
+    }, []);
+
+    const handleUpdate = useCallback(entryTimers => {
+        if (profilerEnabled) {
+            setEntryTimers(entryTimers);
+            //console.log('update entryTimers');
+        }
     }, []);
 
     const handleError = useCallback((summary: string, row: number, col: number) => {
@@ -451,7 +464,7 @@ const WgpuToyController = props => {
     }, [recording, title]);
 
     useEffect(() => {
-        if (canvas !== false) {
+        if (canvas !== false && !needsInitialReset()) {
             const handleMouseMove = (e: MouseEvent) => {
                 // console.log(`Mouse move: ${e.offsetX}, ${e.offsetY}`);
                 ComputeEngine.getInstance().setMousePos(
@@ -614,6 +627,20 @@ const WgpuToyController = props => {
             }
         }
     }, [float32Enabled]);
+
+    useEffect(() => {
+        //console.log('profiler before:', ComputeEngine.getInstance().profiler, !profilerEnabled);
+        if (!needsInitialReset()) {
+            ComputeEngine.getInstance()
+                .setProfilerAttached(profilerEnabled)
+                .then(() => {
+                    recompile().then(() => {
+                        setProfilerEnabled(profilerEnabled);
+                        //setTimeout(() => {console.log('profiler after:',ComputeEngine.getInstance().profiler,profilerEnabled);}, 400);
+                    });
+                });
+        }
+    }, [profilerEnabled]);
 
     return null;
 };
