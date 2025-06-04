@@ -19,7 +19,7 @@ export default function LoginPage() {
                         <form>
                             <CssTextField id="email" name="email" type="email" required />
                             <br />
-                            <Button formAction={login} type="submit">
+                            <Button formAction={login} type="submit" sx={{ marginTop: '10px' }}>
                                 Login / Sign up
                             </Button>
                         </form>

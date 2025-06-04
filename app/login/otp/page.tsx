@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }) {
                             required
                         />
                         <br />
-                        <Button formAction={verify} type="submit">
+                        <Button formAction={verify} type="submit" sx={{ marginTop: '5px' }}>
                             Login / Sign up
                         </Button>
                     </form>
