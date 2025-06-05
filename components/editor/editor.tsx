@@ -6,6 +6,7 @@ import Giscus from '@giscus/react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { User } from '@supabase/supabase-js';
@@ -15,7 +16,7 @@ import PlayPauseButton from 'components/buttons/playpausebutton';
 import RecordButton from 'components/buttons/recordbutton';
 import ReloadButton from 'components/buttons/reloadbutton';
 import ResetButton from 'components/buttons/resetbutton';
-import ScaleButton from 'components/buttons/scalebutton';
+import ResolutionButton from 'components/buttons/resolutionbutton';
 import VimButton from 'components/buttons/vimbutton';
 import EntryPointDisplay from 'components/editor/entrypointdisplay';
 import { MetadataEditor } from 'components/editor/metadataeditor';
@@ -43,21 +44,23 @@ interface EditorProps {
 
 function Comments() {
     return (
-        <Giscus
-            id="comments"
-            repo="compute-toys/comments"
-            repoId="R_kgDOKRTytw"
-            category="Announcements"
-            categoryId="DIC_kwDOKRTyt84CllQC"
-            mapping="pathname"
-            strict="0"
-            reactionsEnabled="1"
-            emitMetadata="1"
-            inputPosition="top"
-            theme="dark"
-            lang="en"
-            loading="lazy"
-        />
+        <Box sx={{ marginTop: { xs: '2em', sm: 0 } }}>
+            <Giscus
+                id="comments"
+                repo="compute-toys/comments"
+                repoId="R_kgDOKRTytw"
+                category="Announcements"
+                categoryId="DIC_kwDOKRTyt84CllQC"
+                mapping="pathname"
+                strict="0"
+                reactionsEnabled="1"
+                emitMetadata="1"
+                inputPosition="top"
+                theme="dark"
+                lang="en"
+                loading="lazy"
+            />
+        </Box>
     );
 }
 
@@ -74,9 +77,6 @@ export default function Editor(props: EditorProps) {
     }, []);
 
     const Timer = dynamic(() => import('components/timer'), { ssr: false });
-    const Resolution = dynamic(() => import('components/resolution'), {
-        ssr: false
-    });
 
     let metadataEditor: JSX.Element | null = null;
     if (supabase && !props.standalone) {
@@ -102,6 +102,40 @@ export default function Editor(props: EditorProps) {
         };
     }
 
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+    const monacoOptions = (isMobile: boolean) => ({
+        stopRenderingLineAfter: isMobile ? 500 : 1000,
+        fontSize: isMobile ? 12 : 12,
+        lineHeight: isMobile ? 16 : 18,
+        fontFamily: "'Fira Code', monospace",
+        'bracketPairColorization.enabled': true,
+        mouseWheelZoom: true,
+        minimap: { enabled: !isMobile },
+        scrollBeyondLastLine: !isMobile,
+        automaticLayout: true,
+        lineNumbersMinChars: isMobile ? 3 : 4
+    });
+
+    const monacoEditorWithButtons = (
+        <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
+            <div className="vim-status"></div>
+            <Monaco editorOptions={monacoOptions(isMobile)} />
+            <Box sx={{ paddingTop: '4px' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Button style={{ pointerEvents: 'none' }} />
+                    <div>
+                        <ReloadButton />
+                        <HotReloadToggle />
+                        <Explainer />
+                    </div>
+                    <VimButton />
+                </Box>
+            </Box>
+        </ItemWithTransitionSignal>
+    );
+
     const leftPanel = (
         <div ref={renderParentNodeRef}>
             <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
@@ -117,61 +151,63 @@ export default function Editor(props: EditorProps) {
                         embed={props.embed}
                     />
                 </Frame>
-                <Grid container>
-                    <Grid item sx={{ textAlign: 'left' }} xs={2}>
-                        <Timer />
+                <Grid
+                    container
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center', // Vertically centers
+                        justifyContent: 'center', // Horizontally centers
+                        height: '100%', // Ensures vertical alignment works
+                        padding: '5px 5px 4px 5px' // top right bottom left
+                    }}
+                >
+                    <Grid item xs={2}>
+                        <Stack
+                            direction="column"
+                            justifyContent="flex-start"
+                            alignItems="flex-start"
+                        >
+                            <Timer />
+                        </Stack>
                     </Grid>
-                    <Grid item xs={7}>
+                    <Grid item xs={8}>
                         <PlayPauseButton />
                         <ResetButton />
                         <RecordButton />
                     </Grid>
-                    <Grid item sx={{ textAlign: 'right' }} xs={3}>
-                        <Resolution />
-                        <ScaleButton />
-                        <FullscreenButton />
+                    <Grid item xs={2}>
+                        <Stack direction="column" justifyContent="flex-end" alignItems="flex-end">
+                            <ResolutionButton />
+                            <FullscreenButton />
+                        </Stack>
                     </Grid>
                 </Grid>
                 <UniformSliders />
             </ItemWithTransitionSignal>
             {metadataEditor}
-            {shaderID ? <Comments /> : null}
+
+            {/* Show code right after shader metadata on mobile */}
+            {isMobile && monacoEditorWithButtons}
+
+            {/* Don't show comments on mobile */}
+            {!isMobile && (shaderID ? <Comments /> : null)}
         </div>
     );
 
-    const theme = useTheme();
-
     const rightPanel = (
         <div>
-            <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
-                <div className="vim-status"></div>
-                <Monaco
-                    editorOptions={{
-                        stopRenderingLineAfter: 1000,
-                        fontFamily: "'Fira Code', monospace",
-                        'bracketPairColorization.enabled': true,
-                        mouseWheelZoom: true
-                        //fontLigatures: true,
-                    }}
-                />
-                <Box sx={{ paddingTop: '4px' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Button style={{ pointerEvents: 'none' }} />{' '}
-                        {/* invisible button, used only for centering */}
-                        <div>
-                            <ReloadButton />
-                            <HotReloadToggle />
-                            <Explainer />
-                        </div>
-                        <VimButton />
-                    </Box>
-                </Box>
-            </ItemWithTransitionSignal>
+            {!isMobile && monacoEditorWithButtons}
             <Grid
                 container
                 spacing={2}
                 sx={{
-                    flexWrap: useMediaQuery(theme.breakpoints.up('sm')) ? 'nowrap' : 'wrap'
+                    flexWrap: useMediaQuery(theme.breakpoints.up('sm')) ? 'nowrap' : 'wrap',
+                    '@media (max-width: 600px)': {
+                        '& > .MuiGrid-item': {
+                            minHeight: 'none',
+                            maxHeight: '350px' // Prevents stretch on mobiles
+                        }
+                    }
                 }}
             >
                 <Grid item>
@@ -184,6 +220,7 @@ export default function Editor(props: EditorProps) {
                     <EntryPointDisplay />
                 </Grid>
             </Grid>
+            {isMobile && (shaderID ? <Comments /> : null)}
         </div>
     );
 

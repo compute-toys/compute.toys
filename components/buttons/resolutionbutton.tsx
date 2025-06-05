@@ -5,24 +5,38 @@ import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import { useAtom, useAtomValue } from 'jotai';
 import { halfResolutionAtom } from 'lib/atoms/atoms';
+import dynamic from 'next/dynamic';
 
 const ScaleIcon = () => {
     const halfResolution = useAtomValue(halfResolutionAtom);
     return halfResolution ? <Sd /> : <Hd />;
 };
 
-export default function ScaleButton() {
+const Resolution = dynamic(() => import('components/resolution'), {
+    ssr: false
+});
+
+export default function ResolutionButton() {
     const [halfResolution, setHalfResolution] = useAtom(halfResolutionAtom);
     const theme = useTheme();
+
+    // Define styles outside the return for better readability
+    const buttonStyles = {
+        padding: '2px',
+        minWidth: 0,
+        color: halfResolution ? theme.palette.primary.contrastText : theme.palette.primary.light,
+        '&:hover': {
+            backgroundColor: 'rgba(255, 255, 255, 0.08)'
+        }
+    };
+
     return (
         <Button
             onClick={() => setHalfResolution(!halfResolution)}
-            sx={
-                halfResolution
-                    ? { color: theme.palette.primary.contrastText }
-                    : { color: theme.palette.primary.light }
-            }
+            sx={buttonStyles}
+            aria-label={halfResolution ? 'Full resolution' : 'Half resolution'}
         >
+            <Resolution />
             <ScaleIcon />
         </Button>
     );

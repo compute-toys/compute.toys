@@ -12,10 +12,12 @@ export default function FullscreenButton() {
 
     return (
         <Button
-            onClick={() => {
-                setRequestFullscreen(true);
+            onClick={() => setRequestFullscreen(true)}
+            sx={{
+                color: theme.palette.dracula.cyan,
+                minWidth: 0,
+                padding: '2px'
             }}
-            sx={{ color: theme.palette.dracula.cyan }}
         >
             <FullscreenIcon />
         </Button>
