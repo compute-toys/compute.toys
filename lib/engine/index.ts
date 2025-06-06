@@ -500,9 +500,9 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Handle window resize
      */
-    resize(width: number, height: number, scale: number): void {
-        this.screenWidth = Math.floor(width * scale);
-        this.screenHeight = Math.floor(height * scale);
+    resize(width: number, height: number): void {
+        this.screenWidth = Math.floor(width);
+        this.screenHeight = Math.floor(height);
 
         // this.surface.configure(this.surfaceConfig);
 
