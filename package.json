@@ -6,6 +6,7 @@
   "packageManager": "yarn@1.22.22",
   "scripts": {
     "dev": "next dev",
+    "dev-build": "PROD_EMULATION=yes NODE_ENV=production next build && yarn start",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
