@@ -1,6 +1,9 @@
 import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
 import allowedtexturesources from './config/allowedtexturesources.json' with { type: 'json' };
 
+const DEVELOPMENT = process.env.NODE_ENV === 'development';
+const PROD_EMULATION = process.env.PROD_EMULATION === 'yes';
+
 function getImageConfig() {
     const config = {
         remotePatterns: allowedtexturesources.map(resource => ({
@@ -24,14 +27,25 @@ function getImageConfig() {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    images:
-        process.env.NODE_ENV === 'development'
-            ? getImageConfig()
-            : {
-                  loader: 'custom',
-                  loaderFile: './lib/util/loader.ts'
-              },
-    webpack: (config) => {
+    productionBrowserSourceMaps: PROD_EMULATION,
+    experimental: { forceSwcTransforms: PROD_EMULATION }, // Bypass SWC entirely in emulation
+    eslint: { ignoreDuringBuilds: true }, // lint checked in CI anyway and fail dramatically
+
+    images: DEVELOPMENT
+        ? getImageConfig()
+        : {
+              loader: 'custom',
+              loaderFile: './lib/util/loader.ts'
+          },
+
+    webpack: config => {
+        if (PROD_EMULATION) {
+            config.optimization.minimize = false;
+            config.optimization.minimizer = [];
+            config.devtool = 'cheap-module-source-map'; // https://webpack.js.org/configuration/devtool/
+        }
+
+        // Shaders configuration
         config.module.rules.push({
             test: /\.(slang|wgsl)$/,
             type: 'asset/source'
@@ -57,7 +71,7 @@ const nextConfig = {
     }
 };
 
-if (process.env.NODE_ENV === 'development') {
+if (DEVELOPMENT) {
     await setupDevPlatform();
 }
 

@@ -1,5 +1,5 @@
 {
-    "githubPullRequests.ignoredPullRequestBranches": [
-        "master"
-    ]
+    "githubPullRequests.ignoredPullRequestBranches": ["master"],
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "prettier.ignorePath": ".prettierignore"
 }
