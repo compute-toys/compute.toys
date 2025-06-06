@@ -35,7 +35,6 @@ export const recordingAtom = atom<boolean>(false);
 export const timerAtom = atom<number>(0);
 export const widthAtom = atom<number>(0);
 export const heightAtom = atom<number>(0);
-export const scaleAtom = atom<number>(1);
 
 export const customTexturesAtom = atom<Texture[]>([]);
 

@@ -20,7 +20,6 @@ import {
     requestFullscreenAtom,
     resetAtom,
     saveColorTransitionSignalAtom,
-    scaleAtom,
     sliderRefMapAtom,
     sliderUpdateSignalAtom,
     textureChannelDimensionsAtom,
@@ -91,7 +90,6 @@ const WgpuToyController = props => {
 
     const [width, setWidth] = useTransientAtom(widthAtom);
     const [height, setHeight] = useTransientAtom(heightAtom);
-    const [scale, setScale] = useTransientAtom(scaleAtom);
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
     const float32Enabled = useAtomValue(float32EnabledAtom);
@@ -179,7 +177,7 @@ const WgpuToyController = props => {
             setTimer(0);
             engine.setPassF32(float32Enabled);
             updateResolution();
-            engine.resize(width(), height(), scale());
+            engine.resize(width(), height());
             engine.reset();
             await loadTexture(0, loadedTextures[0].img);
             await loadTexture(1, loadedTextures[1].img);
@@ -513,42 +511,33 @@ const WgpuToyController = props => {
     }, [code, hotReload, manualReload()]);
 
     const updateResolution = () => {
+        const dpr = !halfResolution ? window.devicePixelRatio : window.devicePixelRatio * 0.5;
         let dimensions = { x: 0, y: 0 }; // dimensions in device (physical) pixels
         if (document.fullscreenElement) {
             // calculate actual screen resolution, accounting for both zoom and hidpi
             // https://stackoverflow.com/a/55839671/78204
             dimensions.x =
                 Math.round(
-                    (window.screen.width * window.devicePixelRatio) /
-                        (window.outerWidth / window.innerWidth) /
-                        80
+                    (window.screen.width * dpr) / (window.outerWidth / window.innerWidth) / 80
                 ) * 80;
             dimensions.y =
                 Math.round(
-                    (window.screen.height * window.devicePixelRatio) /
-                        (window.outerWidth / window.innerWidth) /
-                        60
+                    (window.screen.height * dpr) / (window.outerWidth / window.innerWidth) / 60
                 ) * 60;
         } else if (props.embed) {
-            dimensions = getDimensions(window.innerWidth * window.devicePixelRatio);
+            dimensions = getDimensions(window.innerWidth * dpr);
         } else {
             const padding = 16;
-            dimensions = getDimensions(
-                (parentRef!.offsetWidth - padding) * window.devicePixelRatio
-            );
+            dimensions = getDimensions((parentRef!.offsetWidth - padding) * dpr);
         }
-        if (canvas) {
-            canvas.width = dimensions.x;
-            canvas.height = dimensions.y;
-            canvas.style.width = `${dimensions.x / window.devicePixelRatio}px`;
-            canvas.style.height = `${dimensions.y / window.devicePixelRatio}px`;
-        }
-        const newScale = halfResolution ? 0.5 : 1;
-        if (dimensions.x !== width() || newScale !== scale()) {
-            console.log(`Resizing to ${dimensions.x}x${dimensions.y} @ ${newScale}x`);
+        if (canvas && (dimensions.x !== width() || dimensions.y !== height())) {
+            console.log(`Resizing to ${dimensions.x}x${dimensions.y}`);
             setWidth(dimensions.x);
             setHeight(dimensions.y);
-            setScale(newScale);
+            canvas.width = dimensions.x;
+            canvas.height = dimensions.y;
+            canvas.style.width = `${dimensions.x / dpr}px`;
+            canvas.style.height = `${dimensions.y / dpr}px`;
             return true;
         }
         return false;
@@ -556,14 +545,14 @@ const WgpuToyController = props => {
 
     useResizeObserver(parentRef, () => {
         if (!needsInitialReset() && updateResolution()) {
-            ComputeEngine.getInstance().resize(width(), height(), scale());
+            ComputeEngine.getInstance().resize(width(), height());
             resetCallback();
         }
     });
 
     useEffect(() => {
         if (!needsInitialReset() && updateResolution()) {
-            ComputeEngine.getInstance().resize(width(), height(), scale());
+            ComputeEngine.getInstance().resize(width(), height());
             resetCallback();
         }
     }, [halfResolution]);
