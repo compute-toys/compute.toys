@@ -32,6 +32,7 @@ import { createClient } from 'lib/supabase/client';
 import dynamic from 'next/dynamic';
 import { useCallback } from 'react';
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
+import { MonacoWrapper } from 'theme/monacotheme';
 import { Frame } from 'theme/theme';
 import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
@@ -115,13 +116,16 @@ export default function Editor(props: EditorProps) {
         minimap: { enabled: !isMobile },
         scrollBeyondLastLine: !isMobile,
         automaticLayout: true,
-        lineNumbersMinChars: isMobile ? 3 : 4
+        lineNumbersMinChars: isMobile ? 3 : 4,
+        useShadowDOM: false // https://github.com/microsoft/monaco-editor/issues/3602
     });
 
     const monacoEditorWithButtons = (
         <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
             <div className="vim-status"></div>
-            <Monaco editorOptions={monacoOptions(isMobile)} />
+            <MonacoWrapper>
+                <Monaco editorOptions={monacoOptions(isMobile)} />
+            </MonacoWrapper>
             <Box sx={{ paddingTop: '4px' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Button style={{ pointerEvents: 'none' }} />
