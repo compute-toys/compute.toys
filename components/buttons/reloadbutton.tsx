@@ -1,7 +1,6 @@
 'use client';
 import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded';
 import PlayDisabledRounded from '@mui/icons-material/PlayDisabledRounded';
-import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import { useAtomValue, useSetAtom } from 'jotai';
@@ -32,9 +31,7 @@ export default function ReloadButton() {
                 color: theme.palette.primary[hotReload ? 'contrastText' : 'light']
             }}
         >
-            <Box sx={{ transform: 'scale(1.1)' }}>
-                <PlayIcon />
-            </Box>
+            <PlayIcon />
         </Button>
     );
 }

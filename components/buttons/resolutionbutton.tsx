@@ -3,18 +3,14 @@ import Hd from '@mui/icons-material/Hd';
 import Sd from '@mui/icons-material/Sd';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
+import Resolution from 'components/resolution';
 import { useAtom, useAtomValue } from 'jotai';
 import { halfResolutionAtom } from 'lib/atoms/atoms';
-import dynamic from 'next/dynamic';
 
 const ScaleIcon = () => {
     const halfResolution = useAtomValue(halfResolutionAtom);
     return halfResolution ? <Sd /> : <Hd />;
 };
-
-const Resolution = dynamic(() => import('components/resolution'), {
-    ssr: false
-});
 
 export default function ResolutionButton() {
     const [halfResolution, setHalfResolution] = useAtom(halfResolutionAtom);

@@ -8,20 +8,17 @@ export default function Resolution() {
     const height = useAtomValue(heightAtom);
     const scale = useAtomValue(scaleAtom);
 
-    if (width > 0 && height > 0) {
-        return (
-            <span
-                style={{
-                    color: theme.palette.dracula.foreground,
-                    paddingTop: '1px',
-                    paddingRight: '2px',
-                    lineHeight: '10px',
-                    display: 'inline-block'
-                }}
-            >
-                {Math.floor(width * scale)}x{Math.floor(height * scale)}
-            </span>
-        );
-    }
-    return null;
+    return (
+        <span
+            style={{
+                color: theme.palette.dracula.foreground,
+                paddingTop: '1px',
+                paddingRight: '2px',
+                lineHeight: '10px',
+                textTransform: 'none'
+            }}
+        >
+            {width ? `${Math.floor(width * scale)}x${Math.floor(height * scale)}` : ''}
+        </span>
+    );
 }
