@@ -27,9 +27,11 @@ export default function ReloadButton() {
                 setManualReload(true);
             }}
             title="Recompile <Alt + Enter>"
-            sx={{
-                color: theme.palette.primary[hotReload ? 'contrastText' : 'light']
-            }}
+            sx={
+                hotReload
+                    ? { color: theme.status.disabled }
+                    : { color: theme.palette.primary.light }
+            }
         >
             <PlayIcon />
         </Button>
