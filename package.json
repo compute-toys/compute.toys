@@ -6,6 +6,7 @@
   "packageManager": "yarn@1.22.22",
   "scripts": {
     "dev": "next dev",
+    "dev-https": "next dev --experimental-https",
     "dev-build": "PROD_EMULATION=yes next build && next start",
     "build": "next build",
     "start": "next start",

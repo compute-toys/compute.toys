@@ -42,7 +42,9 @@ const ExplainerBody = () => {
             <br />
             Mouse input can be accessed from the <HiLite>mouse</HiLite> struct:
             <pre style={{ color: theme.palette.neutral.main }}>
-                mouse.pos: vec2i
+                mouse.pos: vec2u
+                <br />
+                mouse.start: vec2u
                 <br />
                 mouse.click: i32
             </pre>
