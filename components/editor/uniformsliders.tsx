@@ -246,8 +246,10 @@ const UniformSlider = (props: UniformSliderProps) => {
                 type="number"
                 value={sliderMinRange}
                 sx={{
+                    display: 'table-cell',
                     gridRow: '1',
-                    width: '80px',
+                    gridColumn: 'span 1',
+                    verticalAlign: 'middle',
                     input: { color: getRainbowColor(props.index) },
                     label: { color: getRainbowColor(props.index) }
                 }}
@@ -285,8 +287,10 @@ const UniformSlider = (props: UniformSliderProps) => {
                 type="number"
                 value={sliderMaxRange}
                 sx={{
+                    display: 'table-cell',
                     gridRow: '1',
-                    width: '80px',
+                    gridColumn: 'span 1',
+                    verticalAlign: 'middle',
                     input: { color: getRainbowColor(props.index) },
                     label: { color: getRainbowColor(props.index) }
                 }}
