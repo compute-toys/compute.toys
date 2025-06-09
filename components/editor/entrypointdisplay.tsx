@@ -15,7 +15,6 @@ import {
     monacoEditorAtom,
     profilerEnabledAtom
 } from 'lib/atoms/atoms';
-import { useEffect, useState } from 'react';
 import { theme } from 'theme/theme';
 import { getRainbowColor, Item } from '../../theme/theme';
 
@@ -25,13 +24,6 @@ export default function EntryPointDisplay() {
     const profilerEnabled = useAtomValue(profilerEnabledAtom);
     const code = useAtomValue(codeAtom);
     const monaco = useAtomValue(monacoEditorAtom);
-
-    const [updateTrigger, setUpdateTrigger] = useState(0);
-    useEffect(() => {
-        setTimeout(() => {
-            setUpdateTrigger(x => x + 1);
-        }, 0);
-    }, [profilerEnabled, entryTimers]);
 
     function editorJumpToEntryPoint(entryPoint: string) {
         const regex = new RegExp('fn\\s+' + entryPoint + '\\s*\\(');
@@ -55,12 +47,11 @@ export default function EntryPointDisplay() {
                 minHeight: '-webkit-fill-available'
             }}
             style={{ minHeight: '-moz-fill-available' }}
-            key={updateTrigger}
         >
             <Timeline sx={{ alignItems: 'stretch', width: '100%', padding: '0 1rem' }}>
                 {entryPoints.map((entryPoint, index) => (
                     <TimelineItem
-                        key={`${entryPoint}-${entryTimers[index]}-${updateTrigger}`}
+                        key={`${entryPoint}-${entryTimers[index]}`}
                         sx={{
                             width: '100%',
                             minHeight: '48px',

@@ -256,7 +256,6 @@ const WgpuToyController = props => {
     const handleUpdate = useCallback(entryTimers => {
         if (profilerEnabled) {
             setEntryTimers(entryTimers);
-            //console.log('update entryTimers');
         }
     }, []);
 
@@ -629,14 +628,12 @@ const WgpuToyController = props => {
     }, [float32Enabled]);
 
     useEffect(() => {
-        //console.log('profiler before:', ComputeEngine.getInstance().profiler, !profilerEnabled);
         if (!needsInitialReset()) {
             ComputeEngine.getInstance()
                 .setProfilerAttached(profilerEnabled)
                 .then(() => {
                     recompile().then(() => {
                         setProfilerEnabled(profilerEnabled);
-                        //setTimeout(() => {console.log('profiler after:',ComputeEngine.getInstance().profiler,profilerEnabled);}, 400);
                     });
                 });
         }
