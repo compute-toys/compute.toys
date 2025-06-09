@@ -31,7 +31,7 @@
     "@mui/utils": "^7.1.0",
     "@react-hook/resize-observer": "^2.0.2",
     "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.48.1",
+    "@supabase/supabase-js": "^2.50.0",
     "async-mutex": "^0.5.0",
     "firacode": "^6.2.0",
     "jotai": "^2.12.4",
