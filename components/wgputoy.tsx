@@ -52,7 +52,12 @@ export const WgpuToyWrapper = props => {
                 id={props.bindID}
                 style={
                     wgpuAvailability !== 'unavailable'
-                        ? { ...props.style, backgroundColor: 'black', visibility: 'visible' }
+                        ? {
+                              ...props.style,
+                              backgroundColor: 'black',
+                              borderRadius: '4px',
+                              visibility: 'visible'
+                          }
                         : { position: 'fixed', display: 'none' }
                 }
                 tabIndex={1}

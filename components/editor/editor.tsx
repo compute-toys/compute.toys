@@ -114,7 +114,8 @@ export default function Editor(props: EditorProps) {
                         width: '100%',
                         height: '100%',
                         margin: 0,
-                        padding: 0
+                        padding: 0,
+                        aspectRatio: '1.77'
                     }}
                     ref={renderParentNodeRef}
                 >
@@ -126,7 +127,6 @@ export default function Editor(props: EditorProps) {
                             height: '100%',
                             margin: 0,
                             padding: 0,
-                            borderRadius: '4px',
                             ...embedStyle
                         }}
                         embed={props.embed}
