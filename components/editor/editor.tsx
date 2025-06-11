@@ -2,7 +2,6 @@
 // MUI sizing from refs:
 // https://github.com/mui/material-ui/issues/15662
 
-import Giscus from '@giscus/react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
@@ -19,7 +18,6 @@ import ScaleButton from 'components/buttons/scalebutton';
 import VimButton from 'components/buttons/vimbutton';
 import EntryPointDisplay from 'components/editor/entrypointdisplay';
 import { MetadataEditor } from 'components/editor/metadataeditor';
-import Monaco from 'components/editor/monaco';
 import TexturePicker from 'components/editor/texturepicker';
 import UniformSliders from 'components/editor/uniformsliders';
 import { WgpuToyWrapper } from 'components/wgputoy';
@@ -31,9 +29,14 @@ import { createClient } from 'lib/supabase/client';
 import dynamic from 'next/dynamic';
 import { useCallback } from 'react';
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
-import { Frame } from 'theme/theme';
 import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
+
+const Monaco = dynamic(() => import('components/editor/monaco'), {
+    ssr: false,
+    loading: () => <Box width={'100%'} height={'calc(100vh - 270px)'} />
+});
+const Giscus = dynamic(() => import('@giscus/react'), { ssr: false });
 
 interface EditorProps {
     user?: User;
@@ -90,33 +93,37 @@ export default function Editor(props: EditorProps) {
         );
     }
 
+    const ordinaryStyle = {
+        width: '100%',
+        height: '100%',
+        margin: 0,
+        padding: 0,
+        aspectRatio: '1.77',
+        background: 'rgba(0,0,0,0)',
+        borderRadius: '4px'
+    };
     let embedStyle = {};
     if (props.embed) {
         embedStyle = {
             position: 'fixed',
             top: 0,
             left: 0,
-            width: '100vw',
-            height: '100vh',
-            zIndex: 9999
+            width: '100vw !important',
+            height: '100vh !important',
+            zIndex: 999999999
         };
     }
 
     const leftPanel = (
-        <div ref={renderParentNodeRef}>
+        <div>
             <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
-                <Frame elevation={12}>
+                <div style={ordinaryStyle} ref={renderParentNodeRef}>
                     <WgpuToyWrapper
                         bindID={'editor-canvas'}
-                        style={{
-                            display: 'inline-block',
-                            borderRadius: '4px',
-                            backgroundColor: 'black',
-                            ...embedStyle
-                        }}
+                        style={{ ...ordinaryStyle, ...embedStyle }}
                         embed={props.embed}
                     />
-                </Frame>
+                </div>
                 <Grid container>
                     <Grid item sx={{ textAlign: 'left' }} xs={2}>
                         <Timer />

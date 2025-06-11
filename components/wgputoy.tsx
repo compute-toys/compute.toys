@@ -3,46 +3,47 @@ import WarningIcon from '@mui/icons-material/Warning';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useAtom, useSetAtom } from 'jotai';
-import { canvasElAtom, wgpuAvailabilityAtom } from 'lib/atoms/wgputoyatoms';
-import dynamic from 'next/dynamic';
-import { Suspense, useCallback, useState } from 'react';
+import {
+    canvasElAtom,
+    wgpuAvailabilityAtom,
+    wgpuContextAtom,
+    wgpuDeviceAtom
+} from 'lib/atoms/wgputoyatoms';
+import { useEffect, useRef } from 'react';
 import { theme } from 'theme/theme';
+import WgpuToyController from './wgputoycontroller';
 
 export const WgpuToyWrapper = props => {
     const setCanvasEl = useSetAtom(canvasElAtom);
+    const setWgpuContext = useSetAtom(wgpuContextAtom);
+    const setWgpuDevice = useSetAtom(wgpuDeviceAtom);
     const [wgpuAvailability, setWgpuAvailability] = useAtom(wgpuAvailabilityAtom);
-    const [loaded, setLoaded] = useState(false);
 
-    const canvasRef = useCallback(canvas => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
+    useEffect(() => {
         (async () => {
             // there may be a case where we don't have the canvas *yet*
-            if (canvas && canvas.getContext('webgpu') && 'gpu' in navigator) {
-                const adapter = await navigator.gpu.requestAdapter();
-                if (adapter) {
-                    const device = await adapter.requestDevice();
-                    if (device) {
-                        setWgpuAvailability('available');
-                        setCanvasEl(canvas);
-                        setLoaded(true);
-                    } else {
-                        setWgpuAvailability('unavailable');
-                    }
+            if (canvasRef.current) {
+                const context = canvasRef.current.getContext('webgpu');
+                const adapter = await navigator.gpu?.requestAdapter({
+                    powerPreference: 'high-performance'
+                });
+                const device = await adapter?.requestDevice({
+                    label: 'compute.toys device with all features',
+                    requiredFeatures: [...adapter.features] as GPUFeatureName[]
+                });
+                if (device && context) {
+                    setCanvasEl(canvasRef.current);
+                    setWgpuContext(context);
+                    setWgpuDevice(device);
+                    setWgpuAvailability('available');
                 } else {
                     setWgpuAvailability('unavailable');
                 }
-            } else {
-                setWgpuAvailability('unavailable');
             }
         })();
     }, []);
-
-    const onLoad = useCallback(() => {
-        setLoaded(true);
-    }, []);
-
-    const Controller = dynamic(() => import('./wgputoycontroller'), {
-        ssr: false
-    });
 
     return (
         <div style={props.style}>
@@ -50,18 +51,16 @@ export const WgpuToyWrapper = props => {
                 ref={canvasRef}
                 id={props.bindID}
                 style={
-                    loaded
-                        ? { ...props.style, ...{ outline: 'none' } }
-                        : { position: 'fixed', display: 'hidden' }
+                    wgpuAvailability !== 'unavailable'
+                        ? { ...props.style, backgroundColor: 'black', borderRadius: '4px' }
+                        : { position: 'fixed', display: 'none' }
                 }
                 tabIndex={1}
             />
-            {loaded ? (
-                <Suspense>
-                    <Controller onLoad={onLoad} embed={props.embed} />
-                </Suspense>
-            ) : wgpuAvailability === 'unknown' ? null : (
-                <Stack color={theme.palette.primary.contrastText} spacing={2} padding={4}>
+            {wgpuAvailability === 'unknown' ? null : wgpuAvailability === 'available' ? (
+                <WgpuToyController embed={props.embed} />
+            ) : (
+                <Stack color={theme.palette.primary.contrastText} spacing={2} padding={7}>
                     <Typography>
                         <WarningIcon />
                     </Typography>
