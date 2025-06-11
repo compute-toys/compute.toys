@@ -280,6 +280,39 @@ const Monaco = props => {
                 );
                 // https://github.com/microsoft/monaco-editor/issues/392
                 document.fonts.ready.then(() => monaco.editor.remeasureFonts());
+
+                // https://github.com/suren-atoyan/monaco-react/issues/733
+                const handleMouseEvent = (e: MonacoEditor.IEditorMouseEvent) => {
+                    const type = e['changedTouches']
+                        ? MonacoEditor.MouseTargetType.UNKNOWN
+                        : MonacoEditor.MouseTargetType.CONTENT_EMPTY;
+                    if (e?.target?.type === type) {
+                        setTimeout(() => {
+                            const position = _editor.getPosition();
+                            const line = position?.lineNumber || 1;
+                            const column =
+                                (_editor.getModel()?.getLineContent(line).length || 0) + 1;
+                            _editor.setSelection(new monaco.Selection(line, column, line, column));
+                        }, 12);
+                    }
+                };
+                const handleTouchEvent = e => {
+                    e.preventDefault();
+                    const touch = e.changedTouches[0];
+                    const mouseEvent = new MouseEvent('mouseup', {
+                        bubbles: true,
+                        cancelable: true,
+                        clientX: touch.clientX,
+                        clientY: touch.clientY,
+                        buttons: 1
+                    });
+                    domNode!.dispatchEvent(mouseEvent);
+                };
+                const domNode = _editor.getDomNode();
+                _editor.onMouseDown(handleMouseEvent);
+                _editor.onMouseUp(handleMouseEvent);
+                domNode!.addEventListener('touchstart', handleTouchEvent, { passive: false });
+                domNode!.addEventListener('touchend', handleTouchEvent, { passive: false });
             }}
             options={props.editorOptions}
             theme="global" // preference
