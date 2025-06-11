@@ -28,7 +28,12 @@ import {
     titleAtom,
     widthAtom
 } from 'lib/atoms/atoms';
-import { canvasElAtom, canvasParentElAtom, wgputoyPreludeAtom } from 'lib/atoms/wgputoyatoms';
+import {
+    canvasElAtom,
+    canvasParentElAtom,
+    wgpuAvailabilityAtom,
+    wgputoyPreludeAtom
+} from 'lib/atoms/wgputoyatoms';
 import { ComputeEngine } from 'lib/engine';
 import { getCompiler, TextureDimensions } from 'lib/slang/compiler';
 import { useCallback, useEffect } from 'react';
@@ -85,7 +90,8 @@ const WgpuToyController = props => {
     const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
 
     const canvas = useAtomValue(canvasElAtom);
-    const [, setPrelude] = useAtom(wgputoyPreludeAtom);
+    const setPrelude = useSetAtom(wgputoyPreludeAtom);
+    const wgpuAvailability = useAtomValue(wgpuAvailabilityAtom);
 
     const parentRef = useAtomValue<HTMLElement | null>(canvasParentElAtom);
 
@@ -483,12 +489,12 @@ const WgpuToyController = props => {
     }, []);
 
     useEffect(() => {
-        if (!isPlaying()) {
+        if (!isPlaying() && wgpuAvailability === 'available') {
             setPlay(true);
             setNeedsInitialReset(true);
             playCallback();
         }
-    }, []);
+    }, [wgpuAvailability]);
 
     // Return a pauseCallback for the cleanup lifecycle
     useEffect(() => pauseCallback, []);

@@ -32,7 +32,7 @@ import { createClient } from 'lib/supabase/client';
 import dynamic from 'next/dynamic';
 import { useCallback } from 'react';
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
-import { MonacoWrapper } from 'theme/monacotheme';
+import { MonacoTheme } from 'theme/monacotheme';
 import { Frame } from 'theme/theme';
 import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
@@ -123,9 +123,9 @@ export default function Editor(props: EditorProps) {
     const monacoEditorWithButtons = (
         <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
             <div className="vim-status"></div>
-            <MonacoWrapper>
+            <MonacoTheme>
                 <Monaco editorOptions={monacoOptions(isMobile)} />
-            </MonacoWrapper>
+            </MonacoTheme>
             <Box sx={{ paddingTop: '4px' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Button style={{ pointerEvents: 'none' }} />
@@ -209,7 +209,7 @@ export default function Editor(props: EditorProps) {
                     '@media (max-width: 600px)': {
                         '& > .MuiGrid-item': {
                             minHeight: 'none',
-                            maxHeight: '350px' // Prevents stretch on mobiles
+                            maxHeight: '400px' // Prevents stretch on mobiles
                         }
                     }
                 }}

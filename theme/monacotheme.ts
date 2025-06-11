@@ -3,9 +3,10 @@ import { styled } from '@mui/material/styles';
 import { theme } from 'theme/theme';
 import 'theme/themeModule';
 
-export const MonacoWrapper = styled(Box)(({ theme }) => ({
+// fix: https://github.com/microsoft/monaco-editor/issues/3602
+export const MonacoTheme = styled(Box)(({ theme }) => ({
     '.monaco-action-bar': {
-        backgroundColor: `${theme.palette.background.paper} !important` // fix: https://github.com/microsoft/monaco-editor/issues/3602
+        backgroundColor: `${theme.palette.background.paper} !important`
     }
 }));
 
