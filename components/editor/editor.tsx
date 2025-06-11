@@ -32,7 +32,7 @@ import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
 
-const Monaco = dynamic(() => import('components/editor/monaco').then(mod => mod.default), {
+const Monaco = dynamic(() => import('components/editor/monaco'), {
     ssr: false,
     loading: () => <Box width={'100%'} height={'calc(100vh - 270px)'} />
 });
@@ -93,6 +93,15 @@ export default function Editor(props: EditorProps) {
         );
     }
 
+    const ordinaryStyle = {
+        width: '100%',
+        height: '100%',
+        margin: 0,
+        padding: 0,
+        aspectRatio: '1.77',
+        background: 'rgba(0,0,0,0)',
+        borderRadius: '4px'
+    };
     let embedStyle = {};
     if (props.embed) {
         embedStyle = {
@@ -108,27 +117,10 @@ export default function Editor(props: EditorProps) {
     const leftPanel = (
         <div>
             <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
-                <div
-                    style={{
-                        visibility: 'hidden',
-                        width: '100%',
-                        height: '100%',
-                        margin: 0,
-                        padding: 0,
-                        aspectRatio: '1.77'
-                    }}
-                    ref={renderParentNodeRef}
-                >
+                <div style={ordinaryStyle} ref={renderParentNodeRef}>
                     <WgpuToyWrapper
                         bindID={'editor-canvas'}
-                        style={{
-                            visibility: 'hidden',
-                            width: '100%',
-                            height: '100%',
-                            margin: 0,
-                            padding: 0,
-                            ...embedStyle
-                        }}
+                        style={{ ...ordinaryStyle, ...embedStyle }}
                         embed={props.embed}
                     />
                 </div>

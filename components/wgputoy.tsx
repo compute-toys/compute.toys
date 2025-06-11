@@ -52,12 +52,7 @@ export const WgpuToyWrapper = props => {
                 id={props.bindID}
                 style={
                     wgpuAvailability !== 'unavailable'
-                        ? {
-                              ...props.style,
-                              backgroundColor: 'black',
-                              borderRadius: '4px',
-                              visibility: 'visible'
-                          }
+                        ? { ...props.style, backgroundColor: 'black', borderRadius: '4px' }
                         : { position: 'fixed', display: 'none' }
                 }
                 tabIndex={1}
@@ -65,7 +60,7 @@ export const WgpuToyWrapper = props => {
             {wgpuAvailability === 'unknown' ? null : wgpuAvailability === 'available' ? (
                 <WgpuToyController embed={props.embed} />
             ) : (
-                <Stack color={theme.palette.primary.contrastText} spacing={2} padding={4}>
+                <Stack color={theme.palette.primary.contrastText} spacing={2} padding={7}>
                     <Typography>
                         <WarningIcon />
                     </Typography>

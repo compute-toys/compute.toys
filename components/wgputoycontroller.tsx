@@ -311,8 +311,12 @@ const WgpuToyController = props => {
     }, []);
 
     const requestFullscreen = useCallback(() => {
-        if (canvas && !document.fullscreenElement) {
-            canvas.requestFullscreen({ navigationUI: 'hide' });
+        try {
+            if (canvas && !document.fullscreenElement) {
+                canvas.requestFullscreen({ navigationUI: 'hide' });
+            }
+        } catch {
+            console.error('Error requesting fullscreen');
         }
     }, []);
 
@@ -600,7 +604,7 @@ const WgpuToyController = props => {
         } else {
             const padding = 0;
             dimensions = getDimensions(
-                (parentRef!.offsetWidth - padding) * window.devicePixelRatio
+                (parentRef!.clientWidth - padding) * window.devicePixelRatio
             );
         }
         if (canvas) {
