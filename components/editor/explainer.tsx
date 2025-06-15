@@ -11,8 +11,6 @@ import DraggableWindow from '../global/draggable-window';
 import { HiLite } from '../global/hilite';
 import Logo from '../global/logo';
 
-const EXPLAINER_INNER_HEIGHT = '570';
-
 const ExplainerBody = () => {
     const theme = useTheme();
     const prelude = useAtomValue(wgputoyPreludeAtom);
@@ -20,11 +18,11 @@ const ExplainerBody = () => {
     return (
         <div
             style={{
+                // Styles for inner text (Chrome/Webkit/Mobiles)
                 textAlign: 'left',
-                width: 'min-content',
-                overflowY: 'auto',
+                width: '100%',
+                overflowY: 'unset',
                 padding: '8px',
-                height: `${EXPLAINER_INNER_HEIGHT}px`,
                 color: theme.palette.primary.main
             }}
         >
@@ -265,7 +263,21 @@ export default function Explainer() {
             <DraggableWindow
                 hidden={explainerHidden}
                 setHidden={setExplainerHidden}
-                sx={{ paddingTop: '8px' }}
+                sx={{
+                    //styles for the draggable window (Chrome/Webkit/Mobiles)
+                    paddingTop: '8px',
+                    width: '70vw',
+                    maxWidth: '800px',
+                    height: '80vh',
+                    overflowX: 'auto',
+                    zIndex: '9999999999',
+                    //mobile specific
+                    '@media (max-width: 600px)': {
+                        width: '97vw',
+                        height: '60vh',
+                        maxHeight: '80%'
+                    }
+                }}
             >
                 <ExplainerBody />
             </DraggableWindow>

@@ -18,7 +18,6 @@ export class SourceMap {
     source: string = '';
     map: number[] = [0];
     workgroupCount = new Map<string, [number, number, number]>();
-    dispatchOnce = new Map<string, boolean>();
     dispatchCount = new Map<string, number>();
     // assertMap: number[] = [];
     // userData = new Map<string, Uint32Array>([['_dummy', new Uint32Array([0])]]);
@@ -190,7 +189,7 @@ export class Preprocessor {
             throw new WGSLError('Invalid #dispatch_count syntax', lineNum);
         }
         const name = tokens[1];
-        this.source.dispatchOnce.set(name, true);
+        this.source.dispatchCount.set(name, 0); // store 0 instead of undefined
     }
 
     private handle_dispatch_count(tokens: string[], lineNum: number): void {
