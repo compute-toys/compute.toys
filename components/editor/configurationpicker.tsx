@@ -59,8 +59,7 @@ export default function ConfigurationPicker() {
             <List
                 sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
                 subheader={
-                    <ListSubheader sx={{ color: theme.palette.dracula.foreground }}>
-                    </ListSubheader>
+                    <ListSubheader sx={{ color: theme.palette.dracula.foreground }}></ListSubheader>
                 }
             >
                 <ListItem>
@@ -71,7 +70,7 @@ export default function ConfigurationPicker() {
                     </ListItemIcon>
                     <ListItemText id="config-list-label-float32" primary="Textures" />
                     <Select
-                        value={float32Enabled ? "true" : "false"}
+                        value={float32Enabled ? 'true' : 'false'}
                         onChange={e => {
                             setFloat32Enabled(e.target.value === 'true');
                         }}
