@@ -6,8 +6,10 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import ListSubheader from '@mui/material/ListSubheader';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+import Switch from '@mui/material/Switch';
 import { useTheme } from '@mui/material/styles';
 import { useAtom, useAtomValue } from 'jotai';
 import {
@@ -58,7 +60,7 @@ export default function ConfigurationPicker() {
             }}
             style={{ minHeight: '-moz-fill-available' }}
         >
-            <List 
+            <List
                 sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
                 subheader={
                     <ListSubheader sx={{ color: theme.palette.dracula.foreground }}></ListSubheader>

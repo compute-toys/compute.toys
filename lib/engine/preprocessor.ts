@@ -189,7 +189,7 @@ export class Preprocessor {
             throw new WGSLError('Invalid #dispatch_count syntax', lineNum);
         }
         const name = tokens[1];
-        this.source.dispatchOnce.set(name, 0); // store 0 instead of undefined
+        this.source.dispatchCount.set(name, 0); // store 0 instead of undefined
     }
 
     private handle_dispatch_count(tokens: string[], lineNum: number): void {
