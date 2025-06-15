@@ -1,13 +1,14 @@
 /**
  * WGSL shader preprocessor implementation
  */
-import { evalMathExpression, fetchInclude, parseUint32, WGSLError } from './utils';
+import { calcMathExpression, fetchInclude, parseInteger, WGSLError } from './utils';
 
 // Regular expressions for preprocessing
 const RE_COMMENT = /(\/\/.*|\/\*[\s\S]*?\*\/)/g;
-const RE_WORD = /\b\w+\b/g;
+const RE_WORD = /[a-zA-Z_][a-zA-Z0-9_]*/g;
 
 const STRING_MAX_LEN = 20;
+type DirectiveFunction = (tokens: string[], lineNum: number) => void | Promise<void>;
 
 /**
  * Maps the processed shader source to original line numbers
@@ -35,21 +36,21 @@ export class SourceMap {
  * Handles WGSL preprocessing including includes, defines, etc.
  */
 export class Preprocessor {
-    private overrides: Map<string, string>;
     private defines: Map<string, string>;
+    private ifdefStack: boolean[];
     private source: SourceMap;
     private storageCount: number;
-    // private assertCount: number;
     private specialStrings: boolean;
+    // private assertCount: number;
 
-    constructor(overrides: Map<string, string>) {
-        this.overrides = new Map(overrides);
-        this.overrides.set('STRING_MAX_LEN', STRING_MAX_LEN.toString());
-        this.defines = new Map();
+    constructor(defines: Map<string, string>) {
+        this.defines = new Map(defines);
+        this.defines.set('STRING_MAX_LEN', STRING_MAX_LEN.toString());
+        this.ifdefStack = [];
         this.source = new SourceMap();
         this.storageCount = 0;
-        // this.assertCount = 0;
         this.specialStrings = false;
+        // this.assertCount = 0;
     }
 
     /**
@@ -59,14 +60,13 @@ export class Preprocessor {
         return source.replace(RE_COMMENT, '');
     }
 
-    /**
-     * Process a single line of shader source
-     */
+    private replaceDefines(source: string): string {
+        return source.replace(RE_WORD, match => this.defines.get(match) ?? match);
+    }
+
     private async processLine(lineOrig: string, lineNum: number): Promise<void> {
-        // Substitute overrides and defines
-        let line = lineOrig
-            .replace(RE_WORD, match => this.overrides.get(match) ?? match)
-            .replace(RE_WORD, match => this.defines.get(match) ?? match);
+        // Substitute defines
+        let line = this.replaceDefines(lineOrig);
 
         // Handle enable directives
         if (line.trimStart().startsWith('enable')) {
@@ -75,56 +75,32 @@ export class Preprocessor {
             return;
         }
 
-        // Handle override in one line and evaluate to number
-        if (line.trimStart().startsWith('override')) {
-            line = line.replace(RE_COMMENT, '');
-            const tokens = line.trim().replace('=', ' = ').replace(/\s+/g, ' ').split(' ');
-            this.handleOverride(tokens, lineNum);
-            return;
-        }
-
         // Handle preprocessor directives
         if (line.trimStart().startsWith('#')) {
             line = line.replace(RE_COMMENT, '');
-            const tokens = line.trim().split(' ');
-            const directive = tokens[0];
+            const tokens = line.trim().split(/\s+/);
+            const directive = tokens[0].slice(1);
 
-            switch (directive) {
-                case '#include':
-                    await this.handleInclude(tokens, lineNum);
-                    break;
+            const handle = 'handle_' + directive;
 
-                case '#workgroup_count':
-                    this.handleWorkgroupCount(tokens, lineNum);
-                    break;
-
-                case '#dispatch_once':
-                    this.handleDispatchOnce(tokens);
-                    break;
-
-                case '#dispatch_count':
-                    this.handleDispatchCount(tokens, lineNum);
-                    break;
-
-                case '#define':
-                    this.handleDefine(tokens, lineNum);
-                    break;
-
-                case '#storage':
-                    this.handleStorage(tokens, lineNum);
-                    break;
-
-                // case '#assert':
-                //     this.handleAssert(tokens, lineNum);
-                //     break;
-
-                // case '#data':
-                //     this.handleData(tokens, lineNum);
-                //     break;
-
-                default:
-                    throw new WGSLError('Unrecognized preprocessor directive', lineNum);
+            if (!(handle in this)) {
+                throw new WGSLError('Unrecognized preprocessor directive', lineNum);
             }
+
+            if (directive === 'include') {
+                await (this[handle] as DirectiveFunction).call(this, tokens, lineNum);
+            } else if (
+                directive === 'define' ||
+                directive === 'calcdefine' ||
+                directive === 'ifdef' ||
+                directive === 'ifndef'
+            ) {
+                const tokensOrig = lineOrig.replace(RE_COMMENT, '').trim().split(' ');
+                (this[handle] as DirectiveFunction).call(this, tokensOrig, lineNum);
+            } else {
+                (this[handle] as DirectiveFunction).call(this, tokens, lineNum);
+            }
+
             return;
         }
 
@@ -164,13 +140,12 @@ export class Preprocessor {
             }
         }
 
-        this.source.pushLine(line, lineNum);
+        if (this.ifdefStack.every(x => x)) {
+            this.source.pushLine(line, lineNum);
+        }
     }
 
-    /**
-     * Handle #include directive
-     */
-    private async handleInclude(tokens: string[], lineNum: number): Promise<void> {
+    private async handle_include(tokens: string[], lineNum: number): Promise<void> {
         if (tokens.length !== 2) {
             throw new WGSLError('Invalid #include syntax', lineNum);
         }
@@ -197,88 +172,103 @@ export class Preprocessor {
         }
     }
 
-    /**
-     * Handle #workgroup_count directive
-     */
-    private handleWorkgroupCount(tokens: string[], lineNum: number): void {
+    private handle_workgroup_count(tokens: string[], lineNum: number): void {
         if (tokens.length !== 5) {
             throw new WGSLError('Invalid #workgroup_count syntax', lineNum);
         }
 
         const [, name, x, y, z] = tokens;
         this.source.workgroupCount.set(name, [
-            parseUint32(x, lineNum),
-            parseUint32(y, lineNum),
-            parseUint32(z, lineNum)
+            parseInteger(x, lineNum),
+            parseInteger(y, lineNum),
+            parseInteger(z, lineNum)
         ]);
     }
 
-    /**
-     * Handle #dispatch_once directive
-     */
-    private handleDispatchOnce(tokens: string[]): void {
-        const [, name] = tokens;
+    private handle_dispatch_once(tokens: string[], lineNum: number): void {
+        if (tokens.length !== 2) {
+            throw new WGSLError('Invalid #dispatch_count syntax', lineNum);
+        }
+        const name = tokens[1];
         this.source.dispatchOnce.set(name, true);
     }
 
-    /**
-     * Handle #dispatch_count directive
-     */
-    private handleDispatchCount(tokens: string[], lineNum: number): void {
+    private handle_dispatch_count(tokens: string[], lineNum: number): void {
         if (tokens.length !== 3) {
             throw new WGSLError('Invalid #dispatch_count syntax', lineNum);
         }
-
         const [, name, count] = tokens;
-        this.source.dispatchCount.set(name, parseUint32(count, lineNum));
+        this.source.dispatchCount.set(name, parseInteger(count, lineNum));
     }
 
-    /**
-     * Handle #define directive
-     */
-    private handleDefine(tokens: string[], lineNum: number): void {
+    private handle_define(tokens: string[], lineNum: number): void {
         const name = tokens[1];
         if (!name) {
             throw new WGSLError('Invalid #define syntax', lineNum);
         }
-
-        const value = tokens.slice(2).join(' ');
-        if (value.includes(name)) {
-            throw new WGSLError(`Cannot redefine ${name}`, lineNum);
+        if (this.defines.has(name)) {
+            throw new WGSLError(`Cannot redefine ${name}. Use #calcdefine.`, lineNum);
         }
-
+        const value = this.replaceDefines(tokens.slice(2).join(' '));
         this.defines.set(name, value);
     }
 
-    // /**
-    //  * Handle override in one line and evaluate to number
-    //  */
-    private handleOverride(tokens: string[], lineNum: number): void {
+    private handle_calcdefine(tokens: string[], lineNum: number): void {
         const name = tokens[1];
-        let expression = tokens.slice(3).join('');
-        if (!name || !expression.endsWith(';')) {
-            throw new WGSLError(
-                `Please write override in single line ${lineNum} and terminated!`,
-                lineNum
-            );
+        if (!name) {
+            throw new WGSLError('Invalid #calcdefine syntax', lineNum);
         }
-        if (expression.includes(name)) {
-            throw new WGSLError(`Cannot redefine ${name}`, lineNum);
+        let expr = this.replaceDefines(tokens.slice(2).join(''));
+        expr = calcMathExpression(expr, lineNum);
+        if (this.defines.has(name)) {
+            this.defines.delete(name);
         }
-
-        expression = expression.slice(0, -1);
-        expression = evalMathExpression(expression, lineNum);
-        this.defines.set(name, expression);
+        this.defines.set(name, expr);
     }
 
-    /**
-     * Handle #storage directive
-     */
-    private handleStorage(tokens: string[], lineNum: number): void {
+    private handle_if(tokens: string[], lineNum: number): void {
+        if (tokens.length < 2) {
+            throw new WGSLError('Invalid #if syntax', lineNum);
+        }
+        const result = calcMathExpression(tokens.slice(1).join(''), lineNum);
+        this.ifdefStack.push(result !== '' && result !== '0' && result !== '0.0');
+    }
+
+    private handle_ifdef(tokens: string[], lineNum: number): void {
+        if (tokens.length < 2) {
+            throw new WGSLError('Invalid #ifdef syntax', lineNum);
+        }
+        const name = tokens[1];
+        this.ifdefStack.push(this.defines.has(name));
+    }
+
+    private handle_ifndef(tokens: string[], lineNum: number): void {
+        if (tokens.length < 2) {
+            throw new WGSLError('Invalid #ifndef syntax', lineNum);
+        }
+        const name = tokens[1];
+        this.ifdefStack.push(!this.defines.has(name));
+    }
+
+    private handle_else(tokens: string[], lineNum: number): void {
+        const len = this.ifdefStack.length;
+        if (len === 0) {
+            throw new WGSLError('Unexpected #else without #ifdef or #ifndef', lineNum);
+        }
+        this.ifdefStack[len - 1] = !this.ifdefStack[len - 1];
+    }
+
+    private handle_endif(tokens: string[], lineNum: number): void {
+        if (this.ifdefStack.length === 0) {
+            throw new WGSLError('Unexpected #endif without #ifdef or #ifndef', lineNum);
+        }
+        this.ifdefStack.pop();
+    }
+
+    private handle_storage(tokens: string[], lineNum: number): void {
         if (this.storageCount >= 2) {
             throw new WGSLError('Only two storage buffers are currently supported', lineNum);
         }
-
         const [, name, ...types] = tokens;
         const type = types.join(' ');
         this.source.pushLine(
@@ -289,7 +279,7 @@ export class Preprocessor {
     }
 
     /*
-    private handleAssert(tokens: string[], lineNum: number): void {
+    private handle_assert(tokens: string[], lineNum: number): void {
         if (this.assertCount >= NUM_ASSERT_COUNTERS) {
             throw new WGSLError(
                 `A maximum of ${NUM_ASSERT_COUNTERS} assertions are currently supported`,
@@ -303,14 +293,14 @@ export class Preprocessor {
         this.assertCount++;
     }
 
-    private handleData(tokens: string[], lineNum: number): void {
+    private handle_data(tokens: string[], lineNum: number): void {
         if (tokens.length < 4 || tokens[2] !== 'u32') {
             throw new WGSLError('Invalid #data syntax', lineNum);
         }
 
         const name = tokens[1];
         const dataStr = tokens.slice(3).join('');
-        const data = new Uint32Array(dataStr.split(',').map(s => parseUint32(s, lineNum)));
+        const data = new Uint32Array(dataStr.split(',').map(s => parseInteger(s, lineNum)));
 
         const existing = this.source.userData.get(name);
         if (existing) {

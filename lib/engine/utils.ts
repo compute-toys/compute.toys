@@ -25,21 +25,14 @@ export class WGSLError extends Error {
 }
 
 /**
- * Parse a string into a uint32, supporting both decimal and hex formats
+ * Parse a string into a integer in decimal and hex formats
  */
-export function parseUint32(value: string, line: number): number {
-    try {
-        const trimmed = value.trim().replace(/u$/, ''); // Remove trailing 'u' if present
-
-        if (trimmed.startsWith('0x')) {
-            return parseInt(trimmed.slice(2), 16);
-        } else {
-            return parseInt(trimmed, 10);
-        }
-    } catch (e) {
-        console.error(e);
-        throw new WGSLError(`Cannot parse '${value}' as u32`, line);
+export function parseInteger(value: string, line: number): number {
+    const result = parseInt(value.replace(/[iu]$/, ''));
+    if (isNaN(result)) {
+        throw new WGSLError(`Cannot parse '${value}' as integer`, line);
     }
+    return result;
 }
 
 // Cache for fetched includes
@@ -84,33 +77,44 @@ export function countNewlines(text: string): number {
 }
 
 /**
- * Evaluate a mathematical expression with bigint/float support
+ * Calculate a mathematical expression safely with int/float support
  */
-export function evalMathExpression(expression: string, lineNumber: number): string {
-    const VALID_EXPRESSIONS = /^[0-9+\-*/%^.,()]+$/;
+export function calcMathExpression(expression: string, lineNumber: number): string {
+    const VALID_EXPRESSIONS = /^[+\-*/%(,)]*$/;
+    const BOOL_FUNCTIONS = /(\^|&&|\|\||<<|>>)/g;
     const INTEGER_FUNCTIONS = /(select|abs|min|max|sign)/g;
     const FLOAT_FUNCTIONS =
         /(asin|acos|atan|atan2|asinh|acosh|atanh|sin|cos|tan|sinh|cosh|tanh|round|floor|ceil|pow|sqrt|log|log2|exp|exp2|fract|clamp|mix|smoothstep|radians|degrees)/g;
-    const ONE_FLOAT = /[+-]?(?=\d*[.eE])(?=\.?\d)\d*\.?\d*(?:[eE][+-]?\d+)?/;
-    const ONE_INTEGER = /^[-+]?\d+$/;
-    const ALL_INTEGERS = /[-+]?\d+/g;
+    const FLOATS = /[+-]?(?=\d*[.eE])(?=\.?\d)\d*\.?\d*(?:[eE][+-]?\d+)?/g;
+    const INTEGERS = /(0[xX][0-9a-fA-F]+[iu]?|[0-9]+[iu]?)/g;
 
     let result = expression.replace(/\s+/g, '');
     if (result === '') {
         return '';
     }
 
-    // safety check for eval vulnerabilities
-    let stripped = result.replace(INTEGER_FUNCTIONS, '').replace(FLOAT_FUNCTIONS, '');
+    // safety check for eval vulnerabilities (https://jsfuck.com/, https://aem1k.com/five/)
+    let stripped = result
+        .replace(BOOL_FUNCTIONS, '')
+        .replace(FLOAT_FUNCTIONS, '')
+        .replace(INTEGER_FUNCTIONS, '')
+        .replace(FLOATS, '')
+        .replace(INTEGERS, '');
     if (!VALID_EXPRESSIONS.test(stripped)) {
-        stripped = stripped.replace(/[0-9+\-*/%^.,()]+/g, '');
-        throw new WGSLError(`Unsafe symbols '${stripped}' in expression ${expression}`, lineNumber);
+        stripped = stripped.replace(/[+\-*/%(,)]+/g, '');
+        throw new WGSLError(
+            `Unsupported symbols '${stripped}' in expression ${expression}`,
+            lineNumber
+        );
     }
 
     // convert to bigint if there are no any floating point numbers or float functions
     let isAbstractInteger = false;
-    if (!ONE_FLOAT.test(expression) && !FLOAT_FUNCTIONS.test(expression)) {
-        result = result.replace(ALL_INTEGERS, match => `${match}n`);
+    if (
+        (!FLOATS.test(expression) && !FLOAT_FUNCTIONS.test(expression)) ||
+        BOOL_FUNCTIONS.test(expression)
+    ) {
+        result = result.replace(INTEGERS, match => `${parseInt(match)}n`);
         isAbstractInteger = true;
     }
 
@@ -157,7 +161,7 @@ export function evalMathExpression(expression: string, lineNumber: number): stri
 
     try {
         result = Function(`'use strict'; return (${result}).toString();`)();
-        return !isAbstractInteger && ONE_INTEGER.test(result) ? `${result}.0` : result;
+        return !isAbstractInteger && /^[-+]?\d+$/.test(result) ? `${result}.0` : result;
     } catch (error) {
         throw new WGSLError(`Invalid eval '${expression}' -> '${result}' (${error})`, lineNumber);
     }

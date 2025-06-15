@@ -40,7 +40,9 @@ const ExplainerBody = () => {
             <br />
             Mouse input can be accessed from the <HiLite>mouse</HiLite> struct:
             <pre style={{ color: theme.palette.neutral.main }}>
-                mouse.pos: vec2i
+                mouse.pos: vec2u
+                <br />
+                mouse.start: vec2u
                 <br />
                 mouse.click: i32
             </pre>
@@ -97,6 +99,13 @@ const ExplainerBody = () => {
                 <li>
                     <HiLite>#define NAME VALUE</HiLite> for simple macros (function-like parameter
                     substitution is not yet supported)
+                </li>
+                <li>
+                    <HiLite>#calcdefine NAME EXPRESSION</HiLite> for defining result of a
+                    mathematical expressions that gives a number
+                </li>
+                <li>
+                    <HiLite>#ifdef #ifndef #if #else #endif</HiLite> for conditional compilation
                 </li>
                 <li>
                     <HiLite>#include &quot;PATH&quot;</HiLite> for accessing built-in libraries

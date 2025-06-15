@@ -42,7 +42,7 @@ export default function EntryPointDisplay() {
                 {entryPoints.map((entryPoint, index) => (
                     <TimelineItem
                         key={entryPoint}
-                        sx={index < entryPoints.length - 1 ? {} : { minHeight: '35px' }}
+                        sx={index < entryPoints.length - 1 ? {} : { minHeight: '2px' }}
                     >
                         <TimelineSeparator>
                             <TimelineDot sx={{ backgroundColor: getRainbowColor(index) }} />
