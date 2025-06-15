@@ -31,7 +31,7 @@ export default function ResolutionButton() {
             onClick={() => setHalfResolution(!halfResolution)}
             sx={buttonStyles}
             aria-label={halfResolution ? 'Full resolution' : 'Half resolution'}
-            style={{textTransform: 'none'}}
+            style={{ textTransform: 'none' }}
         >
             <Resolution />
             <ScaleIcon />
