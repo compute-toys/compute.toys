@@ -8,6 +8,7 @@ import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
 import { loadHDR } from './hdr';
 import { Preprocessor, SourceMap } from './preprocessor';
+import { Profiler } from './profiler';
 import { countNewlines } from './utils';
 
 // Regular expression for parsing compute shader entry points
@@ -20,8 +21,8 @@ interface ComputePipeline {
     name: string;
     workgroupSize: [number, number, number];
     workgroupCount?: [number, number, number];
-    dispatchOnce: boolean;
     dispatchCount: number;
+    passDescs: GPUComputePassDescriptor[];
     pipeline: GPUComputePipeline;
 }
 
@@ -44,14 +45,17 @@ export class ComputeEngine {
     private computeBindGroup: GPUBindGroup;
     private computeBindGroupLayout: GPUBindGroupLayout;
     private onSuccessCb?: (entryPoints: string[]) => void;
+    private onUpdateCb?: (entryTimers: string[]) => void;
     private onErrorCb?: (summary: string, row: number, col: number) => void;
     private passF32: boolean = false;
+    private profilerAttached: boolean = false;
+    private profiler: Profiler | null = null;
     private screenBlitter: Blitter;
-    // private querySet?: GPUQuerySet;
-    private lastStats: number = performance.now();
+    //private lastStats: number = performance.now();
     // private source: SourceMap;
 
     private compileMutex = new Mutex();
+    private compileFrameId = 0;
 
     // static readonly STATS_PERIOD = 100;
     // static readonly ASSERTS_SIZE = 40; // NUM_ASSERT_COUNTERS * 4
@@ -77,14 +81,9 @@ export class ComputeEngine {
             throw new Error('No appropriate GPUAdapter found');
         }
 
-        // Log adapter capabilities
-        const features = [...adapter.features] as GPUFeatureName[];
-        console.log('Adapter features:', features);
-        console.log('Adapter limits:', adapter.limits);
-
         const device = await adapter.requestDevice({
             label: `compute.toys device created at ${new Date().toLocaleTimeString()}`,
-            requiredFeatures: features
+            requiredFeatures: [...adapter.features] as GPUFeatureName[]
         });
 
         if (ComputeEngine.instance) {
@@ -92,7 +91,8 @@ export class ComputeEngine {
             ComputeEngine.instance.device.destroy();
         }
         ComputeEngine.instance = new ComputeEngine(device);
-        console.log('WebGPU engine created');
+        console.log('WebGPU engine created.');
+        console.log('You can check your device features: https://webgpureport.org');
     }
 
     /**
@@ -314,27 +314,40 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         }
         this.lastComputePipelines = this.computePipelines;
 
-        this.computePipelines = entryPoints.map(([name, workgroupSize]) => ({
-            name,
-            workgroupSize,
-            workgroupCount: source.workgroupCount.get(name),
-            dispatchOnce: source.dispatchOnce.get(name) ?? false,
-            dispatchCount: source.dispatchCount.get(name) ?? 1,
-            pipeline: this.device.createComputePipeline({
-                label: `Pipeline ${name}`,
-                layout: this.computePipelineLayout,
-                compute: {
-                    module: shaderModule,
-                    entryPoint: name
-                }
-            })
-        }));
+        if (this.profilerAttached) {
+            if (this.profiler) {
+                await this.profiler.dispose();
+            }
+            this.profiler = new Profiler(entryPointNames, source.dispatchCount, this.device);
+        }
+
+        this.computePipelines = entryPoints.map(([name, workgroupSize], id) => {
+            let passDescs = Array.from({ length: source.dispatchCount.get(name) || 1 }, () => ({}));
+            passDescs = this.profiler?.fillPassDescriptors(passDescs, id) || passDescs;
+            return {
+                name,
+                workgroupSize,
+                workgroupCount: source.workgroupCount.get(name),
+                dispatchCount: source.dispatchCount.get(name) ?? 1,
+                passDescs: passDescs,
+                pipeline: this.device.createComputePipeline({
+                    label: `Pipeline ${name}`,
+                    layout: this.computePipelineLayout,
+                    compute: {
+                        module: shaderModule,
+                        entryPoint: name
+                    }
+                })
+            };
+        });
 
         // Update bindings
         // this.bindings.userData.host = source.userData;
 
-        console.log(`Shader compiled in ${(performance.now() - start).toFixed(2)}ms`);
         // this.source = source;
+
+        console.log(`Shader compiled in ${(performance.now() - start).toFixed(2)}ms`);
+        this.compileFrameId = this.bindings.time.host.frame;
         release();
     }
 
@@ -346,8 +359,6 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             return;
         }
         try {
-            const textureView = this.surface.getCurrentTexture().createView();
-
             const encoder = this.device.createCommandEncoder();
 
             // Update bindings
@@ -378,17 +389,16 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             }
 
             // Dispatch compute passes
-            let dispatchCounter = 0;
+            let dispatchId = 0;
             for (const pipeline of this.computePipelines) {
-                if (pipeline.dispatchOnce) {
-                    if (this.bindings.time.host.frame === 0) {
-                        console.log(`Dispatching ${pipeline.name} once`);
-                    } else {
-                        continue;
-                    }
-                }
-                for (let i = 0; i < pipeline.dispatchCount; i++) {
-                    const pass = encoder.beginComputePass();
+                const dispatchOnce =
+                    pipeline.dispatchCount === 0 &&
+                    this.bindings.time.host.frame === this.compileFrameId
+                        ? 1
+                        : 0;
+
+                for (let i = 0; i < pipeline.dispatchCount + dispatchOnce; i++) {
+                    const pass = encoder.beginComputePass(pipeline.passDescs[i]);
 
                     const workgroupCount = pipeline.workgroupCount ?? [
                         Math.ceil(this.screenWidth / pipeline.workgroupSize[0]),
@@ -399,12 +409,12 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
                     // Update dispatch info
                     this.device.queue.writeBuffer(
                         this.bindings.dispatchInfo.device,
-                        dispatchCounter * 256,
+                        dispatchId * 256,
                         new Uint32Array([i])
                     );
 
                     pass.setPipeline(pipeline.pipeline);
-                    pass.setBindGroup(0, this.computeBindGroup, [dispatchCounter * 256]);
+                    pass.setBindGroup(0, this.computeBindGroup, [dispatchId * 256]);
                     pass.dispatchWorkgroups(...workgroupCount);
                     pass.end();
 
@@ -419,15 +429,17 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
                         }
                     );
 
-                    dispatchCounter++;
+                    dispatchId++;
                 }
             }
 
             // Blit to screen
-            this.screenBlitter.blit(encoder, textureView);
+            this.screenBlitter.blit(encoder, this.surface.getCurrentTexture().createView());
 
             // Submit command buffer
+            this.profiler?.beforeFinish(encoder);
             this.device.queue.submit([encoder.finish()]);
+            this.profiler?.afterFinish(this.onUpdateCb);
 
             // Update frame counter
             this.bindings.time.host.frame += 1;
@@ -441,6 +453,10 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      */
     onSuccess(callback: (entryPoints: string[]) => void): void {
         this.onSuccessCb = callback;
+    }
+
+    onUpdate(callback: (entryTimers: string[]) => void): void {
+        this.onUpdateCb = callback;
     }
 
     onError(callback: (summary: string, row: number, col: number) => void): void {
@@ -503,6 +519,23 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     setPassF32(passF32: boolean): void {
         this.passF32 = passF32;
         // this.reset();
+    }
+
+    /**
+     * Set profiler state
+     */
+    async setProfilerAttached(isEnabled: boolean): Promise<void> {
+        if (!isEnabled && this.profiler) {
+            return new Promise<void>(resolve => {
+                this.profiler?.dispose().then(() => {
+                    this.profiler = null;
+                    this.profilerAttached = false;
+                    resolve();
+                });
+            });
+        }
+        this.profilerAttached = isEnabled;
+        return Promise.resolve();
     }
 
     /**

@@ -5,13 +5,23 @@ import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import TimelineItem from '@mui/lab/TimelineItem';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
+import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 import { useAtomValue } from 'jotai';
-import { codeAtom, entryPointsAtom, monacoEditorAtom } from 'lib/atoms/atoms';
+import {
+    codeAtom,
+    entryPointsAtom,
+    entryTimersAtom,
+    monacoEditorAtom,
+    profilerEnabledAtom
+} from 'lib/atoms/atoms';
+import { theme } from 'theme/theme';
 import { getRainbowColor, Item } from '../../theme/theme';
 
 export default function EntryPointDisplay() {
     const entryPoints = useAtomValue(entryPointsAtom);
+    const entryTimers = useAtomValue(entryTimersAtom);
+    const profilerEnabled = useAtomValue(profilerEnabledAtom);
     const code = useAtomValue(codeAtom);
     const monaco = useAtomValue(monacoEditorAtom);
 
@@ -38,23 +48,41 @@ export default function EntryPointDisplay() {
             }}
             style={{ minHeight: '-moz-fill-available' }}
         >
-            <Timeline sx={{ alignItems: 'baseline', padding: '0px' }}>
+            <Timeline sx={{ alignItems: 'stretch', width: '100%', padding: '0 1rem' }}>
                 {entryPoints.map((entryPoint, index) => (
                     <TimelineItem
-                        key={entryPoint}
-                        sx={index < entryPoints.length - 1 ? {} : { minHeight: '2px' }}
+                        key={`${entryPoint}-${entryTimers[index]}`}
+                        sx={{
+                            width: '100%',
+                            minHeight: '48px',
+                            '&:before': {
+                                display: 'none'
+                            }
+                        }}
                     >
                         <TimelineSeparator>
                             <TimelineDot sx={{ backgroundColor: getRainbowColor(index) }} />
                             {index < entryPoints.length - 1 ? <TimelineConnector /> : null}
                         </TimelineSeparator>
                         <TimelineContent color={getRainbowColor(index)}>
-                            <span
-                                style={{ cursor: 'pointer' }}
+                            <Box
+                                style={{
+                                    cursor: 'pointer'
+                                }}
                                 onClick={() => editorJumpToEntryPoint(entryPoint)}
                             >
-                                {entryPoint}
-                            </span>
+                                <span>{entryPoint}</span>
+                            </Box>
+                            <Box
+                                style={{
+                                    color: theme.palette.dracula.foreground,
+                                    textAlign: 'right',
+                                    fontSize: '0.8rem',
+                                    lineHeight: '.9rem'
+                                }}
+                            >
+                                {profilerEnabled ? entryTimers[index] : ''}
+                            </Box>
                         </TimelineContent>
                     </TimelineItem>
                 ))}
