@@ -103,6 +103,13 @@ const ExplainerBody = () => {
                     substitution is not yet supported)
                 </li>
                 <li>
+                    <HiLite>#calcdefine NAME EXPRESSION</HiLite> for defining result of a
+                    mathematical expressions that gives a number
+                </li>
+                <li>
+                    <HiLite>#ifdef #ifndef #if #else #endif</HiLite> for conditional compilation
+                </li>
+                <li>
                     <HiLite>#include &quot;PATH&quot;</HiLite> for accessing built-in libraries
                 </li>
                 <li>

@@ -9,7 +9,6 @@ import ListSubheader from '@mui/material/ListSubheader';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import { useTheme } from '@mui/material/styles';
-import Switch from '@mui/material/Switch';
 import { useAtom, useAtomValue } from 'jotai';
 import {
     codeAtom,
@@ -60,9 +59,7 @@ export default function ConfigurationPicker() {
             <List
                 sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
                 subheader={
-                    <ListSubheader sx={{ color: theme.palette.dracula.foreground }}>
-                        Settings
-                    </ListSubheader>
+                    <ListSubheader sx={{ color: theme.palette.dracula.foreground }}></ListSubheader>
                 }
             >
                 <ListItem>
@@ -71,17 +68,26 @@ export default function ConfigurationPicker() {
                     >
                         <LineStyleIcon />
                     </ListItemIcon>
-                    <ListItemText id="config-list-label-float32" primary="Float32 Buffers" />
-                    <Switch
-                        edge="end"
-                        onChange={() => {
-                            setFloat32Enabled(!float32Enabled);
+                    <ListItemText id="config-list-label-float32" primary="Textures" />
+                    <Select
+                        value={float32Enabled ? 'true' : 'false'}
+                        onChange={e => {
+                            setFloat32Enabled(e.target.value === 'true');
                         }}
-                        checked={float32Enabled}
+                        sx={{
+                            minWidth: '100px',
+                            color: theme.palette.dracula.foreground,
+                            '& .MuiSelect-icon': {
+                                color: theme.palette.dracula.foreground
+                            }
+                        }}
                         inputProps={{
                             'aria-labelledby': 'config-list-label-float32'
                         }}
-                    />
+                    >
+                        <MenuItem value="false">float16</MenuItem>
+                        <MenuItem value="true">float32</MenuItem>
+                    </Select>
                 </ListItem>
                 <ListItem>
                     <ListItemIcon
