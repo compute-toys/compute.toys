@@ -29,9 +29,9 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
 [Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> mod(matrix<T, S0, S1> x, T y) where T : __BuiltinFloatingPointType { return x - no_diff floor(x / y) * y; }
 [Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> mod(matrix<T, S0, S1> x, matrix<T, S0, S1> y) where T : __BuiltinFloatingPointType { return x - no_diff floor(x / y) * y; }
 
-[Differentiable] public __generic<T> T atan(T x, T y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
-[Differentiable] public __generic<T, int S> vector<T, S> atan(vector<T, S> x, vector<T, S> y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
-[Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> atan(matrix<T, S0, S1> x, matrix<T, S0, S1> y) where T : __BuiltinFloatingPointType { return atan2(y, x); }
+[Differentiable] public __generic<T> T atan(T y, T x) where T : __BuiltinFloatingPointType { return atan2(y, x); }
+[Differentiable] public __generic<T, int S> vector<T, S> atan(vector<T, S> y, vector<T, S> x) where T : __BuiltinFloatingPointType { return atan2(y, x); }
+[Differentiable] public __generic<T, int S0, int S1> matrix<T, S0, S1> atan(matrix<T, S0, S1> y, matrix<T, S0, S1> x) where T : __BuiltinFloatingPointType { return atan2(y, x); }
 
 // HLSL/Slang doenst provide a way to get the inverse of a matrix, so we have to implement it ourselves
 [Differentiable] float2x2 inverse(float2x2 m)
@@ -108,12 +108,13 @@ public typealias mat4x2 = float4x2; public typealias mat4x3 = float4x3; public t
     return inv;
 }
 
-[Differentiable] public __generic<int S0, int S1, int S2> matrix<float, S0, S2> operator *(matrix<float, S0, S1> a, matrix<float, S1, S2> b) { return mul(a, b); }
-// GLSL/Slang matrices are transposed compared to HLSL matrices
+// HLSL/Slang matrices are transposed compared to GLSL matrices
+[Differentiable] public __generic<int S> matrix<float, S, S> operator *(matrix<float, S, S> a, matrix<float, S, S> b) { return mul(b, a); }
+[Differentiable] public __generic<int S0, int S1, int S2> matrix<float, S0, S2> operator *(matrix<float, S1, S2> a, matrix<float, S0, S1> b) { return mul(b, a); }
 [Differentiable] public __generic<int S0, int S1> vector<float, S1> operator *(matrix<float, S0, S1> a, vector<float, S0> b) { return mul(b, a); }
 [Differentiable] public __generic<int S0, int S1> vector<float, S0> operator *(vector<float, S1> a, matrix<float, S0, S1> b) { return mul(b, a); }
 
-[Differentiable] public __generic<int S> void operator *=(inout matrix<float, S, S> a, matrix<float, S, S> b) { a = mul(a, b); }
+[Differentiable] public __generic<int S> void operator *=(inout matrix<float, S, S> a, matrix<float, S, S> b) { a = mul(b, a); }
 [Differentiable] public __generic<int S> void operator *=(inout vector<float, S> a, matrix<float, S, S> b) { a = mul(b, a); }
 
 public uint floatBitsToUint(float x) { return asuint(x); };
@@ -126,19 +127,25 @@ public __generic<int S> vector<int, S> floatBitsToInt(vector<float, S> x) { retu
 public __generic<int S> vector<float, S> uintBitsToFloat(vector<uint, S> x) { return asfloat(x); }
 public __generic<int S> vector<float, S> intBitsToFloat(vector<int, S> x) { return asfloat(x); }
 
-public static const vec2 iResolution = vec2(SCREEN_SIZE);
+public __generic<int S> vector<bool, S> lessThan(vector<float, S> x, vector<float, S> y) { return x < y; }
+public __generic<int S> vector<bool, S> lessThanEqual(vector<float, S> x, vector<float, S> y) { return x <= y; }
+public __generic<int S> vector<bool, S> greaterThan(vector<float, S> x, vector<float, S> y) { return x > y; }
+public __generic<int S> vector<bool, S> greaterThanEqual(vector<float, S> x, vector<float, S> y) { return x >= y; }
+public __generic<int S> vector<bool, S> equal(vector<float, S> x, vector<float, S> y) { return x == y; }
+public __generic<int S> vector<bool, S> notEqual(vector<float, S> x, vector<float, S> y) { return x != y; }
+
+public static const vec3 iResolution = vec3(SCREEN_SIZE, 1);
 public static float iTime = time.elapsed;
 public static float iTimeDelta = time.delta;
 public static int iFrame = time.frame;
-public static vec2 iMousePos = vec2(mouse.pos.x, SCREEN_SIZE.y - 1 - mouse.pos.y);
-public static vec4 iMouse = vec4(iMousePos, (mouse.click == 1) ? iMousePos : 0.0);
+public static vec4 iMouse = vec4(mouse.pos.x, SCREEN_SIZE.y - 1 - mouse.pos.y, mouse.start.x, SCREEN_SIZE.y - 1 - mouse.start.y);
 
 public vec4 texelFetch(int channel, ivec2 coord, int lod) {
     return pass_in[ivec3(coord, channel)];
 }
 
 public vec4 textureLod(int channel, vec2 coord, float lod) {
-    coord = coord*iResolution - 0.5;
+    coord = coord*iResolution.xy - 0.5;
     ivec2 icoord = ivec2(floor(coord));
     vec2 fcoord = fract(coord);
     vec4 v00 = texelFetch(channel, icoord + ivec2(0,0), 0);

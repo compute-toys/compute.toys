@@ -178,7 +178,7 @@ export class ComputeEngine {
         // Add struct definitions
         prelude += `
 struct Time { frame: uint, elapsed: float, delta: float }
-struct Mouse { pos: uint2, click: int }
+struct Mouse { pos: uint2, start: uint2, click: int }
 struct DispatchInfo { id: uint }
 `;
 
@@ -485,6 +485,14 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         }
     }
 
+    setMouseStart(x: number, y: number): void {
+        const mouse = this.bindings.mouse.host;
+        if (mouse.click === 1) {
+            mouse.start = [Math.floor(x * this.screenWidth), Math.floor(y * this.screenHeight)];
+            this.bindings.mouse.host = mouse;
+        }
+    }
+
     setMouseClick(click: boolean): void {
         const mouse = this.bindings.mouse.host;
         mouse.click = click ? 1 : 0;
@@ -533,9 +541,9 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Handle window resize
      */
-    resize(width: number, height: number, scale: number): void {
-        this.screenWidth = Math.floor(width * scale);
-        this.screenHeight = Math.floor(height * scale);
+    resize(width: number, height: number): void {
+        this.screenWidth = Math.floor(width);
+        this.screenHeight = Math.floor(height);
 
         // this.surface.configure(this.surfaceConfig);
 
