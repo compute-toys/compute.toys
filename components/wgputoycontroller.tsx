@@ -597,7 +597,7 @@ const WgpuToyController = props => {
         } else if (props.embed) {
             dimensions = getDimensions(window.innerWidth * dpr);
         } else {
-            dimensions = getDimensions((parentRef!.offsetWidth) * dpr);
+            dimensions = getDimensions(parentRef!.offsetWidth * dpr);
         }
         if (canvas && (dimensions.x !== width() || dimensions.y !== height())) {
             console.log(`Resizing to ${dimensions.x}x${dimensions.y}`);
