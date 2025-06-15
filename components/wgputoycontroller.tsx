@@ -469,7 +469,7 @@ const WgpuToyController = props => {
     }, [recording, title]);
 
     useEffect(() => {
-        if (canvas !== false && !needsInitialReset()) {
+        if (canvas !== false) {
             // Prevent all touch events from scrolling
             const preventDefault = (e: TouchEvent) => {
                 e.preventDefault();
