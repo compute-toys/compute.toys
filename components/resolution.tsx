@@ -8,14 +8,11 @@ export default function Resolution() {
     const width = useAtomValue(widthAtom);
     const height = useAtomValue(heightAtom);
 
-    if (width > 0 && height > 0) {
-        return (
-            <Fragment>
-                <span style={{ color: theme.palette.dracula.foreground }}>
-                    {width}x{height}
-                </span>
-            </Fragment>
-        );
-    }
-    return null;
+    return (
+        <Fragment>
+            <span style={{ color: theme.palette.dracula.foreground }}>
+                {width ? `${width}x${height}` : ''}
+            </span>
+        </Fragment>
+    );
 }
