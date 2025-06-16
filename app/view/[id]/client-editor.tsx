@@ -20,13 +20,10 @@
 
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import type { User } from '@supabase/supabase-js';
-import { useSetAtom } from 'jotai';
 import { useShader } from 'lib/view/client';
 import { Shader } from 'lib/view/server';
 import { useEffect, useState } from 'react';
-import { halfResolutionAtom } from '../../../lib/atoms/atoms';
 
 // Simple container style
 const containerStyle = {
@@ -65,15 +62,12 @@ export default function ClientSideEditor({ shaderData, userData }: ClientSideEdi
     }> | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const setHalfResolution = useSetAtom(halfResolutionAtom);
-    const isMobile = !useMediaQuery('(min-width:600px)');
 
     // Initialize with shader data
     useShader(shaderData);
 
     // Set mounted state only on the client
     useEffect(() => {
-        setHalfResolution(isMobile);
         setHasMounted(true);
     }, []);
 

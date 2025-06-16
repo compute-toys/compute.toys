@@ -10,7 +10,7 @@ export default function Resolution() {
 
     return (
         <Fragment>
-            <span style={{ color: theme.palette.dracula.foreground }}>
+            <span style={{ color: theme.palette.dracula.foreground, marginRight: '3px' }}>
                 {width ? `${width}x${height}` : ''}
             </span>
         </Fragment>

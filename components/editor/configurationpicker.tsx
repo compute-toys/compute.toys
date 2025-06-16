@@ -6,7 +6,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Switch from '@mui/material/Switch';
@@ -60,12 +59,7 @@ export default function ConfigurationPicker() {
             }}
             style={{ minHeight: '-moz-fill-available' }}
         >
-            <List
-                sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
-                subheader={
-                    <ListSubheader sx={{ color: theme.palette.dracula.foreground }}></ListSubheader>
-                }
-            >
+            <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
                 <ListItem>
                     <ListItemIcon
                         sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
@@ -100,26 +94,17 @@ export default function ConfigurationPicker() {
                     >
                         <LineStyleIcon />
                     </ListItemIcon>
-                    <ListItemText id="config-list-label-float32" primary="Textures" />
-                    <Select
-                        value={float32Enabled ? 'true' : 'false'}
-                        onChange={e => {
-                            setFloat32Enabled(e.target.value === 'true');
+                    <ListItemText id="config-list-label-float32" primary="Float32 Textures" />
+                    <Switch
+                        edge="end"
+                        onChange={() => {
+                            setFloat32Enabled(!float32Enabled);
                         }}
-                        sx={{
-                            minWidth: '100px',
-                            color: theme.palette.dracula.foreground,
-                            '& .MuiSelect-icon': {
-                                color: theme.palette.dracula.foreground
-                            }
-                        }}
+                        checked={float32Enabled}
                         inputProps={{
                             'aria-labelledby': 'config-list-label-float32'
                         }}
-                    >
-                        <MenuItem value="false">float16</MenuItem>
-                        <MenuItem value="true">float32</MenuItem>
-                    </Select>
+                    />
                 </ListItem>
                 <ListItem>
                     <ListItemIcon
