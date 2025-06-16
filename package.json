@@ -25,7 +25,7 @@
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@giscus/react": "^3.1.0",
-    "@monaco-editor/react": "^4.4.5",
+    "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^5.17.1",
     "@mui/lab": "^5.0.0-alpha.176",
     "@mui/material": "^5.17.1",
