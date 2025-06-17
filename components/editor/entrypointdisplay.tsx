@@ -42,11 +42,12 @@ export default function EntryPointDisplay() {
     return (
         <Item
             sx={{
-                display: 'inline-block',
+                display: 'flex',
+                flexDirection: 'column',
                 marginTop: '18px',
-                minHeight: '-webkit-fill-available'
+                height: '100%',
+                overflow: 'auto'
             }}
-            style={{ minHeight: '-moz-fill-available' }}
         >
             <Timeline sx={{ alignItems: 'stretch', width: '100%', padding: '0 1rem' }}>
                 {entryPoints.map((entryPoint, index) => (

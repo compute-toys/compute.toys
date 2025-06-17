@@ -206,12 +206,7 @@ export default function Editor(props: EditorProps) {
                 spacing={2}
                 sx={{
                     flexWrap: useMediaQuery(theme.breakpoints.up('sm')) ? 'nowrap' : 'wrap',
-                    '@media (max-width: 600px)': {
-                        '& > .MuiGrid-item': {
-                            minHeight: 'none',
-                            maxHeight: '400px' // Prevents stretch on mobiles
-                        }
-                    }
+                    alignItems: 'stretch'
                 }}
             >
                 <Grid item>

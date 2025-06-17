@@ -51,13 +51,14 @@ export default function ConfigurationPicker() {
     return (
         <Item
             sx={{
-                display: 'inline-block',
+                display: 'flex',
+                flexDirection: 'column',
                 marginTop: '18px',
                 textAlign: 'left',
                 color: theme.palette.dracula.foreground,
-                minHeight: '-webkit-fill-available'
+                height: '100%',
+                overflow: 'auto'
             }}
-            style={{ minHeight: '-moz-fill-available' }}
         >
             <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
                 <ListItem>
