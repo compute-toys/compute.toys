@@ -44,7 +44,9 @@ const ExplainerBody = () => {
                 <br />
                 mouse.start: vec2u
                 <br />
-                mouse.click: i32
+                mouse.click: u32
+                <br />
+                mouse.zoom: f32
             </pre>
             Timing information is in the <HiLite>time</HiLite> struct:
             <pre style={{ color: theme.palette.neutral.main }}>

@@ -177,9 +177,20 @@ export class ComputeEngine {
 
         // Add struct definitions
         prelude += `
-struct Time { frame: uint, elapsed: float, delta: float }
-struct Mouse { pos: uint2, start: uint2, click: int }
-struct DispatchInfo { id: uint }
+struct Time {
+    elapsed: f32,
+    delta: f32,
+    frame: u32
+}
+struct Mouse {
+    pos: vec2u,
+    start: vec2u,
+    click: u32,
+    zoom: f32
+}
+struct DispatchInfo {
+    id: u32
+}
 `;
 
         // Add custom uniforms struct
@@ -454,11 +465,9 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     onSuccess(callback: (entryPoints: string[]) => void): void {
         this.onSuccessCb = callback;
     }
-
     onUpdate(callback: (entryTimers: string[]) => void): void {
         this.onUpdateCb = callback;
     }
-
     onError(callback: (summary: string, row: number, col: number) => void): void {
         this.onErrorCb = callback;
     }
@@ -469,7 +478,6 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     setTimeElapsed(time: number): void {
         this.bindings.time.host.elapsed = time;
     }
-
     setTimeDelta(delta: number): void {
         this.bindings.time.host.delta = delta;
     }
@@ -477,26 +485,25 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Update mouse state
      */
-    setMousePos(x: number, y: number): void {
-        const mouse = this.bindings.mouse.host;
-        if (mouse.click === 1) {
-            mouse.pos = [Math.floor(x * this.screenWidth), Math.floor(y * this.screenHeight)];
-            this.bindings.mouse.host = mouse;
-        }
+    setMousePos(p: { x: number; y: number }): void {
+        this.bindings.mouse.host.pos[0] = p.x;
+        this.bindings.mouse.host.pos[1] = p.y;
     }
-
-    setMouseStart(x: number, y: number): void {
-        const mouse = this.bindings.mouse.host;
-        if (mouse.click === 1) {
-            mouse.start = [Math.floor(x * this.screenWidth), Math.floor(y * this.screenHeight)];
-            this.bindings.mouse.host = mouse;
-        }
+    getMousePos(): { x: number; y: number } {
+        return {
+            x: this.bindings.mouse.host.pos[0],
+            y: this.bindings.mouse.host.pos[1]
+        };
     }
-
-    setMouseClick(click: boolean): void {
-        const mouse = this.bindings.mouse.host;
-        mouse.click = click ? 1 : 0;
-        this.bindings.mouse.host = mouse;
+    setMouseStart(p: { x: number; y: number }): void {
+        this.bindings.mouse.host.start[0] = p.x;
+        this.bindings.mouse.host.start[1] = p.y;
+    }
+    setMouseClick(click: number): void {
+        this.bindings.mouse.host.click = click;
+    }
+    setMouseZoom(zoom: number): void {
+        this.bindings.mouse.host.zoom = zoom;
     }
 
     /**

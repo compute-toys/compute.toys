@@ -42,15 +42,16 @@ public SamplerState bilinear_repeat;
 public SamplerState trilinear_repeat;
 
 public struct Time {
-    public uint frame;
     public float elapsed;
     public float delta;
+    public uint frame;
 };
 
 public struct Mouse {
     public uint2 pos;
     public uint2 start;
-    public int click;
+    public uint click;
+    public float zoom;
 };
 
 public struct DispatchInfo {
