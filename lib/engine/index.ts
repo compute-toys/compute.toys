@@ -55,7 +55,6 @@ export class ComputeEngine {
     // private source: SourceMap;
 
     private compileMutex = new Mutex();
-    private compileFrameId = 0;
 
     // static readonly STATS_PERIOD = 100;
     // static readonly ASSERTS_SIZE = 40; // NUM_ASSERT_COUNTERS * 4
@@ -347,7 +346,6 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         // this.source = source;
 
         console.log(`Shader compiled in ${(performance.now() - start).toFixed(2)}ms`);
-        this.compileFrameId = this.bindings.time.host.frame;
         release();
     }
 
@@ -392,10 +390,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             let dispatchId = 0;
             for (const pipeline of this.computePipelines) {
                 const dispatchOnce =
-                    pipeline.dispatchCount === 0 &&
-                    this.bindings.time.host.frame === this.compileFrameId
-                        ? 1
-                        : 0;
+                    pipeline.dispatchCount === 0 && this.bindings.time.host.frame === 0 ? 1 : 0;
 
                 for (let i = 0; i < pipeline.dispatchCount + dispatchOnce; i++) {
                     const pass = encoder.beginComputePass(pipeline.passDescs[i]);

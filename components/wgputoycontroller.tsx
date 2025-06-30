@@ -611,14 +611,16 @@ const WgpuToyController = props => {
             const padding = 16;
             dimensions = getDimensions((parentRef!.offsetWidth - padding) * dpr);
         }
-        if (canvas && (dimensions.x !== width() || dimensions.y !== height())) {
-            console.log(`Resizing to ${dimensions.x}x${dimensions.y}`);
-            setWidth(dimensions.x);
-            setHeight(dimensions.y);
+        if (canvas) {
             canvas.width = dimensions.x;
             canvas.height = dimensions.y;
             canvas.style.width = `${dimensions.x / dpr}px`;
             canvas.style.height = `${dimensions.y / dpr}px`;
+        }
+        if (dimensions.x !== width()) {
+            console.log(`Resizing to ${dimensions.x / dpr}x${dimensions.y / dpr} @ ${dpr}x`);
+            setWidth(dimensions.x);
+            setHeight(dimensions.y);
             return true;
         }
         return false;

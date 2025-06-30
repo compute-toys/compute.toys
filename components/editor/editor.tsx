@@ -1,8 +1,6 @@
-'use client';
 // MUI sizing from refs:
 // https://github.com/mui/material-ui/issues/15662
 
-import Giscus from '@giscus/react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
@@ -20,7 +18,6 @@ import ResolutionButton from 'components/buttons/resolutionbutton';
 import VimButton from 'components/buttons/vimbutton';
 import EntryPointDisplay from 'components/editor/entrypointdisplay';
 import { MetadataEditor } from 'components/editor/metadataeditor';
-import Monaco from 'components/editor/monaco';
 import TexturePicker from 'components/editor/texturepicker';
 import UniformSliders from 'components/editor/uniformsliders';
 import { WgpuToyWrapper } from 'components/wgputoy';
@@ -36,6 +33,12 @@ import { MonacoTheme } from 'theme/monacotheme';
 import { Frame } from 'theme/theme';
 import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
+
+const Monaco = dynamic(() => import('components/editor/monaco'), {
+    ssr: false,
+    loading: () => <Box width={'100%'} height={'calc(100vh - 270px)'} />
+});
+const Giscus = dynamic(() => import('@giscus/react'), { ssr: false });
 
 interface EditorProps {
     user?: User;
