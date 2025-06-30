@@ -42,6 +42,8 @@ import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
 import useAnimationFrame from 'use-animation-frame';
 
+type Point = { x: number; y: number };
+
 declare global {
     interface Window {
         mediaRecorder: MediaRecorder;
@@ -472,17 +474,21 @@ const WgpuToyController = props => {
         if (canvas !== false) {
             let zoom = 1.0;
             let initialPinchDistance: number | null = null;
-            let previousPointerPosition: { x: number; y: number } = { x: 0, y: 0 };
+            let previousPointerStart: Point = { x: 0, y: 0 };
+            let previousPointerPosition: Point = { x: 0, y: 0 };
 
             const getPointerPosition = (e: MouseEvent | TouchEvent) => {
                 if (e instanceof MouseEvent) {
-                    return { x: e.offsetX, y: e.offsetY };
+                    return {
+                        x: (e.offsetX / canvas.clientWidth) * width(),
+                        y: (e.offsetY / canvas.clientHeight) * height()
+                    };
                 } else {
                     const rect = canvas.getBoundingClientRect();
                     const touch = e.touches[0];
                     return {
-                        x: touch.clientX - rect.left,
-                        y: touch.clientY - rect.top
+                        x: ((touch.clientX - rect.left) / canvas.clientWidth) * width(),
+                        y: ((touch.clientY - rect.top) / canvas.clientHeight) * height()
                     };
                 }
             };
@@ -502,7 +508,7 @@ const WgpuToyController = props => {
                     e.touches[0].clientX - e.touches[1].clientX,
                     e.touches[0].clientY - e.touches[1].clientY
                 );
-                ComputeEngine.getInstance().setMousePos(previousPointerPosition);
+                ComputeEngine.getInstance().setMousePos(previousPointerStart);
                 if (initialPinchDistance !== null) {
                     zoom = currentDistance / initialPinchDistance;
                     ComputeEngine.getInstance().setMouseZoom(zoom);
@@ -513,10 +519,16 @@ const WgpuToyController = props => {
             };
 
             const handlePointerMove = (e: MouseEvent | TouchEvent) => {
-                if (initialPinchDistance !== null) return;
                 const p = getPointerPosition(e);
-                ComputeEngine.getInstance().setMousePos(p);
-                if (!isPlaying()) ComputeEngine.getInstance().render();
+                if (isPointerPressed() && initialPinchDistance === null) {
+                    ComputeEngine.getInstance().setMousePos(p);
+                    ComputeEngine.getInstance().setMouseDelta(
+                        p.x - previousPointerPosition.x,
+                        p.y - previousPointerPosition.y
+                    );
+                    if (!isPlaying()) ComputeEngine.getInstance().render();
+                }
+                previousPointerPosition = p;
             };
 
             const handlePointerUp = () => {
@@ -526,23 +538,22 @@ const WgpuToyController = props => {
             };
 
             const handlePointerDown = (e: MouseEvent | TouchEvent) => {
-                if (!isPointerPressed()) {
-                    setIsPointerPressed(true);
-                    ComputeEngine.getInstance().setMouseClick(
-                        e instanceof MouseEvent ? e.button : 1
-                    );
-                    previousPointerPosition = ComputeEngine.getInstance().getMousePos();
-                    const p = getPointerPosition(e);
-                    ComputeEngine.getInstance().setMouseStart(p);
-                    ComputeEngine.getInstance().setMousePos(p);
-                    if (!isPlaying()) ComputeEngine.getInstance().render();
-                }
+                if (isPointerPressed()) return;
+                setIsPointerPressed(true);
+                previousPointerStart = ComputeEngine.getInstance().getMousePos();
+                const p = getPointerPosition(e);
+                ComputeEngine.getInstance().setMouseStart(p);
+                ComputeEngine.getInstance().setMousePos(p);
+                ComputeEngine.getInstance().setMouseClick(
+                    e instanceof MouseEvent ? e.button + 1 : 1
+                );
+                if (!isPlaying()) ComputeEngine.getInstance().render();
             };
 
             const handleMouse = (e: MouseEvent) => {
                 e.preventDefault();
                 if (e.type === 'mousedown') handlePointerDown(e);
-                else if (e.type === 'mousemove' && isPointerPressed()) handlePointerMove(e);
+                else if (e.type === 'mousemove') handlePointerMove(e);
                 else if (e.type === 'mouseup' || e.type === 'mouseleave') handlePointerUp();
             };
 
@@ -551,7 +562,7 @@ const WgpuToyController = props => {
                 if (e.type === 'touchstart') {
                     if (e.touches.length === 1) handlePointerDown(e);
                     else if (e.touches.length === 2) handlePinch(e);
-                } else if (e.type === 'touchmove' && isPointerPressed()) {
+                } else if (e.type === 'touchmove') {
                     if (e.touches.length === 1) handlePointerMove(e);
                     else if (e.touches.length === 2) handlePinch(e);
                 } else if (

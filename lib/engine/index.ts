@@ -13,6 +13,7 @@ import { countNewlines } from './utils';
 
 // Regular expression for parsing compute shader entry points
 const RE_ENTRY_POINT = /@compute[^@]*?@workgroup_size\((.*?)\)[^@]*?fn\s+(\w+)/g;
+type Point = { x: number; y: number };
 
 /**
  * Information about a compute pipeline
@@ -183,10 +184,11 @@ struct Time {
     frame: u32
 }
 struct Mouse {
-    pos: vec2u,
-    start: vec2u,
-    click: u32,
-    zoom: f32
+    pos: vec2i,
+    zoom: f32,
+    click: i32,
+    start: vec2i,
+    delta: vec2i
 }
 struct DispatchInfo {
     id: u32
@@ -485,25 +487,26 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Update mouse state
      */
-    setMousePos(p: { x: number; y: number }): void {
-        this.bindings.mouse.host.pos[0] = p.x;
-        this.bindings.mouse.host.pos[1] = p.y;
+    setMousePos(p: Point): void {
+        this.bindings.mouse.host.pos.x = p.x;
+        this.bindings.mouse.host.pos.y = p.y;
     }
-    getMousePos(): { x: number; y: number } {
-        return {
-            x: this.bindings.mouse.host.pos[0],
-            y: this.bindings.mouse.host.pos[1]
-        };
-    }
-    setMouseStart(p: { x: number; y: number }): void {
-        this.bindings.mouse.host.start[0] = p.x;
-        this.bindings.mouse.host.start[1] = p.y;
+    setMouseZoom(zoom: number): void {
+        this.bindings.mouse.host.zoom = zoom;
     }
     setMouseClick(click: number): void {
         this.bindings.mouse.host.click = click;
     }
-    setMouseZoom(zoom: number): void {
-        this.bindings.mouse.host.zoom = zoom;
+    setMouseStart(s: Point): void {
+        this.bindings.mouse.host.start.x = s.x;
+        this.bindings.mouse.host.start.y = s.y;
+    }
+    setMouseDelta(dx: number, dy: number): void {
+        this.bindings.mouse.host.delta.x = dx;
+        this.bindings.mouse.host.delta.y = dy;
+    }
+    getMousePos(): Point {
+        return this.bindings.mouse.host.pos;
     }
 
     /**

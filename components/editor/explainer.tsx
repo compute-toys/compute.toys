@@ -40,13 +40,15 @@ const ExplainerBody = () => {
             <br />
             Mouse input can be accessed from the <HiLite>mouse</HiLite> struct:
             <pre style={{ color: theme.palette.neutral.main }}>
-                mouse.pos: vec2u
-                <br />
-                mouse.start: vec2u
-                <br />
-                mouse.click: u32
+                mouse.pos: vec2i
                 <br />
                 mouse.zoom: f32
+                <br />
+                mouse.click: i32
+                <br />
+                mouse.start: vec2i
+                <br />
+                mouse.delta: vec2i
             </pre>
             Timing information is in the <HiLite>time</HiLite> struct:
             <pre style={{ color: theme.palette.neutral.main }}>

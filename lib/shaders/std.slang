@@ -48,10 +48,11 @@ public struct Time {
 };
 
 public struct Mouse {
-    public uint2 pos;
-    public uint2 start;
-    public uint click;
+    public int2 pos;
     public float zoom;
+    public int click;
+    public int2 start;
+    //public int2 delta; //2do: fix pp for same names
 };
 
 public struct DispatchInfo {

@@ -29,30 +29,34 @@ class Time {
     }
 }
 
-class Mouse {
-    pos: [number, number];
-    start: [number, number];
-    click: number;
-    zoom: number;
+type Point = { x: number; y: number };
 
-    constructor(x: number, y: number, x0: number, y0: number, click: number, zoom: number) {
-        this.pos = [x, y];
-        this.start = [x0, y0];
-        this.click = click;
+class Mouse {
+    pos: Point;
+    zoom: number;
+    click: number;
+    start: Point;
+    delta: Point;
+
+    constructor(pos: Point, zoom: number, click: number, start: Point, delta: Point) {
+        this.pos = pos;
         this.zoom = zoom;
+        this.click = click;
+        this.start = start;
+        this.delta = delta;
     }
 
     toBuffer(): Uint8Array {
         const buffer = new Uint8Array(32);
         const view = new DataView(buffer.buffer);
-
-        view.setUint32(0, this.pos[0], true);
-        view.setUint32(4, this.pos[1], true);
-        view.setUint32(8, this.start[0], true);
-        view.setUint32(12, this.start[1], true);
-        view.setUint32(16, this.click, true);
-        view.setFloat32(20, this.zoom, true);
-
+        view.setInt32(0, this.pos.x, true);
+        view.setInt32(4, this.pos.y, true);
+        view.setFloat32(8, this.zoom, true);
+        view.setInt32(12, this.click, true);
+        view.setInt32(16, this.start.x, true);
+        view.setInt32(20, this.start.y, true);
+        view.setInt32(24, this.delta.x, true);
+        view.setInt32(28, this.delta.y, true);
         return buffer;
     }
 }
@@ -362,7 +366,7 @@ export class Bindings {
 
         // Initialize mouse binding
         this.mouse = new BufferBinding<Mouse>({
-            host: new Mouse(width / 2, height / 2, 0, 0, 0, 1),
+            host: new Mouse({ x: width / 2, y: height / 2 }, 1, 0, { x: 0, y: 0 }, { x: 0, y: 0 }),
             device: device.createBuffer({
                 size: 32, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
