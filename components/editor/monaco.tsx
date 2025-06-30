@@ -284,15 +284,23 @@ const Monaco = props => {
                 // https://github.com/suren-atoyan/monaco-react/issues/733
                 const handleMouseEvent = (e: MonacoEditor.IEditorMouseEvent) => {
                     const type = e['changedTouches']
-                        ? MonacoEditor.MouseTargetType.UNKNOWN
-                        : MonacoEditor.MouseTargetType.CONTENT_EMPTY;
+                        ? MonacoEditor.MouseTargetType.UNKNOWN // iOS
+                        : MonacoEditor.MouseTargetType.CONTENT_EMPTY; // Mac
                     if (e?.target?.type === type) {
                         setTimeout(() => {
-                            const position = _editor.getPosition();
-                            const line = position?.lineNumber || 1;
-                            const column =
-                                (_editor.getModel()?.getLineContent(line).length || 0) + 1;
-                            _editor.setSelection(new monaco.Selection(line, column, line, column));
+                            const selection = _editor.getSelection();
+                            const isSelectionEmpty =
+                                selection &&
+                                selection.startLineNumber === selection.endLineNumber &&
+                                selection.startColumn === selection.endColumn;
+                            if (isSelectionEmpty) {
+                                const line = _editor.getPosition()?.lineNumber || 1;
+                                const column =
+                                    (_editor.getModel()?.getLineContent(line).length || 0) + 1;
+                                _editor.setSelection(
+                                    new monaco.Selection(line, column, line, column)
+                                );
+                            }
                         }, 12);
                     }
                 };

@@ -18,7 +18,7 @@ export default function Timer() {
         if (isPlaying()) {
             frames.current += 1;
             secs.current += e.delta;
-            if (secs.current > 0.5) {
+            if (secs.current > 0.5 && timer > 0.0) {
                 setFps(frames.current / secs.current);
                 frames.current = 0;
                 secs.current = 0;
