@@ -375,12 +375,14 @@ const WgpuToyController = props => {
                 const controlRe = /[\x00-\x1f\x80-\x9f]/g; // eslint-disable-line
                 const reservedRe = /^\.+$/;
                 const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
+                const encoder = new TextEncoder();
+                const decoder = new TextDecoder();
 
                 // Truncate string by size in bytes
                 function truncate(str: string, maxByteSize: number): string {
-                    const buffer = Buffer.alloc(maxByteSize);
-                    const written = buffer.write(str, 'utf8');
-                    return buffer.toString('utf8', 0, written);
+                    const bytes = encoder.encode(str);
+                    if (bytes.length <= maxByteSize) return str;
+                    return decoder.decode(bytes.slice(0, maxByteSize));
                 }
 
                 // Sanitize the input string
@@ -446,6 +448,7 @@ const WgpuToyController = props => {
                 a.download = fileName;
                 a.click();
                 window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
             };
 
             window.mediaRecorder = mediaRecorder;
