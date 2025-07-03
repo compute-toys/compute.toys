@@ -7,45 +7,56 @@ const OFFSET_ALIGNMENT = 256;
 
 // Core data structures
 class Time {
-    frame: number;
     elapsed: number;
     delta: number;
+    frame: number;
 
-    constructor(frame: number = 0, elapsed: number = 0, delta: number = 0) {
-        this.frame = frame;
+    constructor(elapsed: number = 0, delta: number = 0, frame: number = 0) {
         this.elapsed = elapsed;
         this.delta = delta;
+        this.frame = frame;
     }
 
     toBuffer(): Uint8Array {
         const buffer = new Uint8Array(12);
         const view = new DataView(buffer.buffer);
 
-        view.setUint32(0, this.frame, true); // true for little-endian
-        view.setFloat32(4, this.elapsed, true);
-        view.setFloat32(8, this.delta, true);
+        view.setFloat32(0, this.elapsed, true); // true for little-endian
+        view.setFloat32(4, this.delta, true);
+        view.setUint32(8, this.frame, true);
 
         return buffer;
     }
 }
 
-class Mouse {
-    pos: [number, number];
-    click: number;
+type Point = { x: number; y: number };
 
-    constructor(x: number, y: number, click: number) {
-        this.pos = [x, y];
+class Mouse {
+    pos: Point;
+    zoom: number;
+    click: number;
+    start: Point;
+    delta: Point;
+
+    constructor(pos: Point, zoom: number, click: number, start: Point, delta: Point) {
+        this.pos = pos;
+        this.zoom = zoom;
         this.click = click;
+        this.start = start;
+        this.delta = delta;
     }
 
     toBuffer(): Uint8Array {
-        const buffer = new Uint8Array(12);
+        const buffer = new Uint8Array(32);
         const view = new DataView(buffer.buffer);
-
-        view.setInt32(0, this.pos[0], true);
-        view.setInt32(4, this.pos[1], true);
-        view.setInt32(8, this.click, true);
-
+        view.setInt32(0, this.pos.x, true);
+        view.setInt32(4, this.pos.y, true);
+        view.setFloat32(8, this.zoom, true);
+        view.setInt32(12, this.click, true);
+        view.setInt32(16, this.start.x, true);
+        view.setInt32(20, this.start.y, true);
+        view.setInt32(24, this.delta.x, true);
+        view.setInt32(28, this.delta.y, true);
         return buffer;
     }
 }
@@ -355,9 +366,9 @@ export class Bindings {
 
         // Initialize mouse binding
         this.mouse = new BufferBinding<Mouse>({
-            host: new Mouse(width / 2, height / 2, 0),
+            host: new Mouse({ x: width / 2, y: height / 2 }, 1, 0, { x: 0, y: 0 }, { x: 0, y: 0 }),
             device: device.createBuffer({
-                size: 16, // Aligned to 16 bytes
+                size: 32, // Aligned to 16 bytes
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             }),
             layout: uniformBuffer,

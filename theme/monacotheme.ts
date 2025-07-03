@@ -1,5 +1,14 @@
+import Box from '@mui/material/Box';
+import { styled } from '@mui/material/styles';
 import { theme } from 'theme/theme';
 import 'theme/themeModule';
+
+// fix: https://github.com/microsoft/monaco-editor/issues/3602
+export const MonacoTheme = styled(Box)(({ theme }) => ({
+    '.monaco-action-bar': {
+        backgroundColor: `${theme.palette.background.paper} !important`
+    }
+}));
 
 export const defineMonacoTheme = (monaco, name: string) => {
     return monaco.editor.defineTheme(name, {

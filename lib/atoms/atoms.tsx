@@ -35,7 +35,6 @@ export const recordingAtom = atom<boolean>(false);
 export const timerAtom = atom<number>(0);
 export const widthAtom = atom<number>(0);
 export const heightAtom = atom<number>(0);
-export const scaleAtom = atom<number>(1);
 
 export const customTexturesAtom = atom<Texture[]>([]);
 
@@ -61,7 +60,9 @@ export const textureChannelDimensionsAtom = atomWithReset<{ width: number; heigh
     { width: 128, height: 128 },
     { width: 128, height: 128 }
 ]);
-export const entryPointsAtom = atomWithReset([]);
+export const entryPointsAtom = atomWithReset(new Array<string>());
+export const entryTimersAtom = atomWithReset(new Array<number>());
+
 // we create a new refmap when deserializing from DB, don't need a reset
 export const sliderRefMapAtom = atom<Map<string, UniformSliderRef>>(
     new Map<string, UniformSliderRef>()
@@ -70,5 +71,6 @@ export const sliderSerDeNeedsUpdateAtom = atomWithReset<boolean>(true);
 export const sliderUpdateSignalAtom = atom<boolean>(false);
 export const shaderDataUrlThumbAtom = atomWithReset<string>('');
 export const float32EnabledAtom = atomWithReset<boolean>(false);
+export const profilerEnabledAtom = atomWithReset<boolean>(true); //true for UI, changing to false
 export const languageAtom = atomWithReset<string>('wgsl');
 export const halfResolutionAtom = atomWithReset<boolean>(false);
