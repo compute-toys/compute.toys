@@ -13,6 +13,7 @@ import { countNewlines } from './utils';
 
 // Regular expression for parsing compute shader entry points
 const RE_ENTRY_POINT = /@compute[^@]*?@workgroup_size\((.*?)\)[^@]*?fn\s+(\w+)/g;
+type Point = { x: number; y: number };
 
 /**
  * Information about a compute pipeline
@@ -176,9 +177,21 @@ export class ComputeEngine {
 
         // Add struct definitions
         prelude += `
-struct Time { frame: uint, elapsed: float, delta: float }
-struct Mouse { pos: uint2, start: uint2, click: int }
-struct DispatchInfo { id: uint }
+struct Time {
+    elapsed: f32,
+    delta: f32,
+    frame: u32
+}
+struct Mouse {
+    pos: vec2i,
+    zoom: f32,
+    click: i32,
+    start: vec2i,
+    delta: vec2i
+}
+struct DispatchInfo {
+    id: u32
+}
 `;
 
         // Add custom uniforms struct
@@ -449,11 +462,9 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     onSuccess(callback: (entryPoints: string[]) => void): void {
         this.onSuccessCb = callback;
     }
-
     onUpdate(callback: (entryTimers: string[]) => void): void {
         this.onUpdateCb = callback;
     }
-
     onError(callback: (summary: string, row: number, col: number) => void): void {
         this.onErrorCb = callback;
     }
@@ -464,7 +475,6 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     setTimeElapsed(time: number): void {
         this.bindings.time.host.elapsed = time;
     }
-
     setTimeDelta(delta: number): void {
         this.bindings.time.host.delta = delta;
     }
@@ -472,26 +482,26 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Update mouse state
      */
-    setMousePos(x: number, y: number): void {
-        const mouse = this.bindings.mouse.host;
-        if (mouse.click === 1) {
-            mouse.pos = [Math.floor(x * this.screenWidth), Math.floor(y * this.screenHeight)];
-            this.bindings.mouse.host = mouse;
-        }
+    setMousePos(p: Point): void {
+        this.bindings.mouse.host.pos.x = p.x;
+        this.bindings.mouse.host.pos.y = p.y;
     }
-
-    setMouseStart(x: number, y: number): void {
-        const mouse = this.bindings.mouse.host;
-        if (mouse.click === 1) {
-            mouse.start = [Math.floor(x * this.screenWidth), Math.floor(y * this.screenHeight)];
-            this.bindings.mouse.host = mouse;
-        }
+    setMouseZoom(zoom: number): void {
+        this.bindings.mouse.host.zoom = zoom;
     }
-
-    setMouseClick(click: boolean): void {
-        const mouse = this.bindings.mouse.host;
-        mouse.click = click ? 1 : 0;
-        this.bindings.mouse.host = mouse;
+    setMouseClick(click: number): void {
+        this.bindings.mouse.host.click = click;
+    }
+    setMouseStart(s: Point): void {
+        this.bindings.mouse.host.start.x = s.x;
+        this.bindings.mouse.host.start.y = s.y;
+    }
+    setMouseDelta(dx: number, dy: number): void {
+        this.bindings.mouse.host.delta.x = dx;
+        this.bindings.mouse.host.delta.y = dy;
+    }
+    getMousePos(): Point {
+        return this.bindings.mouse.host.pos;
     }
 
     /**

@@ -42,6 +42,8 @@ import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
 import useAnimationFrame from 'use-animation-frame';
 
+type Point = { x: number; y: number };
+
 declare global {
     interface Window {
         mediaRecorder: MediaRecorder;
@@ -50,7 +52,7 @@ declare global {
 
 const needsInitialResetAtom = atom<boolean>(true);
 const performingInitialResetAtom = atom<boolean>(false);
-const isMouseDownAtom = atom<boolean>(false);
+const isPointerPressedAtom = atom<boolean>(false);
 
 /*
     Controller component. Returns null because we expect to be notified
@@ -65,7 +67,7 @@ const WgpuToyController = props => {
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
     const [recording, setRecording] = useAtom(recordingAtom);
-    const [isMouseDown, setIsMouseDown] = useTransientAtom(isMouseDownAtom);
+    const [isPointerPressed, setIsPointerPressed] = useTransientAtom(isPointerPressedAtom);
     const title = useAtomValue(titleAtom);
 
     // must be transient so we can access updated value in play loop
@@ -470,96 +472,131 @@ const WgpuToyController = props => {
 
     useEffect(() => {
         if (canvas !== false) {
-            // Prevent all touch events from scrolling
-            const preventDefault = (e: TouchEvent) => {
+            let zoom = 1.0;
+            let initialPinchDistance: number | null = null;
+            let previousPointerStart: Point = { x: 0, y: 0 };
+            let previousPointerPosition: Point = { x: 0, y: 0 };
+
+            const getPointerPosition = (e: MouseEvent | TouchEvent) => {
+                if (e instanceof MouseEvent) {
+                    return {
+                        x: (e.offsetX / canvas.clientWidth) * width(),
+                        y: (e.offsetY / canvas.clientHeight) * height()
+                    };
+                } else {
+                    const rect = canvas.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    return {
+                        x: ((touch.clientX - rect.left) / canvas.clientWidth) * width(),
+                        y: ((touch.clientY - rect.top) / canvas.clientHeight) * height()
+                    };
+                }
+            };
+
+            const handleScroll = (e: WheelEvent) => {
                 e.preventDefault();
+                const factor = e.deltaY > 0 ? 0.95 : 1.05;
+                zoom *= factor;
+                ComputeEngine.getInstance().setMouseZoom(zoom);
+                if (!isPlaying()) ComputeEngine.getInstance().render();
             };
-            canvas.addEventListener('touchstart', preventDefault, { passive: false });
-            canvas.addEventListener('touchmove', preventDefault, { passive: false });
-            canvas.addEventListener('touchend', preventDefault, { passive: false });
 
-            const handleMouseMove = (e: MouseEvent) => {
-                ComputeEngine.getInstance().setMousePos(
-                    e.offsetX / canvas.clientWidth,
-                    e.offsetY / canvas.clientHeight
+            const handlePinch = (e: TouchEvent) => {
+                if (e.touches.length !== 2) return;
+                e.preventDefault();
+                const currentDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
                 );
-                if (!isPlaying()) {
-                    ComputeEngine.getInstance().render();
+                ComputeEngine.getInstance().setMousePos(previousPointerStart);
+                if (initialPinchDistance !== null) {
+                    zoom = currentDistance / initialPinchDistance;
+                    ComputeEngine.getInstance().setMouseZoom(zoom);
+                    if (!isPlaying()) ComputeEngine.getInstance().render();
+                } else {
+                    initialPinchDistance = currentDistance;
                 }
             };
 
-            const handleTouchMove = (e: TouchEvent) => {
-                const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                const offsetX = touch.clientX - rect.left;
-                const offsetY = touch.clientY - rect.top;
-                ComputeEngine.getInstance().setMousePos(
-                    offsetX / canvas.clientWidth,
-                    offsetY / canvas.clientHeight
+            const handlePointerMove = (e: MouseEvent | TouchEvent) => {
+                const p = getPointerPosition(e);
+                if (isPointerPressed() && initialPinchDistance === null) {
+                    ComputeEngine.getInstance().setMousePos(p);
+                    ComputeEngine.getInstance().setMouseDelta(
+                        p.x - previousPointerPosition.x,
+                        p.y - previousPointerPosition.y
+                    );
+                    if (!isPlaying()) ComputeEngine.getInstance().render();
+                }
+                previousPointerPosition = p;
+            };
+
+            const handlePointerUp = () => {
+                ComputeEngine.getInstance().setMouseClick(0);
+                initialPinchDistance = null;
+                setIsPointerPressed(false);
+            };
+
+            const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+                if (isPointerPressed()) return;
+                setIsPointerPressed(true);
+                previousPointerStart = ComputeEngine.getInstance().getMousePos();
+                const p = getPointerPosition(e);
+                ComputeEngine.getInstance().setMouseStart(p);
+                ComputeEngine.getInstance().setMousePos(p);
+                ComputeEngine.getInstance().setMouseClick(
+                    e instanceof MouseEvent ? e.button + 1 : 1
                 );
-                if (!isPlaying()) {
-                    ComputeEngine.getInstance().render();
+                if (!isPlaying()) ComputeEngine.getInstance().render();
+            };
+
+            const handleMouse = (e: MouseEvent) => {
+                e.preventDefault();
+                if (e.type === 'mousedown') handlePointerDown(e);
+                else if (e.type === 'mousemove') handlePointerMove(e);
+                else if (e.type === 'mouseup' || e.type === 'mouseleave') handlePointerUp();
+            };
+
+            const handleTouch = (e: TouchEvent) => {
+                e.preventDefault();
+                if (e.type === 'touchstart') {
+                    if (e.touches.length === 1) handlePointerDown(e);
+                    else if (e.touches.length === 2) handlePinch(e);
+                } else if (e.type === 'touchmove') {
+                    if (e.touches.length === 1) handlePointerMove(e);
+                    else if (e.touches.length === 2) handlePinch(e);
+                } else if (
+                    (e.type === 'touchend' && e.touches.length === 0) ||
+                    e.type === 'touchcancel'
+                ) {
+                    handlePointerUp();
                 }
             };
 
-            const handleMouseUp = () => {
-                ComputeEngine.getInstance().setMouseClick(false);
-                setIsMouseDown(false);
+            // Bind events
+            canvas.onmousedown = e => handleMouse(e);
+            canvas.onmouseup = e => handleMouse(e);
+            canvas.onmouseleave = e => handleMouse(e);
+            canvas.onmousemove = e => handleMouse(e);
+            canvas.onwheel = handleScroll;
+            canvas.ontouchstart = e => handleTouch(e);
+            canvas.ontouchend = e => handleTouch(e);
+            canvas.ontouchcancel = e => handleTouch(e);
+            canvas.ontouchmove = e => handleTouch(e);
+
+            return () => {
+                canvas.onmousedown = null;
+                canvas.onmouseup = null;
+                canvas.onmouseleave = null;
                 canvas.onmousemove = null;
-            };
-
-            const handleTouchEnd = () => {
-                ComputeEngine.getInstance().setMouseClick(false);
+                canvas.onwheel = null;
+                canvas.ontouchstart = null;
+                canvas.ontouchend = null;
+                canvas.ontouchcancel = null;
                 canvas.ontouchmove = null;
             };
-
-            const handleMouseDown = (e: MouseEvent) => {
-                ComputeEngine.getInstance().setMouseClick(true);
-                handleMouseMove(e);
-                canvas.onmousemove = handleMouseMove;
-
-                if (!isMouseDown()) {
-                    ComputeEngine.getInstance().setMouseStart(
-                        e.offsetX / canvas.clientWidth,
-                        e.offsetY / canvas.clientHeight
-                    );
-                    setIsMouseDown(true);
-                }
-            };
-
-            const handleTouchStart = (e: TouchEvent) => {
-                ComputeEngine.getInstance().setMouseClick(true);
-                handleTouchMove(e);
-                canvas.ontouchmove = handleTouchMove;
-
-                const rect = canvas.getBoundingClientRect();
-                const touch = e.touches[0];
-                const offsetX = touch.clientX - rect.left;
-                const offsetY = touch.clientY - rect.top;
-                ComputeEngine.getInstance().setMouseStart(
-                    offsetX / canvas.clientWidth,
-                    offsetY / canvas.clientHeight
-                );
-            };
-
-            // Mouse events
-            canvas.onmousedown = handleMouseDown;
-            canvas.onmouseup = handleMouseUp;
-            canvas.onmouseleave = handleMouseUp;
-
-            // Touch events
-            canvas.ontouchstart = handleTouchStart;
-            canvas.ontouchend = handleTouchEnd;
-            canvas.ontouchcancel = handleTouchEnd;
-
-            // Clean up event listeners when component unmounts
-            return () => {
-                canvas.removeEventListener('touchstart', preventDefault);
-                canvas.removeEventListener('touchmove', preventDefault);
-                canvas.removeEventListener('touchend', preventDefault);
-            };
         }
-    }, []);
+    }, [canvas]);
 
     useEffect(() => {
         if (!isPlaying() && wgpuAvailability === 'available') {
