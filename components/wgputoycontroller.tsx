@@ -729,6 +729,14 @@ const WgpuToyController = props => {
 
     useEffect(() => {
         if (!needsInitialReset()) {
+            if (profilerEnabled) {
+                const engine = ComputeEngine.getInstance();
+                if (!engine.device.features.has('timestamp-query')) {
+                    console.warn('Timestamp queries not supported, disabling profiler');
+                    setProfilerEnabled(false);
+                    return;
+                }
+            }
             ComputeEngine.getInstance()
                 .setProfilerAttached(profilerEnabled)
                 .then(() => {

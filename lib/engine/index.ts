@@ -33,7 +33,7 @@ interface ComputePipeline {
 export class ComputeEngine {
     private static instance: ComputeEngine | null = null;
 
-    private device: GPUDevice;
+    public device: GPUDevice;
 
     private surface: GPUCanvasContext;
     private screenWidth: number;
