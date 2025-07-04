@@ -53,7 +53,7 @@ const ExplainerBody = () => {
                 <br />
                 mouse.click: i32{' '}
                 <span style={{ color: theme.palette.dracula.comment }}>
-                    //clicked buttons, none = 0, left = 1, right = 2
+                    //clicked buttons, none = 0, left = 1, right = 3
                 </span>
                 <br />
                 mouse.start: vec2i{' '}
