@@ -636,4 +636,29 @@ export class Bindings {
         queue.writeBuffer(this.mouse.device, 0, this.mouse.host.toBuffer());
         queue.writeBuffer(this.keys.device, 0, this.keys.host.toBuffer());
     }
+
+    dispose(): void {
+        // Destroy buffers
+        this.storage1.device.destroy();
+        this.storage2.device.destroy();
+        this.time.device.destroy();
+        this.mouse.device.destroy();
+        this.keys.device.destroy();
+        this.custom.device.destroy();
+        this.dispatchInfo.device.destroy();
+
+        // Destroy textures
+        this.texScreen.device.destroy();
+        this.texRead.device.destroy();
+        this.texWrite.device.destroy();
+        this.channels.forEach(channel => channel.device.destroy());
+
+        // Clear sampler references
+        this.nearest.bind = null as any;
+        this.bilinear.bind = null as any;
+        this.trilinear.bind = null as any;
+        this.nearestRepeat.bind = null as any;
+        this.bilinearRepeat.bind = null as any;
+        this.trilinearRepeat.bind = null as any;
+    }
 }
