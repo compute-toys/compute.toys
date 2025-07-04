@@ -23,7 +23,8 @@ export default function TopBar(props) {
     const handleSearch = e => {
         e.preventDefault();
         if (searchQuery.trim()) {
-            router.push(`/search/${searchQuery}/1`);
+            const encodedQuery = encodeURIComponent(searchQuery.trim());
+            router.push(`/search/${encodedQuery}/1`);
         }
     };
 
