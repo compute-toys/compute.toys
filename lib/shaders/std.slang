@@ -42,14 +42,17 @@ public SamplerState bilinear_repeat;
 public SamplerState trilinear_repeat;
 
 public struct Time {
-    public uint frame;
     public float elapsed;
     public float delta;
+    public uint frame;
 };
 
 public struct Mouse {
-    public uint2 pos;
+    public int2 pos;
+    public float zoom;
     public int click;
+    public int2 start;
+    //public int2 delta; //2do: fix pp for same names
 };
 
 public struct DispatchInfo {

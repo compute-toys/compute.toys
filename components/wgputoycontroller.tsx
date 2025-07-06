@@ -6,6 +6,7 @@ import {
     codeAtom,
     dbLoadedAtom,
     entryPointsAtom,
+    entryTimersAtom,
     float32EnabledAtom,
     halfResolutionAtom,
     heightAtom,
@@ -16,11 +17,11 @@ import {
     manualReloadAtom,
     parseErrorAtom,
     playAtom,
+    profilerEnabledAtom,
     recordingAtom,
     requestFullscreenAtom,
     resetAtom,
     saveColorTransitionSignalAtom,
-    scaleAtom,
     sliderRefMapAtom,
     sliderUpdateSignalAtom,
     textureChannelDimensionsAtom,
@@ -28,13 +29,20 @@ import {
     titleAtom,
     widthAtom
 } from 'lib/atoms/atoms';
-import { canvasElAtom, canvasParentElAtom, wgputoyPreludeAtom } from 'lib/atoms/wgputoyatoms';
+import {
+    canvasElAtom,
+    canvasParentElAtom,
+    wgpuAvailabilityAtom,
+    wgputoyPreludeAtom
+} from 'lib/atoms/wgputoyatoms';
 import { ComputeEngine } from 'lib/engine';
 import { getCompiler, TextureDimensions } from 'lib/slang/compiler';
 import { useCallback, useEffect } from 'react';
 import { theme } from 'theme/theme';
 import { getDimensions } from 'types/canvasdimensions';
 import useAnimationFrame from 'use-animation-frame';
+
+type Point = { x: number; y: number };
 
 declare global {
     interface Window {
@@ -44,6 +52,7 @@ declare global {
 
 const needsInitialResetAtom = atom<boolean>(true);
 const performingInitialResetAtom = atom<boolean>(false);
+const isPointerPressedAtom = atom<boolean>(false);
 
 /*
     Controller component. Returns null because we expect to be notified
@@ -58,6 +67,7 @@ const WgpuToyController = props => {
     const [reset, setReset] = useAtom(resetAtom);
     const hotReload = useAtomValue(hotReloadAtom);
     const [recording, setRecording] = useAtom(recordingAtom);
+    const [isPointerPressed, setIsPointerPressed] = useTransientAtom(isPointerPressedAtom);
     const title = useAtomValue(titleAtom);
 
     // must be transient so we can access updated value in play loop
@@ -82,19 +92,21 @@ const WgpuToyController = props => {
     const [, setParseError] = useTransientAtom(parseErrorAtom);
     const loadedTextures = useAtomValue(loadedTexturesAtom);
     const setEntryPoints = useSetAtom(entryPointsAtom);
+    const setEntryTimers = useSetAtom(entryTimersAtom);
     const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
 
     const canvas = useAtomValue(canvasElAtom);
-    const [, setPrelude] = useAtom(wgputoyPreludeAtom);
+    const setPrelude = useSetAtom(wgputoyPreludeAtom);
+    const wgpuAvailability = useAtomValue(wgpuAvailabilityAtom);
 
     const parentRef = useAtomValue<HTMLElement | null>(canvasParentElAtom);
 
     const [width, setWidth] = useTransientAtom(widthAtom);
     const [height, setHeight] = useTransientAtom(heightAtom);
-    const [scale, setScale] = useTransientAtom(scaleAtom);
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
     const float32Enabled = useAtomValue(float32EnabledAtom);
+    const [profilerEnabled, setProfilerEnabled] = useAtom(profilerEnabledAtom);
     const halfResolution = useAtomValue(halfResolutionAtom);
 
     const [textureDimensions, setTextureDimensions] = useTransientAtom(
@@ -175,11 +187,13 @@ const WgpuToyController = props => {
             }
             engine.setSurface(canvas);
             engine.onSuccess(handleSuccess);
+            engine.onUpdate(handleUpdate);
             engine.onError(handleError);
             setTimer(0);
             engine.setPassF32(float32Enabled);
+            setProfilerEnabled(false);
             updateResolution();
-            engine.resize(width(), height(), scale());
+            engine.resize(width(), height());
             engine.reset();
             await loadTexture(0, loadedTextures[0].img);
             await loadTexture(1, loadedTextures[1].img);
@@ -245,6 +259,12 @@ const WgpuToyController = props => {
             success: true
         }));
         if (!hotReloadHot()) setSaveColorTransitionSignal('#24252C');
+    }, []);
+
+    const handleUpdate = useCallback(entryTimers => {
+        if (profilerEnabled) {
+            setEntryTimers(entryTimers);
+        }
     }, []);
 
     const handleError = useCallback((summary: string, row: number, col: number) => {
@@ -357,12 +377,14 @@ const WgpuToyController = props => {
                 const controlRe = /[\x00-\x1f\x80-\x9f]/g; // eslint-disable-line
                 const reservedRe = /^\.+$/;
                 const windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
+                const encoder = new TextEncoder();
+                const decoder = new TextDecoder();
 
                 // Truncate string by size in bytes
                 function truncate(str: string, maxByteSize: number): string {
-                    const buffer = Buffer.alloc(maxByteSize);
-                    const written = buffer.write(str, 'utf8');
-                    return buffer.toString('utf8', 0, written);
+                    const bytes = encoder.encode(str);
+                    if (bytes.length <= maxByteSize) return str;
+                    return decoder.decode(bytes.slice(0, maxByteSize));
                 }
 
                 // Sanitize the input string
@@ -428,6 +450,7 @@ const WgpuToyController = props => {
                 a.download = fileName;
                 a.click();
                 window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
             };
 
             window.mediaRecorder = mediaRecorder;
@@ -452,43 +475,139 @@ const WgpuToyController = props => {
 
     useEffect(() => {
         if (canvas !== false) {
-            const handleMouseMove = (e: MouseEvent) => {
-                // console.log(`Mouse move: ${e.offsetX}, ${e.offsetY}`);
-                ComputeEngine.getInstance().setMousePos(
-                    e.offsetX / canvas.clientWidth,
-                    e.offsetY / canvas.clientHeight
-                );
-                if (!isPlaying()) {
-                    ComputeEngine.getInstance().render();
+            let zoom = 1.0;
+            let initialPinchDistance: number | null = null;
+            let previousPointerStart: Point = { x: 0, y: 0 };
+            let previousPointerPosition: Point = { x: 0, y: 0 };
+
+            const getPointerPosition = (e: MouseEvent | TouchEvent) => {
+                if (e instanceof MouseEvent) {
+                    return {
+                        x: (e.offsetX / canvas.clientWidth) * width(),
+                        y: (e.offsetY / canvas.clientHeight) * height()
+                    };
+                } else {
+                    const rect = canvas.getBoundingClientRect();
+                    const touch = e.touches[0];
+                    return {
+                        x: ((touch.clientX - rect.left) / canvas.clientWidth) * width(),
+                        y: ((touch.clientY - rect.top) / canvas.clientHeight) * height()
+                    };
                 }
             };
 
-            const handleMouseUp = () => {
-                // console.log('Mouse up');
-                ComputeEngine.getInstance().setMouseClick(false);
+            const handleScroll = (e: WheelEvent) => {
+                e.preventDefault();
+                const factor = e.deltaY > 0 ? 0.95 : 1.05;
+                zoom *= factor;
+                ComputeEngine.getInstance().setMouseZoom(zoom);
+                if (!isPlaying()) ComputeEngine.getInstance().render();
+            };
+
+            const handlePinch = (e: TouchEvent) => {
+                if (e.touches.length !== 2) return;
+                e.preventDefault();
+                const currentDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                ComputeEngine.getInstance().setMousePos(previousPointerStart);
+                if (initialPinchDistance !== null) {
+                    zoom = currentDistance / initialPinchDistance;
+                    ComputeEngine.getInstance().setMouseZoom(zoom);
+                    if (!isPlaying()) ComputeEngine.getInstance().render();
+                } else {
+                    initialPinchDistance = currentDistance;
+                }
+            };
+
+            const handlePointerMove = (e: MouseEvent | TouchEvent) => {
+                const p = getPointerPosition(e);
+                if (isPointerPressed() && initialPinchDistance === null) {
+                    ComputeEngine.getInstance().setMousePos(p);
+                    ComputeEngine.getInstance().setMouseDelta(
+                        p.x - previousPointerPosition.x,
+                        p.y - previousPointerPosition.y
+                    );
+                    if (!isPlaying()) ComputeEngine.getInstance().render();
+                }
+                previousPointerPosition = p;
+            };
+
+            const handlePointerUp = () => {
+                ComputeEngine.getInstance().setMouseClick(0);
+                initialPinchDistance = null;
+                setIsPointerPressed(false);
+            };
+
+            const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+                if (isPointerPressed()) return;
+                setIsPointerPressed(true);
+                previousPointerStart = ComputeEngine.getInstance().getMousePos();
+                const p = getPointerPosition(e);
+                ComputeEngine.getInstance().setMouseStart(p);
+                ComputeEngine.getInstance().setMousePos(p);
+                ComputeEngine.getInstance().setMouseClick(
+                    e instanceof MouseEvent ? e.button + 1 : 1
+                );
+                if (!isPlaying()) ComputeEngine.getInstance().render();
+            };
+
+            const handleMouse = (e: MouseEvent) => {
+                e.preventDefault();
+                if (e.type === 'mousedown') handlePointerDown(e);
+                else if (e.type === 'mousemove') handlePointerMove(e);
+                else if (e.type === 'mouseup' || e.type === 'mouseleave') handlePointerUp();
+            };
+
+            const handleTouch = (e: TouchEvent) => {
+                e.preventDefault();
+                if (e.type === 'touchstart') {
+                    if (e.touches.length === 1) handlePointerDown(e);
+                    else if (e.touches.length === 2) handlePinch(e);
+                } else if (e.type === 'touchmove') {
+                    if (e.touches.length === 1) handlePointerMove(e);
+                    else if (e.touches.length === 2) handlePinch(e);
+                } else if (
+                    (e.type === 'touchend' && e.touches.length === 0) ||
+                    e.type === 'touchcancel'
+                ) {
+                    handlePointerUp();
+                }
+            };
+
+            // Bind events
+            canvas.onmousedown = e => handleMouse(e);
+            canvas.onmouseup = e => handleMouse(e);
+            canvas.onmouseleave = e => handleMouse(e);
+            canvas.onmousemove = e => handleMouse(e);
+            canvas.onwheel = handleScroll;
+            canvas.ontouchstart = e => handleTouch(e);
+            canvas.ontouchend = e => handleTouch(e);
+            canvas.ontouchcancel = e => handleTouch(e);
+            canvas.ontouchmove = e => handleTouch(e);
+
+            return () => {
+                canvas.onmousedown = null;
+                canvas.onmouseup = null;
+                canvas.onmouseleave = null;
                 canvas.onmousemove = null;
+                canvas.onwheel = null;
+                canvas.ontouchstart = null;
+                canvas.ontouchend = null;
+                canvas.ontouchcancel = null;
+                canvas.ontouchmove = null;
             };
-
-            const handleMouseDown = (e: MouseEvent) => {
-                // console.log('Mouse down');
-                ComputeEngine.getInstance().setMouseClick(true);
-                handleMouseMove(e);
-                canvas.onmousemove = handleMouseMove;
-            };
-
-            canvas.onmousedown = handleMouseDown;
-            canvas.onmouseup = handleMouseUp;
-            canvas.onmouseleave = handleMouseUp;
         }
-    }, []);
+    }, [canvas]);
 
     useEffect(() => {
-        if (!isPlaying()) {
+        if (!isPlaying() && wgpuAvailability === 'available') {
             setPlay(true);
             setNeedsInitialReset(true);
             playCallback();
         }
-    }, []);
+    }, [wgpuAvailability]);
 
     // Return a pauseCallback for the cleanup lifecycle
     useEffect(() => pauseCallback, []);
@@ -513,42 +632,35 @@ const WgpuToyController = props => {
     }, [code, hotReload, manualReload()]);
 
     const updateResolution = () => {
+        const dpr = !halfResolution ? window.devicePixelRatio : window.devicePixelRatio * 0.5;
         let dimensions = { x: 0, y: 0 }; // dimensions in device (physical) pixels
         if (document.fullscreenElement) {
             // calculate actual screen resolution, accounting for both zoom and hidpi
             // https://stackoverflow.com/a/55839671/78204
             dimensions.x =
                 Math.round(
-                    (window.screen.width * window.devicePixelRatio) /
-                        (window.outerWidth / window.innerWidth) /
-                        80
+                    (window.screen.width * dpr) / (window.outerWidth / window.innerWidth) / 80
                 ) * 80;
             dimensions.y =
                 Math.round(
-                    (window.screen.height * window.devicePixelRatio) /
-                        (window.outerWidth / window.innerWidth) /
-                        60
+                    (window.screen.height * dpr) / (window.outerWidth / window.innerWidth) / 60
                 ) * 60;
         } else if (props.embed) {
-            dimensions = getDimensions(window.innerWidth * window.devicePixelRatio);
+            dimensions = getDimensions(window.innerWidth * dpr);
         } else {
             const padding = 16;
-            dimensions = getDimensions(
-                (parentRef!.offsetWidth - padding) * window.devicePixelRatio
-            );
+            dimensions = getDimensions((parentRef!.offsetWidth - padding) * dpr);
         }
         if (canvas) {
             canvas.width = dimensions.x;
             canvas.height = dimensions.y;
-            canvas.style.width = `${dimensions.x / window.devicePixelRatio}px`;
-            canvas.style.height = `${dimensions.y / window.devicePixelRatio}px`;
+            canvas.style.width = `${dimensions.x / dpr}px`;
+            canvas.style.height = `${dimensions.y / dpr}px`;
         }
-        const newScale = halfResolution ? 0.5 : 1;
-        if (dimensions.x !== width() || newScale !== scale()) {
-            console.log(`Resizing to ${dimensions.x}x${dimensions.y} @ ${newScale}x`);
+        if (dimensions.x !== width()) {
+            console.log(`Resizing to ${dimensions.x / dpr}x${dimensions.y / dpr} @ ${dpr}x`);
             setWidth(dimensions.x);
             setHeight(dimensions.y);
-            setScale(newScale);
             return true;
         }
         return false;
@@ -556,14 +668,14 @@ const WgpuToyController = props => {
 
     useResizeObserver(parentRef, () => {
         if (!needsInitialReset() && updateResolution()) {
-            ComputeEngine.getInstance().resize(width(), height(), scale());
+            ComputeEngine.getInstance().resize(width(), height());
             resetCallback();
         }
     });
 
     useEffect(() => {
         if (!needsInitialReset() && updateResolution()) {
-            ComputeEngine.getInstance().resize(width(), height(), scale());
+            ComputeEngine.getInstance().resize(width(), height());
             resetCallback();
         }
     }, [halfResolution]);
@@ -614,6 +726,26 @@ const WgpuToyController = props => {
             }
         }
     }, [float32Enabled]);
+
+    useEffect(() => {
+        if (!needsInitialReset()) {
+            if (profilerEnabled) {
+                const engine = ComputeEngine.getInstance();
+                if (!engine.device.features.has('timestamp-query')) {
+                    console.warn('Timestamp queries not supported, disabling profiler');
+                    setProfilerEnabled(false);
+                    return;
+                }
+            }
+            ComputeEngine.getInstance()
+                .setProfilerAttached(profilerEnabled)
+                .then(() => {
+                    recompile().then(() => {
+                        setProfilerEnabled(profilerEnabled);
+                    });
+                });
+        }
+    }, [profilerEnabled]);
 
     return null;
 };

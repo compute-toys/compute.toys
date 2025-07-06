@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable react/jsx-no-comment-textnodes */
 import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
@@ -11,8 +12,6 @@ import DraggableWindow from '../global/draggable-window';
 import { HiLite } from '../global/hilite';
 import Logo from '../global/logo';
 
-const EXPLAINER_INNER_HEIGHT = '570';
-
 const ExplainerBody = () => {
     const theme = useTheme();
     const prelude = useAtomValue(wgputoyPreludeAtom);
@@ -20,11 +19,11 @@ const ExplainerBody = () => {
     return (
         <div
             style={{
+                // Styles for inner text (Chrome/Webkit/Mobiles)
                 textAlign: 'left',
-                width: 'min-content',
-                overflowY: 'auto',
+                width: '100%',
+                overflowY: 'unset',
                 padding: '8px',
-                height: `${EXPLAINER_INNER_HEIGHT}px`,
                 color: theme.palette.primary.main
             }}
         >
@@ -42,9 +41,28 @@ const ExplainerBody = () => {
             <br />
             Mouse input can be accessed from the <HiLite>mouse</HiLite> struct:
             <pre style={{ color: theme.palette.neutral.main }}>
-                mouse.pos: vec2i
+                mouse.pos: vec2i{' '}
+                <span style={{ color: theme.palette.dracula.comment }}>
+                    //mousemove position when pressed
+                </span>
                 <br />
-                mouse.click: i32
+                mouse.zoom: f32{' '}
+                <span style={{ color: theme.palette.dracula.comment }}>
+                    //crossplatform zoom, default = 1.0
+                </span>
+                <br />
+                mouse.click: i32{' '}
+                <span style={{ color: theme.palette.dracula.comment }}>
+                    //clicked buttons, none = 0, left = 1, right = 3
+                </span>
+                <br />
+                mouse.start: vec2i{' '}
+                <span style={{ color: theme.palette.dracula.comment }}>//mousedown position</span>
+                <br />
+                mouse.delta: vec2i{' '}
+                <span style={{ color: theme.palette.dracula.comment }}>
+                    //delta since last mousemove
+                </span>
             </pre>
             Timing information is in the <HiLite>time</HiLite> struct:
             <pre style={{ color: theme.palette.neutral.main }}>
@@ -72,7 +90,10 @@ const ExplainerBody = () => {
             </HiLite>{' '}
             helper function:
             <pre style={{ color: theme.palette.neutral.main }}>
-                keyDown(32) // returns true when the spacebar is pressed
+                keyDown(32){' '}
+                <span style={{ color: theme.palette.dracula.comment }}>
+                    //returns true when the spacebar is pressed
+                </span>
             </pre>
             <h1>Outputs</h1>
             For compute shader input and output <Logo /> provides:
@@ -99,6 +120,13 @@ const ExplainerBody = () => {
                 <li>
                     <HiLite>#define NAME VALUE</HiLite> for simple macros (function-like parameter
                     substitution is not yet supported)
+                </li>
+                <li>
+                    <HiLite>#calcdefine NAME EXPRESSION</HiLite> for defining result of a
+                    mathematical expressions that gives a number
+                </li>
+                <li>
+                    <HiLite>#ifdef #ifndef #if #else #endif</HiLite> for conditional compilation
                 </li>
                 <li>
                     <HiLite>#include &quot;PATH&quot;</HiLite> for accessing built-in libraries
@@ -256,7 +284,21 @@ export default function Explainer() {
             <DraggableWindow
                 hidden={explainerHidden}
                 setHidden={setExplainerHidden}
-                sx={{ paddingTop: '8px' }}
+                sx={{
+                    //styles for the draggable window (Chrome/Webkit/Mobiles)
+                    paddingTop: '8px',
+                    width: '70vw',
+                    maxWidth: '800px',
+                    height: '80vh',
+                    overflowX: 'auto',
+                    zIndex: '9999999999',
+                    //mobile specific
+                    '@media (max-width: 600px)': {
+                        width: '97vw',
+                        height: '60vh',
+                        maxHeight: '80%'
+                    }
+                }}
             >
                 <ExplainerBody />
             </DraggableWindow>

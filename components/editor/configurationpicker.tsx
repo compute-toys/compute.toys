@@ -1,21 +1,22 @@
 'use client';
-import CodeIcon from '@mui/icons-material/Code';
 import LineStyleIcon from '@mui/icons-material/LineStyle';
+import PetsIcon from '@mui/icons-material/Pets';
+import SpeedIcon from '@mui/icons-material/Speed';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-import { useTheme } from '@mui/material/styles';
 import Switch from '@mui/material/Switch';
+import { useTheme } from '@mui/material/styles';
 import { useAtom, useAtomValue } from 'jotai';
 import {
     codeAtom,
     codeNeedSaveAtom,
     float32EnabledAtom,
     languageAtom,
+    profilerEnabledAtom,
     shaderIDAtom
 } from 'lib/atoms/atoms';
 import defaultSlangShader from 'lib/shaders/default.slang';
@@ -24,6 +25,7 @@ import { Item } from '../../theme/theme';
 
 export default function ConfigurationPicker() {
     const [float32Enabled, setFloat32Enabled] = useAtom(float32EnabledAtom);
+    const [profilerEnabled, setProfilerEnabled] = useAtom(profilerEnabledAtom);
     const [language, setLanguage] = useAtom(languageAtom);
     const [, setCode] = useAtom(codeAtom);
     const codeNeedSave = useAtomValue(codeNeedSaveAtom);
@@ -49,45 +51,21 @@ export default function ConfigurationPicker() {
     return (
         <Item
             sx={{
-                display: 'inline-block',
+                display: 'flex',
+                flexDirection: 'column',
                 marginTop: '18px',
                 textAlign: 'left',
                 color: theme.palette.dracula.foreground,
-                minHeight: '-webkit-fill-available'
+                height: '100%',
+                overflow: 'auto'
             }}
-            style={{ minHeight: '-moz-fill-available' }}
         >
-            <List
-                sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
-                subheader={
-                    <ListSubheader sx={{ color: theme.palette.dracula.foreground }}>
-                        Settings
-                    </ListSubheader>
-                }
-            >
+            <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
                 <ListItem>
                     <ListItemIcon
                         sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
                     >
-                        <LineStyleIcon />
-                    </ListItemIcon>
-                    <ListItemText id="config-list-label-float32" primary="Float32 Buffers" />
-                    <Switch
-                        edge="end"
-                        onChange={() => {
-                            setFloat32Enabled(!float32Enabled);
-                        }}
-                        checked={float32Enabled}
-                        inputProps={{
-                            'aria-labelledby': 'config-list-label-float32'
-                        }}
-                    />
-                </ListItem>
-                <ListItem>
-                    <ListItemIcon
-                        sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
-                    >
-                        <CodeIcon />
+                        <PetsIcon />
                     </ListItemIcon>
                     <ListItemText id="config-list-label-language" primary="Language" />
                     <Select
@@ -105,10 +83,47 @@ export default function ConfigurationPicker() {
                         inputProps={{
                             'aria-labelledby': 'config-list-label-language'
                         }}
+                        style={{ height: '2em', margin: '0' }}
                     >
                         <MenuItem value="wgsl">WGSL</MenuItem>
                         <MenuItem value="slang">Slang</MenuItem>
                     </Select>
+                </ListItem>
+                <ListItem>
+                    <ListItemIcon
+                        sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
+                    >
+                        <LineStyleIcon />
+                    </ListItemIcon>
+                    <ListItemText id="config-list-label-float32" primary="Float32 Textures" />
+                    <Switch
+                        edge="end"
+                        onChange={() => {
+                            setFloat32Enabled(!float32Enabled);
+                        }}
+                        checked={float32Enabled}
+                        inputProps={{
+                            'aria-labelledby': 'config-list-label-float32'
+                        }}
+                    />
+                </ListItem>
+                <ListItem>
+                    <ListItemIcon
+                        sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
+                    >
+                        <SpeedIcon />
+                    </ListItemIcon>
+                    <ListItemText id="config-profiler-attached" primary="Profiler [beta]" />
+                    <Switch
+                        edge="end"
+                        onChange={() => {
+                            setProfilerEnabled(!profilerEnabled);
+                        }}
+                        checked={profilerEnabled}
+                        inputProps={{
+                            'aria-labelledby': 'config-profiler-attached'
+                        }}
+                    />
                 </ListItem>
             </List>
         </Item>
