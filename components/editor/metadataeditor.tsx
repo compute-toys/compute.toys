@@ -201,37 +201,39 @@ export const MetadataEditor = ({ user }: { user?: User }) => {
                 ) : null}
             </Grid>
             <Grid item xs={4} alignItems="center" textAlign="right">
-                {shaderID && user ? (
-                    <Button
-                        sx={{
-                            padding: '1',
-                            color: theme.palette.dracula.green,
-                            border: `1px solid ${theme.palette.dracula.currentLine}`
-                        }}
-                        onClick={async () => {
-                            setTitle(`Fork of ${title}`.substring(0, 30));
-                            setDescription(`Forked from https://compute.toys/view/${shaderID}`);
-                            setVisibility('private');
-                            upsertShader(true);
-                        }}
-                    >
-                        Fork
-                    </Button>
-                ) : null}
-                {userIsAuthor() ? (
-                    <Button
-                        sx={{
-                            padding: '1',
-                            color: theme.palette.dracula.green,
-                            border: `1px solid ${theme.palette.dracula.currentLine}`
-                        }}
-                        onClick={async () => {
-                            upsertShader(false);
-                        }}
-                    >
-                        Save
-                    </Button>
-                ) : null}
+                <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    {shaderID && user ? (
+                        <Button
+                            sx={{
+                                padding: '1',
+                                color: theme.palette.dracula.green,
+                                border: `1px solid ${theme.palette.dracula.currentLine}`
+                            }}
+                            onClick={async () => {
+                                setTitle(`Fork of ${title}`.substring(0, 30));
+                                setDescription(`Forked from https://compute.toys/view/${shaderID}`);
+                                setVisibility('private');
+                                upsertShader(true);
+                            }}
+                        >
+                            Fork
+                        </Button>
+                    ) : null}
+                    {userIsAuthor() ? (
+                        <Button
+                            sx={{
+                                padding: '1',
+                                color: theme.palette.dracula.green,
+                                border: `1px solid ${theme.palette.dracula.currentLine}`
+                            }}
+                            onClick={async () => {
+                                upsertShader(false);
+                            }}
+                        >
+                            Save
+                        </Button>
+                    ) : null}
+                </Stack>
             </Grid>
         </Grid>
     );

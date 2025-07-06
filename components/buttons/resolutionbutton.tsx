@@ -16,7 +16,6 @@ export default function ResolutionButton() {
     const [halfResolution, setHalfResolution] = useAtom(halfResolutionAtom);
     const theme = useTheme();
 
-    // Define styles outside the return for better readability
     const buttonStyles = {
         padding: '2px',
         minWidth: 0,
