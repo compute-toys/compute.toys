@@ -143,6 +143,7 @@ public static vec4 iMouse = vec4(
     (mouse.click > 0 ? 1 : -1) * float(mouse.start.x),
     (mouse.click > 0 && all(mouse.pos == mouse.start) ? 1 : -1 ) * float(SCREEN_SIZE.y - 1 - mouse.start.y)
 );
+public static vec4 iDate = vec4(2022., 3., 28., iTime + 31. + 60.*56. + 60.*60.*14.);
 
 public vec4 texelFetch(int channel, ivec2 coord, int lod) {
     return pass_in[ivec3(coord, channel)];
