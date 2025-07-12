@@ -33,6 +33,8 @@ import {
     canvasElAtom,
     canvasParentElAtom,
     wgpuAvailabilityAtom,
+    wgpuContextAtom,
+    wgpuDeviceAtom,
     wgputoyPreludeAtom
 } from 'lib/atoms/wgputoyatoms';
 import { ComputeEngine } from 'lib/engine';
@@ -94,11 +96,12 @@ const WgpuToyController = props => {
     const setEntryPoints = useSetAtom(entryPointsAtom);
     const setEntryTimers = useSetAtom(entryTimersAtom);
     const setSaveColorTransitionSignal = useSetAtom(saveColorTransitionSignalAtom);
+    const setPrelude = useSetAtom(wgputoyPreludeAtom);
 
     const canvas = useAtomValue(canvasElAtom);
-    const setPrelude = useSetAtom(wgputoyPreludeAtom);
     const wgpuAvailability = useAtomValue(wgpuAvailabilityAtom);
-
+    const wgpuContext = useAtomValue(wgpuContextAtom);
+    const wgpuDevice = useAtomValue(wgpuDeviceAtom);
     const parentRef = useAtomValue<HTMLElement | null>(canvasParentElAtom);
 
     const [width, setWidth] = useTransientAtom(widthAtom);
@@ -170,51 +173,69 @@ const WgpuToyController = props => {
         where manualReload gets set before the controller is loaded, which
         results in the effect hook for manualReload never getting called.
      */
-    useAnimationFrame(async e => {
+    useAnimationFrame(e => {
         if (sliderUpdateSignal() && !needsInitialReset()) {
-            await updateUniforms();
+            (async () => {
+                await updateUniforms();
+            })();
         }
         if (performingInitialReset()) {
             // wait for initial reset to complete
-        } else if (needsInitialReset() && dbLoaded()) {
-            console.log('Initialising engine...');
-            setPerformingInitialReset(true);
-            await ComputeEngine.create();
-            const engine = ComputeEngine.getInstance();
-            if (!canvas) {
-                console.error('Canvas not found');
-                return;
-            }
-            engine.setSurface(canvas);
-            engine.onSuccess(handleSuccess);
-            engine.onUpdate(handleUpdate);
-            engine.onError(handleError);
-            setTimer(0);
-            engine.setPassF32(float32Enabled);
-            setProfilerEnabled(false);
-            updateResolution();
-            engine.resize(width(), height());
-            engine.reset();
-            await loadTexture(0, loadedTextures[0].img);
-            await loadTexture(1, loadedTextures[1].img);
-            await updateUniforms();
-            console.log('Compiling shader...');
-            const source = await processShaderCode(engine);
-            if (!source) {
-                console.error('Initialisation aborted: shader compilation failed');
-                return;
-            }
-            await engine.compile(source);
-            setPrelude(engine.getPrelude());
-            engine.render();
-            setManualReload(false);
-            setNeedsInitialReset(false);
-            setPerformingInitialReset(false);
-            console.log('Initialisation complete');
+        } else if (needsInitialReset() && dbLoaded() && wgpuContext && wgpuDevice) {
+            (async () => {
+                console.log('Initialising engine...');
+
+                try {
+                    const engineCreationPromise = ComputeEngine.create(wgpuContext, wgpuDevice);
+                    const textureLoadingPromises = [
+                        loadTexture(0, loadedTextures[0].img),
+                        loadTexture(1, loadedTextures[1].img)
+                    ];
+
+                    await engineCreationPromise;
+                    setPerformingInitialReset(true);
+
+                    const engine = ComputeEngine.getInstance();
+                    engine.onSuccess(handleSuccess);
+                    engine.onUpdate(handleUpdate);
+                    engine.onError(handleError);
+
+                    setTimer(0);
+                    engine.setPassF32(float32Enabled);
+                    setProfilerEnabled(false);
+                    updateResolution();
+                    engine.resize(width(), height());
+                    engine.reset();
+
+                    console.log('Waiting for texture loading...');
+                    await Promise.all(textureLoadingPromises);
+
+                    await updateUniforms();
+                    console.log('Compiling shader...');
+                    const source = await processShaderCode(engine);
+
+                    if (!source) {
+                        console.error('Initialisation aborted: shader compilation failed');
+                        return;
+                    }
+
+                    await engine.compile(source);
+                    setPrelude(engine.getPrelude());
+                    engine.render();
+
+                    setManualReload(false);
+                    setNeedsInitialReset(false);
+                    setPerformingInitialReset(false);
+                    console.log('Initialisation complete');
+                } catch (error) {
+                    console.error('Initialization failed:', error);
+                    setPerformingInitialReset(false);
+                }
+            })();
         } else if (dbLoaded() && manualReload()) {
             console.log('Manual reload triggered');
             setManualReload(false);
-            await recompile();
+            recompile();
         }
         if (needsInitialReset()) {
             return;
@@ -323,13 +344,14 @@ const WgpuToyController = props => {
     }, []);
 
     const requestFullscreen = useCallback(() => {
-        if (canvas && !document.fullscreenElement) {
-            canvas.requestFullscreen({ navigationUI: 'hide' });
+        try {
+            if (canvas && !document.fullscreenElement) {
+                canvas.requestFullscreen({ navigationUI: 'hide' });
+            }
+        } catch {
+            console.error('Error requesting fullscreen');
         }
     }, []);
-
-    // init effect
-    useEffect(props.onLoad, []);
 
     useEffect(() => {
         const handleKeyDown = e => {
@@ -648,8 +670,7 @@ const WgpuToyController = props => {
         } else if (props.embed) {
             dimensions = getDimensions(window.innerWidth * dpr);
         } else {
-            const padding = 16;
-            dimensions = getDimensions((parentRef!.offsetWidth - padding) * dpr);
+            dimensions = getDimensions(parentRef!.offsetWidth * dpr);
         }
         if (canvas) {
             canvas.width = dimensions.x;

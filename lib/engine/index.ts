@@ -35,7 +35,7 @@ export class ComputeEngine {
 
     public device: GPUDevice;
 
-    private surface: GPUCanvasContext;
+    private context: GPUCanvasContext;
     private screenWidth: number;
     private screenHeight: number;
 
@@ -72,27 +72,17 @@ export class ComputeEngine {
     /**
      * Factory method to create a new renderer
      */
-    public static async create(): Promise<void> {
-        // Initialize WebGPU adapter and device
-        const adapter = await navigator.gpu.requestAdapter({
-            powerPreference: 'high-performance'
+    public static async create(context: GPUCanvasContext, device: GPUDevice): Promise<void> {
+        const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+        context.configure({
+            device: device,
+            format: presentationFormat,
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+            viewFormats: [presentationFormat]
         });
-        if (!adapter) {
-            throw new Error('No appropriate GPUAdapter found');
-        }
-
-        const device = await adapter.requestDevice({
-            label: `compute.toys device created at ${new Date().toLocaleTimeString()}`,
-            requiredFeatures: [...adapter.features] as GPUFeatureName[]
-        });
-
-        if (ComputeEngine.instance) {
-            console.log('Destroying existing engine');
-            ComputeEngine.instance.device.destroy();
-        }
         ComputeEngine.instance = new ComputeEngine(device);
-        console.log('WebGPU engine created.');
-        console.log('You can check your device features: https://webgpureport.org');
+        ComputeEngine.instance.context = context;
+        ComputeEngine.instance.device = device;
     }
 
     /**
@@ -103,22 +93,6 @@ export class ComputeEngine {
             throw new Error('WebGPU engine not initialised');
         }
         return ComputeEngine.instance;
-    }
-
-    public setSurface(canvas: HTMLCanvasElement) {
-        const context = canvas.getContext('webgpu');
-        if (!context) {
-            throw new Error('WebGPU not supported');
-        }
-        this.surface = context;
-        const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-        this.surface.configure({
-            device: this.device,
-            format: presentationFormat,
-            alphaMode: 'opaque',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT,
-            viewFormats: [presentationFormat]
-        });
     }
 
     /**
@@ -365,7 +339,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Main render function
      */
-    async render(): Promise<void> {
+    render() {
         if (this.compileMutex.isLocked()) {
             return;
         }
@@ -442,7 +416,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             }
 
             // Blit to screen
-            this.screenBlitter.blit(encoder, this.surface.getCurrentTexture().createView());
+            this.screenBlitter.blit(encoder, this.context.getCurrentTexture().createView());
 
             // Submit command buffer
             this.profiler?.beforeFinish(encoder);
@@ -549,10 +523,6 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     resize(width: number, height: number): void {
         this.screenWidth = Math.floor(width);
         this.screenHeight = Math.floor(height);
-
-        // this.surface.configure(this.surfaceConfig);
-
-        // this.reset();
     }
 
     /**
