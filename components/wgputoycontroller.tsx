@@ -137,16 +137,21 @@ const WgpuToyController = props => {
         if (language() === 'slang') {
             console.log('Translating Slang to WGSL...');
             const startTime = performance.now();
-            const compiler = await getCompiler();
-            const slangPrelude = engine.getSlangPrelude();
-            const wgsl = compiler.compile(code, textureDimensions(), slangPrelude);
-            const endTime = performance.now();
-            console.log(`Translation took ${(endTime - startTime).toFixed(2)}ms`);
-            if (!wgsl) {
-                console.error('Translating Slang to WGSL failed');
-                return null;
+
+            try {
+                const compiler = await getCompiler();
+                const slangPrelude = engine.getSlangPrelude();
+                const wgsl = compiler.compile(code, textureDimensions(), slangPrelude);
+                const endTime = performance.now();
+                console.log(`Translation took ${(endTime - startTime).toFixed(2)}ms`);
+                if (!wgsl) {
+                    console.error('Translating Slang to WGSL failed');
+                    return null;
+                }
+                return engine.preprocess(wgsl);
+            } catch (error) {
+                console.error('Slang initialization failed:', error);
             }
-            return engine.preprocess(wgsl);
         } else {
             // For WGSL, just preprocess directly
             return engine.preprocess(code);

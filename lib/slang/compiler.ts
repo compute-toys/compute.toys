@@ -1,4 +1,3 @@
-import memoizee from 'memoizee';
 import pako from 'pako';
 import { ReflectionJSON } from 'types/reflection';
 import type { GlobalSession, LanguageServer, MainModule, Module } from 'types/slang-wasm';
@@ -33,6 +32,9 @@ const moduleConfig = {
 
 let compiler: Compiler | null = null;
 let slangd: LanguageServer | null = null;
+let initializationPromise: Promise<boolean> | null = null;
+let isInitialized = false;
+let initializationError: Error | null = null;
 
 class Compiler {
     private static SLANG_STAGE_COMPUTE = 6;
@@ -130,60 +132,145 @@ class Compiler {
 }
 
 /**
- * Initialises both the compiler and language server.
- * This should be called before any other functions that access these resources.
+ * Starts the initialization process in the background.
+ * This function returns immediately and doesn't block the UI.
  */
-const initialiseSlang = memoizee(
-    async (): Promise<boolean> => {
-        console.log('Initialising Slang module, compiler, and language server');
+export function startSlangInitialization(): void {
+    if (initializationPromise || isInitialized) {
+        return; // Already started or completed
+    }
 
-        // Check if we're in a browser environment
-        if (typeof window === 'undefined') {
-            console.log('Not initializing Slang in SSR environment');
-            return false;
-        }
+    console.log('Starting Slang initialization in background...');
 
-        const createModule = (await import(/* webpackIgnore: true */ moduleURL + '.js')).default;
-        const slangModule: MainModule | null = await createModule(moduleConfig);
-        if (!slangModule) {
-            console.error('Failed to initialise Slang module');
-            return false;
-        }
-
+    initializationPromise = (async (): Promise<boolean> => {
         try {
-            compiler = new Compiler(slangModule);
+            // Check if we're in a browser environment
+            if (typeof window === 'undefined') {
+                console.log('Not initializing Slang in SSR environment');
+                return false;
+            }
+
+            const createModule = (await import(/* webpackIgnore: true */ moduleURL + '.js'))
+                .default;
+            const slangModule: MainModule | null = await createModule(moduleConfig);
+            if (!slangModule) {
+                throw new Error('Failed to initialise Slang module');
+            }
+
+            try {
+                compiler = new Compiler(slangModule);
+            } catch (error) {
+                throw new Error(`Failed to initialise compiler: ${error}`);
+            }
+
+            slangd = slangModule.createLanguageServer();
+            if (!slangd) {
+                throw new Error('Failed to initialise language server');
+            }
+
+            isInitialized = true;
+            console.log('Slang initialization completed successfully');
+            return true;
         } catch (error) {
-            console.error('Failed to initialise compiler', error);
-            return false;
+            initializationError = error instanceof Error ? error : new Error(String(error));
+            console.error('Slang initialization failed:', error);
+            throw error;
         }
+    })();
+}
 
-        slangd = slangModule.createLanguageServer();
-        if (!slangd) {
-            console.error('Failed to initialise language server');
-            return false;
-        }
+/**
+ * Checks if Slang is ready to use.
+ */
+export function isSlangReady(): boolean {
+    return isInitialized && compiler !== null && slangd !== null;
+}
 
+/**
+ * Gets the current initialization status.
+ */
+export function getSlangStatus(): {
+    isReady: boolean;
+    isInitializing: boolean;
+    error: Error | null;
+} {
+    return {
+        isReady: isSlangReady(),
+        isInitializing: initializationPromise !== null && !isInitialized,
+        error: initializationError
+    };
+}
+
+/**
+ * Waits for Slang to be ready, with optional timeout.
+ */
+export async function waitForSlang(timeoutMs: number = 30000): Promise<boolean> {
+    if (isSlangReady()) {
         return true;
-    },
-    { promise: true }
-);
+    }
+
+    if (!initializationPromise) {
+        startSlangInitialization();
+    }
+
+    if (!initializationPromise) {
+        return false;
+    }
+
+    try {
+        const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Slang initialization timeout')), timeoutMs);
+        });
+
+        await Promise.race([initializationPromise, timeoutPromise]);
+        return isSlangReady();
+    } catch (error) {
+        console.error('Error waiting for Slang:', error);
+        return false;
+    }
+}
 
 /**
  * Gets the compiler instance, ensuring it's initialised first.
+ * This function will wait for initialization to complete.
  */
 export async function getCompiler(): Promise<Compiler> {
-    if (await initialiseSlang()) {
+    if (isSlangReady()) {
         return compiler!;
     }
+
+    if (!initializationPromise) {
+        startSlangInitialization();
+    }
+
+    if (await waitForSlang()) {
+        return compiler!;
+    }
+
     throw new Error('Failed to initialise compiler');
 }
 
 /**
  * Gets the language server instance, ensuring it's initialised first.
+ * This function will wait for initialization to complete.
  */
 export async function getLanguageServer(): Promise<LanguageServer> {
-    if (await initialiseSlang()) {
+    if (isSlangReady()) {
         return slangd!;
     }
+
+    if (!initializationPromise) {
+        startSlangInitialization();
+    }
+
+    if (await waitForSlang()) {
+        return slangd!;
+    }
+
     throw new Error('Failed to initialise language server');
+}
+
+// Start initialization immediately when the module is loaded
+if (typeof window !== 'undefined') {
+    startSlangInitialization();
 }
