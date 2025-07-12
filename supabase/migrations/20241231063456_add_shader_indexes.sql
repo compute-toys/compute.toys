@@ -14,6 +14,5 @@ CREATE INDEX IF NOT EXISTS idx_shader_author ON public.shader(author);
 CREATE INDEX IF NOT EXISTS idx_shader_public_count ON public.shader(visibility) 
 WHERE visibility = 'public';
 
--- 5. RLS policy optimization: auth.uid() = author
-CREATE INDEX IF NOT EXISTS idx_shader_author_rls ON public.shader(author) 
-WHERE author IS NOT NULL;
+-- [redundant because author is non-null] RLS policy optimization: auth.uid() = author
+DROP INDEX IF EXISTS idx_shader_author_rls;
