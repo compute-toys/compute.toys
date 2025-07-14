@@ -27,7 +27,7 @@
     "@giscus/react": "^3.1.0",
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^5.17.1",
-    "@mui/lab": "^5.0.0-alpha.176",
+    "@mui/lab": "^5.0.0-alpha.177",
     "@mui/material": "^5.17.1",
     "@mui/utils": "^7.2.0",
     "@react-hook/resize-observer": "^2.0.2",
