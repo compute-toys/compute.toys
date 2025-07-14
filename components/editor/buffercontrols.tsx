@@ -74,7 +74,7 @@ const BufferControl = (props: BufferControlProps) => {
 export default function BufferControls() {
     const theme = useTheme();
 
-    const [bufferControlRefMap, setBufferControlRefMap] = useAtom(bufferControlRefMapAtom);
+    const [bufferControlRefMap, ] = useAtom(bufferControlRefMapAtom);
 
     const bufferTitle =
         bufferControlRefMap.size > 0 ? (

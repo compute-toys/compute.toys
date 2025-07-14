@@ -275,6 +275,13 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      * Compile preprocessed shader code
      */
     async compile(source: SourceMap): Promise<void> {
+        console.log(
+            '%c' + [...source.storageBuffers].map(
+                (pair: [string, string]) => pair.join(': ')
+            ).join('\n'),
+            'color: orange;'
+        );///
+
         const release = await this.compileMutex.acquire();
         const start = performance.now();
         const prelude = source.extensions + this.getPrelude();

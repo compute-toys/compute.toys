@@ -17,6 +17,7 @@ export class SourceMap {
     extensions: string = '';
     source: string = '';
     map: number[] = [0];
+    storageBuffers = new Map<string, string>();
     workgroupCount = new Map<string, [number, number, number]>();
     dispatchCount = new Map<string, number>();
     // assertMap: number[] = [];
@@ -38,7 +39,6 @@ export class Preprocessor {
     private defines: Map<string, string>;
     private ifdefStack: boolean[];
     private source: SourceMap;
-    private storageCount: number;
     private specialStrings: boolean;
     // private assertCount: number;
 
@@ -47,7 +47,6 @@ export class Preprocessor {
         this.defines.set('STRING_MAX_LEN', STRING_MAX_LEN.toString());
         this.ifdefStack = [];
         this.source = new SourceMap();
-        this.storageCount = 0;
         this.specialStrings = false;
         // this.assertCount = 0;
     }
@@ -265,17 +264,19 @@ export class Preprocessor {
     }
 
     private handle_storage(tokens: string[], lineNum: number): void {
-        if (this.storageCount >= 2) {
+        if (this.source.storageBuffers.size >= 2) {
             throw new WGSLError('Only two storage buffers are currently supported', lineNum);
         }
         const [, name, ...types] = tokens;
+        if (this.source.storageBuffers.has(name)) {
+            throw new WGSLError('Storage buffer ' + name + ' may not be redeclared', lineNum);
+        }
         const type = types.join(' ');
-        console.log(`Storage buffer "${name}" of type ${type}`);///
         this.source.pushLine(
-            `@group(0) @binding(${this.storageCount}) var<storage,read_write> ${name}: ${type};`,
+            `@group(0) @binding(${this.source.storageBuffers.size}) var<storage,read_write> ${name}: ${type};`,
             lineNum
         );
-        this.storageCount++;
+        this.source.storageBuffers.set(name, type);
     }
 
     /*

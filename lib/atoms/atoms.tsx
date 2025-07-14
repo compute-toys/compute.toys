@@ -65,11 +65,7 @@ export const entryPointsAtom = atomWithReset(new Array<string>());
 export const entryTimersAtom = atomWithReset(new Array<number>());
 
 export const bufferControlRefMapAtom = atom<Map<string, BufferControlRef>>(
-    new Map<string, BufferControlRef>([
-        ['very very very very very very very very very long name', {}],
-        ['buffer', {}],
-        ['another very very very very very very very very very long name', {}]
-    ])
+    new Map<string, BufferControlRef>()
 );
 // we create a new refmap when deserializing from DB, don't need a reset
 export const sliderRefMapAtom = atom<Map<string, UniformSliderRef>>(
