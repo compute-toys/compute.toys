@@ -11,26 +11,16 @@ import { useAtom } from 'jotai';
 import { bufferControlRefMapAtom } from 'lib/atoms/atoms';
 import { getRainbowColor, theme } from 'theme/theme';
 
-import { useEffect } from 'react';///
-
 export interface BufferControlRef {
-    getUUID: () => string;
-    getBufferName: () => string;
 }
 
 interface BufferControlProps {
-    uuid: string;
+    bufferName: string;
     index: number;
     bufferControlRefMap: Map<string, BufferControlRef>;
 }
 
 const BufferControl = (props: BufferControlProps) => {
-    useEffect(() => {///
-        console.log(`Buffer UUID="${props.uuid}" Name="${props.bufferControlRefMap.get(props.uuid)?.getBufferName()}"`);
-    }, []);
-
-    const bufferName = props.bufferControlRefMap.get(props.uuid)?.getBufferName();
-
     return (
         <Box
             sx={{
@@ -49,13 +39,16 @@ const BufferControl = (props: BufferControlProps) => {
                     display: 'table-cell',
                     gridRow: '1',
                     gridColumn: 'span 1',
-                    padding: '14px',
                     textAlign: 'left',
                     verticalAlign: 'middle',
+                    whiteSpace: 'nowrap', // fix accidental wrapping of a test name, identifiers should not have whitespace though
+                    overflowX: 'scroll',
+                    scrollbarWidth: 'none',
+                    margin: '8px 14px 8px 14px',
                     color: getRainbowColor(props.index)
                 }}
             >
-                {bufferName}
+                {props.bufferName}
             </Box>
             <Button
                 aria-label="Dump Contents"
@@ -63,16 +56,16 @@ const BufferControl = (props: BufferControlProps) => {
                 sx={{
                     display: 'table-cell',
                     gridRow: '1',
-                    gridColumn: 'span 3',
+                    gridColumn: 'span 1',
                     color: theme.palette.dracula.foreground,
                     verticalAlign: 'middle',
                     width: 'fit-content'
                 }}
                 onClick={() => {
-                    console.log(`Dumped ${bufferName}`);
+                    console.log(props.bufferName);
                 }}
             >
-                Dump Contents
+                DUMP CONTENTS
             </Button>
         </Box>
     );
@@ -87,9 +80,9 @@ export default function BufferControls() {
         bufferControlRefMap.size > 0 ? (
             <span
                 style={{ color: theme.palette.dracula.foreground }}
-            >{`Buffers [${bufferControlRefMap.size}]`}</span>
+            >{`Storage Buffers [${bufferControlRefMap.size}]`}</span>
         ) : (
-            <span style={{ color: theme.status.disabled }}>Buffers</span>
+            <span style={{ color: theme.status.disabled }}>Storage Buffers</span>
         );
 
     return (
@@ -116,10 +109,10 @@ export default function BufferControls() {
                         alignItems="center"
                         marginTop="32px"
                     >
-                        {[...bufferControlRefMap.keys()].map((uuid, index) => (
+                        {[...bufferControlRefMap.keys()].map((bufferName, index) => (
                             <BufferControl
-                                key={uuid}
-                                uuid={uuid}
+                                key={bufferName}
+                                bufferName={bufferName}
                                 index={index}
                                 bufferControlRefMap={bufferControlRefMap}
                             />

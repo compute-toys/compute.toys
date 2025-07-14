@@ -270,6 +270,7 @@ export class Preprocessor {
         }
         const [, name, ...types] = tokens;
         const type = types.join(' ');
+        console.log(`Storage buffer "${name}" of type ${type}`);///
         this.source.pushLine(
             `@group(0) @binding(${this.storageCount}) var<storage,read_write> ${name}: ${type};`,
             lineNum

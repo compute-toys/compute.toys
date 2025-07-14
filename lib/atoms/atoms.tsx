@@ -66,14 +66,9 @@ export const entryTimersAtom = atomWithReset(new Array<number>());
 
 export const bufferControlRefMapAtom = atom<Map<string, BufferControlRef>>(
     new Map<string, BufferControlRef>([
-        ["abcdef", {
-            getUUID: () => "abcdef",
-            getBufferName: () => "buffer_a"
-        }],
-        ["ghijkl", {
-            getUUID: () => "ghijkl",
-            getBufferName: () => "buffer_b"
-        }]
+        ['very very very very very very very very very long name', {}],
+        ['buffer', {}],
+        ['another very very very very very very very very very long name', {}]
     ])
 );
 // we create a new refmap when deserializing from DB, don't need a reset
