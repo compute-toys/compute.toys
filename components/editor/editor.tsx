@@ -19,6 +19,7 @@ import VimButton from 'components/buttons/vimbutton';
 import EntryPointDisplay from 'components/editor/entrypointdisplay';
 import { MetadataEditor } from 'components/editor/metadataeditor';
 import TexturePicker from 'components/editor/texturepicker';
+import BufferControls from 'components/editor/buffercontrols';
 import UniformSliders from 'components/editor/uniformsliders';
 import { WgpuToyWrapper } from 'components/wgputoy';
 import 'firacode';
@@ -189,6 +190,7 @@ export default function Editor(props: EditorProps) {
                         </Stack>
                     </Grid>
                 </Grid>
+                <BufferControls />
                 <UniformSliders />
             </ItemWithTransitionSignal>
             {metadataEditor}
