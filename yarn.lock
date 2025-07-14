@@ -4546,10 +4546,10 @@ natural-compare@^1.4.0:
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
   integrity sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==
 
-next-navigation-guard@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/next-navigation-guard/-/next-navigation-guard-0.1.2.tgz#33d810e37a933ae27f88eaa79549606a99c1a74a"
-  integrity sha512-gh+hUMqnI9a/iQ3sxCd7aagQB0NTioe7kj7UJagVfWh+GWfyr4mErlBy2yNZk0VyXebtW86I3cP6lcwraIFhYA==
+next-navigation-guard@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/next-navigation-guard/-/next-navigation-guard-0.2.0.tgz#c9622cf184c59a0ecb54cb2cdbaf962a7d5361e4"
+  integrity sha512-EnQcqJi/bcHXnirnY0TGSFkQ3Rl9ID4BZWdU2ovoWAkA72mCofI2hTcaqUUOmlSBVZp4AvSGm1kQmkOJDLrEjg==
 
 next-tick@^1.1.0:
   version "1.1.0"
