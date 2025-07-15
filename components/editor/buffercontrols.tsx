@@ -8,19 +8,25 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
 import { useAtom } from 'jotai';
+import { useState } from 'react';
 import { bufferControlRefMapAtom } from 'lib/atoms/atoms';
 import { getRainbowColor, theme } from 'theme/theme';
 
 export interface BufferControlRef {
+    getBufferDeclName: () => string;
 }
 
 interface BufferControlProps {
-    bufferName: string;
+    uuid: string;
     index: number;
     bufferControlRefMap: Map<string, BufferControlRef>;
 }
 
 const BufferControl = (props: BufferControlProps) => {
+    const [bufferName,] = useState(
+        props.bufferControlRefMap.get(props.uuid)!.getBufferDeclName()
+    );
+
     return (
         <Box
             sx={{
@@ -48,7 +54,7 @@ const BufferControl = (props: BufferControlProps) => {
                     color: getRainbowColor(props.index)
                 }}
             >
-                {props.bufferName}
+                {bufferName}
             </Box>
             <Button
                 aria-label="Dump Contents"
@@ -62,7 +68,7 @@ const BufferControl = (props: BufferControlProps) => {
                     width: 'fit-content'
                 }}
                 onClick={() => {
-                    console.log(props.bufferName);
+                    console.log(bufferName);
                 }}
             >
                 DUMP CONTENTS
@@ -74,7 +80,7 @@ const BufferControl = (props: BufferControlProps) => {
 export default function BufferControls() {
     const theme = useTheme();
 
-    const [bufferControlRefMap, ] = useAtom(bufferControlRefMapAtom);
+    const [bufferControlRefMap,] = useAtom(bufferControlRefMapAtom);
 
     const bufferTitle =
         bufferControlRefMap.size > 0 ? (
@@ -109,10 +115,10 @@ export default function BufferControls() {
                         alignItems="center"
                         marginTop="32px"
                     >
-                        {[...bufferControlRefMap.keys()].map((bufferName, index) => (
+                        {[...bufferControlRefMap.keys()].map((uuid, index) => (
                             <BufferControl
-                                key={bufferName}
-                                bufferName={bufferName}
+                                key={uuid}
+                                uuid={uuid}
                                 index={index}
                                 bufferControlRefMap={bufferControlRefMap}
                             />

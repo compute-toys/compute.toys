@@ -10,6 +10,11 @@ const RE_WORD = /[a-zA-Z_][a-zA-Z0-9_]*/g;
 const STRING_MAX_LEN = 20;
 type DirectiveFunction = (tokens: string[], lineNum: number) => void | Promise<void>;
 
+interface StorageBufferBindingInfo {
+    binding: number;
+    size: number;
+}
+
 /**
  * Maps the processed shader source to original line numbers
  */
@@ -17,7 +22,7 @@ export class SourceMap {
     extensions: string = '';
     source: string = '';
     map: number[] = [0];
-    storageBuffers = new Map<string, string>();
+    storageBuffers = new Map<string, StorageBufferBindingInfo>();
     workgroupCount = new Map<string, [number, number, number]>();
     dispatchCount = new Map<string, number>();
     // assertMap: number[] = [];
@@ -269,14 +274,18 @@ export class Preprocessor {
         }
         const [, name, ...types] = tokens;
         if (this.source.storageBuffers.has(name)) {
-            throw new WGSLError('Storage buffer ' + name + ' may not be redeclared', lineNum);
+            throw new WGSLError('Storage buffer ' + name + ' has already been declared', lineNum);
         }
         const type = types.join(' ');
+        const binding = this.source.storageBuffers.size;
         this.source.pushLine(
-            `@group(0) @binding(${this.source.storageBuffers.size}) var<storage,read_write> ${name}: ${type};`,
+            `@group(0) @binding(${binding}) var<storage,read_write> ${name}: ${type};`,
             lineNum
         );
-        this.source.storageBuffers.set(name, type);
+        this.source.storageBuffers.set(name, {
+            binding: binding,
+            size: 128 << 20 // 128MiB (default GPUSupportedLimits.maxStorageBufferBindingSize)
+        });
     }
 
     /*

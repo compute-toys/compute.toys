@@ -22,6 +22,7 @@ import {
     requestFullscreenAtom,
     resetAtom,
     saveColorTransitionSignalAtom,
+    bufferControlRefMapAtom,
     sliderRefMapAtom,
     sliderUpdateSignalAtom,
     textureChannelDimensionsAtom,
@@ -70,6 +71,7 @@ const WgpuToyController = props => {
     const [isPointerPressed, setIsPointerPressed] = useTransientAtom(isPointerPressedAtom);
     const title = useAtomValue(titleAtom);
 
+    const setBufferControlRefMap = useSetAtom(bufferControlRefMapAtom);
     // must be transient so we can access updated value in play loop
     const [sliderUpdateSignal, setSliderUpdateSignal] = useTransientAtom(sliderUpdateSignalAtom);
     const [manualReload, setManualReload] = useTransientAtom(manualReloadAtom);
@@ -251,7 +253,8 @@ const WgpuToyController = props => {
         }
     }, []);
 
-    const handleSuccess = useCallback(entryPoints => {
+    const handleSuccess = useCallback((bufferControlRefMap, entryPoints) => {
+        setBufferControlRefMap(bufferControlRefMap);
         setEntryPoints(entryPoints);
         setParseError(() => ({
             summary: '',

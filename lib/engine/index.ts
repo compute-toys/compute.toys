@@ -10,6 +10,8 @@ import { loadHDR } from './hdr';
 import { Preprocessor, SourceMap } from './preprocessor';
 import { Profiler } from './profiler';
 import { countNewlines } from './utils';
+import { BufferControlRef } from 'components/editor/buffercontrols';
+import { v4 as UUID } from 'uuid';
 
 // Regular expression for parsing compute shader entry points
 const RE_ENTRY_POINT = /@compute[^@]*?@workgroup_size\((.*?)\)[^@]*?fn\s+(\w+)/g;
@@ -45,7 +47,7 @@ export class ComputeEngine {
     private computePipelines: ComputePipeline[] = [];
     private computeBindGroup: GPUBindGroup;
     private computeBindGroupLayout: GPUBindGroupLayout;
-    private onSuccessCb?: (entryPoints: string[]) => void;
+    private onSuccessCb?: (bufferControlRefMap: Map<string, BufferControlRef>, entryPoints: string[]) => void;
     private onUpdateCb?: (entryTimers: string[]) => void;
     private onErrorCb?: (summary: string, row: number, col: number) => void;
     private passF32: boolean = false;
@@ -275,18 +277,19 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      * Compile preprocessed shader code
      */
     async compile(source: SourceMap): Promise<void> {
-        console.log(
-            '%c' + [...source.storageBuffers].map(
-                (pair: [string, string]) => pair.join(': ')
-            ).join('\n'),
-            'color: orange;'
-        );///
-
         const release = await this.compileMutex.acquire();
         const start = performance.now();
         const prelude = source.extensions + this.getPrelude();
         const preludeLines = countNewlines(prelude);
         const wgsl = prelude + source.source;
+
+        // Create storage buffer control refs
+        const bufferControlRefMap = new Map<string, BufferControlRef>();
+        for (let [name,] of source.storageBuffers) {
+            bufferControlRefMap.set(UUID(), {
+                getBufferDeclName: () => name
+            });
+        }
 
         // Parse entry points
         const entryPoints: Array<[string, [number, number, number]]> = [];
@@ -301,7 +304,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Notify success callback
         const entryPointNames = entryPoints.map(([name]) => name);
-        this.onSuccessCb?.(entryPointNames);
+        this.onSuccessCb?.(bufferControlRefMap, entryPointNames);
 
         // Create shader module
         const shaderModule = this.device.createShaderModule({
@@ -466,7 +469,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Set success callback for shader compilation
      */
-    onSuccess(callback: (entryPoints: string[]) => void): void {
+    onSuccess(callback: (bufferControlRefMap: Map<string, BufferControlRef>, entryPoints: string[]) => void): void {
         this.onSuccessCb = callback;
     }
     onUpdate(callback: (entryTimers: string[]) => void): void {
