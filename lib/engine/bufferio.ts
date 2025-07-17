@@ -19,21 +19,30 @@ export class BufferReader {
     /**
      * deviceBuffer MUST have GPUBufferUsage.COPY_SRC usage flag
      */
-    read(deviceBuffer: GPUBuffer, hostBuffer: ArrayBuffer, size?: number, srcOffset: number = 0, dstOffset: number = 0): Promise<ArrayBuffer> {
+    read(
+        deviceBuffer: GPUBuffer,
+        hostBuffer: ArrayBuffer,
+        size?: number,
+        srcOffset: number = 0,
+        dstOffset: number = 0
+    ): Promise<ArrayBuffer> {
         if (size === undefined) size = Math.min(deviceBuffer.size, hostBuffer.byteLength);
-        return this.execChain = this.execChain
+        return (this.execChain = this.execChain
             .then(() => {
-                let encoder = this.device.createCommandEncoder();
+                const encoder = this.device.createCommandEncoder();
                 encoder.copyBufferToBuffer(deviceBuffer, srcOffset, this.stagingBuffer, 0, size);
                 this.device.queue.submit([encoder.finish()]);
                 return this.device.queue.onSubmittedWorkDone();
             })
             .then(() => this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, size))
             .then<ArrayBuffer>(() => {
-                new Uint8Array(hostBuffer).set(new Uint8Array(this.stagingBuffer.getMappedRange(0, size)), dstOffset);
+                new Uint8Array(hostBuffer).set(
+                    new Uint8Array(this.stagingBuffer.getMappedRange(0, size)),
+                    dstOffset
+                );
                 this.stagingBuffer.unmap();
                 return hostBuffer;
-            });
+            }));
     }
 
     dispose() {

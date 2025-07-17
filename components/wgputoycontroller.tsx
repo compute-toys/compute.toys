@@ -3,6 +3,7 @@ import useResizeObserver from '@react-hook/resize-observer';
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTransientAtom } from 'jotai-game';
 import {
+    bufferControlRefMapAtom,
     codeAtom,
     dbLoadedAtom,
     entryPointsAtom,
@@ -22,7 +23,6 @@ import {
     requestFullscreenAtom,
     resetAtom,
     saveColorTransitionSignalAtom,
-    bufferControlRefMapAtom,
     sliderRefMapAtom,
     sliderUpdateSignalAtom,
     textureChannelDimensionsAtom,

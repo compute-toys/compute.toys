@@ -4,12 +4,12 @@ import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Box from '@mui/material/Box';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
 import { useAtom } from 'jotai';
-import { useState } from 'react';
 import { bufferControlRefMapAtom } from 'lib/atoms/atoms';
+import { useState } from 'react';
 import { getRainbowColor, theme } from 'theme/theme';
 
 export interface BufferControlRef {
@@ -24,11 +24,9 @@ interface BufferControlProps {
 }
 
 const BufferControl = (props: BufferControlProps) => {
-    const [bufferName,] = useState(
-        props.bufferControlRefMap.get(props.uuid)!.getBufferDeclName
-    );
+    const [bufferName] = useState(props.bufferControlRefMap.get(props.uuid)!.getBufferDeclName);
 
-    const [readBufferContents,] = useState(
+    const [readBufferContents] = useState(
         props.bufferControlRefMap.get(props.uuid)!.getBufferReader
     );
 
@@ -74,9 +72,10 @@ const BufferControl = (props: BufferControlProps) => {
                 }}
                 onClick={() => {
                     readBufferContents().then(contents => {
-                        let anchor = document.createElement('a');
+                        const blob = new Blob([contents], { type: 'application/octet-stream' });
+                        const anchor = document.createElement('a');
                         anchor.download = bufferName + '.bin';
-                        anchor.href = URL.createObjectURL(new Blob([contents], { type: 'application/octet-stream' }));
+                        anchor.href = URL.createObjectURL(blob);
                         anchor.click(); // download blob
                         URL.revokeObjectURL(anchor.href);
                     });
@@ -91,7 +90,7 @@ const BufferControl = (props: BufferControlProps) => {
 export default function BufferControls() {
     const theme = useTheme();
 
-    const [bufferControlRefMap,] = useAtom(bufferControlRefMapAtom);
+    const [bufferControlRefMap] = useAtom(bufferControlRefMapAtom);
 
     const bufferTitle =
         bufferControlRefMap.size > 0 ? (

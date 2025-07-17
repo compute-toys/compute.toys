@@ -4,6 +4,8 @@
  */
 
 import { Mutex } from 'async-mutex';
+import { BufferControlRef } from 'components/editor/buffercontrols';
+import { v4 as UUID } from 'uuid';
 import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
 import { BufferReader } from './bufferio';
@@ -11,8 +13,6 @@ import { loadHDR } from './hdr';
 import { Preprocessor, SourceMap } from './preprocessor';
 import { Profiler } from './profiler';
 import { countNewlines } from './utils';
-import { BufferControlRef } from 'components/editor/buffercontrols';
-import { v4 as UUID } from 'uuid';
 
 // Regular expression for parsing compute shader entry points
 const RE_ENTRY_POINT = /@compute[^@]*?@workgroup_size\((.*?)\)[^@]*?fn\s+(\w+)/g;
@@ -48,7 +48,10 @@ export class ComputeEngine {
     private computePipelines: ComputePipeline[] = [];
     private computeBindGroup: GPUBindGroup;
     private computeBindGroupLayout: GPUBindGroupLayout;
-    private onSuccessCb?: (bufferControlRefMap: Map<string, BufferControlRef>, entryPoints: string[]) => void;
+    private onSuccessCb?: (
+        bufferControlRefMap: Map<string, BufferControlRef>,
+        entryPoints: string[]
+    ) => void;
     private onUpdateCb?: (entryTimers: string[]) => void;
     private onErrorCb?: (summary: string, row: number, col: number) => void;
     private passF32: boolean = false;
@@ -287,9 +290,10 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Create storage buffer control refs
         const bufferControlRefMap = new Map<string, BufferControlRef>();
-        for (let [name, bindingInfo] of source.storageBuffers) {
-            let deviceBuffer = this.bindings.storage[bindingInfo.binding].device;
-            let reader = () => this.bufferReader.read(deviceBuffer, new ArrayBuffer(deviceBuffer.size));
+        for (const [name, bindingInfo] of source.storageBuffers) {
+            const deviceBuffer = this.bindings.storage[bindingInfo.binding].device;
+            const reader = () =>
+                this.bufferReader.read(deviceBuffer, new ArrayBuffer(deviceBuffer.size));
             bufferControlRefMap.set(UUID(), {
                 getBufferDeclName: () => name,
                 getBufferReader: () => reader
@@ -474,7 +478,12 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Set success callback for shader compilation
      */
-    onSuccess(callback: (bufferControlRefMap: Map<string, BufferControlRef>, entryPoints: string[]) => void): void {
+    onSuccess(
+        callback: (
+            bufferControlRefMap: Map<string, BufferControlRef>,
+            entryPoints: string[]
+        ) => void
+    ): void {
         this.onSuccessCb = callback;
     }
     onUpdate(callback: (entryTimers: string[]) => void): void {
