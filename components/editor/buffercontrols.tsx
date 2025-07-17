@@ -14,6 +14,7 @@ import { getRainbowColor, theme } from 'theme/theme';
 
 export interface BufferControlRef {
     getBufferDeclName: () => string;
+    getBufferReader: () => () => Promise<ArrayBuffer>;
 }
 
 interface BufferControlProps {
@@ -24,7 +25,11 @@ interface BufferControlProps {
 
 const BufferControl = (props: BufferControlProps) => {
     const [bufferName,] = useState(
-        props.bufferControlRefMap.get(props.uuid)!.getBufferDeclName()
+        props.bufferControlRefMap.get(props.uuid)!.getBufferDeclName
+    );
+
+    const [readBufferContents,] = useState(
+        props.bufferControlRefMap.get(props.uuid)!.getBufferReader
     );
 
     return (
@@ -68,7 +73,13 @@ const BufferControl = (props: BufferControlProps) => {
                     width: 'fit-content'
                 }}
                 onClick={() => {
-                    console.log(bufferName);
+                    readBufferContents().then(contents => {
+                        let anchor = document.createElement('a');
+                        anchor.download = bufferName + '.bin';
+                        anchor.href = URL.createObjectURL(new Blob([contents], { type: 'application/octet-stream' }));
+                        anchor.click(); // download blob
+                        URL.revokeObjectURL(anchor.href);
+                    });
                 }}
             >
                 DUMP CONTENTS

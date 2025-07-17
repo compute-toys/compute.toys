@@ -257,8 +257,7 @@ export class Bindings {
     custom: BufferBinding<[string[], Float32Array]>;
     // userData: BufferBinding<Map<string, Uint32Array>>;
 
-    storage1: BufferBinding<void>;
-    storage2: BufferBinding<void>;
+    storage: BufferBinding<void>[];
     // debugBuffer: BufferBinding<void>;
     dispatchInfo: BufferBinding<void>;
 
@@ -410,25 +409,26 @@ export class Bindings {
 
         // Initialize storage buffers
         const storageSize = 128 * 1024 * 1024; // 128MB
-        this.storage1 = new BufferBinding<void>({
-            host: undefined,
-            device: device.createBuffer({
-                size: storageSize,
-                usage: GPUBufferUsage.STORAGE
+        this.storage = [
+            new BufferBinding<void>({
+                host: undefined,
+                device: device.createBuffer({
+                    size: storageSize,
+                    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
+                }),
+                layout: storageBuffer,
+                decl: ''
             }),
-            layout: storageBuffer,
-            decl: ''
-        });
-
-        this.storage2 = new BufferBinding<void>({
-            host: undefined,
-            device: device.createBuffer({
-                size: storageSize,
-                usage: GPUBufferUsage.STORAGE
-            }),
-            layout: storageBuffer,
-            decl: ''
-        });
+            new BufferBinding<void>({
+                host: undefined,
+                device: device.createBuffer({
+                    size: storageSize,
+                    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
+                }),
+                layout: storageBuffer,
+                decl: ''
+            })
+        ];
 
         // Initialize debug buffer
         // this.debugBuffer = new BufferBinding<void>({
@@ -574,8 +574,7 @@ export class Bindings {
 
     private getAllBindings(): Binding[] {
         return [
-            this.storage1,
-            this.storage2,
+            ...this.storage,
             this.time,
             this.mouse,
             this.keys,
@@ -639,8 +638,7 @@ export class Bindings {
 
     dispose(): void {
         // Destroy buffers
-        this.storage1.device.destroy();
-        this.storage2.device.destroy();
+        this.storage.map(bufferBinding => bufferBinding.device.destroy());
         this.time.device.destroy();
         this.mouse.device.destroy();
         this.keys.device.destroy();

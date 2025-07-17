@@ -6,6 +6,7 @@
 import { Mutex } from 'async-mutex';
 import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
+import { BufferReader } from './bufferio';
 import { loadHDR } from './hdr';
 import { Preprocessor, SourceMap } from './preprocessor';
 import { Profiler } from './profiler';
@@ -54,6 +55,7 @@ export class ComputeEngine {
     private profilerAttached: boolean = false;
     private profiler: Profiler | null = null;
     private screenBlitter: Blitter;
+    private bufferReader: BufferReader;
     //private lastStats: number = performance.now();
     // private source: SourceMap;
 
@@ -285,9 +287,12 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Create storage buffer control refs
         const bufferControlRefMap = new Map<string, BufferControlRef>();
-        for (let [name,] of source.storageBuffers) {
+        for (let [name, bindingInfo] of source.storageBuffers) {
+            let deviceBuffer = this.bindings.storage[bindingInfo.binding].device;
+            let reader = () => this.bufferReader.read(deviceBuffer, new ArrayBuffer(deviceBuffer.size));
             bufferControlRefMap.set(UUID(), {
-                getBufferDeclName: () => name
+                getBufferDeclName: () => name,
+                getBufferReader: () => reader
             });
         }
 
@@ -595,6 +600,9 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             presentationFormat,
             'linear'
         );
+
+        // Recreate buffer reader
+        this.bufferReader = new BufferReader(this.device);
     }
 
     /**
@@ -756,5 +764,8 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Destroy the profiler
         this.profiler?.dispose();
+
+        // Destroy the buffer reader
+        this.bufferReader?.dispose();
     }
 }
