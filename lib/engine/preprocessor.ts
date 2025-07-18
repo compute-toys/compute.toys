@@ -10,8 +10,9 @@ const RE_WORD = /[a-zA-Z_][a-zA-Z0-9_]*/g;
 const STRING_MAX_LEN = 20;
 type DirectiveFunction = (tokens: string[], lineNum: number) => void | Promise<void>;
 
-interface StorageBufferBindingInfo {
+export interface StorageBufferBindingInfo {
     binding: number;
+    offset: number; // for storage buffers packed into a single buffer (as used for slang)
     size: number;
 }
 
@@ -284,7 +285,8 @@ export class Preprocessor {
         );
         this.source.storageBuffers.set(name, {
             binding: binding,
-            size: 128 << 20 // 128MiB (default GPUSupportedLimits.maxStorageBufferBindingSize)
+            offset: 0,
+            size: 128 << 20 // 128MiB
         });
     }
 

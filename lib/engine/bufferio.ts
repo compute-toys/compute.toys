@@ -26,6 +26,7 @@ export class BufferReader {
         srcOffset: number = 0,
         dstOffset: number = 0
     ): Promise<ArrayBuffer> {
+        // TODO handle srcOffset and size that are not multiples of 4 (e.g. reading buffers of half floats)
         if (size === undefined) size = Math.min(deviceBuffer.size, hostBuffer.byteLength);
         return (this.execChain = this.execChain
             .then(() => {

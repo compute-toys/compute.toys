@@ -291,9 +291,16 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         // Create storage buffer control refs
         const bufferControlRefMap = new Map<string, BufferControlRef>();
         for (const [name, bindingInfo] of source.storageBuffers) {
-            const deviceBuffer = this.bindings.storage[bindingInfo.binding].device;
-            const reader = () =>
-                this.bufferReader.read(deviceBuffer, new ArrayBuffer(deviceBuffer.size));
+            const reader = () => {
+                const bufferBinding = this.bindings.getStorageBufferBinding(bindingInfo.binding);
+                return this.bufferReader.read(
+                    bufferBinding.device,
+                    new ArrayBuffer(bindingInfo.size),
+                    bindingInfo.size,
+                    bindingInfo.offset
+                );
+            };
+
             bufferControlRefMap.set(UUID(), {
                 getBufferDeclName: () => name,
                 getBufferReader: () => reader

@@ -37,6 +37,7 @@ import {
     wgputoyPreludeAtom
 } from 'lib/atoms/wgputoyatoms';
 import { ComputeEngine } from 'lib/engine';
+import { StorageBufferBindingInfo } from 'lib/engine/preprocessor';
 import { getCompiler, TextureDimensions } from 'lib/slang/compiler';
 import { useCallback, useEffect } from 'react';
 import { theme } from 'theme/theme';
@@ -141,14 +142,24 @@ const WgpuToyController = props => {
             const startTime = performance.now();
             const compiler = await getCompiler();
             const slangPrelude = engine.getSlangPrelude();
-            const wgsl = compiler.compile(code, textureDimensions(), slangPrelude);
+            const [wgsl, storageStructLayout] = compiler.compile(
+                code,
+                textureDimensions(),
+                slangPrelude
+            );
             const endTime = performance.now();
             console.log(`Translation took ${(endTime - startTime).toFixed(2)}ms`);
             if (!wgsl) {
                 console.error('Translating Slang to WGSL failed');
                 return null;
             }
-            return engine.preprocess(wgsl);
+            const sourceMap = await engine.preprocess(wgsl);
+            sourceMap.storageBuffers = new Map(
+                storageStructLayout.map<[string, StorageBufferBindingInfo]>(
+                    ({ name, offset, size }) => [name, { binding: 0, offset: offset, size: size }]
+                )
+            );
+            return sourceMap;
         } else {
             // For WGSL, just preprocess directly
             return engine.preprocess(code);

@@ -1,8 +1,94 @@
-import type { ReflectionEntryPoint, ReflectionParameter } from 'types/reflection';
+import type { ReflectionEntryPoint, ReflectionParameter, ReflectionType } from 'types/reflection';
 import { EnhancedReflectionJSON, TextureDimensions } from './compiler';
 
-class ShaderConverter {
-    private getBufferSize(param: ReflectionParameter): number {
+export interface StorageStructMemberLayout {
+    name: string;
+    offset: number;
+    size: number;
+}
+
+export class ShaderConverter {
+    private roundUp(multiple: number, value: number): number {
+        return Math.ceil(value / multiple) * multiple;
+    }
+
+    private calcSizeAndAlignment(type: ReflectionType): [number, number] {
+        // TODO: prettier handling and fix handling of special slang packing of matrices etc.
+        switch (type.kind) {
+            case 'scalar': {
+                switch (type.scalarType) {
+                    case 'int32':
+                    case 'uint32':
+                    case 'float32': {
+                        return [4, 4];
+                    }
+
+                    case 'float16': {
+                        return [2, 2];
+                    }
+
+                    default: {
+                        return [0, 1]; // error
+                    }
+                }
+            }
+
+            case 'vector': {
+                const [elementSize] = this.calcSizeAndAlignment(type.elementType);
+                switch (type.elementCount) {
+                    case 2: {
+                        const width = 2 * elementSize;
+                        return [width, width];
+                    }
+
+                    case 3: {
+                        return [3 * elementSize, 4 * elementSize];
+                    }
+
+                    case 4: {
+                        const width = 4 * elementSize;
+                        return [width, width];
+                    }
+
+                    default: {
+                        return [0, 1]; // error
+                    }
+                }
+            }
+
+            case 'matrix': {
+                const [, columnAlign] = this.calcSizeAndAlignment({
+                    kind: 'vector',
+                    elementCount: type.rowCount,
+                    elementType: type.elementType
+                });
+                return [type.columnCount * columnAlign, columnAlign];
+            }
+
+            case 'struct': {
+                const maxAlign = Math.max(
+                    ...type.fields.map(field => this.calcSizeAndAlignment(field.type)[1])
+                );
+                const lastMember = type.fields[type.fields.length - 1].binding;
+                if (lastMember?.kind === 'uniform') {
+                    return [this.roundUp(maxAlign, lastMember.offset + lastMember.size), maxAlign];
+                } else {
+                    return [0, 1]; // error
+                }
+            }
+
+            case 'array': {
+                const [elementSize, elementAlign] = this.calcSizeAndAlignment(type.elementType);
+                return [type.elementCount * this.roundUp(elementAlign, elementSize), elementAlign];
+            }
+
+            default: {
+                return [0, 1]; // error
+            }
+        }
+    }
+
+    private getBufferElementCount(param: ReflectionParameter): number {
         const zeros = param.userAttribs?.find(attr => attr.name === 'StorageBuffer');
         if (zeros && zeros.arguments.length > 0) {
             return zeros.arguments[0] as number;
@@ -10,24 +96,39 @@ class ShaderConverter {
         return 0;
     }
 
-    private generateStorageStruct(input: EnhancedReflectionJSON): string {
+    // Reference https://www.w3.org/TR/WGSL/#alignment-and-size for size and alignment of WGSL types
+    private generateStorageStruct(
+        input: EnhancedReflectionJSON
+    ): [string, StorageStructMemberLayout[]] {
+        const layout: StorageStructMemberLayout[] = [];
+        let memberOffset = 0;
         let bufferFields = '';
         for (const p of input.parameters) {
             if (
                 p.type.kind === 'resource' &&
                 p.type.baseShape === 'structuredBuffer' &&
-                this.getBufferSize(p) > 0
+                this.getBufferElementCount(p) > 0
             ) {
                 if (p.name in input.bindings) {
                     const binding = input.bindings[p.name];
-                    const size = this.getBufferSize(p);
-                    bufferFields += `    ${p.name}: array<${binding.typeArgs[0]}, ${size}>,\n`;
+                    const elementCount = this.getBufferElementCount(p);
+                    bufferFields += `    ${p.name}: array<${binding.typeArgs[0]}, ${elementCount}>,\n`;
+                    const [elementSize, elementAlign] = this.calcSizeAndAlignment(
+                        p.type.resultType
+                    );
+                    const memberSize = elementCount * this.roundUp(elementAlign, elementSize);
+                    memberOffset = this.roundUp(
+                        elementAlign /* also alignment of member */,
+                        memberOffset
+                    );
+                    layout.push({ name: p.name, offset: memberOffset, size: memberSize });
+                    memberOffset += memberSize;
                 } else {
                     console.warn(`No binding found for ${p.name}`);
                 }
             }
         }
-        return bufferFields ? `struct StorageBuffers {\n${bufferFields}}` : '';
+        return [bufferFields ? `struct StorageBuffers {\n${bufferFields}}` : '', layout];
     }
 
     /*
@@ -68,7 +169,7 @@ class ShaderConverter {
             if (
                 p.type.kind === 'resource' &&
                 p.type.baseShape === 'structuredBuffer' &&
-                this.getBufferSize(p) > 0
+                this.getBufferElementCount(p) > 0
             ) {
                 value = `fields.${p.name}`;
             }
@@ -113,7 +214,7 @@ class ShaderConverter {
                             if (param && param.type.kind === 'resource') {
                                 if (param.type.baseShape === 'structuredBuffer') {
                                     countX = Math.ceil(
-                                        this.getBufferSize(param) / threadGroupSize[0]
+                                        this.getBufferElementCount(param) / threadGroupSize[0]
                                     );
                                 } else if (param.type.baseShape === 'texture2D') {
                                     if (targetName === 'channel0' || targetName === 'channel1') {
@@ -175,13 +276,16 @@ class ShaderConverter {
             .join('\n');
     }
 
-    public convert(input: EnhancedReflectionJSON, channelDimensions: TextureDimensions[]): string {
-        const storageStruct = this.generateStorageStruct(input);
+    public convert(
+        input: EnhancedReflectionJSON,
+        channelDimensions: TextureDimensions[]
+    ): [string, StorageStructMemberLayout[]] {
+        const [storageStructDecl, storageStructLayout] = this.generateStorageStruct(input);
 
         const parts = [
-            storageStruct,
-            storageStruct ? '' : null,
-            storageStruct ? '#storage fields StorageBuffers' : null,
+            storageStructDecl,
+            storageStructDecl ? '' : null,
+            storageStructDecl ? '#storage fields StorageBuffers' : null,
             '',
             this.generateDefines(input.parameters),
             '',
@@ -190,8 +294,6 @@ class ShaderConverter {
             this.generateDispatchDirectives(input.entryPoints)
         ].filter(Boolean);
 
-        return parts.join('\n');
+        return [parts.join('\n'), storageStructLayout];
     }
 }
-
-export default ShaderConverter;

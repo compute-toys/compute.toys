@@ -628,6 +628,10 @@ export class Bindings {
             .join('\n');
     }
 
+    getStorageBufferBinding(binding: number): BufferBinding<void> {
+        return this.storage[binding];
+    }
+
     stage(queue: GPUQueue): void {
         queue.writeBuffer(this.custom.device, 0, this.custom.host[1].buffer);
         // queue.writeBuffer(this.userData.device, 0, this.userData.host.toBuffer());
