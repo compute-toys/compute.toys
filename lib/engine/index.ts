@@ -559,8 +559,12 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      * Reset renderer state
      */
     reset(): void {
-        // Dispose old buffers and textures
-        this.dispose();
+        // Save old channels and custom data
+        const oldChannels = this.bindings?.channels;
+        const oldCustom = this.bindings?.custom;
+
+        // Dispose old buffers and textures, preserving channels and custom data
+        this.dispose({ preserveChannels: true, preserveCustom: true });
 
         // Create new bindings with current settings
         this.bindings = new Bindings(
@@ -569,6 +573,14 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             this.screenHeight,
             this.passF32
         );
+
+        // Copy channels and custom data directly
+        if (oldChannels) {
+            this.bindings.channels = oldChannels;
+        }
+        if (oldCustom) {
+            this.bindings.custom = oldCustom;
+        }
 
         // Recreate pipeline and binding group layouts
         const layout = this.bindings.createBindGroupLayout(this.device);
@@ -740,9 +752,9 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Cleanup method to dispose all resources
      */
-    dispose(): void {
+    dispose(options?: { preserveChannels?: boolean; preserveCustom?: boolean }): void {
         // Destroy all buffers and textures
-        this.bindings?.dispose();
+        this.bindings?.dispose(options);
 
         // Destroy the profiler
         this.profiler?.dispose();
