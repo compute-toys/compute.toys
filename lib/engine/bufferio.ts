@@ -5,7 +5,7 @@
 export class BufferReader {
     private device: GPUDevice;
     private stagingBuffer: GPUBuffer;
-    private execChain: Promise<void | ArrayBuffer>;
+    private execChain: Promise<void>;
 
     constructor(device: GPUDevice, maxBufferSize: number = 128 << 20 /* 128MiB */) {
         this.device = device;
@@ -22,28 +22,43 @@ export class BufferReader {
     read(
         deviceBuffer: GPUBuffer,
         hostBuffer: ArrayBuffer,
-        size?: number,
+        size: number,
         srcOffset: number = 0,
         dstOffset: number = 0
     ): Promise<ArrayBuffer> {
-        // TODO handle srcOffset and size that are not multiples of 4 (e.g. reading buffers of half floats)
-        if (size === undefined) size = Math.min(deviceBuffer.size, hostBuffer.byteLength);
-        return (this.execChain = this.execChain
-            .then(() => {
+        return new Promise(resolve => {
+            this.execChain = this.execChain.then(async () => {
+                // Calculate offset and size which are a multiple of 4 and contain the requested range
+                // https://developer.mozilla.org/en-US/docs/Web/API/GPUCommandEncoder/copyBufferToBuffer#validation
+                // https://developer.mozilla.org/en-US/docs/Web/API/GPUBuffer/mapAsync#validation
+                // https://developer.mozilla.org/en-US/docs/Web/API/GPUBuffer/getMappedRange#validation
+                const startPadding = srcOffset % 4;
+                const readOffset = srcOffset - startPadding;
+                const readSize = Math.ceil((startPadding + size) / 4) * 4;
+
+                // WebGPU severely restricts usage of mappable buffers, only allowing copying to and from them
+                // So we need to copy to an intermediate buffer which we can then map and read on the CPU
                 const encoder = this.device.createCommandEncoder();
-                encoder.copyBufferToBuffer(deviceBuffer, srcOffset, this.stagingBuffer, 0, size);
+                encoder.copyBufferToBuffer(
+                    deviceBuffer,
+                    readOffset,
+                    this.stagingBuffer,
+                    0,
+                    readSize
+                );
                 this.device.queue.submit([encoder.finish()]);
-                return this.device.queue.onSubmittedWorkDone();
-            })
-            .then(() => this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, size))
-            .then<ArrayBuffer>(() => {
-                new Uint8Array(hostBuffer).set(
-                    new Uint8Array(this.stagingBuffer.getMappedRange(0, size)),
-                    dstOffset
+                await this.device.queue.onSubmittedWorkDone(); // SLOW
+
+                await this.stagingBuffer.mapAsync(GPUMapMode.READ, 0, readSize); // also pretty slow
+                const mappedRange = this.stagingBuffer.getMappedRange(0, readSize);
+                new Uint8Array(hostBuffer, dstOffset, size).set(
+                    new Uint8Array(mappedRange, startPadding, size)
                 );
                 this.stagingBuffer.unmap();
-                return hostBuffer;
-            }));
+
+                resolve(hostBuffer);
+            });
+        });
     }
 
     dispose() {
