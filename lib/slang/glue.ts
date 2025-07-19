@@ -12,11 +12,12 @@ export class ShaderConverter {
         return Math.ceil(value / multiple) * multiple;
     }
 
+    // Reference https://www.w3.org/TR/WGSL/#alignment-and-size for size and alignment of WGSL types
     private calcSizeAndAlignment(type: ReflectionType): [number, number] {
-        // TODO: prettier handling and fix handling of special slang packing of matrices etc.
         switch (type.kind) {
             case 'scalar': {
                 switch (type.scalarType) {
+                    case 'bool': // not host shareable but slang lets it pass and it gets caught by WebGPU
                     case 'int32':
                     case 'uint32':
                     case 'float32': {
@@ -28,14 +29,19 @@ export class ShaderConverter {
                     }
 
                     default: {
-                        return [0, 1]; // error
+                        return [0, 0];
                     }
                 }
             }
 
             case 'vector': {
-                const [elementSize] = this.calcSizeAndAlignment(type.elementType);
+                const [elementSize, elementAlign] = this.calcSizeAndAlignment(type.elementType);
                 switch (type.elementCount) {
+                    case 1: {
+                        // slang differentiates between scalars and single element vectors for some reason
+                        return [elementSize, elementAlign];
+                    }
+
                     case 2: {
                         const width = 2 * elementSize;
                         return [width, width];
@@ -51,29 +57,31 @@ export class ShaderConverter {
                     }
 
                     default: {
-                        return [0, 1]; // error
+                        return [0, 0];
                     }
                 }
             }
 
             case 'matrix': {
-                const [, columnAlign] = this.calcSizeAndAlignment({
+                // slang matrix<T, R, C> translates to wgsl array<vector<T, C>, R>
+                const [, rowAlign] = this.calcSizeAndAlignment({
                     kind: 'vector',
-                    elementCount: type.rowCount,
+                    elementCount: type.columnCount,
                     elementType: type.elementType
                 });
-                return [type.columnCount * columnAlign, columnAlign];
+                return [type.rowCount * rowAlign, rowAlign];
             }
 
             case 'struct': {
-                const maxAlign = Math.max(
+                const structAlign = Math.max(
                     ...type.fields.map(field => this.calcSizeAndAlignment(field.type)[1])
                 );
-                const lastMember = type.fields[type.fields.length - 1].binding;
-                if (lastMember?.kind === 'uniform') {
-                    return [this.roundUp(maxAlign, lastMember.offset + lastMember.size), maxAlign];
+                const lastMemberBinding = type.fields[type.fields.length - 1]?.binding;
+                if (lastMemberBinding?.kind === 'uniform') {
+                    const justPastLastMember = lastMemberBinding.offset + lastMemberBinding.size;
+                    return [this.roundUp(structAlign, justPastLastMember), structAlign];
                 } else {
-                    return [0, 1]; // error
+                    return [0, 0];
                 }
             }
 
@@ -83,7 +91,7 @@ export class ShaderConverter {
             }
 
             default: {
-                return [0, 1]; // error
+                return [0, 0];
             }
         }
     }
@@ -96,7 +104,6 @@ export class ShaderConverter {
         return 0;
     }
 
-    // Reference https://www.w3.org/TR/WGSL/#alignment-and-size for size and alignment of WGSL types
     private generateStorageStruct(
         input: EnhancedReflectionJSON
     ): [string, StorageStructMemberLayout[]] {
@@ -113,16 +120,28 @@ export class ShaderConverter {
                     const binding = input.bindings[p.name];
                     const elementCount = this.getBufferElementCount(p);
                     bufferFields += `    ${p.name}: array<${binding.typeArgs[0]}, ${elementCount}>,\n`;
-                    const [elementSize, elementAlign] = this.calcSizeAndAlignment(
-                        p.type.resultType
-                    );
-                    const memberSize = elementCount * this.roundUp(elementAlign, elementSize);
-                    memberOffset = this.roundUp(
-                        elementAlign /* also alignment of member */,
-                        memberOffset
-                    );
-                    layout.push({ name: p.name, offset: memberOffset, size: memberSize });
-                    memberOffset += memberSize;
+                    if (memberOffset >= 0) {
+                        const [elementSize, elementAlign] = this.calcSizeAndAlignment(
+                            p.type.resultType
+                        );
+                        if (elementAlign > 0) {
+                            memberOffset = this.roundUp(elementAlign, memberOffset);
+                            const memberSize =
+                                elementCount * this.roundUp(elementAlign, elementSize);
+                            layout.push({ name: p.name, offset: memberOffset, size: memberSize });
+                            memberOffset += memberSize;
+                        } else {
+                            console.error(
+                                `Size and alignment unknown for binding ${p.name}`,
+                                p.type
+                            );
+                            memberOffset = -1; // invalidate offset to skip following members
+                        }
+                    } else {
+                        console.warn(
+                            `Skipping binding ${p.name} due to inability to determine offset`
+                        );
+                    }
                 } else {
                     console.warn(`No binding found for ${p.name}`);
                 }
