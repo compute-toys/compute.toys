@@ -16,7 +16,7 @@ export interface TextureDimensions {
     height: number;
 }
 
-const moduleURL = 'https://compute-toys.github.io/slang-playground/wasm/slang-wasm';
+const moduleURL = '/wasm/slang-wasm';
 const moduleConfig = {
     instantiateWasm: async (
         imports: WebAssembly.Imports,
