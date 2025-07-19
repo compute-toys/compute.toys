@@ -15,7 +15,8 @@
     "pages:setup": "npx @cloudflare/next-on-pages",
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:preview": "wrangler pages dev",
-    "supabase:types": ". ./.env && supabase gen types typescript --project-id $NEXT_PUBLIC_SUPABASE_PROJECT_ID > types/database.types.ts"
+    "supabase:start": "supabase db start",
+    "supabase:types": "supabase gen types typescript --local > types/database.types.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
