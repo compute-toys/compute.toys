@@ -39,7 +39,7 @@
     "jotai-game": "^0.2.0",
     "memoizee": "^0.4.17",
     "monaco-editor": "^0.52.2",
-    "next": "^15.3.3",
+    "next": "^15.4.2",
     "next-navigation-guard": "^0.2.0",
     "pako": "^2.1.0",
     "react": "^18.3.1",
@@ -59,7 +59,7 @@
     "depcheck": "^1.4.7",
     "dotenv": "^16.5.0",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^15.3.3",
+    "eslint-config-next": "^15.4.2",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-n": "^17.21.0",
@@ -68,7 +68,7 @@
     "prettier-plugin-organize-imports": "^4.1.0",
     "supabase": "^2.24.3",
     "typescript": "^5.8.3",
-    "vercel": "^43.1.0",
-    "wrangler": "^4.20.0"
+    "vercel": "^44.5.0",
+    "wrangler": "^4.25.0"
   }
 }
