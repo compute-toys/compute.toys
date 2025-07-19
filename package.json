@@ -16,6 +16,7 @@
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:preview": "wrangler pages dev",
     "supabase:start": "supabase db start",
+    "supabase:reset": "supabase db reset",
     "supabase:types": "supabase gen types typescript --local > types/database.types.ts"
   },
   "dependencies": {
@@ -67,7 +68,7 @@
     "eslint-plugin-prettier": "^5.4.1",
     "prettier": "^3.5.3",
     "prettier-plugin-organize-imports": "^4.1.0",
-    "supabase": "^2.24.3",
+    "supabase": "2.31.2",
     "typescript": "^5.8.3",
     "vercel": "^43.1.0",
     "wrangler": "^4.20.0"
