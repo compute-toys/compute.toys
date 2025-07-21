@@ -291,7 +291,7 @@ export class ShaderConverter {
     private generateDispatchDirectives(entryPoints: ReflectionEntryPoint[]): string {
         return entryPoints
             .filter(ep => ep.userAttribs?.some(attr => attr.name === 'DispatchOnce'))
-            .map(ep => `#dispatch_once ${ep.name}`)
+            .map(ep => `#dispatch_once ${ep.name}\n`)
             .join('\n');
     }
 
