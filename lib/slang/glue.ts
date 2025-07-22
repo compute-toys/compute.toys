@@ -7,95 +7,116 @@ export interface StorageStructMemberLayout {
     size: number;
 }
 
-export class ShaderConverter {
-    private roundUp(multiple: number, value: number): number {
-        return Math.ceil(value / multiple) * multiple;
-    }
+/**
+ * Returns the smallest multiple of multiple >= value
+ */
+function roundUp(multiple: number, value: number): number {
+    return Math.ceil(value / multiple) * multiple;
+}
 
-    // Reference https://www.w3.org/TR/WGSL/#alignment-and-size for size and alignment of WGSL types
-    private calcSizeAndAlignment(type: ReflectionType): [number, number] {
-        switch (type.kind) {
-            case 'scalar': {
-                switch (type.scalarType) {
-                    case 'bool': // not host shareable but slang lets it pass and it gets caught by WebGPU
-                    case 'int32':
-                    case 'uint32':
-                    case 'float32': {
-                        return [4, 4];
-                    }
-
-                    case 'float16': {
-                        return [2, 2];
-                    }
-
-                    default: {
-                        return [0, 0];
-                    }
+/**
+ * Returns [size, alignment] for the WGSL translation of a Slang type reflection
+ * [0, 0] is returned for incompatible, non host shareable, or non fixed footprint types
+ * Reference https://www.w3.org/TR/WGSL/#alignment-and-size for size and alignment of WGSL types
+ */
+function calcSizeAndAlignment(type: ReflectionType): [number, number] {
+    switch (type.kind) {
+        case 'scalar': {
+            switch (type.scalarType) {
+                case 'int32':
+                case 'uint32':
+                case 'float32': {
+                    return [4, 4];
                 }
-            }
 
-            case 'vector': {
-                const [elementSize, elementAlign] = this.calcSizeAndAlignment(type.elementType);
-                switch (type.elementCount) {
-                    case 1: {
-                        // slang differentiates between scalars and single element vectors for some reason
-                        return [elementSize, elementAlign];
-                    }
-
-                    case 2: {
-                        const width = 2 * elementSize;
-                        return [width, width];
-                    }
-
-                    case 3: {
-                        return [3 * elementSize, 4 * elementSize];
-                    }
-
-                    case 4: {
-                        const width = 4 * elementSize;
-                        return [width, width];
-                    }
-
-                    default: {
-                        return [0, 0];
-                    }
+                case 'float16': {
+                    return [2, 2];
                 }
-            }
 
-            case 'matrix': {
-                // slang matrix<T, R, C> translates to wgsl array<vector<T, C>, R>
-                const [, rowAlign] = this.calcSizeAndAlignment({
-                    kind: 'vector',
-                    elementCount: type.columnCount,
-                    elementType: type.elementType
-                });
-                return [type.rowCount * rowAlign, rowAlign];
-            }
-
-            case 'struct': {
-                const structAlign = Math.max(
-                    ...type.fields.map(field => this.calcSizeAndAlignment(field.type)[1])
-                );
-                const lastMemberBinding = type.fields[type.fields.length - 1]?.binding;
-                if (lastMemberBinding?.kind === 'uniform') {
-                    const justPastLastMember = lastMemberBinding.offset + lastMemberBinding.size;
-                    return [this.roundUp(structAlign, justPastLastMember), structAlign];
-                } else {
+                default: {
                     return [0, 0];
                 }
             }
+        }
 
-            case 'array': {
-                const [elementSize, elementAlign] = this.calcSizeAndAlignment(type.elementType);
-                return [type.elementCount * this.roundUp(elementAlign, elementSize), elementAlign];
-            }
-
-            default: {
+        case 'vector': {
+            if (type.elementType.kind !== 'scalar') {
                 return [0, 0];
             }
+
+            const [elementSize, elementAlign] = calcSizeAndAlignment(type.elementType);
+            switch (type.elementCount) {
+                case 1: {
+                    // for some reason vector<T, 1> and T are treated as distinct types
+                    return [elementSize, elementAlign];
+                }
+
+                case 2: {
+                    return [2 * elementSize, 2 * elementAlign];
+                }
+
+                case 3: {
+                    return [3 * elementSize, 4 * elementAlign];
+                }
+
+                case 4: {
+                    return [4 * elementSize, 4 * elementAlign];
+                }
+
+                default: {
+                    return [0, 0];
+                }
+            }
+        }
+
+        case 'matrix': {
+            if (
+                type.rowCount < 2 ||
+                type.rowCount > 4 ||
+                type.columnCount < 2 ||
+                type.columnCount > 4 ||
+                type.elementType.kind !== 'scalar' ||
+                (type.elementType.scalarType !== 'float32' &&
+                    type.elementType.scalarType !== 'float16')
+            ) {
+                return [0, 0];
+            }
+
+            const [, rowAlign] = calcSizeAndAlignment({
+                kind: 'vector',
+                elementType: type.elementType,
+                elementCount: type.columnCount
+            });
+            return [type.rowCount * rowAlign, rowAlign];
+        }
+
+        case 'struct': {
+            let size = 0;
+            let align = 0;
+            for (const member of type.fields) {
+                const [memberSize, memberAlign] = calcSizeAndAlignment(member.type);
+                if (memberAlign === 0) return [0, 0];
+                if (memberAlign > align) align = memberAlign;
+                size = roundUp(memberAlign, size) + memberSize;
+            }
+
+            if (align === 0) return [0, 0];
+            return [roundUp(align, size), align];
+        }
+
+        case 'array': {
+            const [elementSize, elementAlign] = calcSizeAndAlignment(type.elementType);
+            if (elementAlign === 0) return [0, 0];
+            return [type.elementCount * roundUp(elementAlign, elementSize), elementAlign];
+        }
+
+        default: {
+            return [0, 0];
         }
     }
+}
 
+export class ShaderConverter {
     private getBufferElementCount(param: ReflectionParameter): number {
         const zeros = param.userAttribs?.find(attr => attr.name === 'StorageBuffer');
         if (zeros && zeros.arguments.length > 0) {
@@ -121,13 +142,10 @@ export class ShaderConverter {
                     const elementCount = this.getBufferElementCount(p);
                     bufferFields += `    ${p.name}: array<${binding.typeArgs[0]}, ${elementCount}>,\n`;
                     if (memberOffset >= 0) {
-                        const [elementSize, elementAlign] = this.calcSizeAndAlignment(
-                            p.type.resultType
-                        );
+                        const [elementSize, elementAlign] = calcSizeAndAlignment(p.type.resultType);
                         if (elementAlign > 0) {
-                            memberOffset = this.roundUp(elementAlign, memberOffset);
-                            const memberSize =
-                                elementCount * this.roundUp(elementAlign, elementSize);
+                            memberOffset = roundUp(elementAlign, memberOffset);
+                            const memberSize = elementCount * roundUp(elementAlign, elementSize);
                             layout.push({ name: p.name, offset: memberOffset, size: memberSize });
                             memberOffset += memberSize;
                         } else {
