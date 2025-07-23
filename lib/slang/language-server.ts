@@ -3,7 +3,7 @@ import shadertoylibSource from 'lib/shaders/shadertoy.slang';
 import stdSlangShader from 'lib/shaders/std.slang';
 import * as monaco from 'monaco-editor';
 import { CompletionContext } from 'types/slang-wasm';
-import { getLanguageServer } from './compiler';
+import { getLanguageServer, isSlangReady, waitForSlang } from './compiler';
 
 const userCodeURI = 'file:///user.slang';
 
@@ -15,13 +15,19 @@ export async function registerSlangLanguageServer(monacoInstance: typeof monaco)
         return;
     }
 
+    // Wait for language server to be ready
+    if (!(await waitForSlang())) {
+        console.error('Failed to initialize Slang language server');
+        return;
+    }
+
     const slangd = await getLanguageServer();
     console.log('Registering Slang language server');
 
     // Register hover provider
     monacoInstance.languages.registerHoverProvider('slang', {
         provideHover: (model, position) => {
-            if (!slangd) return null;
+            if (!slangd || !isSlangReady()) return null;
 
             const result = slangd.hover(userCodeURI, {
                 line: position.lineNumber - 1,
@@ -45,7 +51,7 @@ export async function registerSlangLanguageServer(monacoInstance: typeof monaco)
     // Register definition provider
     monacoInstance.languages.registerDefinitionProvider('slang', {
         provideDefinition: (model, position) => {
-            if (!slangd) return null;
+            if (!slangd || !isSlangReady()) return null;
 
             const result = slangd.gotoDefinition(userCodeURI, {
                 line: position.lineNumber - 1,
@@ -78,7 +84,7 @@ export async function registerSlangLanguageServer(monacoInstance: typeof monaco)
     monacoInstance.languages.registerCompletionItemProvider('slang', {
         triggerCharacters: ['.', ':', '>', '(', '<', ' ', '['],
         provideCompletionItems: (model, position, context) => {
-            if (!slangd) return null;
+            if (!slangd || !isSlangReady()) return null;
 
             const lspContext: CompletionContext = {
                 triggerKind: context.triggerKind,
@@ -125,7 +131,7 @@ export async function registerSlangLanguageServer(monacoInstance: typeof monaco)
         signatureHelpTriggerCharacters: ['(', ','],
         signatureHelpRetriggerCharacters: [','],
         provideSignatureHelp: (model, position) => {
-            if (!slangd) return null;
+            if (!slangd || !isSlangReady()) return null;
 
             const result = slangd.signatureHelp(userCodeURI, {
                 line: position.lineNumber - 1,
@@ -186,7 +192,7 @@ export async function registerSlangLanguageServer(monacoInstance: typeof monaco)
             tokenModifiers: []
         }),
         provideDocumentRangeSemanticTokens: () => {
-            if (!slangd) return null;
+            if (!slangd || !isSlangReady()) return null;
 
             const result = slangd.semanticTokens(userCodeURI);
             if (!result) return null;
@@ -213,6 +219,12 @@ export async function updateSlangDocumentAndDiagnostics(
     // Skip in server-side rendering
     if (typeof window === 'undefined') {
         console.log('Skipping Slang document and diagnostics update in SSR environment');
+        return;
+    }
+
+    // Wait for language server to be ready
+    if (!(await waitForSlang())) {
+        console.error('Failed to initialize Slang language server for diagnostics');
         return;
     }
 

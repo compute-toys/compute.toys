@@ -79,11 +79,16 @@ export default function ClientSideEditor({ shaderData, userData }: ClientSideEdi
 
         const loadEditor = async () => {
             try {
+                // Preload Monaco editor in parallel
+                const monacoPreload = import('components/editor/monaco');
+
                 // Direct import with string literal for webpack to analyze
                 const editorModule = await import('components/editor/editor');
 
                 if (isMounted) {
                     setEditorComponent(() => editorModule.default);
+                    // Preload Monaco after editor loads
+                    await monacoPreload;
                 }
             } catch (err) {
                 console.error('Error loading editor:', err);
