@@ -73,6 +73,11 @@ export class Blitter {
     private renderBindGroup: GPUBindGroup;
     private destFormat: GPUTextureFormat;
 
+    private trackedTextures: GPUTexture[] = [];
+    private bindGroupLayout: GPUBindGroupLayout;
+    private shaderModule: GPUShaderModule;
+    private sampler: GPUSampler;
+
     constructor(
         device: GPUDevice,
         src: GPUTextureView,
@@ -83,13 +88,13 @@ export class Blitter {
         this.destFormat = destFormat;
 
         // Create shader module
-        const shaderModule = device.createShaderModule({
+        this.shaderModule = device.createShaderModule({
             label: 'Blit Shader',
             code: BLIT_SHADER
         });
 
         // Create bind group layout
-        const bindGroupLayout = device.createBindGroupLayout({
+        this.bindGroupLayout = device.createBindGroupLayout({
             label: 'Blit Bind Group Layout',
             entries: [
                 {
@@ -114,18 +119,18 @@ export class Blitter {
         // Create pipeline layout
         const pipelineLayout = device.createPipelineLayout({
             label: 'Blit Pipeline Layout',
-            bindGroupLayouts: [bindGroupLayout]
+            bindGroupLayouts: [this.bindGroupLayout]
         });
 
         // Create sampler
-        const sampler = device.createSampler({
+        this.sampler = device.createSampler({
             minFilter: filter,
             magFilter: filter
         });
 
         // Create bind group
         this.renderBindGroup = device.createBindGroup({
-            layout: bindGroupLayout,
+            layout: this.bindGroupLayout,
             entries: [
                 {
                     binding: 0,
@@ -133,7 +138,7 @@ export class Blitter {
                 },
                 {
                     binding: 1,
-                    resource: sampler
+                    resource: this.sampler
                 }
             ]
         });
@@ -145,11 +150,11 @@ export class Blitter {
         this.renderPipeline = device.createRenderPipeline({
             layout: pipelineLayout,
             vertex: {
-                module: shaderModule,
+                module: this.shaderModule,
                 entryPoint: 'vs_main'
             },
             fragment: {
-                module: shaderModule,
+                module: this.shaderModule,
                 entryPoint: fragmentEntry,
                 targets: [
                     {
@@ -210,7 +215,7 @@ export class Blitter {
     /**
      * Create a new texture with mipmaps
      */
-    createTexture(
+    createMipmappedTexture(
         device: GPUDevice,
         queue: GPUQueue,
         width: number,
@@ -244,6 +249,7 @@ export class Blitter {
         this.blit(encoder, views[0]);
 
         // Generate remaining mip levels
+        const blittersToDispose: Blitter[] = [];
         for (let targetMip = 1; targetMip < mipLevelCount; targetMip++) {
             const prevLevelBlitter = new Blitter(
                 device,
@@ -252,10 +258,37 @@ export class Blitter {
                 this.destFormat,
                 'linear'
             );
+            blittersToDispose.push(prevLevelBlitter);
             prevLevelBlitter.blit(encoder, views[targetMip]);
         }
 
         queue.submit([encoder.finish()]);
+
+        // Track the final texture for disposal
+        this.trackedTextures.push(texture);
+        // Dispose all temporary blitters
+        queue.onSubmittedWorkDone().then(() => {
+            for (const blitter of blittersToDispose) {
+                blitter.dispose();
+            }
+        });
+
         return texture;
+    }
+
+    // This method is used after mipmap generation
+    private dispose(): void {
+        // Destroy textures
+        for (const texture of this.trackedTextures) {
+            texture.destroy();
+        }
+        this.trackedTextures = [];
+
+        // Clear references
+        this.renderPipeline = null as any;
+        this.renderBindGroup = null as any;
+        this.bindGroupLayout = null as any;
+        this.shaderModule = null as any;
+        this.sampler = null as any;
     }
 }

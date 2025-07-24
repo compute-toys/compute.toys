@@ -559,24 +559,28 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      * Reset renderer state
      */
     reset(): void {
+        // Save old channels and custom data
+        const oldChannels = this.bindings?.channels;
+        const oldCustom = this.bindings?.custom;
+
+        // Dispose old buffers and textures, preserving channels and custom data
+        this.dispose({ preserveChannels: true, preserveCustom: true });
+
         // Create new bindings with current settings
-        const newBindings = new Bindings(
+        this.bindings = new Bindings(
             this.device,
             this.screenWidth,
             this.screenHeight,
             this.passF32
         );
 
-        if (this.bindings) {
-            // Copy over dynamic state
-            newBindings.custom = this.bindings.custom;
-            // newBindings.userData = this.bindings.userData;
-            newBindings.channels = this.bindings.channels;
+        // Copy channels and custom data directly
+        if (oldChannels) {
+            this.bindings.channels = oldChannels;
         }
-
-        // Clean up old bindings
-        // this.bindings.destroy();
-        this.bindings = newBindings;
+        if (oldCustom) {
+            this.bindings.custom = oldCustom;
+        }
 
         // Recreate pipeline and binding group layouts
         const layout = this.bindings.createBindGroupLayout(this.device);
@@ -607,8 +611,8 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             colorSpaceConversion: 'none'
         });
 
-        // Create texture
-        let texture = this.device.createTexture({
+        // Create initial texture
+        const initialTexture = this.device.createTexture({
             size: {
                 width: imageBitmap.width,
                 height: imageBitmap.height,
@@ -624,7 +628,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         // Copy image data to texture
         this.device.queue.copyExternalImageToTexture(
             { source: imageBitmap },
-            { texture },
+            { texture: initialTexture },
             {
                 width: imageBitmap.width,
                 height: imageBitmap.height,
@@ -635,12 +639,14 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         // Generate mipmap chain
         const blitter = new Blitter(
             this.device,
-            texture.createView(),
+            initialTexture.createView(),
             ColorSpace.Linear,
             'rgba8unorm-srgb',
             'linear'
         );
-        texture = blitter.createTexture(
+
+        // Create final texture with mipmaps for channel textures
+        const finalTexture = blitter.createMipmappedTexture(
             this.device,
             this.device.queue,
             imageBitmap.width,
@@ -649,13 +655,16 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         );
 
         // Update channel texture
-        this.bindings.channels[index].setTexture(texture);
+        this.bindings.channels[index].setTexture(finalTexture);
 
         // Recreate bind group since we changed a texture
         this.computeBindGroup = this.bindings.createBindGroup(
             this.device,
             this.computeBindGroupLayout
         );
+
+        // Destroy initial texture
+        initialTexture.destroy();
 
         console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
 
@@ -676,7 +685,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const { rgbe, width, height } = loadHDR(data);
 
         // Create RGBE texture
-        const rgbeTexture = this.device.createTexture({
+        const initialTexture = this.device.createTexture({
             size: {
                 width,
                 height,
@@ -691,7 +700,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Copy RGBE data to texture
         this.device.queue.writeTexture(
-            { texture: rgbeTexture },
+            { texture: initialTexture },
             rgbe,
             {
                 offset: 0,
@@ -708,12 +717,13 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         // Convert RGBE to float texture and generate mipmap chain
         const blitter = new Blitter(
             this.device,
-            rgbeTexture.createView(),
+            initialTexture.createView(),
             ColorSpace.Rgbe,
             'rgba16float',
             'linear'
         );
-        const texture = blitter.createTexture(
+
+        const finalTexture = blitter.createMipmappedTexture(
             this.device,
             this.device.queue,
             width,
@@ -722,7 +732,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         );
 
         // Update channel texture
-        this.bindings.channels[index].setTexture(texture);
+        this.bindings.channels[index].setTexture(finalTexture);
 
         // Recreate bind group since we changed a texture
         this.computeBindGroup = this.bindings.createBindGroup(
@@ -730,9 +740,23 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             this.computeBindGroupLayout
         );
 
+        // Destroy initial texture
+        initialTexture.destroy();
+
         console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
 
         // Return dimensions
         return { width, height };
+    }
+
+    /**
+     * Cleanup method to dispose all resources
+     */
+    dispose(options?: { preserveChannels?: boolean; preserveCustom?: boolean }): void {
+        // Destroy all buffers and textures
+        this.bindings?.dispose(options);
+
+        // Destroy the profiler
+        this.profiler?.dispose();
     }
 }
