@@ -5,7 +5,7 @@ import type { GlobalSession, LanguageServer, MainModule, Module } from 'types/sl
 import shadertoylibSource from '../shaders/shadertoy.slang';
 import stdlibSource from '../shaders/std.slang';
 import { BindingInfo, parseBindings } from './binding-parser';
-import ShaderConverter from './glue';
+import { ShaderConverter, StorageStructMemberLayout } from './glue';
 
 export interface EnhancedReflectionJSON extends ReflectionJSON {
     bindings: Record<string, BindingInfo>;
@@ -61,7 +61,11 @@ class Compiler {
         this.wgslTarget = target.value;
     }
 
-    compile(shaderSource: string, channelDimensions: TextureDimensions[], prelude: string): string {
+    compile(
+        shaderSource: string,
+        channelDimensions: TextureDimensions[],
+        prelude: string
+    ): [string, StorageStructMemberLayout[]] {
         const session = this.globalSession.createSession(this.wgslTarget);
         if (!session) throw this.mainModule.getLastError();
 
@@ -116,16 +120,21 @@ class Compiler {
         console.log('Enhanced reflection:', enhancedReflection);
 
         const converter = new ShaderConverter();
-        const glue = converter.convert(enhancedReflection, channelDimensions);
+        const [glue, storageStructLayout] = converter.convert(
+            enhancedReflection,
+            channelDimensions
+        );
         console.log(glue);
+        console.log(storageStructLayout);
 
-        return (
+        const wgsl =
             glue +
             outCode
                 .split('\n')
                 .filter(line => !line.trim().startsWith('@binding'))
-                .join('\n')
-        );
+                .join('\n');
+
+        return [wgsl, storageStructLayout];
     }
 }
 

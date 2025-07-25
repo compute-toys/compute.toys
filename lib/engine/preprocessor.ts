@@ -10,6 +10,12 @@ const RE_WORD = /[a-zA-Z_][a-zA-Z0-9_]*/g;
 const STRING_MAX_LEN = 20;
 type DirectiveFunction = (tokens: string[], lineNum: number) => void | Promise<void>;
 
+export interface StorageBufferBindingInfo {
+    binding: number;
+    offset: number; // for storage buffers packed into a single buffer (as used for slang)
+    size: number;
+}
+
 /**
  * Maps the processed shader source to original line numbers
  */
@@ -17,6 +23,7 @@ export class SourceMap {
     extensions: string = '';
     source: string = '';
     map: number[] = [0];
+    storageBuffers = new Map<string, StorageBufferBindingInfo>();
     workgroupCount = new Map<string, [number, number, number]>();
     dispatchCount = new Map<string, number>();
     // assertMap: number[] = [];
@@ -38,7 +45,6 @@ export class Preprocessor {
     private defines: Map<string, string>;
     private ifdefStack: boolean[];
     private source: SourceMap;
-    private storageCount: number;
     private specialStrings: boolean;
     // private assertCount: number;
 
@@ -47,7 +53,6 @@ export class Preprocessor {
         this.defines.set('STRING_MAX_LEN', STRING_MAX_LEN.toString());
         this.ifdefStack = [];
         this.source = new SourceMap();
-        this.storageCount = 0;
         this.specialStrings = false;
         // this.assertCount = 0;
     }
@@ -265,16 +270,24 @@ export class Preprocessor {
     }
 
     private handle_storage(tokens: string[], lineNum: number): void {
-        if (this.storageCount >= 2) {
+        if (this.source.storageBuffers.size >= 2) {
             throw new WGSLError('Only two storage buffers are currently supported', lineNum);
         }
         const [, name, ...types] = tokens;
+        if (this.source.storageBuffers.has(name)) {
+            throw new WGSLError('Storage buffer ' + name + ' has already been declared', lineNum);
+        }
         const type = types.join(' ');
+        const binding = this.source.storageBuffers.size;
         this.source.pushLine(
-            `@group(0) @binding(${this.storageCount}) var<storage,read_write> ${name}: ${type};`,
+            `@group(0) @binding(${binding}) var<storage,read_write> ${name}: ${type};`,
             lineNum
         );
-        this.storageCount++;
+        this.source.storageBuffers.set(name, {
+            binding: binding,
+            offset: 0,
+            size: 128 << 20 // 128MiB
+        });
     }
 
     /*

@@ -4,8 +4,11 @@
  */
 
 import { Mutex } from 'async-mutex';
+import { BufferControlRef } from 'components/editor/buffercontrols';
+import { v4 as UUID } from 'uuid';
 import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
+import { BufferReader } from './bufferio';
 import { loadHDR } from './hdr';
 import { Preprocessor, SourceMap } from './preprocessor';
 import { Profiler } from './profiler';
@@ -45,13 +48,17 @@ export class ComputeEngine {
     private computePipelines: ComputePipeline[] = [];
     private computeBindGroup: GPUBindGroup;
     private computeBindGroupLayout: GPUBindGroupLayout;
-    private onSuccessCb?: (entryPoints: string[]) => void;
+    private onSuccessCb?: (
+        bufferControlRefMap: Map<string, BufferControlRef>,
+        entryPoints: string[]
+    ) => void;
     private onUpdateCb?: (entryTimers: string[]) => void;
     private onErrorCb?: (summary: string, row: number, col: number) => void;
     private passF32: boolean = false;
     private profilerAttached: boolean = false;
     private profiler: Profiler | null = null;
     private screenBlitter: Blitter;
+    private bufferReader: BufferReader;
     //private lastStats: number = performance.now();
     // private source: SourceMap;
 
@@ -281,6 +288,25 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const preludeLines = countNewlines(prelude);
         const wgsl = prelude + source.source;
 
+        // Create storage buffer control refs
+        const bufferControlRefMap = new Map<string, BufferControlRef>();
+        for (const [name, bindingInfo] of source.storageBuffers) {
+            const reader = () => {
+                const bufferBinding = this.bindings.getStorageBufferBinding(bindingInfo.binding);
+                return this.bufferReader.read(
+                    bufferBinding.device,
+                    new ArrayBuffer(bindingInfo.size),
+                    bindingInfo.size,
+                    bindingInfo.offset
+                );
+            };
+
+            bufferControlRefMap.set(UUID(), {
+                getBufferDeclName: () => name,
+                getBufferReader: () => reader
+            });
+        }
+
         // Parse entry points
         const entryPoints: Array<[string, [number, number, number]]> = [];
         const entryPointCode = Preprocessor.stripComments(wgsl);
@@ -294,7 +320,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Notify success callback
         const entryPointNames = entryPoints.map(([name]) => name);
-        this.onSuccessCb?.(entryPointNames);
+        this.onSuccessCb?.(bufferControlRefMap, entryPointNames);
 
         // Create shader module
         const shaderModule = this.device.createShaderModule({
@@ -459,7 +485,12 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Set success callback for shader compilation
      */
-    onSuccess(callback: (entryPoints: string[]) => void): void {
+    onSuccess(
+        callback: (
+            bufferControlRefMap: Map<string, BufferControlRef>,
+            entryPoints: string[]
+        ) => void
+    ): void {
         this.onSuccessCb = callback;
     }
     onUpdate(callback: (entryTimers: string[]) => void): void {
@@ -597,6 +628,9 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             presentationFormat,
             'linear'
         );
+
+        // Recreate buffer reader
+        this.bufferReader = new BufferReader(this.device);
     }
 
     /**
@@ -758,5 +792,8 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Destroy the profiler
         this.profiler?.dispose();
+
+        // Destroy the buffer reader
+        this.bufferReader?.dispose();
     }
 }
