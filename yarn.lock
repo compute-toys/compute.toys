@@ -89,10 +89,10 @@
   dependencies:
     mime "^3.0.0"
 
-"@cloudflare/next-on-pages@^1.13.12":
-  version "1.13.12"
-  resolved "https://registry.yarnpkg.com/@cloudflare/next-on-pages/-/next-on-pages-1.13.12.tgz#71a0cad4b4c2574aaa8da1ad77cc01e058a347d1"
-  integrity sha512-rPy7x9c2+0RDDdJ5o0TeRUwXJ1b7N1epnqF6qKSp5Wz1r9KHOyvaZh1ACoOC6Vu5k9su5WZOgy+8fPLIyrldMQ==
+"@cloudflare/next-on-pages@^1.13.13":
+  version "1.13.13"
+  resolved "https://registry.yarnpkg.com/@cloudflare/next-on-pages/-/next-on-pages-1.13.13.tgz#8fef864a03c102e9ca8739320608e121777e1adc"
+  integrity sha512-bq63kFz4Hz4lAkYqSWebigbNMr5bPglV9YHfeL+BHIXwysE8psZCx0DIxsSnXP0dNH7Zzat6DS89AxhaxfJQkg==
   dependencies:
     acorn "^8.8.0"
     ast-types "^0.14.2"
@@ -107,10 +107,10 @@
     pcre-to-regexp "^1.1.0"
     semver "^7.5.2"
 
-"@cloudflare/unenv-preset@2.3.3":
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/@cloudflare/unenv-preset/-/unenv-preset-2.3.3.tgz#d586da084aabbca91be04f4592d18655e932bd11"
-  integrity sha512-/M3MEcj3V2WHIRSW1eAQBPRJ6JnGQHc6JKMAPLkDb7pLs3m6X9ES/+K3ceGqxI6TKeF32AWAi7ls0AYzVxCP0A==
+"@cloudflare/unenv-preset@2.4.1":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@cloudflare/unenv-preset/-/unenv-preset-2.4.1.tgz#e7ebe96d9dae322f439961812a08aec11377a32e"
+  integrity sha512-70mk5GPv+ozJ5XcIhFpq4ps7HvQYu+As7vwasUy9LcBadsTcWA2iFis/7aFJmQehfKerDwVOHfMYpgTTC+u24Q==
 
 "@cloudflare/workerd-darwin-64@1.20250129.0":
   version "1.20250129.0"
@@ -1040,57 +1040,57 @@
     prop-types "^15.8.1"
     react-is "^19.1.0"
 
-"@next/env@15.4.2":
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/@next/env/-/env-15.4.2.tgz#1f0536974e6d81cc1f0e7f1221b824a61310e324"
-  integrity sha512-kd7MvW3pAP7tmk1NaiX4yG15xb2l4gNhteKQxt3f+NGR22qwPymn9RBuv26QKfIKmfo6z2NpgU8W2RT0s0jlvg==
+"@next/env@15.4.4":
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/@next/env/-/env-15.4.4.tgz#ada0a3bdecc5c11fedd2b8cbf4e2b0b999a5324f"
+  integrity sha512-SJKOOkULKENyHSYXE5+KiFU6itcIb6wSBjgM92meK0HVKpo94dNOLZVdLLuS7/BxImROkGoPsjR4EnuDucqiiA==
 
-"@next/eslint-plugin-next@15.4.2":
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/@next/eslint-plugin-next/-/eslint-plugin-next-15.4.2.tgz#283d342e004d5598ea6a2583613ec448348da314"
-  integrity sha512-k0rjdWjXBY6tAOty1ckrMETE6Mx66d85NsgcAIdDp7/cXOsTJ93ywmbg3uUcpxX5TUHFEcCWI5mb8nPhwCe9jg==
+"@next/eslint-plugin-next@15.4.4":
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/@next/eslint-plugin-next/-/eslint-plugin-next-15.4.4.tgz#06cf46ee425d23d7a21aab0638dd8edc3ef27871"
+  integrity sha512-1FDsyN//ai3Jd97SEd7scw5h1yLdzDACGOPRofr2GD3sEFsBylEEoL0MHSerd4n2dq9Zm/mFMqi4+NRMOreOKA==
   dependencies:
     fast-glob "3.3.1"
 
-"@next/swc-darwin-arm64@15.4.2":
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/@next/swc-darwin-arm64/-/swc-darwin-arm64-15.4.2.tgz#f729096e4ccb13c4d8926c279a5de7157b36b261"
-  integrity sha512-ovqjR8NjCBdBf1U+R/Gvn0RazTtXS9n6wqs84iFaCS1NHbw9ksVE4dfmsYcLoyUVd9BWE0bjkphOWrrz8uz/uw==
+"@next/swc-darwin-arm64@15.4.4":
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/@next/swc-darwin-arm64/-/swc-darwin-arm64-15.4.4.tgz#e8791e3ddb6098f2e82c5fb574a7259641d92949"
+  integrity sha512-eVG55dnGwfUuG+TtnUCt+mEJ+8TGgul6nHEvdb8HEH7dmJIFYOCApAaFrIrxwtEq2Cdf+0m5sG1Np8cNpw9EAw==
 
-"@next/swc-darwin-x64@15.4.2":
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/@next/swc-darwin-x64/-/swc-darwin-x64-15.4.2.tgz#fe4c32c93e9615ebdd1850eaee187623e59dd3b0"
-  integrity sha512-I8d4W7tPqbdbHRI4z1iBfaoJIBrEG4fnWKIe+Rj1vIucNZ5cEinfwkBt3RcDF00bFRZRDpvKuDjgMFD3OyRBnw==
+"@next/swc-darwin-x64@15.4.4":
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/@next/swc-darwin-x64/-/swc-darwin-x64-15.4.4.tgz#c5c58b71ae2f3754945263e0b1878cce5a9b1012"
+  integrity sha512-zqG+/8apsu49CltEj4NAmCGZvHcZbOOOsNoTVeIXphYWIbE4l6A/vuQHyqll0flU2o3dmYCXsBW5FmbrGDgljQ==
 
-"@next/swc-linux-arm64-gnu@15.4.2":
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/@next/swc-linux-arm64-gnu/-/swc-linux-arm64-gnu-15.4.2.tgz#b8df15297ba6a57a144636cac72c54884acab88d"
-  integrity sha512-lvhz02dU3Ec5thzfQ2RCUeOFADjNkS/px1W7MBt7HMhf0/amMfT8Z/aXOwEA+cVWN7HSDRSUc8hHILoHmvajsg==
+"@next/swc-linux-arm64-gnu@15.4.4":
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/@next/swc-linux-arm64-gnu/-/swc-linux-arm64-gnu-15.4.4.tgz#babb2756d0672960ba1666ca5187812e854ea8b6"
+  integrity sha512-LRD4l2lq4R+2QCHBQVC0wjxxkLlALGJCwigaJ5FSRSqnje+MRKHljQNZgDCaKUZQzO/TXxlmUdkZP/X3KNGZaw==
 
-"@next/swc-linux-arm64-musl@15.4.2":
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/@next/swc-linux-arm64-musl/-/swc-linux-arm64-musl-15.4.2.tgz#c32591a82c03bf73d2d9b869801b51aa7a3de22d"
-  integrity sha512-v+5PPfL8UP+KKHS3Mox7QMoeFdMlaV0zeNMIF7eLC4qTiVSO0RPNnK0nkBZSD5BEkkf//c+vI9s/iHxddCZchA==
+"@next/swc-linux-arm64-musl@15.4.4":
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/@next/swc-linux-arm64-musl/-/swc-linux-arm64-musl-15.4.4.tgz#51c54f99ef3c131f7fcab876771a44b7b4059748"
+  integrity sha512-LsGUCTvuZ0690fFWerA4lnQvjkYg9gHo12A3wiPUR4kCxbx/d+SlwmonuTH2SWZI+RVGA9VL3N0S03WTYv6bYg==
 
-"@next/swc-linux-x64-gnu@15.4.2":
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-15.4.2.tgz#1bbbf8f5e5bea7ca11e8fad57d97ac9aa13d6ea2"
-  integrity sha512-PHLYOC9W2cu6I/JEKo77+LW4uPNvyEQiSkVRUQPsOIsf01PRr8PtPhwtz3XNnC9At8CrzPkzqQ9/kYDg4R4Inw==
+"@next/swc-linux-x64-gnu@15.4.4":
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/@next/swc-linux-x64-gnu/-/swc-linux-x64-gnu-15.4.4.tgz#b46cdf54860a941e1ba32ed2344d139bcd74f4a1"
+  integrity sha512-aOy5yNRpLL3wNiJVkFYl6w22hdREERNjvegE6vvtix8LHRdsTHhWTpgvcYdCK7AIDCQW5ATmzr9XkPHvSoAnvg==
 
-"@next/swc-linux-x64-musl@15.4.2":
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/@next/swc-linux-x64-musl/-/swc-linux-x64-musl-15.4.2.tgz#27ca1a65a270ad4a2ae8d5e3f47851949710405e"
-  integrity sha512-lpmUF9FfLFns4JbTu+5aJGA8aR9dXaA12eoNe9CJbVkGib0FDiPa4kBGTwy0xDxKNGlv3bLDViyx1U+qafmuJQ==
+"@next/swc-linux-x64-musl@15.4.4":
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/@next/swc-linux-x64-musl/-/swc-linux-x64-musl-15.4.4.tgz#4bfa60a6b203c7652fbbfdb21940fb5fab7f24bf"
+  integrity sha512-FL7OAn4UkR8hKQRGBmlHiHinzOb07tsfARdGh7v0Z0jEJ3sz8/7L5bR23ble9E6DZMabSStqlATHlSxv1fuzAg==
 
-"@next/swc-win32-arm64-msvc@15.4.2":
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/@next/swc-win32-arm64-msvc/-/swc-win32-arm64-msvc-15.4.2.tgz#3b426ad43cfaab72946e1ebe059b4ead81b28522"
-  integrity sha512-aMjogoGnRepas0LQ/PBPsvvUzj+IoXw2IoDSEShEtrsu2toBiaxEWzOQuPZ8nie8+1iF7TA63S7rlp3YWAjNEg==
+"@next/swc-win32-arm64-msvc@15.4.4":
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/@next/swc-win32-arm64-msvc/-/swc-win32-arm64-msvc-15.4.4.tgz#b84e917f2e1cfabb07ac4ec137e8a6e9db225bba"
+  integrity sha512-eEdNW/TXwjYhOulQh0pffTMMItWVwKCQpbziSBmgBNFZIIRn2GTXrhrewevs8wP8KXWYMx8Z+mNU0X+AfvtrRg==
 
-"@next/swc-win32-x64-msvc@15.4.2":
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/@next/swc-win32-x64-msvc/-/swc-win32-x64-msvc-15.4.2.tgz#c23402879f14a0647a9e6890537fa07068452912"
-  integrity sha512-FxwauyexSFu78wEqR/+NB9MnqXVj6SxJKwcVs2CRjeSX/jBagDCgtR2W36PZUYm0WPgY1pQ3C1+nn7zSnwROuw==
+"@next/swc-win32-x64-msvc@15.4.4":
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/@next/swc-win32-x64-msvc/-/swc-win32-x64-msvc-15.4.4.tgz#74fd5c40515cf626344982c201c0567efccf0f4a"
+  integrity sha512-SE5pYNbn/xZKMy1RE3pAs+4xD32OI4rY6mzJa4XUkp/ItZY+OMjIgilskmErt8ls/fVJ+Ihopi2QIeW6O3TrMw==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
@@ -1491,10 +1491,10 @@
     throttleit "^2.1.0"
     undici "^5.28.4"
 
-"@vercel/build-utils@10.6.7":
-  version "10.6.7"
-  resolved "https://registry.yarnpkg.com/@vercel/build-utils/-/build-utils-10.6.7.tgz#1a9828c9fdc1d5de5e4be8ab8a88fe8d14ec9a29"
-  integrity sha512-DVV7zLsHvG/7NgWuo7DAZ6Gnrfd08hKEeQ0URkgv+4g0YXmv+JW4cZkJ7pW0fwoszuoqUfGRwIjTG6LT4TDEOg==
+"@vercel/build-utils@11.0.0":
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/@vercel/build-utils/-/build-utils-11.0.0.tgz#2db5978074e98d0a2af1ad9957cd5fab00266629"
+  integrity sha512-jeBQHHOVqTgIMynVLtGUhf+Qf2Q0K1C/luZP7wuUM9veTeTMUSjju6HtpuJE5yuxre0rIogKRbKjvRXrAsbOIg==
 
 "@vercel/error-utils@2.0.3":
   version "2.0.3"
@@ -1532,13 +1532,13 @@
   dependencies:
     web-vitals "0.2.4"
 
-"@vercel/gatsby-plugin-vercel-builder@2.0.90":
-  version "2.0.90"
-  resolved "https://registry.yarnpkg.com/@vercel/gatsby-plugin-vercel-builder/-/gatsby-plugin-vercel-builder-2.0.90.tgz#78353e2d9dbae5bfd9ee99ad1f7133acd5c18f9f"
-  integrity sha512-kjhCEUs4FRGhJU1Lf7/GDLkzCOm8EDOUrRXmcbkGmCqxreSXqHxauR+VGhr9qV3mFLJc1jjeZobUHUeJXPx7JA==
+"@vercel/gatsby-plugin-vercel-builder@2.0.91":
+  version "2.0.91"
+  resolved "https://registry.yarnpkg.com/@vercel/gatsby-plugin-vercel-builder/-/gatsby-plugin-vercel-builder-2.0.91.tgz#a4d652498de11c422c80c3eed5d268b303f3948b"
+  integrity sha512-I0kD+79QRi2EsplUXEkNF1OlXw1PqZuOuKza1wTwim6Y3NQNZQxZfADbKEorps1sn2HICXlzuoFdYQ1RxIuMyQ==
   dependencies:
     "@sinclair/typebox" "0.25.24"
-    "@vercel/build-utils" "10.6.7"
+    "@vercel/build-utils" "11.0.0"
     esbuild "0.14.47"
     etag "1.8.1"
     fs-extra "11.1.0"
@@ -1548,6 +1548,15 @@
   resolved "https://registry.yarnpkg.com/@vercel/go/-/go-3.2.2.tgz#88095e1c403955b446c971cce4d1036e44f475d8"
   integrity sha512-yYIU3OXkuoxzr47vf+HZnVGujzkVW/e5hrUK0jzCzzmjgo4+5ECrXDSA1bTB6qmWEy6HVsSovnKoHkwDqNIN6Q==
 
+"@vercel/hono@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/@vercel/hono/-/hono-0.0.4.tgz#61833e3ef40e47e0ec4eb879ec0ac72321cd05c6"
+  integrity sha512-seH+eaHEooC8EWVKGRtPtFMrl7n2dvO1OJ3YCt1Fou6tRBfi4spErGs2sdC4raogAWO645BK2bepH5Fo/wJFZw==
+  dependencies:
+    "@vercel/node" "5.3.7"
+    "@vercel/static-config" "3.1.1"
+    ts-morph "12.0.0"
+
 "@vercel/hydrogen@1.2.3":
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/@vercel/hydrogen/-/hydrogen-1.2.3.tgz#ae32bc72a3d871643346e0f46bccb73dda3e1e62"
@@ -1556,10 +1565,10 @@
     "@vercel/static-config" "3.1.1"
     ts-morph "12.0.0"
 
-"@vercel/next@4.10.2":
-  version "4.10.2"
-  resolved "https://registry.yarnpkg.com/@vercel/next/-/next-4.10.2.tgz#fd79e557c6bba659fd3e39d36fb8a67a6ddd837b"
-  integrity sha512-KIoC5HzjTvRhM8j8g0EmvD0dHQ607KU+MqAvNCL/JsfqpOM+Tv0PFnOIXJjmbkEXwWkTvnu8WSsJTfpEUyM55g==
+"@vercel/next@4.10.8":
+  version "4.10.8"
+  resolved "https://registry.yarnpkg.com/@vercel/next/-/next-4.10.8.tgz#41d69a0b46626aaab1d40d38ab376d6a0160a7b6"
+  integrity sha512-2con6J6uj4IAs+3SU55ZjH6flskDpi6zCRH4XmfnR0SUrsGiy6hmDbZAvfJnSHKxLFQpmP0+cn5XC+hoUAUQLg==
   dependencies:
     "@vercel/nft" "0.29.2"
 
@@ -1581,16 +1590,16 @@
     picomatch "^4.0.2"
     resolve-from "^5.0.0"
 
-"@vercel/node@5.3.6":
-  version "5.3.6"
-  resolved "https://registry.yarnpkg.com/@vercel/node/-/node-5.3.6.tgz#10b5d857d6193ce7c79f88eaa549ff9cc1ffbc06"
-  integrity sha512-Q+46nIur6XztdXEv8rXK5n1fSH1gLoTaHq0tGGHX5OBCfi26HNlTeIMludPTzW7twf5lXmGHFsRD2Uoor5ku0w==
+"@vercel/node@5.3.7":
+  version "5.3.7"
+  resolved "https://registry.yarnpkg.com/@vercel/node/-/node-5.3.7.tgz#1d4c0d6aede7a0ebf4b48e9a4c91fceb85df50e2"
+  integrity sha512-1g1yITH7wq3okruA7TCCPjPV5Fp8wsxTwTg8Pz7N8+fW5a/F4evjzvBgTXV+ZYx4C3DFwpc5t3Jbm079Kgksug==
   dependencies:
     "@edge-runtime/node-utils" "2.3.0"
     "@edge-runtime/primitives" "4.1.0"
     "@edge-runtime/vm" "3.2.0"
     "@types/node" "16.18.11"
-    "@vercel/build-utils" "10.6.7"
+    "@vercel/build-utils" "11.0.0"
     "@vercel/error-utils" "2.0.3"
     "@vercel/nft" "0.29.2"
     "@vercel/static-config" "3.1.1"
@@ -1608,10 +1617,10 @@
     typescript "4.9.5"
     undici "5.28.4"
 
-"@vercel/python@4.7.4":
-  version "4.7.4"
-  resolved "https://registry.yarnpkg.com/@vercel/python/-/python-4.7.4.tgz#473d74ab38c32b2b8cf3f18fcbd517b830bb260b"
-  integrity sha512-HTjvOTgr9kAF+N/shIHgi0vo8aJRImyUHSmbRSwq3qBdAa3CPnEAKmaoY6liBTodhI3SUVISsBsAJ+zbluIbaA==
+"@vercel/python@4.8.0":
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/@vercel/python/-/python-4.8.0.tgz#fd6ced586074ec75126a2b313a4706152de20254"
+  integrity sha512-1ckvoGu4uEovbLRQgUACXrmANwuPSfZnAHYs5TX2RwNMSY63Y7fpnEyeq2y1cenzoj7NoG2xO+cZJRsxsfMmfQ==
 
 "@vercel/redwood@2.3.4":
   version "2.3.4"
@@ -1640,13 +1649,13 @@
   resolved "https://registry.yarnpkg.com/@vercel/ruby/-/ruby-2.2.1.tgz#c36ba0568531f30193479d2442177201142fbadb"
   integrity sha512-DsmTCggOa/Uvt/9JkafXx9U+Bz5eNIb6Bs422EOQo2zKwcxW88ITSh8mM5m0dQ0+B4k02X/moVim6iFa4sjazg==
 
-"@vercel/static-build@2.7.16":
-  version "2.7.16"
-  resolved "https://registry.yarnpkg.com/@vercel/static-build/-/static-build-2.7.16.tgz#c513321b4c61fb276cca05b375dc0160ca5b9099"
-  integrity sha512-vRIY1tLTuGSkQaMdCaV1cb5wBCC+HU081TtwjlGQQETdjZcqgkl+kJEOFfICzk5iSVluRRMTkUslc0wHM7vqXQ==
+"@vercel/static-build@2.7.17":
+  version "2.7.17"
+  resolved "https://registry.yarnpkg.com/@vercel/static-build/-/static-build-2.7.17.tgz#6b4c4f3fcc57e0cec7fc415c3837771a3c11c512"
+  integrity sha512-gottkM98UkbQfNOnn+UiAhrNgtx6eQBUygHak7fTfTB53gr1ikadUwNY8PVj4pYn8AwNpwHqFI8dNYnTB88klA==
   dependencies:
     "@vercel/gatsby-plugin-vercel-analytics" "1.0.11"
-    "@vercel/gatsby-plugin-vercel-builder" "2.0.90"
+    "@vercel/gatsby-plugin-vercel-builder" "2.0.91"
     "@vercel/static-config" "3.1.1"
     ts-morph "12.0.0"
 
@@ -3125,12 +3134,12 @@ eslint-compat-utils@^0.5.1:
   dependencies:
     semver "^7.5.4"
 
-eslint-config-next@^15.4.2:
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/eslint-config-next/-/eslint-config-next-15.4.2.tgz#7a9f71def0bd2f73c74f942142a9dd553a403bb6"
-  integrity sha512-rAeZyTWn1/36Y+S+KpJ/W+RAUmM6fpBWsON4Uci+5l9DIKrhkMK0rgAZQ45ktx+xFk5tyYwkTBGit/9jalsHrw==
+eslint-config-next@^15.4.4:
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/eslint-config-next/-/eslint-config-next-15.4.4.tgz#df20632c342b2b48e8450d0028b8fd15edb10a60"
+  integrity sha512-sK/lWLUVF5om18O5w76Jt3F8uzu/LP5mVa6TprCMWkjWHUmByq80iHGHcdH7k1dLiJlj+DRIWf98d5piwRsSuA==
   dependencies:
-    "@next/eslint-plugin-next" "15.4.2"
+    "@next/eslint-plugin-next" "15.4.4"
     "@rushstack/eslint-patch" "^1.10.3"
     "@typescript-eslint/eslint-plugin" "^5.4.2 || ^6.0.0 || ^7.0.0 || ^8.0.0"
     "@typescript-eslint/parser" "^5.4.2 || ^6.0.0 || ^7.0.0 || ^8.0.0"
@@ -4506,10 +4515,10 @@ mime@^3.0.0:
   resolved "https://registry.yarnpkg.com/mime/-/mime-3.0.0.tgz#b374550dca3a0c18443b0c950a6a58f1931cf7a7"
   integrity sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==
 
-miniflare@4.20250712.0:
-  version "4.20250712.0"
-  resolved "https://registry.yarnpkg.com/miniflare/-/miniflare-4.20250712.0.tgz#2e38bf9bee7c280555e91fcea49738df1deb5629"
-  integrity sha512-o7zYqG4pMi3gQTjiGhgZ82bQfexNwK+bzAaNlu8f7m3Kra4DcU5LC9nznfq2rfIBnUnMgwtU2VUfMlN1TuI8Og==
+miniflare@4.20250712.2:
+  version "4.20250712.2"
+  resolved "https://registry.yarnpkg.com/miniflare/-/miniflare-4.20250712.2.tgz#7e9e8d6a805417334c4e13735c51682080d398a8"
+  integrity sha512-cZ8WyQBwqfjYLjd61fDR4/j0nAVbjB3Wxbun/brL9S5FAi4RlTR0LyMTKsIVA0s+nL4Pg9VjVMki4M/Jk2cz+Q==
   dependencies:
     "@cspotcode/source-map-support" "0.8.1"
     acorn "8.14.0"
@@ -4670,25 +4679,25 @@ next-tick@^1.1.0:
   resolved "https://registry.yarnpkg.com/next-tick/-/next-tick-1.1.0.tgz#1836ee30ad56d67ef281b22bd199f709449b35eb"
   integrity sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==
 
-next@^15.4.2:
-  version "15.4.2"
-  resolved "https://registry.yarnpkg.com/next/-/next-15.4.2.tgz#47f31a94bdb6a8e2d8eb7698a9cfc9886728eedb"
-  integrity sha512-oH1rmFso+84NIkocfuxaGKcXIjMUTmnzV2x0m8qsYtB4gD6iflLMESXt5XJ8cFgWMBei4v88rNr/j+peNg72XA==
+next@^15.4.4:
+  version "15.4.4"
+  resolved "https://registry.yarnpkg.com/next/-/next-15.4.4.tgz#b7895a6d51e3cf9ace34c7f4392a2c043fc186e2"
+  integrity sha512-kNcubvJjOL9yUOfwtZF3HfDhuhp+kVD+FM2A6Tyua1eI/xfmY4r/8ZS913MMz+oWKDlbps/dQOWdDricuIkXLw==
   dependencies:
-    "@next/env" "15.4.2"
+    "@next/env" "15.4.4"
     "@swc/helpers" "0.5.15"
     caniuse-lite "^1.0.30001579"
     postcss "8.4.31"
     styled-jsx "5.1.6"
   optionalDependencies:
-    "@next/swc-darwin-arm64" "15.4.2"
-    "@next/swc-darwin-x64" "15.4.2"
-    "@next/swc-linux-arm64-gnu" "15.4.2"
-    "@next/swc-linux-arm64-musl" "15.4.2"
-    "@next/swc-linux-x64-gnu" "15.4.2"
-    "@next/swc-linux-x64-musl" "15.4.2"
-    "@next/swc-win32-arm64-msvc" "15.4.2"
-    "@next/swc-win32-x64-msvc" "15.4.2"
+    "@next/swc-darwin-arm64" "15.4.4"
+    "@next/swc-darwin-x64" "15.4.4"
+    "@next/swc-linux-arm64-gnu" "15.4.4"
+    "@next/swc-linux-arm64-musl" "15.4.4"
+    "@next/swc-linux-x64-gnu" "15.4.4"
+    "@next/swc-linux-x64-musl" "15.4.4"
+    "@next/swc-win32-arm64-msvc" "15.4.4"
+    "@next/swc-win32-x64-msvc" "15.4.4"
     sharp "^0.34.3"
 
 node-domexception@^1.0.0:
@@ -6085,23 +6094,24 @@ v8-compile-cache-lib@^3.0.1:
   resolved "https://registry.yarnpkg.com/v8-compile-cache-lib/-/v8-compile-cache-lib-3.0.1.tgz#6336e8d71965cb3d35a1bbb7868445a7c05264bf"
   integrity sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==
 
-vercel@^44.5.0:
-  version "44.5.0"
-  resolved "https://registry.yarnpkg.com/vercel/-/vercel-44.5.0.tgz#60b6128d01e5bd1534c7e813b3a13aa5baf8c55f"
-  integrity sha512-bA0xj2jEY75eScjf6SZrKTeIDScAhhSLNkSYIu0RPH2gBYfvI0aXhLLy04Tn6RiyyCX/DnLSNvaaC7kLrr64FA==
+vercel@^44.6.3:
+  version "44.6.3"
+  resolved "https://registry.yarnpkg.com/vercel/-/vercel-44.6.3.tgz#37347da8e7282860a33564f33223d4731c7e6917"
+  integrity sha512-2E0AQWf3VeRGxiRXCjjmZFZAlosBhW2UPS+2tFHgHgoBaChKZ0r8+4+DONTc+pYKXqVcybdLuNgfJSwkZeuvOA==
   dependencies:
     "@vercel/blob" "1.0.2"
-    "@vercel/build-utils" "10.6.7"
+    "@vercel/build-utils" "11.0.0"
     "@vercel/fun" "1.1.6"
     "@vercel/go" "3.2.2"
+    "@vercel/hono" "0.0.4"
     "@vercel/hydrogen" "1.2.3"
-    "@vercel/next" "4.10.2"
-    "@vercel/node" "5.3.6"
-    "@vercel/python" "4.7.4"
+    "@vercel/next" "4.10.8"
+    "@vercel/node" "5.3.7"
+    "@vercel/python" "4.8.0"
     "@vercel/redwood" "2.3.4"
     "@vercel/remix-builder" "5.4.10"
     "@vercel/ruby" "2.2.1"
-    "@vercel/static-build" "2.7.16"
+    "@vercel/static-build" "2.7.17"
     chokidar "4.0.0"
     jose "5.9.6"
 
@@ -6234,16 +6244,16 @@ workerd@1.20250712.0:
     "@cloudflare/workerd-linux-arm64" "1.20250712.0"
     "@cloudflare/workerd-windows-64" "1.20250712.0"
 
-wrangler@^4.25.0:
-  version "4.25.0"
-  resolved "https://registry.yarnpkg.com/wrangler/-/wrangler-4.25.0.tgz#db2089e2585c4a83be4d97a73a4029f9b3b5579e"
-  integrity sha512-SepXQbzWkdp0O7qAx3i0go+fw5I0VkDqLV2G3ewbffO5k8kpvuCkhalS23KO+7+o8+Oa3vfC7x+16IL3rj2n4w==
+wrangler@^4.26.0:
+  version "4.26.0"
+  resolved "https://registry.yarnpkg.com/wrangler/-/wrangler-4.26.0.tgz#a9b1f39ff03a4a9d954aabcc5e833ea2c98f2a58"
+  integrity sha512-EXuwyWlgYQZv6GJlyE0lVGk9hHqASssuECECT1XC5aIijTwNLQhsj/TOZ0hKSFlMbVr1E+OAdevAxd0kaF4ovA==
   dependencies:
     "@cloudflare/kv-asset-handler" "0.4.0"
-    "@cloudflare/unenv-preset" "2.3.3"
+    "@cloudflare/unenv-preset" "2.4.1"
     blake3-wasm "2.1.5"
     esbuild "0.25.4"
-    miniflare "4.20250712.0"
+    miniflare "4.20250712.2"
     path-to-regexp "6.3.0"
     unenv "2.0.0-rc.17"
     workerd "1.20250712.0"
