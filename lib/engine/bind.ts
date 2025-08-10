@@ -634,10 +634,9 @@ export class Bindings {
 
     stage(queue: GPUQueue): void {
         queue.writeBuffer(this.custom.device, 0, this.custom.host[1].buffer);
-        // queue.writeBuffer(this.userData.device, 0, this.userData.host.toBuffer());
-        queue.writeBuffer(this.time.device, 0, this.time.host.toBuffer());
-        queue.writeBuffer(this.mouse.device, 0, this.mouse.host.toBuffer());
-        queue.writeBuffer(this.keys.device, 0, this.keys.host.toBuffer());
+        queue.writeBuffer(this.time.device, 0, this.time.host.toBuffer().buffer);
+        queue.writeBuffer(this.mouse.device, 0, this.mouse.host.toBuffer().buffer);
+        queue.writeBuffer(this.keys.device, 0, this.keys.host.toBuffer().buffer);
     }
 
     dispose(options?: { preserveChannels?: boolean; preserveCustom?: boolean }): void {
