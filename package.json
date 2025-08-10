@@ -71,7 +71,7 @@
     "eslint-plugin-prettier": "^5.5.1",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.1.0",
-    "supabase": "2.33.9",
+    "supabase": "^2.33.9",
     "typescript": "^5.8.3",
     "vercel": "^44.7.3",
     "wrangler": "^4.28.1"
