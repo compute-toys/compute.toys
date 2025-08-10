@@ -1,4 +1,6 @@
 name: Deploy Migrations to Production
+permissions:
+  contents: read
 
 on:
   push:
