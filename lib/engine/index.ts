@@ -10,6 +10,7 @@ import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
 import { BufferReader } from './bufferio';
 import { loadHDR } from './hdr';
+import { uint8ArrayToImageBitmap } from './image';
 import { Preprocessor, SourceMap } from './preprocessor';
 import { Profiler } from './profiler';
 import { countNewlines } from './utils';
@@ -640,7 +641,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const start = performance.now();
 
         // Create ImageBitmap from data
-        const imageBitmap = await createImageBitmap(new Blob([data]), {
+        const imageBitmap = await uint8ArrayToImageBitmap(data, {
             premultiplyAlpha: 'none',
             colorSpaceConversion: 'none'
         });
@@ -735,7 +736,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         // Copy RGBE data to texture
         this.device.queue.writeTexture(
             { texture: initialTexture },
-            rgbe,
+            rgbe.buffer,
             {
                 offset: 0,
                 bytesPerRow: 4 * width,
