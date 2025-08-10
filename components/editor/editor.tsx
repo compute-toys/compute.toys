@@ -113,7 +113,7 @@ export default function Editor(props: EditorProps) {
     const monacoOptions = (isMobile: boolean) => ({
         stopRenderingLineAfter: isMobile ? 500 : 1000,
         fontSize: isMobile ? 12 : 12,
-        lineHeight: isMobile ? 16 : 18,
+        lineHeight: isMobile ? 14 : 14,
         fontFamily: "'Fira Code', monospace",
         'bracketPairColorization.enabled': true,
         mouseWheelZoom: true,
