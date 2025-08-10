@@ -241,9 +241,10 @@ const UniformSlider = (props: UniformSliderProps) => {
                 setSliderUniform={setSliderUniform}
                 sliderRefMap={props.sliderRefMap}
             />
-            <TextField
+            <StyledTextField
                 label="Min"
                 type="number"
+                size="small"
                 value={sliderMinRange}
                 sx={{
                     display: 'table-cell',
@@ -282,9 +283,10 @@ const UniformSlider = (props: UniformSliderProps) => {
                     setSliderVal(newValue as number);
                 }}
             />
-            <TextField
+            <StyledTextField
                 label="Max"
                 type="number"
+                size="small"
                 value={sliderMaxRange}
                 sx={{
                     display: 'table-cell',

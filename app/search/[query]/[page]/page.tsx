@@ -64,6 +64,7 @@ async function getShaders(supabase: SupabaseClient, query: string, page: number)
 export default async function SearchShaderListPage({ params }) {
     const supabase = await createClient();
     const { query, page } = await params;
-    const { props } = await getShaders(supabase, query, Number(page));
+    const decodedQuery = decodeURIComponent(query);
+    const { props } = await getShaders(supabase, decodedQuery, Number(page));
     return <ShaderList {...props} />;
 }

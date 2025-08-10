@@ -16,6 +16,7 @@ import ReloadButton from 'components/buttons/reloadbutton';
 import ResetButton from 'components/buttons/resetbutton';
 import ResolutionButton from 'components/buttons/resolutionbutton';
 import VimButton from 'components/buttons/vimbutton';
+import BufferControls from 'components/editor/buffercontrols';
 import EntryPointDisplay from 'components/editor/entrypointdisplay';
 import { MetadataEditor } from 'components/editor/metadataeditor';
 import TexturePicker from 'components/editor/texturepicker';
@@ -112,7 +113,7 @@ export default function Editor(props: EditorProps) {
     const monacoOptions = (isMobile: boolean) => ({
         stopRenderingLineAfter: isMobile ? 500 : 1000,
         fontSize: isMobile ? 12 : 12,
-        lineHeight: isMobile ? 16 : 18,
+        lineHeight: isMobile ? 14 : 14,
         fontFamily: "'Fira Code', monospace",
         'bracketPairColorization.enabled': true,
         mouseWheelZoom: true,
@@ -189,6 +190,7 @@ export default function Editor(props: EditorProps) {
                         </Stack>
                     </Grid>
                 </Grid>
+                <BufferControls />
                 <UniformSliders />
             </ItemWithTransitionSignal>
             {metadataEditor}

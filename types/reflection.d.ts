@@ -15,9 +15,21 @@ export type ReflectionBinding =
 
 export type ReflectionType =
     | {
+          kind: 'array';
+          uniformStride: number;
+          elementCount: number;
+          elementType: ReflectionType;
+      }
+    | {
           kind: 'struct';
           name: string;
           fields: ReflectionParameter[];
+      }
+    | {
+          kind: 'matrix';
+          rowCount: number;
+          columnCount: number;
+          elementType: ReflectionType;
       }
     | {
           kind: 'vector';
@@ -26,7 +38,7 @@ export type ReflectionType =
       }
     | {
           kind: 'scalar';
-          scalarType: `${'uint' | 'int'}${8 | 16 | 32 | 64}` | `${'float'}${16 | 32 | 64}`;
+          scalarType: 'bool' | `${'uint' | 'int'}${8 | 16 | 32 | 64}` | `${'float'}${16 | 32 | 64}`;
       }
     | {
           kind: 'resource';

@@ -1,4 +1,5 @@
 'use client';
+import { BufferControlRef } from 'components/editor/buffercontrols';
 import { UniformSliderRef } from 'components/editor/uniformsliders';
 import { atom } from 'jotai';
 import { atomWithReset } from 'jotai/utils';
@@ -63,6 +64,9 @@ export const textureChannelDimensionsAtom = atomWithReset<{ width: number; heigh
 export const entryPointsAtom = atomWithReset(new Array<string>());
 export const entryTimersAtom = atomWithReset(new Array<number>());
 
+export const bufferControlRefMapAtom = atom<Map<string, BufferControlRef>>(
+    new Map<string, BufferControlRef>()
+);
 // we create a new refmap when deserializing from DB, don't need a reset
 export const sliderRefMapAtom = atom<Map<string, UniformSliderRef>>(
     new Map<string, UniformSliderRef>()

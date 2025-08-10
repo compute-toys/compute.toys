@@ -4,9 +4,13 @@
  */
 
 import { Mutex } from 'async-mutex';
+import { BufferControlRef } from 'components/editor/buffercontrols';
+import { v4 as UUID } from 'uuid';
 import { Bindings } from './bind';
 import { Blitter, ColorSpace } from './blit';
+import { BufferReader } from './bufferio';
 import { loadHDR } from './hdr';
+import { uint8ArrayToImageBitmap } from './image';
 import { Preprocessor, SourceMap } from './preprocessor';
 import { Profiler } from './profiler';
 import { countNewlines } from './utils';
@@ -45,13 +49,17 @@ export class ComputeEngine {
     private computePipelines: ComputePipeline[] = [];
     private computeBindGroup: GPUBindGroup;
     private computeBindGroupLayout: GPUBindGroupLayout;
-    private onSuccessCb?: (entryPoints: string[]) => void;
+    private onSuccessCb?: (
+        bufferControlRefMap: Map<string, BufferControlRef>,
+        entryPoints: string[]
+    ) => void;
     private onUpdateCb?: (entryTimers: string[]) => void;
     private onErrorCb?: (summary: string, row: number, col: number) => void;
     private passF32: boolean = false;
     private profilerAttached: boolean = false;
     private profiler: Profiler | null = null;
     private screenBlitter: Blitter;
+    private bufferReader: BufferReader;
     //private lastStats: number = performance.now();
     // private source: SourceMap;
 
@@ -281,6 +289,25 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const preludeLines = countNewlines(prelude);
         const wgsl = prelude + source.source;
 
+        // Create storage buffer control refs
+        const bufferControlRefMap = new Map<string, BufferControlRef>();
+        for (const [name, bindingInfo] of source.storageBuffers) {
+            const reader = () => {
+                const bufferBinding = this.bindings.getStorageBufferBinding(bindingInfo.binding);
+                return this.bufferReader.read(
+                    bufferBinding.device,
+                    new ArrayBuffer(bindingInfo.size),
+                    bindingInfo.size,
+                    bindingInfo.offset
+                );
+            };
+
+            bufferControlRefMap.set(UUID(), {
+                getBufferDeclName: () => name,
+                getBufferReader: () => reader
+            });
+        }
+
         // Parse entry points
         const entryPoints: Array<[string, [number, number, number]]> = [];
         const entryPointCode = Preprocessor.stripComments(wgsl);
@@ -294,7 +321,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Notify success callback
         const entryPointNames = entryPoints.map(([name]) => name);
-        this.onSuccessCb?.(entryPointNames);
+        this.onSuccessCb?.(bufferControlRefMap, entryPointNames);
 
         // Create shader module
         const shaderModule = this.device.createShaderModule({
@@ -459,7 +486,12 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
     /**
      * Set success callback for shader compilation
      */
-    onSuccess(callback: (entryPoints: string[]) => void): void {
+    onSuccess(
+        callback: (
+            bufferControlRefMap: Map<string, BufferControlRef>,
+            entryPoints: string[]
+        ) => void
+    ): void {
         this.onSuccessCb = callback;
     }
     onUpdate(callback: (entryTimers: string[]) => void): void {
@@ -559,24 +591,28 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
      * Reset renderer state
      */
     reset(): void {
+        // Save old channels and custom data
+        const oldChannels = this.bindings?.channels;
+        const oldCustom = this.bindings?.custom;
+
+        // Dispose old buffers and textures, preserving channels and custom data
+        this.dispose({ preserveChannels: true, preserveCustom: true });
+
         // Create new bindings with current settings
-        const newBindings = new Bindings(
+        this.bindings = new Bindings(
             this.device,
             this.screenWidth,
             this.screenHeight,
             this.passF32
         );
 
-        if (this.bindings) {
-            // Copy over dynamic state
-            newBindings.custom = this.bindings.custom;
-            // newBindings.userData = this.bindings.userData;
-            newBindings.channels = this.bindings.channels;
+        // Copy channels and custom data directly
+        if (oldChannels) {
+            this.bindings.channels = oldChannels;
         }
-
-        // Clean up old bindings
-        // this.bindings.destroy();
-        this.bindings = newBindings;
+        if (oldCustom) {
+            this.bindings.custom = oldCustom;
+        }
 
         // Recreate pipeline and binding group layouts
         const layout = this.bindings.createBindGroupLayout(this.device);
@@ -593,6 +629,9 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             presentationFormat,
             'linear'
         );
+
+        // Recreate buffer reader
+        this.bufferReader = new BufferReader(this.device);
     }
 
     /**
@@ -602,13 +641,13 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const start = performance.now();
 
         // Create ImageBitmap from data
-        const imageBitmap = await createImageBitmap(new Blob([data]), {
+        const imageBitmap = await uint8ArrayToImageBitmap(data, {
             premultiplyAlpha: 'none',
             colorSpaceConversion: 'none'
         });
 
-        // Create texture
-        let texture = this.device.createTexture({
+        // Create initial texture
+        const initialTexture = this.device.createTexture({
             size: {
                 width: imageBitmap.width,
                 height: imageBitmap.height,
@@ -624,7 +663,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         // Copy image data to texture
         this.device.queue.copyExternalImageToTexture(
             { source: imageBitmap },
-            { texture },
+            { texture: initialTexture },
             {
                 width: imageBitmap.width,
                 height: imageBitmap.height,
@@ -635,12 +674,14 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         // Generate mipmap chain
         const blitter = new Blitter(
             this.device,
-            texture.createView(),
+            initialTexture.createView(),
             ColorSpace.Linear,
             'rgba8unorm-srgb',
             'linear'
         );
-        texture = blitter.createTexture(
+
+        // Create final texture with mipmaps for channel textures
+        const finalTexture = blitter.createMipmappedTexture(
             this.device,
             this.device.queue,
             imageBitmap.width,
@@ -649,13 +690,16 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         );
 
         // Update channel texture
-        this.bindings.channels[index].setTexture(texture);
+        this.bindings.channels[index].setTexture(finalTexture);
 
         // Recreate bind group since we changed a texture
         this.computeBindGroup = this.bindings.createBindGroup(
             this.device,
             this.computeBindGroupLayout
         );
+
+        // Destroy initial texture
+        initialTexture.destroy();
 
         console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
 
@@ -676,7 +720,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         const { rgbe, width, height } = loadHDR(data);
 
         // Create RGBE texture
-        const rgbeTexture = this.device.createTexture({
+        const initialTexture = this.device.createTexture({
             size: {
                 width,
                 height,
@@ -691,8 +735,8 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
         // Copy RGBE data to texture
         this.device.queue.writeTexture(
-            { texture: rgbeTexture },
-            rgbe,
+            { texture: initialTexture },
+            rgbe.buffer,
             {
                 offset: 0,
                 bytesPerRow: 4 * width,
@@ -708,12 +752,13 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         // Convert RGBE to float texture and generate mipmap chain
         const blitter = new Blitter(
             this.device,
-            rgbeTexture.createView(),
+            initialTexture.createView(),
             ColorSpace.Rgbe,
             'rgba16float',
             'linear'
         );
-        const texture = blitter.createTexture(
+
+        const finalTexture = blitter.createMipmappedTexture(
             this.device,
             this.device.queue,
             width,
@@ -722,7 +767,7 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         );
 
         // Update channel texture
-        this.bindings.channels[index].setTexture(texture);
+        this.bindings.channels[index].setTexture(finalTexture);
 
         // Recreate bind group since we changed a texture
         this.computeBindGroup = this.bindings.createBindGroup(
@@ -730,9 +775,26 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             this.computeBindGroupLayout
         );
 
+        // Destroy initial texture
+        initialTexture.destroy();
+
         console.log(`Channel ${index} loaded in ${(performance.now() - start).toFixed(2)}ms`);
 
         // Return dimensions
         return { width, height };
+    }
+
+    /**
+     * Cleanup method to dispose all resources
+     */
+    dispose(options?: { preserveChannels?: boolean; preserveCustom?: boolean }): void {
+        // Destroy all buffers and textures
+        this.bindings?.dispose(options);
+
+        // Destroy the profiler
+        this.profiler?.dispose();
+
+        // Destroy the buffer reader
+        this.bufferReader?.dispose();
     }
 }
