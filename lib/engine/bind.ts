@@ -637,21 +637,25 @@ export class Bindings {
         queue.writeBuffer(this.keys.device, 0, this.keys.host.toBuffer());
     }
 
-    dispose(): void {
+    dispose(options?: { preserveChannels?: boolean; preserveCustom?: boolean }): void {
         // Destroy buffers
         this.storage1.device.destroy();
         this.storage2.device.destroy();
         this.time.device.destroy();
         this.mouse.device.destroy();
         this.keys.device.destroy();
-        this.custom.device.destroy();
+        if (!options?.preserveCustom) {
+            this.custom.device.destroy();
+        }
         this.dispatchInfo.device.destroy();
 
         // Destroy textures
         this.texScreen.device.destroy();
         this.texRead.device.destroy();
         this.texWrite.device.destroy();
-        this.channels.forEach(channel => channel.device.destroy());
+        if (!options?.preserveChannels) {
+            this.channels.forEach(channel => channel.device.destroy());
+        }
 
         // Clear sampler references
         this.nearest.bind = null as any;

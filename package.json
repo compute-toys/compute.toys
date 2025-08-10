@@ -18,7 +18,9 @@
     "pages:setup": "npx @cloudflare/next-on-pages",
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:preview": "wrangler pages dev",
-    "supabase:types": ". ./.env && supabase gen types typescript --project-id $NEXT_PUBLIC_SUPABASE_PROJECT_ID > types/database.types.ts"
+    "supabase:start": "supabase db start",
+    "supabase:reset": "supabase db reset",
+    "supabase:types": "supabase gen types typescript --local > types/database.types.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -31,7 +33,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^5.17.1",
     "@mui/lab": "^5.0.0-alpha.177",
-    "@mui/material": "^5.17.1",
+    "@mui/material": "^5.18.0",
     "@mui/utils": "^7.2.0",
     "@react-hook/resize-observer": "^2.0.2",
     "@supabase/ssr": "^0.6.1",
@@ -48,7 +50,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.5",
-    "sharp": "^0.34.2",
+    "sharp": "^0.34.3",
     "use-animation-frame": "^0.2.1",
     "uuid": "^11.1.0"
   },
@@ -60,7 +62,7 @@
     "@types/react": "^18.3.12",
     "@webgpu/types": "^0.1.64",
     "depcheck": "^1.4.7",
-    "dotenv": "^16.5.0",
+    "dotenv": "^17.2.0",
     "eslint": "^8.57.1",
     "eslint-config-next": "^15.4.2",
     "eslint-config-prettier": "^10.1.5",
@@ -69,7 +71,7 @@
     "eslint-plugin-prettier": "^5.5.1",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.1.0",
-    "supabase": "^2.24.3",
+    "supabase": "2.31.2",
     "typescript": "^5.8.3",
     "vercel": "^44.5.0",
     "wrangler": "^4.25.0"
