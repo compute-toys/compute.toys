@@ -1,4 +1,6 @@
 name: Supabase CI
+permissions:
+  contents: read
 
 on:
   push:
