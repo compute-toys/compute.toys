@@ -16,7 +16,7 @@
     "lint": "next lint",
     "fix": "next lint --fix",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv types/cloudflare-env.d.ts",
     "supabase:start": "supabase db start",
     "supabase:reset": "supabase db reset",
     "supabase:types": "supabase gen types typescript --local > types/database.types.ts"
