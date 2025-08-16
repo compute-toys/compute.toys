@@ -7,8 +7,6 @@ import { CssTextField, Item } from 'theme/theme';
 import { login } from './actions';
 import Error from './error';
 
-export const runtime = 'edge';
-
 export default function LoginPage() {
     return (
         <ErrorBoundary errorComponent={Error}>

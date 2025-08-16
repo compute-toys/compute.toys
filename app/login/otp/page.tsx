@@ -5,8 +5,6 @@ import Typography from '@mui/material/Typography';
 import { CssTextField, Item } from 'theme/theme';
 import { verify } from '../actions';
 
-export const runtime = 'edge';
-
 export default async function LoginPage({ searchParams }) {
     const email = (await searchParams).email;
     return (
