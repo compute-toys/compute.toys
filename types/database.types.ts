@@ -530,8 +530,8 @@ export type Database = {
       get_size_by_bucket: {
         Args: Record<PropertyKey, never>
         Returns: {
-          size: number
           bucket_id: string
+          size: number
         }[]
       }
       list_multipart_uploads_with_delimiter: {
@@ -544,9 +544,9 @@ export type Database = {
           prefix_param: string
         }
         Returns: {
-          key: string
-          id: string
           created_at: string
+          id: string
+          key: string
         }[]
       }
       list_objects_with_delimiter: {
@@ -559,9 +559,9 @@ export type Database = {
           start_after?: string
         }
         Returns: {
-          name: string
           id: string
           metadata: Json
+          name: string
           updated_at: string
         }[]
       }
@@ -581,12 +581,12 @@ export type Database = {
           sortorder?: string
         }
         Returns: {
-          name: string
-          id: string
-          updated_at: string
           created_at: string
+          id: string
           last_accessed_at: string
           metadata: Json
+          name: string
+          updated_at: string
         }[]
       }
       search_legacy_v1: {
@@ -601,12 +601,12 @@ export type Database = {
           sortorder?: string
         }
         Returns: {
-          name: string
-          id: string
-          updated_at: string
           created_at: string
+          id: string
           last_accessed_at: string
           metadata: Json
+          name: string
+          updated_at: string
         }[]
       }
       search_v1_optimised: {
@@ -621,12 +621,12 @@ export type Database = {
           sortorder?: string
         }
         Returns: {
-          name: string
-          id: string
-          updated_at: string
           created_at: string
+          id: string
           last_accessed_at: string
           metadata: Json
+          name: string
+          updated_at: string
         }[]
       }
       search_v2: {
@@ -638,12 +638,12 @@ export type Database = {
           start_after?: string
         }
         Returns: {
-          key: string
-          name: string
-          id: string
-          updated_at: string
           created_at: string
+          id: string
+          key: string
           metadata: Json
+          name: string
+          updated_at: string
         }[]
       }
     }

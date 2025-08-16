@@ -1,8 +1,6 @@
 import Box from '@mui/material/Box';
 import Link from 'next/link';
 
-export const runtime = 'edge';
-
 export default function NotFound() {
     return (
         <Box sx={{ p: 4 }}>

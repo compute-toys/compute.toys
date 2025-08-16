@@ -1,4 +1,4 @@
-import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev';
+import type { NextConfig } from 'next';
 import allowedtexturesources from './config/allowedtexturesources.json' with { type: 'json' };
 
 const DEVELOPMENT = process.env.NODE_ENV === 'development';
@@ -19,13 +19,12 @@ function getImageConfig() {
         console.warn(
             'NEXT_PUBLIC_SUPABASE_PROJECT_ID is not set, images from supabase will not be loaded'
         );
-        config.unoptimized = true;
+        // config.unoptimized = true;
     }
     return config;
 }
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
     reactStrictMode: true,
     productionBrowserSourceMaps: PROD_EMULATION,
     experimental: { forceSwcTransforms: PROD_EMULATION }, // Bypass SWC entirely in emulation
@@ -71,8 +70,7 @@ const nextConfig = {
     }
 };
 
-if (DEVELOPMENT) {
-    await setupDevPlatform();
-}
-
 export default nextConfig;
+
+import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
+initOpenNextCloudflareForDev();

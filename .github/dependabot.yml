@@ -19,7 +19,7 @@ updates:
     groups:
       nextjs:
         patterns:
-          - "@cloudflare/next-on-pages"
+          - "@opennextjs/cloudflare"
           - "@next/*"
           - "eslint-config-next"
           - "next"

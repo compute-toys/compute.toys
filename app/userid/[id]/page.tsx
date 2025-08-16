@@ -2,8 +2,6 @@ import { createClient } from 'lib/supabase/server';
 import { notFound } from 'next/navigation';
 import Profile from './profile';
 
-export const runtime = 'edge';
-
 export default async function ProfilePage({ params }) {
     const supabase = await createClient();
     const { id } = await params;

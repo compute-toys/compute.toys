@@ -3,8 +3,6 @@ import { fetchShader } from 'lib/view/server';
 import { notFound } from 'next/navigation';
 import EmbedShader from './embed';
 
-export const runtime = 'edge';
-
 export default async function ViewShaderPage({ params }) {
     const supabase = await createClient();
     let { id } = await params;

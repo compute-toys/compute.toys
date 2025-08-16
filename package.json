@@ -15,9 +15,8 @@
     "start": "next start",
     "lint": "next lint",
     "fix": "next lint --fix",
-    "pages:setup": "npx @cloudflare/next-on-pages",
-    "pages:build": "npx @cloudflare/next-on-pages",
-    "pages:preview": "wrangler pages dev",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv types/cloudflare-env.d.ts",
     "supabase:start": "supabase db start",
     "supabase:reset": "supabase db reset",
     "supabase:types": "supabase gen types typescript --local > types/database.types.ts"
@@ -35,10 +34,12 @@
     "@mui/lab": "^5.0.0-alpha.177",
     "@mui/material": "^5.18.0",
     "@mui/utils": "^7.2.0",
+    "@opennextjs/cloudflare": "^1.6.5",
     "@react-hook/resize-observer": "^2.0.2",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.53.0",
     "async-mutex": "^0.5.0",
+    "esbuild": "^0.25.4",
     "firacode": "^6.2.0",
     "jotai": "^2.12.5",
     "jotai-game": "^0.2.0",
@@ -55,7 +56,6 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.13",
     "@types/emscripten": "^1.40.1",
     "@types/memoizee": "^0.4.12",
     "@types/node": "^24.2.1",

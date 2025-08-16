@@ -5,8 +5,6 @@ import { notFound } from 'next/navigation';
 import { Database } from 'types/database.types';
 import ClientSideEditor from './client-editor';
 
-export const runtime = 'edge';
-
 async function getShader(supabase: SupabaseClient<Database>, { id }) {
     id = Number(id);
     if (Number.isNaN(id)) notFound();
