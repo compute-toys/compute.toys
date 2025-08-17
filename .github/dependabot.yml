@@ -23,7 +23,6 @@ updates:
           - "@next/*"
           - "eslint-config-next"
           - "next"
-          - "vercel"
           - "wrangler"
       typescript:
         patterns:
