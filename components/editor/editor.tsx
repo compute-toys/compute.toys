@@ -28,7 +28,7 @@ import { saveColorTransitionSignalAtom, shaderIDAtom } from 'lib/atoms/atoms';
 import { canvasParentElAtom } from 'lib/atoms/wgputoyatoms';
 import { createClient } from 'lib/supabase/client';
 import dynamic from 'next/dynamic';
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import { MonacoTheme } from 'theme/monacotheme';
 import { Frame } from 'theme/theme';
@@ -83,7 +83,7 @@ export default function Editor(props: EditorProps) {
 
     const Timer = dynamic(() => import('components/timer'), { ssr: false });
 
-    let metadataEditor: JSX.Element | null = null;
+    let metadataEditor: React.ReactElement | null = null;
     if (supabase && !props.standalone) {
         metadataEditor = (
             <ItemWithTransitionSignal

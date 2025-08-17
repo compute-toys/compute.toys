@@ -3,8 +3,6 @@ import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import { fetchShader } from 'lib/view/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-export const runtime = 'edge';
-
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const supabase = await createClient();
