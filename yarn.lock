@@ -6494,6 +6494,11 @@ next-navigation-guard@^0.2.0:
   resolved "https://registry.yarnpkg.com/next-navigation-guard/-/next-navigation-guard-0.2.0.tgz#c9622cf184c59a0ecb54cb2cdbaf962a7d5361e4"
   integrity sha512-EnQcqJi/bcHXnirnY0TGSFkQ3Rl9ID4BZWdU2ovoWAkA72mCofI2hTcaqUUOmlSBVZp4AvSGm1kQmkOJDLrEjg==
 
+next-plausible@^3.12.4:
+  version "3.12.4"
+  resolved "https://registry.yarnpkg.com/next-plausible/-/next-plausible-3.12.4.tgz#d0ac1d7dcbe9836b6c93e37d42b80e3661fdaa34"
+  integrity sha512-cD3+ixJxf8yBYvsideTxqli3fvrB7R4BXcvsNJz8Sm2X1QN039WfiXjCyNWkub4h5++rRs6fHhchUMnOuJokcg==
+
 next-tick@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/next-tick/-/next-tick-1.1.0.tgz#1836ee30ad56d67ef281b22bd199f709449b35eb"
