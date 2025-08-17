@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { withPlausibleProxy } from 'next-plausible';
 import allowedtexturesources from './config/allowedtexturesources.json' with { type: 'json' };
 
 const DEVELOPMENT = process.env.NODE_ENV === 'development';
@@ -70,7 +71,10 @@ const nextConfig: NextConfig = {
     }
 };
 
-export default nextConfig;
+export default withPlausibleProxy({
+    customDomain: 'https://p.compute.toys',
+    subdirectory: 'plausible'
+})(nextConfig);
 
 import { initOpenNextCloudflareForDev } from '@opennextjs/cloudflare';
 initOpenNextCloudflareForDev();

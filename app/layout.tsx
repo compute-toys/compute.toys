@@ -6,6 +6,7 @@ import TopBar from 'components/global/topbar';
 import { createClient } from 'lib/supabase/server';
 import { WindowManagementProvider } from 'lib/util/draggablewindowscontext';
 import { NavigationGuardProvider } from 'next-navigation-guard';
+import PlausibleProvider from 'next-plausible';
 import { theme } from 'theme/theme';
 
 const originTrialTokens = [
@@ -44,6 +45,7 @@ export default async function RootLayout({
                 {originTrialTokens.map((token, index) => (
                     <meta key={index} httpEquiv="origin-trial" content={token} />
                 ))}
+                <PlausibleProvider domain="compute.toys" />
             </head>
             <body>
                 <Providers>
