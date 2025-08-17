@@ -32,6 +32,7 @@ jobs:
           fetch-depth: 1
 
       - name: Run Claude Code Review
+        continue-on-error: true
         id: claude-review
         uses: anthropics/claude-code-action@beta
         with:
