@@ -3,8 +3,6 @@ import ShaderList from 'components/shaderlist';
 import { createClient } from 'lib/supabase/server';
 import { notFound } from 'next/navigation';
 
-export const runtime = 'edge';
-
 const SHADERS_PER_PAGE = 12;
 
 const getPagination = (page: number, size: number) => {

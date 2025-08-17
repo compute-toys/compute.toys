@@ -54,7 +54,7 @@
           "app/**/route.ts",
           "theme/themeModule.ts",
           "next-env.d.ts",
-          "next.config.mjs"
+          "next.config.ts"
         ]
       }
     ],
