@@ -26,5 +26,14 @@
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1
+	},
+	"routes": [
+		{
+			"pattern": "compute.toys",
+			"custom_domain": true
+		}
+	],
+	"placement": {
+		"mode": "smart"
 	}
 }
