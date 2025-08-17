@@ -2,7 +2,16 @@
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/compute-toys/compute.toys?quickstart=1)
 
-This is the source code of the [compute.toys](https://compute.toys) website.
+**[compute.toys](https://compute.toys)** is a WebGPU-based compute shader playground that lets you write, compile, and run compute shaders directly in the browser.
+It uses the [Slang shading language](https://shader-slang.org/), which gets transpiled to WGSL and executed on your GPU via WebGPU.
+
+## Architecture
+
+- **Frontend**: Next.js with React, Material-UI, and Monaco Editor
+- **Deployment**: Cloudflare Workers (via OpenNext)
+- **Database**: Supabase (PostgreSQL) with real-time features
+- **Shader Compilation**: Slang compiler running as WebAssembly
+- **Graphics**: WebGPU for compute shader execution and rendering
 
 ## Development
 
