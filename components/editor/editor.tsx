@@ -31,7 +31,6 @@ import dynamic from 'next/dynamic';
 import React, { useCallback } from 'react';
 import { ItemWithTransitionSignal } from 'theme/itemwithtransition';
 import { MonacoTheme } from 'theme/monacotheme';
-import { Frame } from 'theme/theme';
 import ConfigurationPicker from './configurationpicker';
 import Explainer from './explainer';
 
@@ -95,6 +94,15 @@ export default function Editor(props: EditorProps) {
         );
     }
 
+    const ordinaryStyle = {
+        width: '100%',
+        height: '100%',
+        margin: 0,
+        padding: 0,
+        aspectRatio: '1.77',
+        background: 'rgba(0,0,0,0)',
+        borderRadius: '4px'
+    };
     let embedStyle = {};
     if (props.embed) {
         embedStyle = {
@@ -145,20 +153,15 @@ export default function Editor(props: EditorProps) {
     );
 
     const leftPanel = (
-        <div ref={renderParentNodeRef}>
+        <div>
             <ItemWithTransitionSignal transitionAtom={saveColorTransitionSignalAtom}>
-                <Frame elevation={12}>
+                <div style={ordinaryStyle} ref={renderParentNodeRef}>
                     <WgpuToyWrapper
                         bindID={'editor-canvas'}
-                        style={{
-                            display: 'inline-block',
-                            borderRadius: '4px',
-                            backgroundColor: 'black',
-                            ...embedStyle
-                        }}
+                        style={{ ...ordinaryStyle, ...embedStyle }}
                         embed={props.embed}
                     />
-                </Frame>
+                </div>
                 <Grid
                     container
                     sx={{
