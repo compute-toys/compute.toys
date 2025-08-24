@@ -1,5 +1,4 @@
 import memoizee from 'memoizee';
-import pako from 'pako';
 import { ReflectionJSON } from 'types/reflection';
 import type { GlobalSession, LanguageServer, MainModule, Module } from 'types/slang-wasm';
 import shadertoylibSource from '../shaders/shadertoy.slang';
@@ -22,9 +21,8 @@ const moduleConfig = {
         imports: WebAssembly.Imports,
         receiveInstance: (instance: WebAssembly.Instance) => void
     ) => {
-        const response = await fetch(moduleURL + '.wasm.gz');
-        const compressedData = new Uint8Array(await response.arrayBuffer());
-        const wasmBinary = pako.inflate(compressedData);
+        const response = await fetch(moduleURL + '.wasm');
+        const wasmBinary = new Uint8Array(await response.arrayBuffer());
         const { instance } = await WebAssembly.instantiate(wasmBinary, imports);
         receiveInstance(instance);
         return instance.exports;
@@ -40,18 +38,6 @@ class Compiler {
     private wgslTarget: number;
 
     constructor(private mainModule: MainModule) {
-        // Create empty files that will be populated later
-        ['user.slang', 'std.slang', 'shadertoy.slang'].forEach(file => {
-            mainModule.FS.createDataFile(
-                '/',
-                file,
-                new DataView(new ArrayBuffer(0)),
-                true,
-                true,
-                false
-            );
-        });
-
         const globalSession = mainModule.createGlobalSession();
         if (!globalSession) throw mainModule.getLastError();
         this.globalSession = globalSession;
