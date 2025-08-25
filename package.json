@@ -27,7 +27,7 @@
     "@fontsource/lobster": "^5.2.6",
     "@fortawesome/fontawesome-svg-core": "^7.0.0",
     "@fortawesome/free-brands-svg-icons": "^7.0.0",
-    "@fortawesome/react-fontawesome": "^0.2.3",
+    "@fortawesome/react-fontawesome": "^3.0.0",
     "@giscus/react": "^3.1.0",
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^5.17.1",
