@@ -45,13 +45,22 @@ export const WgpuToyWrapper = props => {
     });
 
     return (
-        <div style={props.style}>
+        <div
+            style={{
+                ...props.style,
+                ...{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }
+            }}
+        >
             <canvas
                 ref={canvasRef}
                 id={props.bindID}
                 style={
                     loaded
-                        ? { ...props.style, ...{ outline: 'none' } }
+                        ? { ...props.style, ...{ outline: 'none', position: 'relative' } }
                         : { position: 'fixed', display: 'hidden' }
                 }
                 tabIndex={1}
