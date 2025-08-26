@@ -12,10 +12,20 @@ import useShaderSerDe from 'lib/db/serializeshader';
 import { createClient } from 'lib/supabase/client';
 import { useShader } from 'lib/view/client';
 import { Shader } from 'lib/view/server';
+import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useState } from 'react';
 import { MetadataEditor } from '../../../components/editor/metadataeditor';
-import StandaloneEditor from '../../../standalone-editor/src/StandaloneEditor';
 import { ShaderData, User as UserType } from '../../../standalone-editor/src/types';
+
+// Dynamically import the standalone editor to prevent server-side bundling
+const StandaloneEditor = dynamic(() => import('../../../standalone-editor/src/StandaloneEditor'), {
+    ssr: false,
+    loading: () => (
+        <Box sx={containerStyle}>
+            <CircularProgress size={60} thickness={4} />
+        </Box>
+    )
+});
 
 // Simple container style
 const containerStyle = {
