@@ -15,7 +15,7 @@ import { Shader } from 'lib/view/server';
 import { useCallback, useEffect, useState } from 'react';
 import { MetadataEditor } from '../../../components/editor/metadataeditor';
 import StandaloneEditor from '../../../standalone-editor/src/StandaloneEditor';
-import { ShaderData } from '../../../standalone-editor/src/types';
+import { ShaderData, User as UserType } from '../../../standalone-editor/src/types';
 
 // Simple container style
 const containerStyle = {
@@ -38,8 +38,8 @@ const errorStyle = {
 };
 
 // Wrapper components for the standalone editor
-const MetadataEditorComponent = ({ user }) => {
-    return <MetadataEditor user={user} />;
+const MetadataEditorComponent = ({ user }: { user?: UserType }) => {
+    return <MetadataEditor userid={user?.id} />;
 };
 
 const CommentsComponent = () => {
