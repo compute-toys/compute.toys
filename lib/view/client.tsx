@@ -1,6 +1,7 @@
 'use client';
-import { fromUniformActiveSettings } from 'components/editor/uniformsliders';
 import { useSetAtom } from 'jotai';
+import { ShaderActiveSettings, useResetShaderData } from 'lib/db/serializeshader';
+import { fromUniformActiveSettings } from '../../standalone-editor/src/components/editor/uniformsliders';
 import {
     authorProfileAtom,
     codeAtom,
@@ -18,10 +19,9 @@ import {
     Texture,
     titleAtom,
     visibilityAtom
-} from 'lib/atoms/atoms';
-import { ShaderActiveSettings, useResetShaderData } from 'lib/db/serializeshader';
-import { fixup_shader_code } from 'lib/util/fixup';
-import { defaultTextures } from 'lib/util/textureutils';
+} from '../../standalone-editor/src/lib/atoms/atoms';
+import { fixup_shader_code } from '../../standalone-editor/src/lib/util/fixup';
+import { defaultTextures } from '../../standalone-editor/src/lib/util/textureutils';
 import { Shader } from './server';
 
 export function useShader(shader: Shader) {

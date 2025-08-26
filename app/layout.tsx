@@ -1,12 +1,12 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import Footer from 'components/footer';
-import { ShadowCanvas } from 'components/global/shadowcanvas';
 import TopBar from 'components/global/topbar';
 import { createClient } from 'lib/supabase/server';
-import { WindowManagementProvider } from 'lib/util/draggablewindowscontext';
 import { NavigationGuardProvider } from 'next-navigation-guard';
 import PlausibleProvider from 'next-plausible';
+import { ShadowCanvas } from 'standalone-editor/src/components/global/shadowcanvas';
+import { WindowManagementProvider } from 'standalone-editor/src/lib/util/draggablewindowscontext';
 import { theme } from 'theme/theme';
 
 const originTrialTokens = [
