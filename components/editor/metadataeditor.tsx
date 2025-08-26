@@ -11,6 +11,14 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { User } from '@supabase/supabase-js';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { createClient } from 'lib/supabase/client';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ChangeEvent, useEffect } from 'react';
+import {
+    shadowCanvasElAtom,
+    shadowCanvasToDataUrl
+} from 'standalone-editor/src/components/global/shadowcanvas';
 import {
     authorProfileAtom,
     codeNeedSaveAtom,
@@ -20,16 +28,11 @@ import {
     titleAtom,
     Visibility,
     visibilityAtom
-} from 'lib/atoms/atoms';
-import { createClient } from 'lib/supabase/client';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ChangeEvent, useEffect } from 'react';
+} from 'standalone-editor/src/lib/atoms/atoms';
+import { canvasElAtom } from 'standalone-editor/src/lib/atoms/wgputoyatoms';
 import { CssTextField, theme } from 'theme/theme';
-import { canvasElAtom } from '../../lib/atoms/wgputoyatoms';
 import useShaderSerDe, { UpsertResult } from '../../lib/db/serializeshader';
 import Avatar from '../global/avatar';
-import { shadowCanvasElAtom, shadowCanvasToDataUrl } from '../global/shadowcanvas';
 
 const VisibilityInput = styled(InputBase)(({ theme }) => ({
     '& .MuiInputBase-input': {
