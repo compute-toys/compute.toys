@@ -57,10 +57,10 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@types/emscripten": "^1.40.1",
+    "@types/emscripten": "^1.41.1",
     "@types/memoizee": "^0.4.12",
-    "@types/node": "^24.2.1",
-    "@types/react": "^19.1.10",
+    "@types/node": "^24.3.1",
+    "@types/react": "^19.1.12",
     "@webgpu/types": "^0.1.64",
     "depcheck": "^1.4.7",
     "dotenv": "^17.2.0",
