@@ -63,7 +63,8 @@ const copyToShadowCanvas = async (
         const dim = getDimensions(
             canvas.clientWidth > MAX_SHADOW_CANVAS_WIDTH
                 ? MAX_SHADOW_CANVAS_WIDTH
-                : canvas.clientWidth
+                : canvas.clientWidth,
+            false
         );
         shadowCanvas.width = dim.x;
         shadowCanvas.height = dim.y;
