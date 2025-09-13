@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Configuration - update this to change the Slang version
-SLANG_VERSION="2025.999"
-SLANG_REPO="davidar/slang"
+SLANG_VERSION="2025.16.1"
+SLANG_REPO="shader-slang/slang"
 ZIP_URL="https://github.com/${SLANG_REPO}/releases/download/v${SLANG_VERSION}/slang-${SLANG_VERSION}-wasm.zip"
 
 # Paths
