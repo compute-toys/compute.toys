@@ -40,4 +40,4 @@ yarn-error.log*
 certificates
 
 # Downloaded WASM files (generated at build time)
-/public/wasm/
+/standalone-editor/src/wasm/

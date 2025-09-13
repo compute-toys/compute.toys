@@ -7,9 +7,9 @@ ZIP_URL="https://github.com/${SLANG_REPO}/releases/download/v${SLANG_VERSION}/sl
 
 # Paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PUBLIC_DIR="${SCRIPT_DIR}/../public"
-WASM_DIR="${PUBLIC_DIR}/wasm"
-TYPES_DIR="${SCRIPT_DIR}/../types"
+STANDALONE_DIR="${SCRIPT_DIR}/../standalone-editor"
+WASM_DIR="${STANDALONE_DIR}/src/wasm"
+TYPES_DIR="${STANDALONE_DIR}/src/types"
 ZIP_PATH="${WASM_DIR}/slang-wasm.zip"
 
 # Ensure wasm directory exists

@@ -1,22 +1,22 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import wasm from 'vite-plugin-wasm';
+import topLevelAwait from 'vite-plugin-top-level-await';
 import path from 'path';
-import { copyFileSync, mkdirSync } from 'fs';
 
 export default defineConfig({
     plugins: [
         react(),
-        // Custom plugin to handle WASM files
+        wasm(),
+        topLevelAwait(),
+        // Custom plugin to handle shader files as text
         {
-            name: 'wasm-handler',
-            generateBundle() {
-                try {
-                    mkdirSync('dist/src/wasm', { recursive: true });
-                    copyFileSync('src/wasm/slang-wasm.js', 'dist/src/wasm/slang-wasm.js');
-                    copyFileSync('src/wasm/slang-wasm.wasm', 'dist/src/wasm/slang-wasm.wasm');
-                    console.log('WASM files copied to dist/src/wasm');
-                } catch (err) {
-                    console.error('Failed to copy WASM files:', err);
+            name: 'shader-loader',
+            load(id) {
+                if (id.endsWith('.slang') || id.endsWith('.wgsl')) {
+                    const fs = require('fs');
+                    const content = fs.readFileSync(id, 'utf-8');
+                    return `export default ${JSON.stringify(content)};`;
                 }
             }
         }
@@ -51,6 +51,5 @@ export default defineConfig({
             },
         },
     },
-    // Handle shader and WASM files
-    assetsInclude: ['**/*.slang', '**/*.wgsl', '**/*.wasm'],
+    // WASM is handled by vite-plugin-wasm, shader files imported as text modules
 });

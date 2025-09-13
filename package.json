@@ -68,6 +68,8 @@
     "typescript": "^5.9.2",
     "vite": "^7.1.5",
     "vite-plugin-cloudflare": "^0.4.1",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.5.0",
     "wrangler": "^4.36.0"
   }
 }

@@ -5,6 +5,8 @@ import shadertoylibSource from '../shaders/shadertoy.slang';
 import stdlibSource from '../shaders/std.slang';
 import { BindingInfo, parseBindings } from './binding-parser';
 import { ShaderConverter, StorageStructMemberLayout } from './glue';
+import wasmInit from '../../wasm/slang-wasm.wasm?init';
+import createModule from '../../wasm/slang-wasm.js';
 
 export interface EnhancedReflectionJSON extends ReflectionJSON {
     bindings: Record<string, BindingInfo>;
@@ -15,20 +17,6 @@ export interface TextureDimensions {
     height: number;
 }
 
-const moduleURL = '/wasm/slang-wasm';
-const moduleConfig = {
-    instantiateWasm: async (
-        imports: WebAssembly.Imports,
-        receiveInstance: (instance: WebAssembly.Instance) => void
-    ) => {
-        const response = await fetch(moduleURL + '.wasm');
-        const wasmBinary = new Uint8Array(await response.arrayBuffer());
-        const result: any = await WebAssembly.instantiate(wasmBinary, imports);
-        const instance = result.instance;
-        receiveInstance(instance);
-        return instance.exports;
-    }
-};
 
 let compiler: Compiler | null = null;
 let slangd: LanguageServer | null = null;
@@ -139,8 +127,7 @@ const initialiseSlang = memoizee(
             return false;
         }
 
-        const createModule = (await import(/* webpackIgnore: true */ moduleURL + '.js')).default;
-        const slangModule: MainModule | null = await createModule(moduleConfig);
+        const slangModule: MainModule | null = await createModule();
         if (!slangModule) {
             console.error('Failed to initialise Slang module');
             return false;
