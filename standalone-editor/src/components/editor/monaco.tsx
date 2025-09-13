@@ -25,7 +25,7 @@ import {
 } from '../../lib/slang/language-server';
 import { debounce } from '../../lib/util/debounce';
 import { editor as MonacoEditor } from 'monaco-editor';
-import { useNavigationGuard } from 'next-navigation-guard';
+// import { useNavigationGuard } from 'next-navigation-guard';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { defineMonacoTheme } from '../../theme/monacotheme';
 
@@ -166,10 +166,10 @@ const Monaco = props => {
         defineMonacoTheme(monaco, 'global', theme);
     };
 
-    useNavigationGuard({
-        enabled: codeNeedSave,
-        confirm: () => window.confirm('You have unsaved changes that will be lost.')
-    });
+    // useNavigationGuard({
+    //     enabled: codeNeedSave,
+    //     confirm: () => window.confirm('You have unsaved changes that will be lost.')
+    // });
 
     useEffect(() => {
         if (vim) {

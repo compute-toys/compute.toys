@@ -1,7 +1,7 @@
 'use client';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
-import Image from 'next/image';
+// import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 export default function Avatar({
@@ -32,13 +32,10 @@ export default function Avatar({
     const displayNull = typeof displayOnNull !== 'undefined' && displayOnNull;
 
     return avatarUrl ? (
-        <Image
+        <img
             src={avatarUrl}
             alt={'avatar'}
-            style={{ borderRadius: '15px' }}
-            width={size}
-            height={size}
-            priority={true}
+            style={{ borderRadius: '15px', width: size, height: size }}
         />
     ) : displayNull ? (
         <AccountCircleIcon style={{ height: size, width: size }} />

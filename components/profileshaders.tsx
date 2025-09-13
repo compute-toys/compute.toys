@@ -15,8 +15,8 @@ import visuallyHidden from '@mui/utils/visuallyHidden';
 import useShaderSerDe from 'lib/db/serializeshader';
 import { createClient } from 'lib/supabase/client';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
-import Image from 'next/image';
-import Link from 'next/link';
+// import Image from 'next/image';
+// import Link from 'next/link';
 import { MouseEvent, useState } from 'react';
 import { toDateString, toUnixTime } from '../standalone-editor/src/lib/util/dateutils';
 
@@ -225,14 +225,13 @@ export const ProfileShaders = props => {
                                     return (
                                         <TableRow hover tabIndex={-1} key={row.id} id={elementId}>
                                             <TableCell align="left">
-                                                <Image
+                                                <img
                                                     height={TABLE_PREVIEW_HEIGHT}
                                                     width={TABLE_PREVIEW_WIDTH}
                                                     src={getFullyQualifiedSupabaseBucketURL(
                                                         row.thumb_url
                                                     )}
                                                     alt={row.name}
-                                                    priority={true}
                                                 />
                                             </TableCell>
                                             <TableCell
@@ -241,7 +240,7 @@ export const ProfileShaders = props => {
                                                 scope="row"
                                                 padding="none"
                                             >
-                                                <Link href={`/view/${row.id}`}>{row.name}</Link>
+                                                <a href={`/view.html?id=${row.id}`}>{row.name}</a>
                                             </TableCell>
                                             <TableCell align="left">
                                                 {toDateString(row.created_at)}

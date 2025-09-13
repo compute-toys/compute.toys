@@ -7,8 +7,8 @@ import Pagination from '@mui/material/Pagination';
 import PaginationItem from '@mui/material/PaginationItem';
 import Avatar from 'components/global/avatar';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
-import Image from 'next/image';
-import Link from 'next/link';
+// import Image from 'next/image';
+// import Link from 'next/link';
 import { Fragment } from 'react';
 import { Item, theme } from 'theme/theme';
 
@@ -43,22 +43,18 @@ function ShaderPicker(props) {
             >
                 {props.shaders.map(shader => (
                     <ImageListItem key={shader.id} style={{ aspectRatio: '1/0.75' }}>
-                        <Link passHref href={`/view/${shader.id}`}>
-                            <Image
+                        <a href={`/view.html?id=${shader.id}`}>
+                            <img
                                 style={{
                                     width: '100%',
                                     height: 'auto',
                                     borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    pointerEvents: 'none'
+                                    cursor: 'pointer'
                                 }}
                                 src={getFullyQualifiedSupabaseBucketURL(shader.thumb_url)}
                                 alt={shader.name}
-                                width={512}
-                                height={288}
-                                priority={true}
                             />
-                        </Link>
+                        </a>
                         <ImageListItemBar
                             title={
                                 <span
@@ -79,7 +75,7 @@ function ShaderPicker(props) {
                                     }}
                                 >
                                     <span>by </span>
-                                    <Link href={`/userid/${shader.profile.id}`}>
+                                    <a href={`/userid.html?id=${shader.profile.id}`}>
                                         <span
                                             style={{
                                                 fontWeight: 'bold',
@@ -88,16 +84,16 @@ function ShaderPicker(props) {
                                         >
                                             {shader.profile.username ?? 'anonymous'}
                                         </span>
-                                    </Link>
+                                    </a>
                                 </span>
                             }
                             style={{ borderRadius: '4px', textAlign: 'left' }}
                             actionIcon={
-                                <Link href={`/userid/${shader.profile.id}`}>
+                                <a href={`/userid.html?id=${shader.profile.id}`}>
                                     <Box sx={{ margin: '10px' }}>
                                         <Avatar url={shader.profile.avatar_url} size={25} />
                                     </Box>
-                                </Link>
+                                </a>
                             }
                         />
                     </ImageListItem>
@@ -129,8 +125,8 @@ export default function ShaderList(props) {
                         color="secondary"
                         renderItem={item => (
                             <PaginationItem
-                                component={Link}
-                                href={`${urlPrefix}/${item.page}`}
+                                component="a"
+                                href={`${urlPrefix}.html?page=${item.page}`}
                                 {...item}
                             />
                         )}

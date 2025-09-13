@@ -11,8 +11,8 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { createClient } from 'lib/supabase/client';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+// import Link from 'next/link';
+// import { useRouter } from 'next/navigation';
 import { ChangeEvent, useEffect } from 'react';
 import {
     shadowCanvasElAtom,
@@ -57,7 +57,7 @@ export const MetadataEditor = ({ userid }: { userid?: string }) => {
 
     const supabase = createClient();
     const [, upsertToHost] = useShaderSerDe(supabase);
-    const router = useRouter();
+    // const router = useRouter();
 
     //TODO: not the best place for this logic
     const upsertShader = async (forceCreate: boolean) => {
@@ -72,7 +72,7 @@ export const MetadataEditor = ({ userid }: { userid?: string }) => {
             if (result.needsRedirect) {
                 setTimeout(() => {
                     setShaderID(result.id!);
-                    router.push(`/view/${result.id}`);
+                    window.location.href = `/view.html?id=${result.id}`;
                 }, 0);
             }
         } else {
@@ -195,9 +195,9 @@ export const MetadataEditor = ({ userid }: { userid?: string }) => {
                             displayOnNull={false}
                         />
                         <Typography color={theme.palette.dracula.green}>
-                            <Link href={`/userid/${authorProfile.id}`}>
+                            <a href={`/userid.html?id=${authorProfile.id}`}>
                                 {authorProfile.username ?? 'anonymous'}
-                            </Link>
+                            </a>
                         </Typography>
                     </Stack>
                 ) : null}

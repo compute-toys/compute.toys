@@ -9,22 +9,24 @@ import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { logout } from 'app/login/actions';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { logout } from 'lib/auth/actions';
+// Removed Next.js imports, using native navigation
 import { useState } from 'react';
 import Logo from './logo';
 
-export default function TopBar(props) {
+interface TopBarProps {
+    user?: any; // TODO: type this properly
+}
+
+export default function TopBar(props: TopBarProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [anchorEl, setAnchorEl] = useState(null);
-    const router = useRouter();
 
-    const handleSearch = e => {
+    const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         if (searchQuery.trim()) {
             const encodedQuery = encodeURIComponent(searchQuery.trim());
-            router.push(`/search/${encodedQuery}/1`);
+            window.location.href = `/search/${encodedQuery}/1`;
         }
     };
 
@@ -45,9 +47,9 @@ export default function TopBar(props) {
     );
 
     const UserEmail = () => (
-        <Link href={`/userid/${props.user.id}`} className="flex items-center">
+        <a href={`/userid/${props.user.id}`} className="flex items-center" style={{ textDecoration: 'none', color: 'inherit' }}>
             {props.user.email}
-        </Link>
+        </a>
     );
 
     const BurgerMenu = (
@@ -65,9 +67,9 @@ export default function TopBar(props) {
     const LogoStack = (
         <Stack marginLeft="1em" marginRight="1.7em">
             <Typography variant="h6">
-                <Link href="/">
+                <a href="/" style={{textDecoration: "none", color: "inherit"}}>
                     <Logo />
-                </Link>
+                </a>
             </Typography>
         </Stack>
     );
@@ -114,8 +116,8 @@ export default function TopBar(props) {
                             }}
                         >
                             <Stack direction="row" spacing={2} sx={{ flex: 1 }}>
-                                <Link href="/new">new</Link>
-                                <Link href="/list/1">browse</Link>
+                                <a href="/new" style={{textDecoration: "none", color: "inherit"}}>new</a>
+                                <a href="/list/1" style={{textDecoration: "none", color: "inherit"}}>browse</a>
                             </Stack>
                             <Stack direction="row" justifyContent="center" sx={{ flex: 1 }}>
                                 {SearchForm}
@@ -133,7 +135,7 @@ export default function TopBar(props) {
                                     </Stack>
                                 ) : (
                                     <Button>
-                                        <Link href={'/login'}>login / sign up</Link>
+                                        <a href={'/login'} style={{textDecoration: "none", color: "inherit"}}>login / sign up</a>
                                     </Button>
                                 )}
                             </Stack>
@@ -145,16 +147,16 @@ export default function TopBar(props) {
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
                 <MenuItem>{SearchForm}</MenuItem>
                 <MenuItem
-                    component={Link}
-                    href="/new"
+                    component="a"
+                    href="/new.html"
                     onClick={handleMenuClose}
                     sx={{ marginLeft: 1.3 }}
                 >
                     New
                 </MenuItem>
                 <MenuItem
-                    component={Link}
-                    href="/list/1"
+                    component="a"
+                    href="/list.html?page=1"
                     onClick={handleMenuClose}
                     sx={{ marginLeft: 1.3 }}
                 >
@@ -171,8 +173,8 @@ export default function TopBar(props) {
                     ]
                 ) : (
                     <MenuItem
-                        component={Link}
-                        href="/login"
+                        component="a"
+                        href="/login.html"
                         onClick={handleMenuClose}
                         sx={{ marginLeft: 1.3 }}
                     >

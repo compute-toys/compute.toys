@@ -1,10 +1,14 @@
-import { createBrowserClient } from '@supabase/ssr';
-import { SupabaseClient } from '@supabase/supabase-js';
+import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js';
 import { Database } from 'types/database.types';
 
 export function createClient(): SupabaseClient {
-    return createBrowserClient<Database>(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLIC_API_KEY!
-    );
+    // Use Vite environment variables (import.meta.env)
+    const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env?.VITE_SUPABASE_ANON_KEY;
+    
+    if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Missing Supabase environment variables');
+    }
+    
+    return createSupabaseClient<Database>(supabaseUrl, supabaseAnonKey);
 }
