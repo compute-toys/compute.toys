@@ -3,8 +3,7 @@ interface Dimensions {
     y: number;
 }
 
-export const getDimensions = (parentWidth: number, embed: boolean): Dimensions => {
-    let d = embed ? parentWidth / 32 : Math.floor(parentWidth / 32);
-    const baseIncrement = Math.max(d);
+export const getDimensions = (parentWidth: number): Dimensions => {
+    const baseIncrement = Math.max(Math.floor(parentWidth / 32), 1);
     return { x: baseIncrement * 32, y: baseIncrement * 18 };
 };
