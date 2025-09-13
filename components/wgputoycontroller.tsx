@@ -662,7 +662,8 @@ const WgpuToyController = props => {
                     (window.screen.height * dpr) / (window.outerWidth / window.innerWidth) / 60
                 ) * 60;
         } else if (props.embed) {
-            dimensions = getDimensions(window.innerWidth * dpr);
+            dimensions.x = window.innerWidth * dpr;
+            dimensions.y = window.innerHeight * dpr;
         } else {
             const padding = 16;
             dimensions = getDimensions((parentRef!.offsetWidth - padding) * dpr);
