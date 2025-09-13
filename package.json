@@ -34,7 +34,7 @@
     "@mui/utils": "^7.2.0",
     "@opennextjs/cloudflare": "^1.6.5",
     "@react-hook/resize-observer": "^2.0.2",
-    "@supabase/ssr": "^0.6.1",
+    "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.53.0",
     "async-mutex": "^0.5.0",
     "esbuild": "^0.25.4",
