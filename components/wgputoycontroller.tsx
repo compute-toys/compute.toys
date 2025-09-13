@@ -556,6 +556,8 @@ const WgpuToyController = props => {
 
             const handlePointerDown = (e: MouseEvent | TouchEvent) => {
                 if (isPointerPressed()) return;
+                // Focus the canvas to enable keyboard events
+                if (canvas instanceof HTMLCanvasElement) canvas.focus();
                 setIsPointerPressed(true);
                 previousPointerStart = ComputeEngine.getInstance().getMousePos();
                 const p = getPointerPosition(e);

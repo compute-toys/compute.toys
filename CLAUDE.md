@@ -88,8 +88,8 @@ Set these in `.env`:
 - WebGPU types from `@webgpu/types`, Emscripten types for WASM integration
 
 ### WebAssembly Integration
-- Slang compiler loaded as compressed WASM (`slang-wasm.wasm.gz`)
-- Custom instantiation logic in `lib/slang/compiler.ts` handles decompression
+- Slang compiler loaded as uncompressed WASM (`slang-wasm.wasm`)
+- Cloudflare Workers automatically handles compression for static assets
 - WASM files served from `/public/wasm/` directory
 
 ### Development Environment
