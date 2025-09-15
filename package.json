@@ -54,10 +54,10 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@types/emscripten": "^1.40.1",
+    "@types/emscripten": "^1.41.2",
     "@types/memoizee": "^0.4.12",
-    "@types/node": "^24.2.1",
-    "@types/react": "^19.1.10",
+    "@types/node": "^24.4.0",
+    "@types/react": "^19.1.13",
     "@webgpu/types": "^0.1.64",
     "depcheck": "^1.4.7",
     "dotenv": "^17.2.0",
@@ -65,7 +65,7 @@
     "eslint-config-next": "^15.4.6",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-n": "^17.21.3",
+    "eslint-plugin-n": "^17.22.0",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.6.2",
     "prettier-plugin-organize-imports": "^4.2.0",
