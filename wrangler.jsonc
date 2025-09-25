@@ -23,6 +23,7 @@
 			"bucket_name": "cache"
 		}
 	],
+	"preview_urls": true,
 	"observability": {
 		"enabled": true,
 		"head_sampling_rate": 1
