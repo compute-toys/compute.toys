@@ -32,7 +32,7 @@
     "@mui/lab": "^5.0.0-alpha.177",
     "@mui/material": "^5.18.0",
     "@mui/utils": "^7.2.0",
-    "@opennextjs/cloudflare": "^1.8.5",
+    "@opennextjs/cloudflare": "^1.9.0",
     "@react-hook/resize-observer": "^2.0.2",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.57.4",
@@ -71,6 +71,6 @@
     "prettier-plugin-organize-imports": "^4.3.0",
     "supabase": "^2.33.9",
     "typescript": "^5.9.2",
-    "wrangler": "^4.40.0"
+    "wrangler": "^4.40.2"
   }
 }
