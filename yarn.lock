@@ -2475,10 +2475,10 @@
     urlpattern-polyfill "^10.0.0"
     yaml "^2.7.0"
 
-"@opennextjs/cloudflare@^1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@opennextjs/cloudflare/-/cloudflare-1.8.5.tgz#e358b541854a0a427faf2529f683c6336b572cde"
-  integrity sha512-+U2kq5fno7R1v8CUXEjvz/2LZim+JxtGMXG5+i0sSAAD3l1lxh05/DoFrcb+5QAa/f5Lir2Y8wz2H4qsOjzRwA==
+"@opennextjs/cloudflare@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@opennextjs/cloudflare/-/cloudflare-1.9.0.tgz#c4c042531746d4d2672e786e4d2ecf2478b1f162"
+  integrity sha512-Dao5tW2g0Q/n9BLoDCoK0qiEY4bqxevsjb4OhtEfQpc7Pt/R9TZCWXKZ8+GTr1ZkvsFcMJeD1qsciNFTkb60kg==
   dependencies:
     "@dotenvx/dotenvx" "1.31.0"
     "@opennextjs/aws" "3.7.7"
@@ -7970,10 +7970,10 @@ workerd@1.20250924.0:
     "@cloudflare/workerd-linux-arm64" "1.20250924.0"
     "@cloudflare/workerd-windows-64" "1.20250924.0"
 
-wrangler@^4.40.0:
-  version "4.40.0"
-  resolved "https://registry.yarnpkg.com/wrangler/-/wrangler-4.40.0.tgz#926a316d4830b3a70ec69c2188e11759fd4e5530"
-  integrity sha512-HCPNUz599h9emi6qjppn92kxS6E12QvD0A3K087CZFEysw6lO1saZUdJ8azk0LsYGYDnrkBs5TzUOEfpuccwWA==
+wrangler@^4.40.2:
+  version "4.40.2"
+  resolved "https://registry.yarnpkg.com/wrangler/-/wrangler-4.40.2.tgz#df053a9db5959b757dad794e22ad2c671cfaefab"
+  integrity sha512-wcev8GF6GU4ME5AsYY/gUehHrGdRiUCkifuyCeuVvpOtha3TMK4/s39x+jLuJBRtibpgejDekO68rqxfamf16A==
   dependencies:
     "@cloudflare/kv-asset-handler" "0.4.0"
     "@cloudflare/unenv-preset" "2.7.4"
