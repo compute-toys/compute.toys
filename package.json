@@ -31,7 +31,7 @@
     "@mui/icons-material": "^5.17.1",
     "@mui/lab": "^5.0.0-alpha.177",
     "@mui/material": "^5.18.0",
-    "@mui/utils": "^7.2.0",
+    "@mui/utils": "^7.3.3",
     "@opennextjs/cloudflare": "^1.8.5",
     "@react-hook/resize-observer": "^2.0.2",
     "@supabase/ssr": "^0.7.0",
