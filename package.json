@@ -37,7 +37,7 @@
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.76.1",
     "async-mutex": "^0.5.0",
-    "esbuild": "^0.25.4",
+    "esbuild": "^0.25.11",
     "firacode": "^6.2.0",
     "jotai": "^2.12.5",
     "jotai-game": "^0.2.0",
