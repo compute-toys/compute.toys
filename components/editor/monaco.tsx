@@ -1,18 +1,13 @@
 'use client';
 import Editor from '@monaco-editor/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useTransientAtom } from 'jotai-game';
 import {
     codeAtom,
     codeNeedSaveAtom,
-    isPlayingAtom,
     languageAtom,
     manualReloadAtom,
     monacoEditorAtom,
     parseErrorAtom,
-    playAtom,
-    recordingAtom,
-    resetAtom,
     vimAtom
 } from 'lib/atoms/atoms';
 import { slangConfiguration, slangLanguageDef } from 'lib/grammars/slang';
@@ -35,13 +30,9 @@ interface VimMode {
 
 const Monaco = props => {
     const [code, setCode] = useAtom(codeAtom);
-    const [isRecording, setRecording] = useTransientAtom(recordingAtom);
     const [codeNeedSave, setCodeNeedSave] = useAtom(codeNeedSaveAtom);
     const parseError = useAtomValue(parseErrorAtom);
-    const [isPlaying] = useTransientAtom(isPlayingAtom);
-    const setPlay = useSetAtom(playAtom);
     const setManualReload = useSetAtom(manualReloadAtom);
-    const setReset = useSetAtom(resetAtom);
     const vim = useAtomValue(vimAtom);
     const [vimContext, setVimContext] = useState<VimMode | undefined>(undefined);
     const [editor, setEditor] = useAtom(monacoEditorAtom);
@@ -257,27 +248,6 @@ const Monaco = props => {
                 _editor.addCommand(monaco.KeyMod.Alt | monaco.KeyCode.Enter, () => {
                     setManualReload(true);
                 });
-                // Play/Pause shortcut
-                _editor.addCommand(
-                    monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.UpArrow,
-                    () => {
-                        setPlay(!isPlaying());
-                    }
-                );
-                // Record shortcut
-                _editor.addCommand(
-                    monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR,
-                    () => {
-                        setRecording(!isRecording());
-                    }
-                );
-                // Rewind shortcut
-                _editor.addCommand(
-                    monaco.KeyMod.Alt | monaco.KeyMod.CtrlCmd | monaco.KeyCode.DownArrow,
-                    () => {
-                        setReset(true);
-                    }
-                );
                 // https://github.com/microsoft/monaco-editor/issues/392
                 document.fonts.ready.then(() => monaco.editor.remeasureFonts());
 
