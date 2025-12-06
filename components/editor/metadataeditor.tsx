@@ -11,10 +11,15 @@ import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { User } from '@supabase/supabase-js';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useTransientAtom } from 'jotai-game';
 import {
     authorProfileAtom,
     codeNeedSaveAtom,
     descriptionAtom,
+    isPlayingAtom,
+    playAtom,
+    recordingAtom,
+    resetAtom,
     shaderDataUrlThumbAtom,
     shaderIDAtom,
     titleAtom,
@@ -46,6 +51,10 @@ export const MetadataEditor = ({ user }: { user?: User }) => {
     const setCodeNeedSave = useSetAtom(codeNeedSaveAtom);
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
+    const [isRecording, setRecording] = useTransientAtom(recordingAtom);
+    const [isPlaying] = useTransientAtom(isPlayingAtom);
+    const setPlay = useSetAtom(playAtom);
+    const setReset = useSetAtom(resetAtom);
     const [visibility, setVisibility] = useAtom(visibilityAtom);
     const [shaderID, setShaderID] = useAtom(shaderIDAtom);
     const setShaderDataUrlThumb = useSetAtom(shaderDataUrlThumbAtom);
@@ -91,9 +100,27 @@ export const MetadataEditor = ({ user }: { user?: User }) => {
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.ctrlKey && e.key === 's') {
+            // Make shortcuts work if caps lock is enabled
+            const key = e.key.toLocaleLowerCase();
+            // Save shortcut
+            if (e.ctrlKey && key === 's') {
                 e.preventDefault();
                 upsertShader(false);
+            }
+            // Rewind shortcut
+            if (e.altKey && e.ctrlKey && key === 'arrowdown') {
+                e.preventDefault();
+                setReset(true);
+            }
+            // Play/Pause shortcut
+            if (e.altKey && e.ctrlKey && key === 'arrowup') {
+                e.preventDefault();
+                setPlay(!isPlaying());
+            }
+            // Record shortcut
+            if (e.altKey && e.ctrlKey && key === 'r') {
+                e.preventDefault();
+                setRecording(!isRecording());
             }
         };
         document.addEventListener('keydown', handleKeyDown);
