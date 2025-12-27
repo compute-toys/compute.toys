@@ -113,16 +113,20 @@ export class ComputeEngine {
         return ComputeEngine.instance;
     }
 
-    public setSurface(canvas: HTMLCanvasElement) {
+    public setSurface(canvas: HTMLCanvasElement, screenHDR: boolean) {
         const context = canvas.getContext('webgpu');
         if (!context) {
             throw new Error('WebGPU not supported');
         }
         this.surface = context;
-        const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+        screenHDR = screenHDR && window.matchMedia('(dynamic-range: high)').matches;
+        let presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+        if (screenHDR) presentationFormat = 'rgba16float';
         this.surface.configure({
             device: this.device,
             format: presentationFormat,
+            colorSpace: 'srgb', // display-p3  srgb
+            toneMapping: { mode: screenHDR ? 'extended' : 'standard' },
             alphaMode: 'opaque',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
             viewFormats: [presentationFormat]
@@ -621,7 +625,9 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         this.computeBindGroupLayout = layout;
 
         // Recreate screen blitter
-        const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+        const screenHDR = window.matchMedia('(dynamic-range: high)').matches;
+        let presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+        if (screenHDR) presentationFormat = 'rgba16float';
         this.screenBlitter = new Blitter(
             this.device,
             this.bindings.texScreen.view,

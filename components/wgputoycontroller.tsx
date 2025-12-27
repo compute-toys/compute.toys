@@ -23,6 +23,7 @@ import {
     requestFullscreenAtom,
     resetAtom,
     saveColorTransitionSignalAtom,
+    screenHDREnabledAtom,
     sliderRefMapAtom,
     sliderUpdateSignalAtom,
     textureChannelDimensionsAtom,
@@ -109,6 +110,7 @@ const WgpuToyController = props => {
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
     const float32Enabled = useAtomValue(float32EnabledAtom);
+    const screenHDREnabled = useAtomValue(screenHDREnabledAtom);
     const [profilerEnabled, setProfilerEnabled] = useAtom(profilerEnabledAtom);
     const halfResolution = useAtomValue(halfResolutionAtom);
 
@@ -198,7 +200,7 @@ const WgpuToyController = props => {
                 console.error('Canvas not found');
                 return;
             }
-            engine.setSurface(canvas);
+            engine.setSurface(canvas, screenHDREnabled);
             engine.onSuccess(handleSuccess);
             engine.onUpdate(handleUpdate);
             engine.onError(handleError);
@@ -743,6 +745,18 @@ const WgpuToyController = props => {
             }
         }
     }, [float32Enabled]);
+
+    useEffect(() => {
+        if (!needsInitialReset()) {
+            console.log(`Setting screen HDR to ${screenHDREnabled}`);
+            ComputeEngine.getInstance().reset();
+            if (dbLoaded()) {
+                recompile().then(() => {
+                    resetCallback();
+                });
+            }
+        }
+    }, [screenHDREnabled]);
 
     useEffect(() => {
         if (!needsInitialReset()) {
