@@ -1,8 +1,16 @@
 'use client';
-import Editor from 'components/editor/editor';
 import { useSetAtom } from 'jotai';
-import { codeNeedSaveAtom, dbLoadedAtom, manualReloadAtom, shaderIDAtom } from 'lib/atoms/atoms';
 import { useResetShaderData } from 'lib/db/serializeshader';
+import {
+    codeNeedSaveAtom,
+    dbLoadedAtom,
+    manualReloadAtom,
+    shaderIDAtom
+} from '../../standalone-editor/src/lib/atoms/atoms';
+import StandaloneEditor from '../../standalone-editor/src/StandaloneEditor';
+
+// Import the default shader
+import defaultWGSL from '../../standalone-editor/src/lib/shaders/default.wgsl';
 
 export default function Index(props) {
     const reset = useResetShaderData();
@@ -16,5 +24,5 @@ export default function Index(props) {
     setManualReload(true);
     setDBLoaded(true);
     setCodeNeedSave(false);
-    return <Editor user={props.user} />;
+    return <StandaloneEditor user={props.user} initialShader={defaultWGSL} language="wgsl" />;
 }

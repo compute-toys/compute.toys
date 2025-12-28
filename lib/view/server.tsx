@@ -1,8 +1,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { AuthorProfile } from 'lib/atoms/atoms';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import { Metadata } from 'next';
 import { Database } from 'types/database.types';
+import { AuthorProfile } from '../../standalone-editor/src/lib/atoms/atoms';
 
 export interface ShaderMetadata {
     id: number;

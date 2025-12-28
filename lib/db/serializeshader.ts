@@ -1,8 +1,12 @@
 'use client';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { UniformSliderRef } from 'components/editor/uniformsliders';
 import { atom, Getter, useAtomValue, useSetAtom } from 'jotai';
 import { useResetAtom } from 'jotai/utils';
+import { useMemo, useRef } from 'react';
+import {
+    UniformActiveSettings,
+    UniformSliderRef
+} from 'standalone-editor/src/components/editor/uniformsliders';
 import {
     authorProfileAtom,
     codeAtom,
@@ -18,16 +22,8 @@ import {
     sliderSerDeNeedsUpdateAtom,
     titleAtom,
     visibilityAtom
-} from 'lib/atoms/atoms';
-import { useMemo, useRef } from 'react';
+} from 'standalone-editor/src/lib/atoms/atoms';
 import { theme } from 'theme/theme';
-
-export interface UniformActiveSettings {
-    name: string;
-    value: number;
-    minRange: number;
-    maxRange: number;
-}
 
 interface TextureActiveSettings {
     img: string;

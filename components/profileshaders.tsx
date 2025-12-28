@@ -14,11 +14,11 @@ import Typography from '@mui/material/Typography';
 import visuallyHidden from '@mui/utils/visuallyHidden';
 import useShaderSerDe from 'lib/db/serializeshader';
 import { createClient } from 'lib/supabase/client';
-import { toDateString, toUnixTime } from 'lib/util/dateutils';
 import { getFullyQualifiedSupabaseBucketURL } from 'lib/util/urlutils';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MouseEvent, useState } from 'react';
+import { toDateString, toUnixTime } from '../standalone-editor/src/lib/util/dateutils';
 
 interface Data {
     name: string;

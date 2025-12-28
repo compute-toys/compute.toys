@@ -1,6 +1,6 @@
 import type { NextConfig } from 'next';
 import { withPlausibleProxy } from 'next-plausible';
-import allowedtexturesources from './config/allowedtexturesources.json' with { type: 'json' };
+import allowedtexturesources from './standalone-editor/src/config/allowedtexturesources.json' with { type: 'json' };
 
 const DEVELOPMENT = process.env.NODE_ENV === 'development';
 const PROD_EMULATION = process.env.PROD_EMULATION === 'yes';

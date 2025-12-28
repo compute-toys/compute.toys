@@ -9,8 +9,15 @@ import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import { User } from '@supabase/supabase-js';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { createClient } from 'lib/supabase/client';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ChangeEvent, useEffect } from 'react';
+import {
+    shadowCanvasElAtom,
+    shadowCanvasToDataUrl
+} from 'standalone-editor/src/components/global/shadowcanvas';
 import {
     authorProfileAtom,
     codeNeedSaveAtom,
@@ -20,16 +27,11 @@ import {
     titleAtom,
     Visibility,
     visibilityAtom
-} from 'lib/atoms/atoms';
-import { createClient } from 'lib/supabase/client';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ChangeEvent, useEffect } from 'react';
+} from 'standalone-editor/src/lib/atoms/atoms';
+import { canvasElAtom } from 'standalone-editor/src/lib/atoms/wgputoyatoms';
 import { CssTextField, theme } from 'theme/theme';
-import { canvasElAtom } from '../../lib/atoms/wgputoyatoms';
 import useShaderSerDe, { UpsertResult } from '../../lib/db/serializeshader';
 import Avatar from '../global/avatar';
-import { shadowCanvasElAtom, shadowCanvasToDataUrl } from '../global/shadowcanvas';
 
 const VisibilityInput = styled(InputBase)(({ theme }) => ({
     '& .MuiInputBase-input': {
@@ -42,7 +44,7 @@ const VisibilityInput = styled(InputBase)(({ theme }) => ({
     }
 }));
 
-export const MetadataEditor = ({ user }: { user?: User }) => {
+export const MetadataEditor = ({ userid }: { userid?: string }) => {
     const setCodeNeedSave = useSetAtom(codeNeedSaveAtom);
     const [title, setTitle] = useAtom(titleAtom);
     const [description, setDescription] = useAtom(descriptionAtom);
@@ -80,9 +82,9 @@ export const MetadataEditor = ({ user }: { user?: User }) => {
 
     // disables frontend controls if not author (backend will reject changes otherwise)
     const userIsAuthor = () => {
-        if (user) {
+        if (userid) {
             // handles the case where shader has no author, i.e. is /new
-            if (!authorProfile || user.id === authorProfile.id) {
+            if (!authorProfile || userid === authorProfile.id) {
                 return true;
             }
         }
@@ -202,7 +204,7 @@ export const MetadataEditor = ({ user }: { user?: User }) => {
             </Grid>
             <Grid item xs={4} alignItems="center" textAlign="right">
                 <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    {shaderID && user ? (
+                    {shaderID && userid ? (
                         <Button
                             sx={{
                                 padding: '1',
