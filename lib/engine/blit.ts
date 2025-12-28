@@ -83,7 +83,8 @@ export class Blitter {
         src: GPUTextureView,
         srcSpace: ColorSpace,
         destFormat: GPUTextureFormat,
-        filter: GPUFilterMode
+        filter: GPUFilterMode,
+        fragmentEntry?: string
     ) {
         this.destFormat = destFormat;
 
@@ -144,7 +145,9 @@ export class Blitter {
         });
 
         // Determine fragment shader entry point based on color space conversion
-        const fragmentEntry = this.getFragmentEntry(srcSpace, destFormat);
+        if (fragmentEntry === undefined) {
+            fragmentEntry = this.getFragmentEntry(srcSpace, destFormat);
+        }
 
         // Create render pipeline
         this.renderPipeline = device.createRenderPipeline({

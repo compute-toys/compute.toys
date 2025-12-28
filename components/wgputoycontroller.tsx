@@ -200,7 +200,8 @@ const WgpuToyController = props => {
                 console.error('Canvas not found');
                 return;
             }
-            engine.setSurface(canvas, screenHDREnabled);
+            engine.setHDRFormat(screenHDREnabled);
+            engine.setSurface(canvas);
             engine.onSuccess(handleSuccess);
             engine.onUpdate(handleUpdate);
             engine.onError(handleError);
@@ -748,7 +749,13 @@ const WgpuToyController = props => {
 
     useEffect(() => {
         if (!needsInitialReset()) {
+            if (!canvas) {
+                console.error('Canvas not found');
+                return;
+            }
             console.log(`Setting screen HDR to ${screenHDREnabled}`);
+            ComputeEngine.getInstance().setHDRFormat(screenHDREnabled);
+            ComputeEngine.getInstance().resetSurface(canvas);
             ComputeEngine.getInstance().reset();
             if (dbLoaded()) {
                 recompile().then(() => {

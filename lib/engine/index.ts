@@ -60,6 +60,7 @@ export class ComputeEngine {
     private profiler: Profiler | null = null;
     private screenBlitter: Blitter;
     private bufferReader: BufferReader;
+    private screenHDRFormat: number = 0;
     //private lastStats: number = performance.now();
     // private source: SourceMap;
 
@@ -113,23 +114,40 @@ export class ComputeEngine {
         return ComputeEngine.instance;
     }
 
-    public setSurface(canvas: HTMLCanvasElement, screenHDR: boolean) {
+    public setHDRFormat(screenHDR: boolean) {
+        if (screenHDR === false) this.screenHDRFormat = 0; //HDR disabled
+        if (screenHDR === true) this.screenHDRFormat = 1; //HDR sRGB
+        //if(screenHDR ===     ) this.screenHDRFormat = 2; //HDR display-p3
+    }
+    public setSurface(canvas: HTMLCanvasElement) {
         const context = canvas.getContext('webgpu');
-        if (!context) {
-            throw new Error('WebGPU not supported');
-        }
+        if (!context) throw new Error('WebGPU not supported');
         this.surface = context;
-        screenHDR = screenHDR && window.matchMedia('(dynamic-range: high)').matches;
-        let presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-        if (screenHDR) presentationFormat = 'rgba16float';
+
+        const yeshdr = this.screenHDRFormat !== 0;
+        const presentationFormat =
+            yeshdr && window.matchMedia('(dynamic-range: high)').matches
+                ? 'rgba16float'
+                : navigator.gpu.getPreferredCanvasFormat();
+        //let colorSpace = 'srgb';
+        //if (this.screenHDRFormat === 0) colorSpace = 'srgb'; //HDR disabled
+        //if (this.screenHDRFormat === 1) colorSpace = 'srgb'; //HDR sRGB
+        //if (this.screenHDRFormat === 2) colorSpace = 'display-p3'; //HDR display-p3
+
         this.surface.configure({
             device: this.device,
             format: presentationFormat,
-            colorSpace: 'srgb', // display-p3  srgb
-            toneMapping: { mode: screenHDR ? 'extended' : 'standard' },
+            colorSpace: 'srgb',
+            toneMapping: { mode: yeshdr ? 'extended' : 'standard' },
             alphaMode: 'opaque',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
             viewFormats: [presentationFormat]
+        });
+    }
+    public resetSurface(canvas: HTMLCanvasElement) {
+        this.device.queue.onSubmittedWorkDone().then(() => {
+            this.surface.unconfigure();
+            this.setSurface(canvas);
         });
     }
 
@@ -624,16 +642,20 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         this.computeBindGroup = this.bindings.createBindGroup(this.device, layout);
         this.computeBindGroupLayout = layout;
 
+        const yeshdr = this.screenHDRFormat !== 0;
+        const presentationFormat =
+            yeshdr && window.matchMedia('(dynamic-range: high)').matches
+                ? 'rgba16float'
+                : navigator.gpu.getPreferredCanvasFormat();
+
         // Recreate screen blitter
-        const screenHDR = window.matchMedia('(dynamic-range: high)').matches;
-        let presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-        if (screenHDR) presentationFormat = 'rgba16float';
         this.screenBlitter = new Blitter(
             this.device,
             this.bindings.texScreen.view,
             ColorSpace.Linear,
             presentationFormat,
-            'linear'
+            'linear',
+            'fs_main_linear_to_srgb'
         );
 
         // Recreate buffer reader
