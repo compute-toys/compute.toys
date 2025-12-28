@@ -40,6 +40,15 @@ fn linear_to_srgb(rgb: vec3<f32>) -> vec3<f32> {
         rgb <= vec3<f32>(0.0031308));
 }
 
+fn linear_to_displayp3(color: vec3f) -> vec3f {
+    let linSRGB_to_linP3 = mat3x3f(
+        vec3f(0.8224621, 0.0331941, 0.0170827), // Col 0
+        vec3f(0.177538,  0.9668058, 0.0723974), // Col 1
+        vec3f(0.0,       0.0,       0.9105199)  // Col 2
+    );
+    return linear_to_srgb(linSRGB_to_linP3 * color);
+}
+
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     return textureSample(r_color, r_sampler, in.tex_coords);
@@ -49,6 +58,12 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
 fn fs_main_linear_to_srgb(in: VertexOutput) -> @location(0) vec4<f32> {
     let rgba = textureSample(r_color, r_sampler, in.tex_coords);
     return vec4<f32>(linear_to_srgb(rgba.rgb), rgba.a);
+}
+
+@fragment
+fn fs_main_linear_to_displayp3(in: VertexOutput) -> @location(0) vec4<f32> {
+    let rgba = textureSample(r_color, r_sampler, in.tex_coords);
+    return vec4<f32>(linear_to_displayp3(rgba.rgb), rgba.a);
 }
 
 @fragment

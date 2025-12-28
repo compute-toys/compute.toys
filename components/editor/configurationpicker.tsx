@@ -18,7 +18,7 @@ import {
     float32EnabledAtom,
     languageAtom,
     profilerEnabledAtom,
-    screenHDREnabledAtom,
+    screenHDRFormatAtom,
     shaderIDAtom
 } from 'lib/atoms/atoms';
 import defaultSlangShader from 'lib/shaders/default.slang';
@@ -27,7 +27,7 @@ import { Item } from '../../theme/theme';
 
 export default function ConfigurationPicker() {
     const [float32Enabled, setFloat32Enabled] = useAtom(float32EnabledAtom);
-    const [screenHDREnabled, setScreenHDREnabled] = useAtom(screenHDREnabledAtom);
+    const [screenHDRFormat, setScreenHDRFormat] = useAtom(screenHDRFormatAtom);
     const [profilerEnabled, setProfilerEnabled] = useAtom(profilerEnabledAtom);
     const [language, setLanguage] = useAtom(languageAtom);
     const [, setCode] = useAtom(codeAtom);
@@ -96,6 +96,35 @@ export default function ConfigurationPicker() {
                     <ListItemIcon
                         sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
                     >
+                        <Brightness7Icon />
+                    </ListItemIcon>
+                    <ListItemText id="config-list-label-screenHDRFormat" primary="HDR" />
+                    <Select
+                        value={screenHDRFormat}
+                        onChange={e => {
+                            setScreenHDRFormat(e.target.value);
+                        }}
+                        sx={{
+                            minWidth: '100px',
+                            color: theme.palette.dracula.foreground,
+                            '& .MuiSelect-icon': {
+                                color: theme.palette.dracula.foreground
+                            }
+                        }}
+                        inputProps={{
+                            'aria-labelledby': 'config-list-label-language'
+                        }}
+                        style={{ height: '2em', margin: '0' }}
+                    >
+                        <MenuItem value="sRGB">sRGB</MenuItem>
+                        <MenuItem value="scRGB">scRGB</MenuItem>
+                        <MenuItem value="displayP3">displayP3</MenuItem>
+                    </Select>
+                </ListItem>
+                <ListItem>
+                    <ListItemIcon
+                        sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
+                    >
                         <LineStyleIcon />
                     </ListItemIcon>
                     <ListItemText id="config-list-label-float32" primary="Float32 Textures" />
@@ -107,24 +136,6 @@ export default function ConfigurationPicker() {
                         checked={float32Enabled}
                         inputProps={{
                             'aria-labelledby': 'config-list-label-float32'
-                        }}
-                    />
-                </ListItem>
-                <ListItem>
-                    <ListItemIcon
-                        sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
-                    >
-                        <Brightness7Icon />
-                    </ListItemIcon>
-                    <ListItemText id="config-list-label-screenHDR" primary="HDR" />
-                    <Switch
-                        edge="end"
-                        onChange={() => {
-                            setScreenHDREnabled(!screenHDREnabled);
-                        }}
-                        checked={screenHDREnabled}
-                        inputProps={{
-                            'aria-labelledby': 'config-list-label-screenHDR'
                         }}
                     />
                 </ListItem>
