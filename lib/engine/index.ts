@@ -117,26 +117,39 @@ export class ComputeEngine {
     public setHDRFormat(screenHDRFormat: string) {
         this.screenHDRFormat = screenHDRFormat;
     }
+
+    private isHDREnabled(): boolean {
+        return this.screenHDRFormat !== 'sRGB';
+    }
+
+    private getHDRPresentationFormat(): GPUTextureFormat {
+        const hdrSupported = window.matchMedia('(dynamic-range: high)').matches;
+        return this.isHDREnabled() && hdrSupported
+            ? 'rgba16float'
+            : navigator.gpu.getPreferredCanvasFormat();
+    }
+
+    private getHDRColorSpace(): PredefinedColorSpace {
+        return this.screenHDRFormat === 'displayP3' ? 'display-p3' : 'srgb';
+    }
+
+    private getHDRFragmentEntry(): string {
+        return this.screenHDRFormat === 'displayP3'
+            ? 'fs_main_linear_to_displayp3'
+            : 'fs_main_linear_to_srgb';
+    }
+
     public setSurface(canvas: HTMLCanvasElement) {
         const context = canvas.getContext('webgpu');
         if (!context) throw new Error('WebGPU not supported');
         this.surface = context;
 
-        const yeshdr = this.screenHDRFormat !== 'sRGB';
-        const presentationFormat =
-            yeshdr && window.matchMedia('(dynamic-range: high)').matches
-                ? 'rgba16float'
-                : navigator.gpu.getPreferredCanvasFormat();
-        let colorSpace: PredefinedColorSpace = 'srgb';
-        if (this.screenHDRFormat === 'sRGB') colorSpace = 'srgb';
-        if (this.screenHDRFormat === 'scRGB') colorSpace = 'srgb';
-        if (this.screenHDRFormat === 'displayP3') colorSpace = 'display-p3';
-
+        const presentationFormat = this.getHDRPresentationFormat();
         this.surface.configure({
             device: this.device,
             format: presentationFormat,
-            colorSpace: colorSpace,
-            toneMapping: { mode: yeshdr ? 'extended' : 'standard' },
+            colorSpace: this.getHDRColorSpace(),
+            toneMapping: { mode: this.isHDREnabled() ? 'extended' : 'standard' },
             alphaMode: 'opaque',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
             viewFormats: [presentationFormat]
@@ -640,24 +653,14 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         this.computeBindGroup = this.bindings.createBindGroup(this.device, layout);
         this.computeBindGroupLayout = layout;
 
-        const yeshdr = this.screenHDRFormat !== 'sRGB';
-        const presentationFormat =
-            yeshdr && window.matchMedia('(dynamic-range: high)').matches
-                ? 'rgba16float'
-                : navigator.gpu.getPreferredCanvasFormat();
-        let fragmentEntry = 'fs_main_linear_to_srgb';
-        if (this.screenHDRFormat === 'sRGB') fragmentEntry = 'fs_main_linear_to_srgb';
-        if (this.screenHDRFormat === 'scRGB') fragmentEntry = 'fs_main_linear_to_srgb';
-        if (this.screenHDRFormat === 'displayP3') fragmentEntry = 'fs_main_linear_to_displayp3';
-
         // Recreate screen blitter
         this.screenBlitter = new Blitter(
             this.device,
             this.bindings.texScreen.view,
             ColorSpace.Linear,
-            presentationFormat,
+            this.getHDRPresentationFormat(),
             'linear',
-            fragmentEntry
+            this.getHDRFragmentEntry()
         );
 
         // Recreate buffer reader
