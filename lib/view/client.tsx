@@ -56,7 +56,7 @@ export function useShader(shader: Shader) {
     const uniforms = body.uniforms;
     const textures = body.textures;
     const float32Enabled = 'float32Enabled' in body ? body.float32Enabled : false;
-    const screenHDRFormat = 'screenHDRFormat' in body ? body.screenHDRFormat : false;
+    const screenHDRFormat = 'screenHDRFormat' in body ? body.screenHDRFormat : 'sRGB';
     const language = 'language' in body ? body.language : 'wgsl';
 
     const shaderActiveSettings: ShaderActiveSettings = {

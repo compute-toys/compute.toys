@@ -10,6 +10,7 @@ import ListItemText from '@mui/material/ListItemText';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import Switch from '@mui/material/Switch';
+import Tooltip from '@mui/material/Tooltip';
 import { useTheme } from '@mui/material/styles';
 import { useAtom, useAtomValue } from 'jotai';
 import {
@@ -23,6 +24,7 @@ import {
 } from 'lib/atoms/atoms';
 import defaultSlangShader from 'lib/shaders/default.slang';
 import defaultWgslShader from 'lib/shaders/default.wgsl';
+import { useEffect, useState } from 'react';
 import { Item } from '../../theme/theme';
 
 export default function ConfigurationPicker() {
@@ -34,6 +36,11 @@ export default function ConfigurationPicker() {
     const codeNeedSave = useAtomValue(codeNeedSaveAtom);
     const shaderID = useAtomValue(shaderIDAtom);
     const theme = useTheme();
+    const [hdrSupported, setHdrSupported] = useState(false);
+
+    useEffect(() => {
+        setHdrSupported(window.matchMedia('(dynamic-range: high)').matches);
+    }, []);
 
     // Function to handle language change
     const handleLanguageChange = newLanguage => {
@@ -92,35 +99,44 @@ export default function ConfigurationPicker() {
                         <MenuItem value="slang">Slang</MenuItem>
                     </Select>
                 </ListItem>
-                <ListItem>
-                    <ListItemIcon
-                        sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
-                    >
-                        <Brightness7Icon />
-                    </ListItemIcon>
-                    <ListItemText id="config-list-label-screenHDRFormat" primary="HDR" />
-                    <Select
-                        value={screenHDRFormat}
-                        onChange={e => {
-                            setScreenHDRFormat(e.target.value);
-                        }}
-                        sx={{
-                            minWidth: '100px',
-                            color: theme.palette.dracula.foreground,
-                            '& .MuiSelect-icon': {
-                                color: theme.palette.dracula.foreground
-                            }
-                        }}
-                        inputProps={{
-                            'aria-labelledby': 'config-list-label-language'
-                        }}
-                        style={{ height: '2em', margin: '0' }}
-                    >
-                        <MenuItem value="sRGB">sRGB</MenuItem>
-                        <MenuItem value="scRGB">scRGB</MenuItem>
-                        <MenuItem value="displayP3">displayP3</MenuItem>
-                    </Select>
-                </ListItem>
+                <Tooltip
+                    title={
+                        !hdrSupported && screenHDRFormat !== 'sRGB'
+                            ? 'HDR not detected - output may fall back to SDR'
+                            : ''
+                    }
+                    placement="left"
+                >
+                    <ListItem>
+                        <ListItemIcon
+                            sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
+                        >
+                            <Brightness7Icon />
+                        </ListItemIcon>
+                        <ListItemText id="config-list-label-screenHDRFormat" primary="HDR" />
+                        <Select
+                            value={screenHDRFormat}
+                            onChange={e => {
+                                setScreenHDRFormat(e.target.value);
+                            }}
+                            sx={{
+                                minWidth: '115px',
+                                color: theme.palette.dracula.foreground,
+                                '& .MuiSelect-icon': {
+                                    color: theme.palette.dracula.foreground
+                                }
+                            }}
+                            inputProps={{
+                                'aria-labelledby': 'config-list-label-screenHDRFormat'
+                            }}
+                            style={{ height: '2em', margin: '0' }}
+                        >
+                            <MenuItem value="sRGB">sRGB (SDR)</MenuItem>
+                            <MenuItem value="scRGB">scRGB (HDR)</MenuItem>
+                            <MenuItem value="displayP3">Display P3 (HDR)</MenuItem>
+                        </Select>
+                    </ListItem>
+                </Tooltip>
                 <ListItem>
                     <ListItemIcon
                         sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
