@@ -1,4 +1,5 @@
 'use client';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import LineStyleIcon from '@mui/icons-material/LineStyle';
 import PetsIcon from '@mui/icons-material/Pets';
 import SpeedIcon from '@mui/icons-material/Speed';
@@ -17,6 +18,7 @@ import {
     float32EnabledAtom,
     languageAtom,
     profilerEnabledAtom,
+    screenHDRFormatAtom,
     shaderIDAtom
 } from 'lib/atoms/atoms';
 import defaultSlangShader from 'lib/shaders/default.slang';
@@ -25,6 +27,7 @@ import { Item } from '../../theme/theme';
 
 export default function ConfigurationPicker() {
     const [float32Enabled, setFloat32Enabled] = useAtom(float32EnabledAtom);
+    const [screenHDRFormat, setScreenHDRFormat] = useAtom(screenHDRFormatAtom);
     const [profilerEnabled, setProfilerEnabled] = useAtom(profilerEnabledAtom);
     const [language, setLanguage] = useAtom(languageAtom);
     const [, setCode] = useAtom(codeAtom);
@@ -87,6 +90,35 @@ export default function ConfigurationPicker() {
                     >
                         <MenuItem value="wgsl">WGSL</MenuItem>
                         <MenuItem value="slang">Slang</MenuItem>
+                    </Select>
+                </ListItem>
+                <ListItem>
+                    <ListItemIcon
+                        sx={{ minWidth: '32px', color: theme.palette.dracula.foreground }}
+                    >
+                        <Brightness7Icon />
+                    </ListItemIcon>
+                    <ListItemText id="config-list-label-screenHDRFormat" primary="HDR" />
+                    <Select
+                        value={screenHDRFormat}
+                        onChange={e => {
+                            setScreenHDRFormat(e.target.value);
+                        }}
+                        sx={{
+                            minWidth: '100px',
+                            color: theme.palette.dracula.foreground,
+                            '& .MuiSelect-icon': {
+                                color: theme.palette.dracula.foreground
+                            }
+                        }}
+                        inputProps={{
+                            'aria-labelledby': 'config-list-label-language'
+                        }}
+                        style={{ height: '2em', margin: '0' }}
+                    >
+                        <MenuItem value="sRGB">sRGB</MenuItem>
+                        <MenuItem value="scRGB">scRGB</MenuItem>
+                        <MenuItem value="displayP3">displayP3</MenuItem>
                     </Select>
                 </ListItem>
                 <ListItem>

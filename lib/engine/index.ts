@@ -60,6 +60,7 @@ export class ComputeEngine {
     private profiler: Profiler | null = null;
     private screenBlitter: Blitter;
     private bufferReader: BufferReader;
+    private screenHDRFormat: string = 'sRGB';
     //private lastStats: number = performance.now();
     // private source: SourceMap;
 
@@ -113,19 +114,38 @@ export class ComputeEngine {
         return ComputeEngine.instance;
     }
 
+    public setHDRFormat(screenHDRFormat: string) {
+        this.screenHDRFormat = screenHDRFormat;
+    }
     public setSurface(canvas: HTMLCanvasElement) {
         const context = canvas.getContext('webgpu');
-        if (!context) {
-            throw new Error('WebGPU not supported');
-        }
+        if (!context) throw new Error('WebGPU not supported');
         this.surface = context;
-        const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
+
+        const yeshdr = this.screenHDRFormat !== 'sRGB';
+        const presentationFormat =
+            yeshdr && window.matchMedia('(dynamic-range: high)').matches
+                ? 'rgba16float'
+                : navigator.gpu.getPreferredCanvasFormat();
+        let colorSpace: PredefinedColorSpace = 'srgb';
+        if (this.screenHDRFormat === 'sRGB') colorSpace = 'srgb';
+        if (this.screenHDRFormat === 'scRGB') colorSpace = 'srgb';
+        if (this.screenHDRFormat === 'displayP3') colorSpace = 'display-p3';
+
         this.surface.configure({
             device: this.device,
             format: presentationFormat,
+            colorSpace: colorSpace,
+            toneMapping: { mode: yeshdr ? 'extended' : 'standard' },
             alphaMode: 'opaque',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
             viewFormats: [presentationFormat]
+        });
+    }
+    public resetSurface(canvas: HTMLCanvasElement) {
+        this.device.queue.onSubmittedWorkDone().then(() => {
+            this.surface.unconfigure();
+            this.setSurface(canvas);
         });
     }
 
@@ -620,14 +640,24 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
         this.computeBindGroup = this.bindings.createBindGroup(this.device, layout);
         this.computeBindGroupLayout = layout;
 
+        const yeshdr = this.screenHDRFormat !== 'sRGB';
+        const presentationFormat =
+            yeshdr && window.matchMedia('(dynamic-range: high)').matches
+                ? 'rgba16float'
+                : navigator.gpu.getPreferredCanvasFormat();
+        let fragmentEntry = 'fs_main_linear_to_srgb';
+        if (this.screenHDRFormat === 'sRGB') fragmentEntry = 'fs_main_linear_to_srgb';
+        if (this.screenHDRFormat === 'scRGB') fragmentEntry = 'fs_main_linear_to_srgb';
+        if (this.screenHDRFormat === 'displayP3') fragmentEntry = 'fs_main_linear_to_displayp3';
+
         // Recreate screen blitter
-        const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
         this.screenBlitter = new Blitter(
             this.device,
             this.bindings.texScreen.view,
             ColorSpace.Linear,
             presentationFormat,
-            'linear'
+            'linear',
+            fragmentEntry
         );
 
         // Recreate buffer reader

@@ -12,6 +12,7 @@ import {
     languageAtom,
     loadedTexturesAtom,
     saveColorTransitionSignalAtom,
+    screenHDRFormatAtom,
     shaderDataUrlThumbAtom,
     shaderIDAtom,
     sliderRefMapAtom,
@@ -39,6 +40,7 @@ export interface ShaderActiveSettings {
     uniforms: Array<UniformActiveSettings>;
     textures: Array<TextureActiveSettings>;
     float32Enabled?: boolean;
+    screenHDRFormat?: string;
     language?: string;
 }
 
@@ -106,6 +108,7 @@ export const useResetShaderData = () => {
     const resetSliderSerDeNeedsUpdateAtom = useResetAtom(sliderSerDeNeedsUpdateAtom);
     const resetShaderDataUrlThumb = useResetAtom(shaderDataUrlThumbAtom);
     const resetFloat32Enabled = useResetAtom(float32EnabledAtom);
+    const resetScreenHDRFormat = useResetAtom(screenHDRFormatAtom);
     const resetLanguage = useResetAtom(languageAtom);
 
     const reset = () => {
@@ -120,6 +123,7 @@ export const useResetShaderData = () => {
         resetSliderSerDeNeedsUpdateAtom();
         resetShaderDataUrlThumb();
         resetFloat32Enabled();
+        resetScreenHDRFormat();
         resetLanguage();
     };
 
@@ -187,6 +191,7 @@ export default function useShaderSerDe(
                             uniforms: getSliderActiveSettings(atomGetter(sliderRefMapAtom)),
                             textures: atomGetter(loadedTexturesAtom),
                             float32Enabled: atomGetter(float32EnabledAtom),
+                            screenHDRFormat: atomGetter(screenHDRFormatAtom),
                             language: atomGetter(languageAtom)
                         })
                     }
@@ -227,6 +232,7 @@ export default function useShaderSerDe(
                         uniforms: getSliderActiveSettings(atomGetter(sliderRefMapAtom)),
                         textures: atomGetter(loadedTexturesAtom),
                         float32Enabled: atomGetter(float32EnabledAtom),
+                        screenHDRFormat: atomGetter(screenHDRFormatAtom),
                         language: atomGetter(languageAtom)
                     })
                 })
