@@ -26,6 +26,8 @@ export class SourceMap {
     storageBuffers = new Map<string, StorageBufferBindingInfo>();
     workgroupCount = new Map<string, [number, number, number]>();
     dispatchCount = new Map<string, number>();
+    pipelinesOrder = new Array(0);
+    pipelinesOnceOrder = new Array(0);
     // assertMap: number[] = [];
     // userData = new Map<string, Uint32Array>([['_dummy', new Uint32Array([0])]]);
 
@@ -176,17 +178,133 @@ export class Preprocessor {
         }
     }
 
-    private handle_workgroup_count(tokens: string[], lineNum: number): void {
-        if (tokens.length !== 5) {
-            throw new WGSLError('Invalid #workgroup_count syntax', lineNum);
-        }
+    computeEquations = function (str, eqlmt) {
+        //remove comments
+        str = str.replace(/\/\/.*|\/\*.*?\*\//g, '');
+        // 1. Validate: Allow only digits, whitespace, and specific operators
+        if (/[^0-9+\-*/%&|^~()<>\s]/.test(str)) return new Array<number>(0);
+        // 2. Tokenize
+        const tokens = str.match(/\d+|<<|>>|[+\-*/%&|^~()]/g);
+        if (!tokens) return new Array<number>(0);
+        // 3. Solver Function (Shunting-yard with Unary support)
+        const solve = eqTokens => {
+            if (!eqTokens.length) return 0;
+            const ops = {
+                'u-': a => -a,
+                '~': a => ~a,
+                '*': (a, b) => a * b,
+                '/': (a, b) => (a / b) | 0,
+                '%': (a, b) => a % b,
+                '+': (a, b) => a + b,
+                '-': (a, b) => a - b,
+                '<<': (a, b) => a << b,
+                '>>': (a, b) => a >> b,
+                '&': (a, b) => a & b,
+                '^': (a, b) => a ^ b,
+                '|': (a, b) => a | b
+            };
+            const prec = {
+                'u-': 6,
+                '~': 6,
+                '*': 5,
+                '/': 5,
+                '%': 5,
+                '+': 4,
+                '-': 4,
+                '<<': 3,
+                '>>': 3,
+                '&': 2,
+                '^': 1,
+                '|': 0
+            };
+            const values = new Array(0);
+            const opStack = new Array(0);
+            let expectOp = true; // Used strictly inside solve for Unary detection
+            const applyOp = () => {
+                const op = opStack.pop();
+                const fn = ops[op];
+                if (op === 'u-' || op === '~') {
+                    values.push(fn(values.pop()));
+                } else {
+                    const b = values.pop();
+                    const a = values.pop();
+                    values.push(fn(a, b));
+                }
+            };
+            for (const token of eqTokens) {
+                if (/\d/.test(token)) {
+                    values.push(parseInt(token, 10));
+                    expectOp = false;
+                } else if (token === '(') {
+                    opStack.push(token);
+                    expectOp = true;
+                } else if (token === ')') {
+                    while (opStack.length && opStack[opStack.length - 1] !== '(') applyOp();
+                    opStack.pop();
+                    expectOp = false;
+                } else {
+                    let currentOp = token;
+                    // Detect Unary Minus
+                    if (expectOp && token === '-') currentOp = 'u-';
 
-        const [, name, x, y, z] = tokens;
-        this.source.workgroupCount.set(name, [
-            parseInteger(x, lineNum),
-            parseInteger(y, lineNum),
-            parseInteger(z, lineNum)
-        ]);
+                    while (
+                        opStack.length &&
+                        opStack[opStack.length - 1] !== '(' &&
+                        prec[opStack[opStack.length - 1]] >= prec[currentOp]
+                    ) {
+                        // Right-associative unary ops do not pop equal precedence
+                        if (currentOp === 'u-' || currentOp === '~') break;
+                        applyOp();
+                    }
+                    opStack.push(currentOp);
+                    expectOp = true;
+                }
+            }
+            while (opStack.length) applyOp();
+            return values[0];
+        };
+        // 4. Split tokens into individual equations
+        const results = new Array<number>(0);
+        let currentEq = new Array(0);
+        let expectOperand = true; // Tracks if the previous token ended an expression
+        for (const t of tokens) {
+            const isNum = /^\d+$/.test(t);
+            const isOpen = t === '(';
+            const isUnaryPrefix = t === '~'; // ~ is always start of a value, unlike -
+            // Split condition: We don't expect an operand (we just finished a value),
+            // but the current token starts a new value (Number, Open Paren, or ~).
+            // Note: '-' is not a split trigger because "5 - 2" is valid binary math.
+            if (!expectOperand && (isNum || isOpen || isUnaryPrefix)) {
+                results.push(solve(currentEq));
+                if (results.length === eqlmt) return results;
+                currentEq = new Array(0);
+                expectOperand = true; // Reset state for new equation
+            }
+            currentEq.push(t);
+            // Update state
+            if (isNum || t === ')') {
+                expectOperand = false; // We have a value
+            } else {
+                expectOperand = true; // We have an operator or '('
+            }
+        }
+        if (currentEq.length) results.push(solve(currentEq));
+        //console.log(str);
+        //console.log(results);
+        return results;
+    };
+    private handle_workgroup_count(tokens: string[], lineNum: number): void {
+        const line = tokens.join(' ');
+        const startsWith = /^\s*#workgroup_count\b/.test(line);
+        let match = line.match(/^\s*#workgroup_count\s+(\S+)\s+(.+)$/);
+        if (match) {
+            const rs = this.computeEquations(match[2], 3);
+            if (rs.length === 0 || !rs.every(n => n > 0)) match = null;
+            if (rs.length === 1) rs.push(1);
+            if (rs.length === 2) rs.push(1);
+            if (match) this.source.workgroupCount.set(match[1], [rs[0], rs[1], rs[2]]);
+        }
+        if (!match && startsWith) throw new WGSLError('Invalid #workgroup_count syntax', lineNum);
     }
 
     private handle_dispatch_once(tokens: string[], lineNum: number): void {
@@ -290,6 +408,72 @@ export class Preprocessor {
         });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    private handle_repeat(tokens: string[], lineNum: number): void {}
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    private handle_pipeline(tokens: string[], lineNum: number): void {}
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    private handle_pipeline_once(tokens: string[], lineNum: number): void {}
+    // extract #pipeline #pipeline_once and apply #repeat to them
+    private handle_pipelines(shader: string): void {
+        const match1 = shader.match(/^\s*#pipeline\s+(.+)$/m);
+        const match2 = shader.match(/^\s*#pipeline_once\s+(.+)$/m);
+        if (!match1 && !match2) return;
+        const lines = shader.split(/\r?\n/);
+        const dcLineIndex = lines.findIndex(line => /^\s*#dispatch_count\b/.test(line));
+        const doLineIndex = lines.findIndex(line => /^\s*#dispatch_once\b/.test(line));
+        if (match1 && dcLineIndex !== -1) {
+            throw new WGSLError("can't have both #dispatch_count and #pipeline", dcLineIndex);
+        }
+        if (match2 && dcLineIndex !== -1) {
+            throw new WGSLError("can't have both #dispatch_count and #pipeline_once", dcLineIndex);
+        }
+        if (match2 && doLineIndex !== -1) {
+            throw new WGSLError("can't have both #dispatch_once and #pipeline_once", doLineIndex);
+        }
+        let myPipeline = '';
+        let myPipelineO = '';
+        if (match1) myPipeline = match1[1].replace(/\/\/.*|\/\*.*?\*\//g, ''); //remove comments
+        if (match2) myPipelineO = match2[1].replace(/\/\/.*|\/\*.*?\*\//g, ''); //remove comments
+        const rules = new Array(0);
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            //regex #repeat (keyword) (count) (text)
+            const startsWith = /^\s*#repeat\b/.test(line);
+            const match = line.match(/^\s*#repeat\s+(\S+)\s+(\d+)\s+(.+)$/);
+            if (match) {
+                const keyword = match[1];
+                const count = parseInt(match[2], 10);
+                const text = match[3];
+                rules.push({
+                    keyword: keyword,
+                    replacement: Array(count).fill(text).join(' ')
+                });
+            }
+            if (!match && startsWith) throw new WGSLError('invalid #repeat format', i);
+        }
+        if (myPipeline.length !== 0) {
+            for (const rule of rules) {
+                myPipeline = myPipeline.split(rule.keyword).join(rule.replacement);
+            }
+            this.source.pipelinesOrder = myPipeline.trim().split(/\s+/);
+        }
+        if (myPipelineO.length !== 0) {
+            for (const rule of rules) {
+                myPipelineO = myPipelineO.split(rule.keyword).join(rule.replacement);
+            }
+            this.source.pipelinesOnceOrder = myPipelineO.trim().split(/\s+/);
+        }
+        if (match1 && this.source.pipelinesOrder.length === 0) {
+            const lineIndex = lines.findIndex(line => /^\s*#pipeline\b/.test(line));
+            throw new WGSLError('#pipeline is empty or has invalid names', lineIndex);
+        }
+        if (match2 && this.source.pipelinesOnceOrder.length === 0) {
+            const lineIndex = lines.findIndex(line => /^\s*#pipeline_once\b/.test(line));
+            throw new WGSLError('#pipeline_once is empty or has invalid names', lineIndex);
+        }
+    }
+
     /*
     private handle_assert(tokens: string[], lineNum: number): void {
         if (this.assertCount >= NUM_ASSERT_COUNTERS) {
@@ -331,6 +515,7 @@ export class Preprocessor {
      * Process complete shader source
      */
     async preprocess(shader: string): Promise<SourceMap> {
+        this.handle_pipelines(shader);
         const lines = shader.split('\n');
         for (let i = 0; i < lines.length; i++) {
             await this.processLine(lines[i], i + 1);

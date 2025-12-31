@@ -144,6 +144,18 @@ const ExplainerBody = () => {
                     the entrypoint is dispatched only once
                 </li>
                 <li>
+                    <HiLite>#pipeline NAME1 NAME2 ...</HiLite> a list of names that sets the order
+                    of shader execution for each frame
+                </li>
+                <li>
+                    <HiLite>#pipeline_once NAME1 NAME2 ...</HiLite> a list of names that sets the
+                    order of shader execution only for frame 0
+                </li>
+                <li>
+                    <HiLite>#repear KEY N VALUE</HiLite> finds and replaces KEY with VALUE but
+                    repeating VALUE N times, only affects #pipeline and #pipeline_once
+                </li>
+                <li>
                     <HiLite>#storage NAME TYPE</HiLite> for declaring a storage buffer
                 </li>
                 <li>
