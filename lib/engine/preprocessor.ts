@@ -178,17 +178,133 @@ export class Preprocessor {
         }
     }
 
-    private handle_workgroup_count(tokens: string[], lineNum: number): void {
-        if (tokens.length !== 5) {
-            throw new WGSLError('Invalid #workgroup_count syntax', lineNum);
-        }
+    computeEquations = function (str, eqlmt) {
+        //remove comments
+        str = str.replace(/\/\/.*|\/\*.*?\*\//g, '');
+        // 1. Validate: Allow only digits, whitespace, and specific operators
+        if (/[^0-9+\-*/%&|^~()<>\s]/.test(str)) return new Array<number>(0);
+        // 2. Tokenize
+        const tokens = str.match(/\d+|<<|>>|[+\-*/%&|^~()]/g);
+        if (!tokens) return new Array<number>(0);
+        // 3. Solver Function (Shunting-yard with Unary support)
+        const solve = eqTokens => {
+            if (!eqTokens.length) return 0;
+            const ops = {
+                'u-': a => -a,
+                '~': a => ~a,
+                '*': (a, b) => a * b,
+                '/': (a, b) => (a / b) | 0,
+                '%': (a, b) => a % b,
+                '+': (a, b) => a + b,
+                '-': (a, b) => a - b,
+                '<<': (a, b) => a << b,
+                '>>': (a, b) => a >> b,
+                '&': (a, b) => a & b,
+                '^': (a, b) => a ^ b,
+                '|': (a, b) => a | b
+            };
+            const prec = {
+                'u-': 6,
+                '~': 6,
+                '*': 5,
+                '/': 5,
+                '%': 5,
+                '+': 4,
+                '-': 4,
+                '<<': 3,
+                '>>': 3,
+                '&': 2,
+                '^': 1,
+                '|': 0
+            };
+            const values = new Array(0);
+            const opStack = new Array(0);
+            let expectOp = true; // Used strictly inside solve for Unary detection
+            const applyOp = () => {
+                const op = opStack.pop();
+                const fn = ops[op];
+                if (op === 'u-' || op === '~') {
+                    values.push(fn(values.pop()));
+                } else {
+                    const b = values.pop();
+                    const a = values.pop();
+                    values.push(fn(a, b));
+                }
+            };
+            for (const token of eqTokens) {
+                if (/\d/.test(token)) {
+                    values.push(parseInt(token, 10));
+                    expectOp = false;
+                } else if (token === '(') {
+                    opStack.push(token);
+                    expectOp = true;
+                } else if (token === ')') {
+                    while (opStack.length && opStack[opStack.length - 1] !== '(') applyOp();
+                    opStack.pop();
+                    expectOp = false;
+                } else {
+                    let currentOp = token;
+                    // Detect Unary Minus
+                    if (expectOp && token === '-') currentOp = 'u-';
 
-        const [, name, x, y, z] = tokens;
-        this.source.workgroupCount.set(name, [
-            parseInteger(x, lineNum),
-            parseInteger(y, lineNum),
-            parseInteger(z, lineNum)
-        ]);
+                    while (
+                        opStack.length &&
+                        opStack[opStack.length - 1] !== '(' &&
+                        prec[opStack[opStack.length - 1]] >= prec[currentOp]
+                    ) {
+                        // Right-associative unary ops do not pop equal precedence
+                        if (currentOp === 'u-' || currentOp === '~') break;
+                        applyOp();
+                    }
+                    opStack.push(currentOp);
+                    expectOp = true;
+                }
+            }
+            while (opStack.length) applyOp();
+            return values[0];
+        };
+        // 4. Split tokens into individual equations
+        const results = new Array<number>(0);
+        let currentEq = new Array(0);
+        let expectOperand = true; // Tracks if the previous token ended an expression
+        for (const t of tokens) {
+            const isNum = /^\d+$/.test(t);
+            const isOpen = t === '(';
+            const isUnaryPrefix = t === '~'; // ~ is always start of a value, unlike -
+            // Split condition: We don't expect an operand (we just finished a value),
+            // but the current token starts a new value (Number, Open Paren, or ~).
+            // Note: '-' is not a split trigger because "5 - 2" is valid binary math.
+            if (!expectOperand && (isNum || isOpen || isUnaryPrefix)) {
+                results.push(solve(currentEq));
+                if (results.length === eqlmt) return results;
+                currentEq = new Array(0);
+                expectOperand = true; // Reset state for new equation
+            }
+            currentEq.push(t);
+            // Update state
+            if (isNum || t === ')') {
+                expectOperand = false; // We have a value
+            } else {
+                expectOperand = true; // We have an operator or '('
+            }
+        }
+        if (currentEq.length) results.push(solve(currentEq));
+        //console.log(str);
+        //console.log(results);
+        return results;
+    };
+    private handle_workgroup_count(tokens: string[], lineNum: number): void {
+        const line = tokens.join(' ');
+        const startsWith = /^\s*#workgroup_count\b/.test(line);
+        let match = line.match(/^\s*#workgroup_count\s+(\S+)\s+(.+)$/);
+        if (match) {
+            const rs = this.computeEquations(match[2], 3);
+            if (rs.length === 0 || !rs.every(n => n > 0)) match = null;
+            if (rs.length === 1) rs.push(1);
+            if (rs.length === 2) rs.push(1);
+            if (match) this.source.workgroupCount.set(match[1], [rs[0], rs[1], rs[2]]);
+        }
+        if (!match && startsWith) throw new WGSLError('Invalid #workgroup_count syntax', lineNum);
     }
 
     private handle_dispatch_once(tokens: string[], lineNum: number): void {
