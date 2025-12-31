@@ -47,6 +47,8 @@ export class ComputeEngine {
     private computePipelineLayout: GPUPipelineLayout;
     private lastComputePipelines?: ComputePipeline[];
     private computePipelines: ComputePipeline[] = [];
+    private computePipelinesOrderID = new Array(0);
+    private computePipelinesOnceOrderID = new Array(0);
     private computeBindGroup: GPUBindGroup;
     private computeBindGroupLayout: GPUBindGroupLayout;
     private onSuccessCb?: (
@@ -400,6 +402,25 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
             };
         });
 
+        this.computePipelinesOrderID = source.pipelinesOrder
+            .map(name => entryPointNames.indexOf(name))
+            .filter(index => index !== -1);
+        this.computePipelinesOnceOrderID = source.pipelinesOnceOrder
+            .map(name => entryPointNames.indexOf(name))
+            .filter(index => index !== -1);
+        if (this.computePipelinesOrderID.length === 0) {
+            this.computePipelinesOrderID = new Array(entryPointNames.length);
+            for (let i = 0; i < entryPointNames.length; i++) {
+                this.computePipelinesOrderID[i] = i;
+            }
+        }
+        if (this.computePipelinesOnceOrderID.length === 0) {
+            this.computePipelinesOnceOrderID = new Array(entryPointNames.length);
+            for (let i = 0; i < entryPointNames.length; i++) {
+                this.computePipelinesOnceOrderID[i] = i;
+            }
+        }
+
         // Update bindings
         // this.bindings.userData.host = source.userData;
 
@@ -448,43 +469,49 @@ fn passSampleLevelBilinearRepeat(pass_index: int, uv: float2, lod: float) -> flo
 
             // Dispatch compute passes
             let dispatchId = 0;
-            for (const pipeline of this.computePipelines) {
-                const dispatchOnce =
-                    pipeline.dispatchCount === 0 && this.bindings.time.host.frame === 0 ? 1 : 0;
+            for (let k = 0; k < 2; k++) {
+                if (k === 0 && this.bindings.time.host.frame !== 0) continue;
+                const ids =
+                    k === 0 ? this.computePipelinesOnceOrderID : this.computePipelinesOrderID;
+                for (let j = 0; j < ids.length; j++) {
+                    const pipeline = this.computePipelines[ids[j]];
+                    const dispatchOnce =
+                        pipeline.dispatchCount === 0 && this.bindings.time.host.frame === 0 ? 1 : 0;
 
-                for (let i = 0; i < pipeline.dispatchCount + dispatchOnce; i++) {
-                    const pass = encoder.beginComputePass(pipeline.passDescs[i]);
+                    for (let i = 0; i < pipeline.dispatchCount + dispatchOnce; i++) {
+                        const pass = encoder.beginComputePass(pipeline.passDescs[i]);
 
-                    const workgroupCount = pipeline.workgroupCount ?? [
-                        Math.ceil(this.screenWidth / pipeline.workgroupSize[0]),
-                        Math.ceil(this.screenHeight / pipeline.workgroupSize[1]),
-                        1
-                    ];
+                        const workgroupCount = pipeline.workgroupCount ?? [
+                            Math.ceil(this.screenWidth / pipeline.workgroupSize[0]),
+                            Math.ceil(this.screenHeight / pipeline.workgroupSize[1]),
+                            1
+                        ];
 
-                    // Update dispatch info
-                    this.device.queue.writeBuffer(
-                        this.bindings.dispatchInfo.device,
-                        dispatchId * 256,
-                        new Uint32Array([i])
-                    );
+                        // Update dispatch info
+                        this.device.queue.writeBuffer(
+                            this.bindings.dispatchInfo.device,
+                            dispatchId * 256,
+                            new Uint32Array([i])
+                        );
 
-                    pass.setPipeline(pipeline.pipeline);
-                    pass.setBindGroup(0, this.computeBindGroup, [dispatchId * 256]);
-                    pass.dispatchWorkgroups(...workgroupCount);
-                    pass.end();
+                        pass.setPipeline(pipeline.pipeline);
+                        pass.setBindGroup(0, this.computeBindGroup, [dispatchId * 256]);
+                        pass.dispatchWorkgroups(...workgroupCount);
+                        pass.end();
 
-                    // Copy write texture to read texture
-                    encoder.copyTextureToTexture(
-                        { texture: this.bindings.texWrite.texture() },
-                        { texture: this.bindings.texRead.texture() },
-                        {
-                            width: this.screenWidth,
-                            height: this.screenHeight,
-                            depthOrArrayLayers: 4
-                        }
-                    );
+                        // Copy write texture to read texture
+                        encoder.copyTextureToTexture(
+                            { texture: this.bindings.texWrite.texture() },
+                            { texture: this.bindings.texRead.texture() },
+                            {
+                                width: this.screenWidth,
+                                height: this.screenHeight,
+                                depthOrArrayLayers: 4
+                            }
+                        );
 
-                    dispatchId++;
+                        dispatchId++;
+                    }
                 }
             }
 

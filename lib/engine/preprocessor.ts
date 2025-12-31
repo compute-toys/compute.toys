@@ -26,6 +26,8 @@ export class SourceMap {
     storageBuffers = new Map<string, StorageBufferBindingInfo>();
     workgroupCount = new Map<string, [number, number, number]>();
     dispatchCount = new Map<string, number>();
+    pipelinesOrder = new Array(0);
+    pipelinesOnceOrder = new Array(0);
     // assertMap: number[] = [];
     // userData = new Map<string, Uint32Array>([['_dummy', new Uint32Array([0])]]);
 
@@ -290,6 +292,72 @@ export class Preprocessor {
         });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    private handle_repeat(tokens: string[], lineNum: number): void {}
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    private handle_pipeline(tokens: string[], lineNum: number): void {}
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    private handle_pipeline_once(tokens: string[], lineNum: number): void {}
+    // extract #pipeline #pipeline_once and apply #repeat to them
+    private handle_pipelines(shader: string): void {
+        const match1 = shader.match(/^\s*#pipeline\s+(.+)$/m);
+        const match2 = shader.match(/^\s*#pipeline_once\s+(.+)$/m);
+        if (!match1 && !match2) return;
+        const lines = shader.split(/\r?\n/);
+        const dcLineIndex = lines.findIndex(line => /^\s*#dispatch_count\b/.test(line));
+        const doLineIndex = lines.findIndex(line => /^\s*#dispatch_once\b/.test(line));
+        if (match1 && dcLineIndex !== -1) {
+            throw new WGSLError("can't have both #dispatch_count and #pipeline", dcLineIndex);
+        }
+        if (match2 && dcLineIndex !== -1) {
+            throw new WGSLError("can't have both #dispatch_count and #pipeline_once", dcLineIndex);
+        }
+        if (match2 && doLineIndex !== -1) {
+            throw new WGSLError("can't have both #dispatch_once and #pipeline_once", doLineIndex);
+        }
+        let myPipeline = '';
+        let myPipelineO = '';
+        if (match1) myPipeline = match1[1].replace(/\/\/.*|\/\*.*?\*\//g, ''); //remove comments
+        if (match2) myPipelineO = match2[1].replace(/\/\/.*|\/\*.*?\*\//g, ''); //remove comments
+        const rules = new Array(0);
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            //regex #repeat (keyword) (count) (text)
+            const startsWith = /^\s*#repeat\b/.test(line);
+            const match = line.match(/^\s*#repeat\s+(\S+)\s+(\d+)\s+(.+)$/);
+            if (match) {
+                const keyword = match[1];
+                const count = parseInt(match[2], 10);
+                const text = match[3];
+                rules.push({
+                    keyword: keyword,
+                    replacement: Array(count).fill(text).join(' ')
+                });
+            }
+            if (!match && startsWith) throw new WGSLError('invalid #repeat format', i);
+        }
+        if (myPipeline.length !== 0) {
+            for (const rule of rules) {
+                myPipeline = myPipeline.split(rule.keyword).join(rule.replacement);
+            }
+            this.source.pipelinesOrder = myPipeline.trim().split(/\s+/);
+        }
+        if (myPipelineO.length !== 0) {
+            for (const rule of rules) {
+                myPipelineO = myPipelineO.split(rule.keyword).join(rule.replacement);
+            }
+            this.source.pipelinesOnceOrder = myPipelineO.trim().split(/\s+/);
+        }
+        if (match1 && this.source.pipelinesOrder.length === 0) {
+            const lineIndex = lines.findIndex(line => /^\s*#pipeline\b/.test(line));
+            throw new WGSLError('#pipeline is empty or has invalid names', lineIndex);
+        }
+        if (match2 && this.source.pipelinesOnceOrder.length === 0) {
+            const lineIndex = lines.findIndex(line => /^\s*#pipeline_once\b/.test(line));
+            throw new WGSLError('#pipeline_once is empty or has invalid names', lineIndex);
+        }
+    }
+
     /*
     private handle_assert(tokens: string[], lineNum: number): void {
         if (this.assertCount >= NUM_ASSERT_COUNTERS) {
@@ -331,6 +399,7 @@ export class Preprocessor {
      * Process complete shader source
      */
     async preprocess(shader: string): Promise<SourceMap> {
+        this.handle_pipelines(shader);
         const lines = shader.split('\n');
         for (let i = 0; i < lines.length; i++) {
             await this.processLine(lines[i], i + 1);
