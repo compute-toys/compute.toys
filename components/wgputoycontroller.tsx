@@ -56,6 +56,7 @@ declare global {
 const needsInitialResetAtom = atom<boolean>(true);
 const performingInitialResetAtom = atom<boolean>(false);
 const isPointerPressedAtom = atom<boolean>(false);
+const isPointerLockedAtom = atom<boolean>(false);
 
 /*
     Controller component. Returns null because we expect to be notified
@@ -71,6 +72,7 @@ const WgpuToyController = props => {
     const hotReload = useAtomValue(hotReloadAtom);
     const [recording, setRecording] = useAtom(recordingAtom);
     const [isPointerPressed, setIsPointerPressed] = useTransientAtom(isPointerPressedAtom);
+    const [isPointerLocked, setIsPointerLocked] = useTransientAtom(isPointerLockedAtom);
     const title = useAtomValue(titleAtom);
 
     const setBufferControlRefMap = useSetAtom(bufferControlRefMapAtom);
@@ -348,28 +350,35 @@ const WgpuToyController = props => {
     // init effect
     useEffect(props.onLoad, []);
 
+    // Add pointer lock event listeners
+    useEffect(() => {
+        const handlePointerLockChange = () => {
+            setIsPointerLocked(document.pointerLockElement === canvas);
+        };
+
+        document.addEventListener('pointerlockchange', handlePointerLockChange);
+        return () => document.removeEventListener('pointerlockchange', handlePointerLockChange);
+    }, [canvas]);
+
+    // Update keyboard event handlers to use the transient atom
     useEffect(() => {
         const handleKeyDown = e => {
-            // console.log(`Key down: ${e.keyCode}`);
-            if (typeof e.keyCode === 'number')
-                ComputeEngine.getInstance().setKeydown(e.keyCode, true);
+            if (!isPointerLocked()) return;
+            e.preventDefault();
+            ComputeEngine.getInstance().setKeydown(e.keyCode as number, true);
         };
-        if (canvas) {
-            canvas.addEventListener('keydown', handleKeyDown);
-            return () => canvas.removeEventListener('keydown', handleKeyDown);
-        }
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
     }, []);
 
     useEffect(() => {
         const handleKeyUp = e => {
-            // console.log(`Key up: ${e.keyCode}`);
-            if (typeof e.keyCode === 'number')
-                ComputeEngine.getInstance().setKeydown(e.keyCode, false);
+            if (!isPointerLocked()) return;
+            e.preventDefault();
+            ComputeEngine.getInstance().setKeydown(e.keyCode as number, false);
         };
-        if (canvas) {
-            canvas.addEventListener('keyup', handleKeyUp);
-            return () => canvas.removeEventListener('keyup', handleKeyUp);
-        }
+        document.addEventListener('keyup', handleKeyUp);
+        return () => document.removeEventListener('keyup', handleKeyUp);
     }, []);
 
     useEffect(() => {
@@ -569,6 +578,12 @@ const WgpuToyController = props => {
                 ComputeEngine.getInstance().setMouseClick(
                     e instanceof MouseEvent ? e.button + 1 : 1
                 );
+
+                // Add pointer lock on left mouse click
+                if (e instanceof MouseEvent && e.button === 0 && !isPointerLocked()) {
+                    canvas.requestPointerLock();
+                }
+
                 if (!isPlaying()) ComputeEngine.getInstance().render();
             };
 
