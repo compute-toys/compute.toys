@@ -12,6 +12,7 @@ import {
     languageAtom,
     loadedTexturesAtom,
     manualReloadAtom,
+    screenHDRFormatAtom,
     shaderIDAtom,
     sliderRefMapAtom,
     sliderSerDeNeedsUpdateAtom,
@@ -41,6 +42,7 @@ export function useShader(shader: Shader) {
     const setVisibility = useSetAtom(visibilityAtom);
     const setAuthorProfile = useSetAtom(authorProfileAtom);
     const setFloat32Enabled = useSetAtom(float32EnabledAtom);
+    const setScreenHDRFormat = useSetAtom(screenHDRFormatAtom);
     const setLanguage = useSetAtom(languageAtom);
 
     setDBLoaded(false);
@@ -54,6 +56,7 @@ export function useShader(shader: Shader) {
     const uniforms = body.uniforms;
     const textures = body.textures;
     const float32Enabled = 'float32Enabled' in body ? body.float32Enabled : false;
+    const screenHDRFormat = 'screenHDRFormat' in body ? body.screenHDRFormat : false;
     const language = 'language' in body ? body.language : 'wgsl';
 
     const shaderActiveSettings: ShaderActiveSettings = {
@@ -61,6 +64,7 @@ export function useShader(shader: Shader) {
         uniforms,
         textures,
         float32Enabled,
+        screenHDRFormat,
         language
     };
     setCode(shaderActiveSettings.code);
@@ -87,6 +91,7 @@ export function useShader(shader: Shader) {
     // need to inform the slider component of a change so it can get a count of all the enabled sliders
     setSliderSerDeNeedsUpdate(true);
     setFloat32Enabled(float32Enabled);
+    setScreenHDRFormat(screenHDRFormat);
     setLanguage(language);
     setAuthorProfile(shader.profile);
     setShaderID(shader.id);

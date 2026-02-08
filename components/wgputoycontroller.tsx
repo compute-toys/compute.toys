@@ -23,6 +23,7 @@ import {
     requestFullscreenAtom,
     resetAtom,
     saveColorTransitionSignalAtom,
+    screenHDRFormatAtom,
     sliderRefMapAtom,
     sliderUpdateSignalAtom,
     textureChannelDimensionsAtom,
@@ -109,6 +110,7 @@ const WgpuToyController = props => {
 
     const [requestFullscreenSignal, setRequestFullscreenSignal] = useAtom(requestFullscreenAtom);
     const float32Enabled = useAtomValue(float32EnabledAtom);
+    const screenHDRFormat = useAtomValue(screenHDRFormatAtom);
     const [profilerEnabled, setProfilerEnabled] = useAtom(profilerEnabledAtom);
     const halfResolution = useAtomValue(halfResolutionAtom);
 
@@ -198,6 +200,7 @@ const WgpuToyController = props => {
                 console.error('Canvas not found');
                 return;
             }
+            engine.setHDRFormat(screenHDRFormat);
             engine.setSurface(canvas);
             engine.onSuccess(handleSuccess);
             engine.onUpdate(handleUpdate);
@@ -556,6 +559,8 @@ const WgpuToyController = props => {
 
             const handlePointerDown = (e: MouseEvent | TouchEvent) => {
                 if (isPointerPressed()) return;
+                // Focus the canvas to enable keyboard events
+                if (canvas instanceof HTMLCanvasElement) canvas.focus();
                 setIsPointerPressed(true);
                 previousPointerStart = ComputeEngine.getInstance().getMousePos();
                 const p = getPointerPosition(e);
@@ -660,7 +665,8 @@ const WgpuToyController = props => {
                     (window.screen.height * dpr) / (window.outerWidth / window.innerWidth) / 60
                 ) * 60;
         } else if (props.embed) {
-            dimensions = getDimensions(window.innerWidth * dpr);
+            dimensions.x = window.innerWidth * dpr;
+            dimensions.y = window.innerHeight * dpr;
         } else {
             const padding = 16;
             dimensions = getDimensions((parentRef!.offsetWidth - padding) * dpr);
@@ -740,6 +746,24 @@ const WgpuToyController = props => {
             }
         }
     }, [float32Enabled]);
+
+    useEffect(() => {
+        if (!needsInitialReset()) {
+            if (!canvas) {
+                console.error('Canvas not found');
+                return;
+            }
+            console.log(`Setting screen format to ${screenHDRFormat}`);
+            ComputeEngine.getInstance().setHDRFormat(screenHDRFormat);
+            ComputeEngine.getInstance().resetSurface(canvas);
+            ComputeEngine.getInstance().reset();
+            if (dbLoaded()) {
+                recompile().then(() => {
+                    resetCallback();
+                });
+            }
+        }
+    }, [screenHDRFormat]);
 
     useEffect(() => {
         if (!needsInitialReset()) {
