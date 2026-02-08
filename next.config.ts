@@ -1,29 +1,6 @@
 import type { NextConfig } from 'next';
 import { withPlausibleProxy } from 'next-plausible';
-import allowedtexturesources from './config/allowedtexturesources.json' with { type: 'json' };
-
-const DEVELOPMENT = process.env.NODE_ENV === 'development';
 const PROD_EMULATION = process.env.PROD_EMULATION === 'yes';
-
-function getImageConfig() {
-    const config = {
-        remotePatterns: allowedtexturesources.map(resource => ({
-            hostname: resource.domain
-        }))
-    };
-
-    if (process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID) {
-        config.remotePatterns.push({
-            hostname: `${process.env.NEXT_PUBLIC_SUPABASE_PROJECT_ID}.supabase.co`
-        });
-    } else {
-        console.warn(
-            'NEXT_PUBLIC_SUPABASE_PROJECT_ID is not set, images from supabase will not be loaded'
-        );
-        // config.unoptimized = true;
-    }
-    return config;
-}
 
 const nextConfig: NextConfig = {
     reactStrictMode: true,
@@ -31,12 +8,9 @@ const nextConfig: NextConfig = {
     experimental: { forceSwcTransforms: PROD_EMULATION }, // Bypass SWC entirely in emulation
     eslint: { ignoreDuringBuilds: true }, // lint checked in CI anyway and fail dramatically
 
-    images: DEVELOPMENT
-        ? getImageConfig()
-        : {
-              loader: 'custom',
-              loaderFile: './lib/util/loader.ts'
-          },
+    images: {
+        unoptimized: true
+    },
 
     webpack: config => {
         if (PROD_EMULATION) {
