@@ -1825,10 +1825,10 @@
   dependencies:
     "@fortawesome/fontawesome-common-types" "7.1.0"
 
-"@fortawesome/react-fontawesome@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@fortawesome/react-fontawesome/-/react-fontawesome-3.1.0.tgz#bb22f49622574a80ee74213ad8c68107f3f47e64"
-  integrity sha512-5OUQH9aDH/xHJwnpD4J7oEdGvFGJgYnGe0UebaPIdMW9UxYC/f5jv2VjVEgnikdJN0HL8yQxp9Nq+7gqGZpIIA==
+"@fortawesome/react-fontawesome@^3.2.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@fortawesome/react-fontawesome/-/react-fontawesome-3.2.0.tgz#e30278eac8a0d1746e5dd6835faef91ad87eabf2"
+  integrity sha512-E9Gu1hqd6JussVO26EC4WqRZssXMnQr2ol7ZNWkkFOH8jZUaxDJ9Z9WF9wIVkC+kJGXUdY3tlffpDwEKfgQrQw==
 
 "@giscus/react@^3.1.0":
   version "3.1.0"
