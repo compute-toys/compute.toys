@@ -339,11 +339,15 @@ const WgpuToyController = props => {
         return false;
     }, []);
 
-    const requestFullscreen = useCallback(() => {
+    const requestFullscreen = useCallback(async () => {
         if (canvas && !document.fullscreenElement) {
-            canvas.requestFullscreen({ navigationUI: 'hide' });
+            try {
+                await canvas.requestFullscreen({ navigationUI: 'hide' });
+            } catch (err) {
+                console.error('Fullscreen request failed:', err);
+            }
         }
-    }, []);
+    }, [canvas]);
 
     // init effect
     useEffect(props.onLoad, []);
@@ -654,16 +658,8 @@ const WgpuToyController = props => {
         const dpr = !halfResolution ? window.devicePixelRatio : window.devicePixelRatio * 0.5;
         let dimensions = { x: 0, y: 0 }; // dimensions in device (physical) pixels
         if (document.fullscreenElement) {
-            // calculate actual screen resolution, accounting for both zoom and hidpi
-            // https://stackoverflow.com/a/55839671/78204
-            dimensions.x =
-                Math.round(
-                    (window.screen.width * dpr) / (window.outerWidth / window.innerWidth) / 80
-                ) * 80;
-            dimensions.y =
-                Math.round(
-                    (window.screen.height * dpr) / (window.outerWidth / window.innerWidth) / 60
-                ) * 60;
+            dimensions.x = Math.round(window.innerWidth * dpr);
+            dimensions.y = Math.round(window.innerHeight * dpr);
         } else if (props.embed) {
             dimensions.x = window.innerWidth * dpr;
             dimensions.y = window.innerHeight * dpr;
@@ -706,6 +702,19 @@ const WgpuToyController = props => {
             setReset(false);
         }
     }, [reset]);
+
+    // Handle fullscreen changes - update resolution when entering/exiting fullscreen
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            if (!needsInitialReset() && updateResolution()) {
+                ComputeEngine.getInstance().resize(width(), height());
+                resetCallback();
+            }
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
 
     useEffect(() => {
         if (!needsInitialReset()) {
