@@ -32,7 +32,7 @@
     "@mui/lab": "^5.0.0-alpha.177",
     "@mui/material": "^5.18.0",
     "@mui/utils": "^7.3.3",
-    "@opennextjs/cloudflare": "^1.8.5",
+    "@opennextjs/cloudflare": "^1.16.5",
     "@react-hook/resize-observer": "^2.0.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.76.1",
@@ -43,7 +43,7 @@
     "jotai-game": "^0.2.0",
     "memoizee": "^0.4.17",
     "monaco-editor": "^0.52.2",
-    "next": "^15.5.8",
+    "next": "^16.1.6",
     "next-navigation-guard": "^0.2.0",
     "next-plausible": "^3.12.4",
     "react": "^19.1.1",
@@ -62,7 +62,7 @@
     "depcheck": "^1.4.7",
     "dotenv": "^17.2.0",
     "eslint": "^8.57.1",
-    "eslint-config-next": "^15.5.4",
+    "eslint-config-next": "^16.1.6",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-n": "^17.23.2",
@@ -71,6 +71,6 @@
     "prettier-plugin-organize-imports": "^4.3.0",
     "supabase": "^2.33.9",
     "typescript": "^5.9.3",
-    "wrangler": "^4.59.1"
+    "wrangler": "^4.65.0"
   }
 }
