@@ -343,18 +343,11 @@ const WgpuToyController = props => {
         if (canvas && !document.fullscreenElement) {
             try {
                 await canvas.requestFullscreen({ navigationUI: 'hide' });
-                // After fullscreen is established, update resolution
-                setTimeout(() => {
-                    if (!needsInitialReset() && updateResolution()) {
-                        ComputeEngine.getInstance().resize(width(), height());
-                        resetCallback();
-                    }
-                }, 100);
             } catch (err) {
                 console.error('Fullscreen request failed:', err);
             }
         }
-    }, []);
+    }, [canvas]);
 
     // init effect
     useEffect(props.onLoad, []);
