@@ -176,17 +176,223 @@ export class Preprocessor {
         }
     }
 
+    private evaluateMathEquations(input: string, maxresults: number): number[] {
+        if (maxresults <= 0) return [];
+        type Token =
+            | { type: 'NUM'; value: number }
+            | { type: 'OP'; value: string }
+            | { type: 'LPAREN'; value: string }
+            | { type: 'RPAREN'; value: string }
+            | { type: 'EOF' };
+        let charPos = 0;
+        // 1. Pull-based Lexer
+        function readNextToken(): Token {
+            while (charPos < input.length) {
+                const char = input[charPos];
+                if (char === ' ' || char === '\t') {
+                    charPos++;
+                    continue;
+                }
+                if (char >= '0' && char <= '9') {
+                    let numStr = '';
+                    while (
+                        charPos < input.length &&
+                        input[charPos] >= '0' &&
+                        input[charPos] <= '9'
+                    ) {
+                        numStr += input[charPos];
+                        charPos++;
+                    }
+                    return { type: 'NUM', value: parseInt(numStr, 10) };
+                }
+                if (char === '<' && input[charPos + 1] === '<') {
+                    charPos += 2;
+                    return { type: 'OP', value: '<<' };
+                }
+                if (char === '>' && input[charPos + 1] === '>') {
+                    charPos += 2;
+                    return { type: 'OP', value: '>>' };
+                }
+                if ('+-*/%&|^~'.indexOf(char) !== -1) {
+                    charPos++;
+                    return { type: 'OP', value: char };
+                }
+                if (char === '(') {
+                    charPos++;
+                    return { type: 'LPAREN', value: '(' };
+                }
+                if (char === ')') {
+                    charPos++;
+                    return { type: 'RPAREN', value: ')' };
+                }
+                charPos++;
+            }
+            return { type: 'EOF' };
+        }
+        let currentToken: Token = readNextToken();
+        // Using a getter function bypasses TypeScript's over-aggressive type narrowing
+        function getToken(): Token {
+            return currentToken;
+        }
+        function consume(): void {
+            if (currentToken.type !== 'EOF') {
+                currentToken = readNextToken();
+            }
+        }
+        // 2. Parser & Evaluator Utilities
+        function getBinaryPrec(op: string): number {
+            switch (op) {
+                case '*':
+                case '/':
+                case '%':
+                    return 7;
+                case '+':
+                case '-':
+                    return 6;
+                case '<<':
+                case '>>':
+                    return 5;
+                case '&':
+                    return 4;
+                case '^':
+                    return 3;
+                case '|':
+                    return 2;
+                default:
+                    return -1;
+            }
+        }
+        function isBinary(op: string): boolean {
+            return op !== '~';
+        }
+        function isUnary(op: string): boolean {
+            return op === '+' || op === '-' || op === '~';
+        }
+        // Pratt / Recursive Descent Parser
+        function parseExpression(minPrec: number): number {
+            const tok = getToken();
+            if (tok.type === 'EOF') return 0;
+            let left = 0;
+            // --- Parse Prefix ---
+            if (tok.type === 'NUM') {
+                left = tok.value;
+                consume();
+            } else if (tok.type === 'LPAREN') {
+                consume();
+                left = parseExpression(0);
+                if (getToken().type === 'RPAREN') {
+                    consume();
+                }
+            } else if (tok.type === 'OP' && isUnary(tok.value)) {
+                const op = tok.value;
+                consume();
+                const right = parseExpression(10);
+                switch (op) {
+                    case '+':
+                        left = +right;
+                        break;
+                    case '-':
+                        left = -right;
+                        break;
+                    case '~':
+                        left = ~right;
+                        break;
+                }
+            } else {
+                consume();
+                return 0;
+            }
+            // --- Parse Infix ---
+            // 'while (true)' + 'break' ensures TS correctly types nextTok on every iteration
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                const nextTok = getToken();
+                if (nextTok.type === 'EOF') break; // No overlap error here!
+                if (nextTok.type === 'OP') {
+                    const op = nextTok.value;
+                    if (!isBinary(op)) break;
+                    const prec = getBinaryPrec(op);
+                    if (prec < minPrec) break;
+                    consume();
+                    const right = parseExpression(prec + 1);
+                    switch (op) {
+                        case '+':
+                            left = left + right;
+                            break;
+                        case '-':
+                            left = left - right;
+                            break;
+                        case '*':
+                            left = left * right;
+                            break;
+                        case '/':
+                            left = right === 0 ? 0 : Math.trunc(left / right);
+                            break;
+                        case '%':
+                            left = right === 0 ? 0 : left % right;
+                            break;
+                        case '<<':
+                            left = left << right;
+                            break;
+                        case '>>':
+                            left = left >> right;
+                            break;
+                        case '&':
+                            left = left & right;
+                            break;
+                        case '|':
+                            left = left | right;
+                            break;
+                        case '^':
+                            left = left ^ right;
+                            break;
+                    }
+                } else {
+                    break;
+                }
+            }
+            return left;
+        }
+        const results: number[] = [];
+        // 3. Process stream directly
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            const t = getToken();
+            if (t.type === 'EOF' || results.length >= maxresults) {
+                break; // Stop cleanly as soon as max results are achieved
+            }
+            if (t.type === 'RPAREN') {
+                consume();
+                continue;
+            }
+            results.push(parseExpression(0));
+        }
+        return results;
+    }
     private handle_workgroup_count(tokens: string[], lineNum: number): void {
-        if (tokens.length !== 5) {
+        const r = this.evaluateMathEquations(tokens.slice(2).join(' '), 3);
+        if (r.length === 0) {
             throw new WGSLError('Invalid #workgroup_count syntax', lineNum);
         }
-
-        const [, name, x, y, z] = tokens;
-        this.source.workgroupCount.set(name, [
-            parseInteger(x, lineNum),
-            parseInteger(y, lineNum),
-            parseInteger(z, lineNum)
-        ]);
+        if (r.length === 1) {
+            r.push(1);
+        }
+        if (r.length === 2) {
+            r.push(1);
+        }
+        if (r[0] <= 0 || r[1] <= 0 || r[2] <= 0) {
+            throw new WGSLError(
+                '#workgroup_count ' +
+                    r[0].toString() +
+                    ' ' +
+                    r[1].toString() +
+                    ' ' +
+                    r[2].toString() +
+                    ' values must be bigger than 0',
+                lineNum
+            );
+        }
+        this.source.workgroupCount.set(tokens[1], [r[0], r[1], r[2]]);
     }
 
     private handle_dispatch_once(tokens: string[], lineNum: number): void {
