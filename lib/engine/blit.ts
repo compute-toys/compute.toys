@@ -46,7 +46,7 @@ fn linear_to_displayp3(color: vec3f) -> vec3f {
         vec3f(0.177538,  0.9668058, 0.0723974), // Col 1
         vec3f(0.0,       0.0,       0.9105199)  // Col 2
     );
-    return linear_to_srgb(linSRGB_to_linP3 * color);
+    return linear_to_srgb(color);
 }
 
 @fragment
